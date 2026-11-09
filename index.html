@@ -447,8 +447,8 @@
             </div>
         </div>
 
-        <!-- Lifetime Pass & Venue License Section -->
-        <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-4">
+        <!-- Lifetime Pass & Venue License Section (Hidden in Pro/Venue Mode) -->
+        <div id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-4">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Access & Venue Referral Network</h2>
             <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
                 <div class="flex justify-between items-center">
@@ -500,6 +500,21 @@
                         <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet[cite: 1].</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- Affiliate Links at the Very Bottom -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
+            <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Utilities</h2>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="https://www.touchtunes.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>🎶 TouchTunes Jukebox</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Queue Bar Music</span>
+                </a>
+                <a href="https://www.uber.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>🚗 Uber / Lyft Rideshare</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Safe Designated Ride</span>
+                </a>
             </div>
         </div>
 
@@ -711,25 +726,18 @@
             const switcher = document.getElementById('dev-tier-switcher');
             if(switcher) switcher.value = activeTier;
 
-            const proDesc = document.getElementById('pro-desc');
-            const proAction = document.getElementById('pro-action-container');
+            const subCard = document.getElementById('subscription-card');
             const venueBanner = document.getElementById('venue-mode-banner');
             const spotlight = document.getElementById('venue-winner-spotlight');
 
             if (activeTier === 'free') {
-                if(proDesc) proDesc.innerText = "Unlock thermal heatmaps, scratch-off barcoding, and venue patron networking.";
+                if(subCard) subCard.style.display = 'block';
                 if(venueBanner) venueBanner.style.opacity = '0.5';
                 if(spotlight) spotlight.style.display = 'none';
-                if(proAction) {
-                    proAction.innerHTML = `<a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">Upgrade to Pro ($9.99 Lifetime)</a>`;
-                }
             } else {
-                if(proDesc) proDesc.innerText = "✅ Pro / Venue access active! Scratch-off scanner and instant-win P/L active.";
+                if(subCard) subCard.style.display = 'none'; // Hidden when Pro or Venue mode is active
                 if(venueBanner) venueBanner.style.opacity = '1';
                 if(spotlight) spotlight.style.display = 'block';
-                if(proAction) {
-                    proAction.innerHTML = `<div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">✨ Pro Active (Scratch Scanner Unlocked)</div>`;
-                }
             }
             updateFreeLimitBadge();
             renderHeatmap();
