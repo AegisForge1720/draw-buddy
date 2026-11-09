@@ -76,6 +76,27 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
+        <!-- 🍻 Venue Live Leaderboard Card (Venue Tier Exclusive Display) -->
+        <div id="venue-leaderboard-card" class="bg-[#0b132b] p-4 rounded-xl border border-purple-500/50 shadow-xl space-y-3 hidden">
+            <div class="flex justify-between items-center border-b border-purple-900/50 pb-2">
+                <div class="flex items-center space-x-2">
+                    <span class="text-base">🏆</span>
+                    <div>
+                        <h2 class="text-xs uppercase tracking-wider text-purple-300 font-black">House Live Venue Leaderboard</h2>
+                        <span class="text-[9px] text-blue-300">Active Venue: Fairport Sports Bar & Grill</span>
+                    </div>
+                </div>
+                <span class="text-[9px] bg-purple-950 text-purple-300 border border-purple-600 px-2 py-0.5 rounded font-bold">Live Display</span>
+            </div>
+            
+            <div class="space-y-1.5" id="leaderboard-list">
+                <!-- Rendered dynamically -->
+            </div>
+            <div class="text-[9px] text-blue-400/70 text-center italic">
+                *Displays top active session standings in the house. No app download required for patrons viewing venue screens.
+            </div>
+        </div>
+
         <!-- One-Tap Preset Bar Modes -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold mb-2.5">⚡ Bar Presets</h2>
@@ -95,7 +116,6 @@
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
-                <!-- Floating Eye-Catcher Badge -->
                 <span class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(250,204,21,0.2)] animate-pulse">
                     ⚡ +12.5% Optimal ROI
                 </span>
@@ -152,7 +172,6 @@
                 🚀 GENERATE OPTIMAL TICKET
             </button>
 
-            <!-- Optimized Rolling Parameters Disclaimer Moved Below Button -->
             <div class="text-[9px] text-blue-400/80 italic text-center pt-1">
                 *ROI metrics derived from optimized rolling parameters. Past performance does not guarantee future results.
             </div>
@@ -406,6 +425,7 @@
 
             renderHeatmap();
             updateFreeLimitBadge();
+            renderVenueLeaderboard();
 
             let fetchTimedOut = false;
             const timeoutPromise = new Promise((_, reject) => 
@@ -486,9 +506,11 @@
             const sponsorBox = document.getElementById('sponsored-courier-box');
             const proDesc = document.getElementById('pro-desc');
             const proAction = document.getElementById('pro-action-container');
+            const venueLeaderboardCard = document.getElementById('venue-leaderboard-card');
 
             if (activeTier === 'free') {
                 if(sponsorBox) sponsorBox.style.display = 'block';
+                if(venueLeaderboardCard) venueLeaderboardCard.classList.add('hidden');
                 if(proDesc) proDesc.innerText = "Unlock thermal heatmaps, number deep-dive inspectors, unlimited batch scanning, and zero ads.";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -500,6 +522,7 @@
             } 
             else if (activeTier === 'pro') {
                 if(sponsorBox) sponsorBox.style.display = 'none';
+                if(venueLeaderboardCard) venueLeaderboardCard.classList.add('hidden');
                 if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! Heatmaps, inspectors, and unlimited batch scanning unlocked.";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -511,6 +534,7 @@
             } 
             else if (activeTier === 'venue') {
                 if(sponsorBox) sponsorBox.style.display = 'none';
+                if(venueLeaderboardCard) venueLeaderboardCard.classList.remove('hidden'); // Venue mode shows live display
                 if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet & custom branding enabled).";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -523,6 +547,38 @@
 
             updateFreeLimitBadge();
             renderHeatmap();
+        }
+
+        function renderVenueLeaderboard() {
+            const listEl = document.getElementById('leaderboard-list');
+            if(!listEl) return;
+            
+            // Simulated live patrons/tables at the venue
+            const venueStandings = [
+                { rank: 1, name: "Table 4 (VIP Pro)", spot: "10-Spot", net: "+$1,420.00", hits: "9/10 Hit" },
+                { rank: 2, name: "Bar Rail #2", spot: "7-Spot", net: "+$680.50", hits: "7/7 Hit" },
+                { rank: 3, name: "Table 9", spot: "10-Spot", net: "+$310.00", hits: "8/10 Hit" },
+                { rank: 4, name: "Lounge Booth A", spot: "5-Spot", net: "-$45.00", hits: "4/5 Hit" }
+            ];
+
+            listEl.innerHTML = '';
+            venueStandings.forEach(v => {
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-[#050814] p-2.5 rounded-lg border border-purple-900/40 text-xs";
+                row.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span class="font-black text-yellow-400 w-4">#${v.rank}</span>
+                        <div>
+                            <div class="font-bold text-white">${v.name}</div>
+                            <span class="text-[9px] text-blue-300">${v.spot} • ${v.hits}</span>
+                        </div>
+                    </div>
+                    <div class="text-right font-mono font-bold ${v.net.startsWith('+') ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${v.net}
+                    </div>
+                `;
+                listEl.appendChild(row);
+            });
         }
 
         function updateFreeLimitBadge() {
