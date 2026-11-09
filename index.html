@@ -105,7 +105,6 @@
             <div id="invite-active-view" class="space-y-3 text-center">
                 <p class="text-[11px] text-blue-300">Have the next patron scan this screen to receive your Pro-authenticated table invite:</p>
                 <div class="bg-white p-3 rounded-xl inline-block shadow-lg mx-auto">
-                    <!-- Dynamic SVG QR Code Representation -->
                     <svg viewBox="0 0 120 120" class="w-36 h-36 mx-auto">
                         <rect width="120" height="120" fill="white"/>
                         <path d="M10 10h40v40H10zM70 10h40v40H70zM10 70h40v40H10z" fill="#0b132b"/>
@@ -385,7 +384,7 @@
             </div>
         </div>
 
-        <!-- 🎫 Pro Scratch-Off Engine -->
+        <!-- 🎫 Pro Scratch-Off Engine with Game Rotation & Search / Select -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
@@ -405,11 +404,27 @@
             </div>
 
             <div id="scratch-active-form" class="space-y-3 hidden">
+                <!-- Search / Select & Game Rotation Controls -->
                 <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                     <div class="flex justify-between items-center text-xs">
-                        <span id="scratch-game-title-display" class="font-bold text-white">Featured Game Analysis: $50,000 Cashword</span>
+                        <label class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">Search / Select Scratch-Off Game:</label>
+                        <button onclick="rotateScratchGame()" class="text-[9px] bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 px-2 py-0.5 rounded font-bold transition">
+                            🔄 Rotate Featured
+                        </button>
+                    </div>
+                    <select id="scratch-game-selector" onchange="selectScratchGame(this.value)" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none">
+                        <option value="$50,000 Cashword">$50,000 Cashword ($5)</option>
+                        <option value="$1,000,000 Black Titanium">$1,000,000 Black Titanium ($10)</option>
+                        <option value="$5,000,000 Fortune">$5,000,000 Fortune ($20)</option>
+                        <option value="$10,000,000 Loaded">$10,000,000 Loaded ($30)</option>
+                        <option value="Set For Life">Set For Life ($10)</option>
+                    </select>
+
+                    <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-800">
+                        <span id="scratch-game-title-display" class="font-bold text-white text-xs">Featured: $50,000 Cashword</span>
                         <span id="scratch-ev-badge" class="text-[10px] text-emerald-400 font-mono font-bold">EV: +$2.15 (High Value)</span>
                     </div>
+
                     <div class="grid grid-cols-3 gap-2 text-center text-[10px] pt-1">
                         <div class="bg-[#111c38] p-1.5 rounded">
                             <span class="text-blue-300 block">Top Prizes Left</span>
@@ -428,31 +443,24 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] text-blue-300 mb-1">Scanned Game Name</label>
-                        <input type="text" id="scratch-game-name" value="$50,000 Cashword" placeholder="e.g. $50,000 Cashword" oninput="updateScratchGameTitle(this.value)" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
-                    </div>
-                    <div>
                         <label class="block text-[10px] text-blue-300 mb-1">Ticket Cost ($)</label>
-                        <input type="number" id="scratch-cost" value="10" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                        <input type="number" id="scratch-cost" value="5" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none">
                     </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-[10px] text-blue-300 mb-1">Payout Won ($)</label>
-                        <input type="number" id="scratch-payout" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-yellow-400">
-                    </div>
-                    <div class="flex items-end">
-                        <label class="w-full bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
-                            <span>📷 Scan Barcode</span>
-                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleScratchScan(event)">
-                        </label>
+                        <input type="number" id="scratch-payout" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 focus:outline-none">
                     </div>
                 </div>
 
-                <button onclick="logScratchTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
-                    📥 Log Scratch-Off to P/L Archive
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="logScratchTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
+                        📥 Log Scratch-Off to Archive
+                    </button>
+                    <label class="bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2.5 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center shrink-0">
+                        <span>📷 Scan</span>
+                        <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleScratchScan(event)">
+                    </label>
+                </div>
 
                 <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] mt-2">
                     <div>
@@ -665,6 +673,17 @@
             1:  { 1: 2 }
         };
 
+        const SCRATCH_GAMES_DATABASE = {
+            "$50,000 Cashword": { cost: 5, topTotal: 5, topRemaining: 3, odds: "1 in 3.42", roi: "+14.2%", ev: "+$2.15" },
+            "$1,000,000 Black Titanium": { cost: 10, topTotal: 3, topRemaining: 2, odds: "1 in 3.12", roi: "+16.8%", ev: "+$4.50" },
+            "$5,000,000 Fortune": { cost: 20, topTotal: 4, topRemaining: 1, odds: "1 in 2.85", roi: "+18.5%", ev: "+$9.20" },
+            "$10,000,000 Loaded": { cost: 30, topTotal: 2, topRemaining: 2, odds: "1 in 2.64", roi: "+21.4%", ev: "+$14.80" },
+            "Set For Life": { cost: 10, topTotal: 6, topRemaining: 4, odds: "1 in 3.50", roi: "+12.1%", ev: "+$1.85" }
+        };
+
+        const scratchGameKeys = Object.keys(SCRATCH_GAMES_DATABASE);
+        let scratchGameRotationIndex = 0;
+
         const VENUE_PROFILES = [
             { 
                 name: "M's Bar & Grill", 
@@ -745,11 +764,24 @@
             document.getElementById('invite-modal').classList.add('hidden');
         }
 
-        function updateScratchGameTitle(val) {
-            const titleEl = document.getElementById('scratch-game-title-display');
-            if (titleEl) {
-                titleEl.innerText = `Featured Game Analysis: ${val || '$50,000 Cashword'}`;
-            }
+        function selectScratchGame(gameName) {
+            const data = SCRATCH_GAMES_DATABASE[gameName];
+            if (!data) return;
+
+            document.getElementById('scratch-game-title-display').innerText = `Featured: ${gameName}`;
+            document.getElementById('scratch-ev-badge').innerText = `EV: ${data.ev} (Optimal)`;
+            document.getElementById('stat-top-prizes').innerText = `${data.topRemaining} / ${data.topTotal}`;
+            document.getElementById('stat-odds').innerText = data.odds;
+            document.getElementById('stat-roi').innerText = data.roi;
+            document.getElementById('scratch-cost').value = data.cost;
+            document.getElementById('scratch-game-name').value = gameName;
+            document.getElementById('scratch-game-selector').value = gameName;
+        }
+
+        function rotateScratchGame() {
+            scratchGameRotationIndex = (scratchGameRotationIndex + 1) % scratchGameKeys.length;
+            const nextGame = scratchGameKeys[scratchGameRotationIndex];
+            selectScratchGame(nextGame);
         }
 
         function autoOptimizeByLiveCluster() {
@@ -1092,9 +1124,7 @@
                 return;
             }
             if (!event.target.files[0]) return;
-            document.getElementById('scratch-game-name').value = "$50,000 Extreme Cash #1482";
-            updateScratchGameTitle("$50,000 Extreme Cash #1482");
-            document.getElementById('scratch-cost').value = "20";
+            selectScratchGame("$1,000,000 Black Titanium");
             document.getElementById('scratch-payout').value = "50";
             alert("📷 Scratch-Off Barcode Scanned & Verified against State Database!");
         }
@@ -1104,15 +1134,14 @@
                 alert("🔒 Pro Scratch-Off Engine is a Pro feature! Upgrade to Pro ($9.99) to unlock instant win analytics.");
                 return;
             }
-            const gameName = document.getElementById('scratch-game-name').value || "Standard Scratch-Off";
+            const gameName = document.getElementById('scratch-game-selector').value || "Standard Scratch-Off";
             const cost = parseFloat(document.getElementById('scratch-cost').value) || 0;
             const payout = parseFloat(document.getElementById('scratch-payout').value) || 0;
 
             scratchTickets.unshift({ game: gameName, cost: cost, payout: payout, timestamp: new Date().toISOString() });
             saveScratchArchive();
             updateScratchLedgerUI();
-            document.getElementById('scratch-game-name').value = "";
-            alert("📥 Scratch-off ticket logged successfully!");
+            alert(`📥 ${gameName} ticket logged successfully!`);
         }
 
         function loadScratchArchive() {
