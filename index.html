@@ -26,7 +26,7 @@
 </head>
 <body class="min-h-screen pb-12">
 
-    <!-- Header & Tactical Robot Emblem Branding Bar -->
+    <!-- Header & Tactical Robot Emblem + State Jurisdiction Indicator -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2.5">
@@ -37,7 +37,11 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="font-black text-base tracking-wider text-white leading-none">DRAW <span class="text-yellow-400">BUDDY</span></h1>
+                    <div class="flex items-center space-x-1.5">
+                        <h1 class="font-black text-base tracking-wider text-white leading-none">DRAW <span class="text-yellow-400">BUDDY</span></h1>
+                        <!-- Dynamic State Jurisdiction Badge -->
+                        <span id="header-state-badge" class="text-[9px] bg-blue-950 text-cyan-300 border border-blue-600 px-1.5 py-0.5 rounded font-black tracking-wide">NY</span>
+                    </div>
                     <span class="text-[9px] font-bold text-blue-300 tracking-widest uppercase">TACTICAL ASSISTANT</span>
                 </div>
             </div>
@@ -385,11 +389,13 @@
         let batchScannedCount = 0;
         let freeScanLimit = 5;
         let activeTier = 'free'; // 'free', 'pro', or 'venue'
+        let currentState = localStorage.getItem('draw_buddy_state') || 'NY';
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
 
         async function init() {
             checkProStatus();
+            setAppState(currentState);
             const statusEl = document.getElementById('sync-status');
             if(statusEl) {
                 statusEl.innerText = "Connecting...";
@@ -456,6 +462,13 @@
             loadHistoryArchive();
             renderHeatmap();
             updateCostDisplay();
+        }
+
+        function setAppState(stateCode) {
+            currentState = stateCode;
+            localStorage.setItem('draw_buddy_state', stateCode);
+            const badge = document.getElementById('header-state-badge');
+            if (badge) badge.innerText = stateCode;
         }
 
         // 🧪 Strict Tier Enforcement & Feature Gating
@@ -749,12 +762,10 @@
                 const cell = document.createElement('div');
                 
                 if (activeTier === 'free') {
-                    // Free tier gets basic grid cells with a Pro lock indicator
                     cell.className = "heatmap-cell bg-[#111c38] text-blue-300 border-[#1d4ed8]";
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
-                    // Pro / Venue gets full thermal heatmap colors & hit counts
                     let bgStyle = "bg-green-700 text-white";
                     if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
                     else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
