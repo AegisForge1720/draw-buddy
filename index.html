@@ -310,7 +310,7 @@
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
 
-            <!-- Integrated Inspector Card (Now inside the same Heatmap window) -->
+            <!-- Integrated Inspector Card -->
             <div id="inspector-card" class="bg-[#050814] p-3 rounded-lg border border-yellow-500/50 space-y-2.5 mt-3">
                 <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
                     <div class="flex items-center space-x-2">
@@ -336,50 +336,6 @@
                         <span id="stat-interval" class="font-bold text-white text-xs">~4.2 draws</span>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- 📊 Multi-Draw Slip P/L Archive -->
-        <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
-                <div class="flex items-center space-x-1.5">
-                    <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2 py-0.5 rounded font-bold transition">
-                        📥 Export Power BI CSV
-                    </button>
-                    <button onclick="clearHistoryArchive()" class="text-[10px] text-rose-400 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800 px-2 py-0.5 rounded transition">Clear</button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Total Wagered</div>
-                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
-                </div>
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Total Payout</div>
-                    <div id="archive-total-payout" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
-                </div>
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Lifetime Net P&L</div>
-                    <div id="archive-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
-                </div>
-            </div>
-
-            <div class="overflow-x-auto max-h-60 overflow-y-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="sticky top-0 bg-[#0b132b]">
-                        <tr class="text-blue-400 border-b border-[#1d4ed8]">
-                            <th class="pb-2">Draws</th>
-                            <th class="pb-2">Slip Spec</th>
-                            <th class="pb-2">Slip Progress & Hits</th>
-                            <th class="pb-2 text-right">Net P&L</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ledger-body">
-                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
 
@@ -599,6 +555,50 @@
                     <span>🎲 BetMGM</span>
                     <span class="text-[8px] text-blue-300 font-normal mt-0.5">Casino & Odds</span>
                 </a>
+            </div>
+        </div>
+
+        <!-- 📊 Multi-Draw Slip P/L Archive (Moved to the Very Bottom) -->
+        <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
+                <div class="flex items-center space-x-1.5">
+                    <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2 py-0.5 rounded font-bold transition">
+                        📥 Export Power BI CSV
+                    </button>
+                    <button onclick="clearHistoryArchive()" class="text-[10px] text-rose-400 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800 px-2 py-0.5 rounded transition">Clear</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Wagered</div>
+                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Payout</div>
+                    <div id="archive-total-payout" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Lifetime Net P&L</div>
+                    <div id="archive-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="sticky top-0 bg-[#0b132b]">
+                        <tr class="text-blue-400 border-b border-[#1d4ed8]">
+                            <th class="pb-2">Draws</th>
+                            <th class="pb-2">Slip Spec</th>
+                            <th class="pb-2">Slip Progress & Hits</th>
+                            <th class="pb-2 text-right">Net P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledger-body">
+                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
