@@ -453,7 +453,7 @@
             updateCostDisplay();
         }
 
-        // 🧪 Tier Switcher Logic & Feature Gating Enforcement
+        // 🧪 Strict Tier Enforcement & Feature Gating
         function switchTestTier(tier) {
             localStorage.setItem('draw_buddy_active_tier', tier);
             checkProStatus();
@@ -475,11 +475,11 @@
                     tierBadge.className = "text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold";
                 }
                 if(sponsorBox) sponsorBox.style.display = 'block';
-                if(proDesc) proDesc.innerText = "Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.";
+                if(proDesc) proDesc.innerText = "Unlock thermal heatmaps, number deep-dive inspectors, unlimited batch scanning, and zero ads.";
                 if(proAction) {
                     proAction.innerHTML = `
                         <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                            Get Lifetime Access ($9.99)
+                            Upgrade to Pro ($9.99 Lifetime)
                         </a>
                     `;
                 }
@@ -489,12 +489,12 @@
                     tierBadge.innerText = "PRO LIFETIME";
                     tierBadge.className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
                 }
-                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads removed
-                if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
+                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads stripped out
+                if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! Heatmaps, inspectors, and unlimited batch scanning unlocked.";
                 if(proAction) {
                     proAction.innerHTML = `
                         <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
-                            ✨ Individual Pro Active (Unlimited)
+                            ✨ Individual Pro Active (All Features Unlocked)
                         </div>
                     `;
                 }
@@ -504,7 +504,7 @@
                     tierBadge.innerText = "VENUE TIER";
                     tierBadge.className = "text-[10px] bg-purple-950 text-purple-300 border border-purple-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#c084fc]";
                 }
-                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads removed
+                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads stripped out
                 if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet & custom branding enabled).";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -516,6 +516,7 @@
             }
 
             updateFreeLimitBadge();
+            renderHeatmap(); // Refresh heatmap to reflect lock states
         }
 
         function updateFreeLimitBadge() {
@@ -529,8 +530,41 @@
             }
         }
 
+        // Gated Number Inspector: Free users get paywalled when tapping heatmap cells
+        function inspectNumber(num) {
+            if (activeTier === 'free') {
+                alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
+                triggerRewardedAdGate();
+                return;
+            }
+
+            const lookbackSize = cachedDraws.length || 100;
+            let hits = 0;
+            let lastSeenDistance = null;
+
+            cachedDraws.forEach((d, index) => {
+                if (d.winning_numbers && d.winning_numbers.includes(num)) {
+                    hits++;
+                    if (lastSeenDistance === null) lastSeenDistance = index;
+                }
+            });
+
+            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
+            const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
+
+            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
+            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
+            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
+            document.getElementById('stat-percentage').innerText = `${percentage}%`;
+            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
+            document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
+
+            document.getElementById('inspector-card').classList.remove('hidden');
+            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
         function triggerRewardedAdGate() {
-            if (activeTier === 'pro' || activeTier === 'venue') return; // Pro/Venue skip ad gates entirely
+            if (activeTier === 'pro' || activeTier === 'venue') return;
             const modal = document.getElementById('ad-gate-modal');
             modal.classList.remove('hidden');
             modal.scrollIntoView({ behavior: 'smooth' });
@@ -633,6 +667,7 @@
             updateLedgerUI();
         }
 
+        // Standard helper functions
         function startTimers() {
             if (!window.drawBuddyTimer) {
                 window.drawBuddyTimer = setInterval(() => {
@@ -661,32 +696,6 @@
                     if(cdEl) cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 }, 1000);
             }
-        }
-
-        function inspectNumber(num) {
-            const lookbackSize = cachedDraws.length || 100;
-            let hits = 0;
-            let lastSeenDistance = null;
-
-            cachedDraws.forEach((d, index) => {
-                if (d.winning_numbers && d.winning_numbers.includes(num)) {
-                    hits++;
-                    if (lastSeenDistance === null) lastSeenDistance = index;
-                }
-            });
-
-            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
-            const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
-
-            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
-            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
-            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
-            document.getElementById('stat-percentage').innerText = `${percentage}%`;
-            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
-            document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
-
-            document.getElementById('inspector-card').classList.remove('hidden');
-            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
         function closeInspector() { document.getElementById('inspector-card').classList.add('hidden'); }
@@ -747,14 +756,25 @@
             for (let i = 1; i <= 80; i++) {
                 const count = freq[i] || 0;
                 const cell = document.createElement('div');
-                let bgStyle = "bg-green-700 text-white";
-                if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
-                else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
-                else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                else if (count >= 13) bgStyle = "bg-blue-600 text-white";
-                cell.className = `heatmap-cell ${bgStyle}`;
-                cell.onclick = () => inspectNumber(i);
-                cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
+                let bgStyle = "bg-slate-800 text-slate-400 border-slate-700";
+                
+                if (activeTier === 'free') {
+                    // Free tier gets basic subdued cells with a lock icon
+                    bgStyle = "bg-[#111c38] text-blue-400 border-[#1d4ed8]";
+                    cell.className = `heatmap-cell ${bgStyle}`;
+                    cell.onclick = () => inspectNumber(i);
+                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] text-yellow-400">🔒 PRO</span>`;
+                } else {
+                    // Pro / Venue gets full thermal heatmap colors & hit counts
+                    bgStyle = "bg-green-700 text-white";
+                    if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
+                    else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
+                    else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                    else if (count >= 13) bgStyle = "bg-blue-600 text-white";
+                    cell.className = `heatmap-cell ${bgStyle}`;
+                    cell.onclick = () => inspectNumber(i);
+                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
+                }
                 grid.appendChild(cell);
             }
         }
