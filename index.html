@@ -167,10 +167,13 @@
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📸 Multi-Ticket Batch Scanner</h2>
-                <span id="batch-count-badge" class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">0 Scanned</span>
+                <div class="flex items-center space-x-2">
+                    <span id="batch-count-badge" class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">0 Scanned</span>
+                    <span id="free-limit-badge" class="text-[10px] text-yellow-400 bg-amber-950 px-2 py-0.5 rounded border border-amber-800">Free Scans: 3/5</span>
+                </div>
             </div>
             
-            <p class="text-[11px] text-blue-300">Continuously scan ticket slips. Automatically verifies against Supabase and pushes straight into your session ledger.</p>
+            <p class="text-[11px] text-blue-300">Continuously scan ticket slips. Free tier includes 5 complimentary batch scans per session.</p>
 
             <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -191,6 +194,30 @@
                 <button onclick="processAndLogBatchTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 px-3 rounded-lg text-xs shadow transition">
                     📥 Add to Ledger
                 </button>
+            </div>
+        </div>
+
+        <!-- 📺 Rewarded Ad Gate Modal (Freemium Friction Trigger) -->
+        <div id="ad-gate-modal" class="bg-[#0b132b] p-5 rounded-xl border border-yellow-500 shadow-2xl space-y-4 hidden">
+            <div class="text-center space-y-1">
+                <span class="text-yellow-400 text-xs font-bold uppercase tracking-wider">⚡ Free Scan Limit Reached</span>
+                <h3 class="font-black text-white text-base">Watch a 15-Sec Ad to Refill Scans</h3>
+                <p class="text-[11px] text-blue-300">You've used your 5 free batch scans. Watch a short partner message to instantly unlock 5 more free scans, or go Pro for unlimited access.</p>
+            </div>
+            
+            <div id="ad-player-box" class="bg-[#050814] p-4 rounded-lg border border-[#1d4ed8] text-center space-y-3">
+                <div id="ad-timer" class="font-mono text-2xl font-black text-yellow-400">15s</div>
+                <div class="text-[10px] text-blue-400">Sponsored Partner Message (AdMob Interstitial Demo)</div>
+                <button id="ad-claim-btn" onclick="claimAdReward()" disabled class="w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed transition">
+                    Please wait for ad to finish...
+                </button>
+            </div>
+
+            <div class="text-center">
+                <span class="text-[11px] text-blue-300">Or skip ads forever:</span>
+                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block mt-1 text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                    Unlock Lifetime Pro ($9.99)
+                </a>
             </div>
         </div>
 
@@ -343,6 +370,7 @@
         let countdownSeconds = 240;
         let notificationTriggered = false;
         let batchScannedCount = 0;
+        let freeScanLimit = 5; // Free tier friction limit
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
 
@@ -354,6 +382,7 @@
             }
 
             renderHeatmap();
+            updateFreeLimitBadge();
 
             let fetchTimedOut = false;
             const timeoutPromise = new Promise((_, reject) => 
@@ -412,6 +441,45 @@
             loadHistoryArchive();
             renderHeatmap();
             updateCostDisplay();
+        }
+
+        function updateFreeLimitBadge() {
+            const badge = document.getElementById('free-limit-badge');
+            if(badge) badge.innerText = `Free Scans: ${batchScannedCount}/${freeScanLimit}`;
+        }
+
+        // 📺 Trigger Rewarded Interstitial Ad Gate
+        function triggerRewardedAdGate() {
+            const modal = document.getElementById('ad-gate-modal');
+            modal.classList.remove('hidden');
+            modal.scrollIntoView({ behavior: 'smooth' });
+
+            let timeLeft = 15;
+            const timerEl = document.getElementById('ad-timer');
+            const claimBtn = document.getElementById('ad-claim-btn');
+            
+            claimBtn.disabled = true;
+            claimBtn.className = "w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed transition";
+            claimBtn.innerText = "Please wait for ad to finish...";
+
+            const adCountdown = setInterval(() => {
+                timeLeft--;
+                if(timerEl) timerEl.innerText = `${timeLeft}s`;
+                if(timeLeft <= 0) {
+                    clearInterval(adCountdown);
+                    if(timerEl) timerEl.innerText = "🎁 Ad Complete!";
+                    claimBtn.disabled = false;
+                    claimBtn.className = "w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black py-2.5 rounded-lg text-xs shadow transition cursor-pointer";
+                    claimBtn.innerText = "Claim 5 Free Scans";
+                }
+            }, 1000);
+        }
+
+        function claimAdReward() {
+            freeScanLimit += 5;
+            updateFreeLimitBadge();
+            document.getElementById('ad-gate-modal').classList.add('hidden');
+            alert("🎁 Reward claimed! 5 new free batch scans added.");
         }
 
         function startTimers() {
@@ -575,7 +643,7 @@
                 const btn = document.getElementById('notif-btn');
                 if (permission === "granted") {
                     btn.innerText = "🔔 Active";
-                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2 py-1 rounded transition font-bold";
+                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
                     new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
                 } else {
                     alert("Notification permission denied.");
@@ -694,6 +762,12 @@
         }
 
         async function processAndLogBatchTicket() {
+            // Check free scan limit friction gate
+            if (batchScannedCount >= freeScanLimit) {
+                triggerRewardedAdGate();
+                return;
+            }
+
             const drawNumInput = parseInt(document.getElementById('batch-draw-num').value);
             const rawNumbers = document.getElementById('batch-numbers').value;
             const costPerGame = getGameCost();
@@ -750,7 +824,7 @@
             });
 
             batchScannedCount++;
-            document.getElementById('batch-count-badge').innerText = `${batchScannedCount} Scanned`;
+            updateFreeLimitBadge();
             document.getElementById('batch-numbers').value = "";
             document.getElementById('batch-draw-num').value = drawNumInput + 1;
 
