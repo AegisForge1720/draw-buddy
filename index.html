@@ -305,7 +305,7 @@
                 <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.</p>
                 <div id="pro-action-container">
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                        Get Lifetime Access
+                        Get Lifetime Access ($9.99)
                     </a>
                 </div>
             </div>
@@ -379,7 +379,7 @@
         let notificationTriggered = false;
         let batchScannedCount = 0;
         let freeScanLimit = 5;
-        let isProUser = false;
+        let activeTier = 'free'; // 'free', 'pro', or 'venue'
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
 
@@ -453,24 +453,23 @@
             updateCostDisplay();
         }
 
-        // 🧪 Tier Switcher Logic for Testing
+        // 🧪 Tier Switcher Logic & Feature Gating Enforcement
         function switchTestTier(tier) {
             localStorage.setItem('draw_buddy_active_tier', tier);
             checkProStatus();
         }
 
         function checkProStatus() {
-            const savedTier = localStorage.getItem('draw_buddy_active_tier') || 'free';
+            activeTier = localStorage.getItem('draw_buddy_active_tier') || 'free';
             const switcher = document.getElementById('dev-tier-switcher');
-            if(switcher) switcher.value = savedTier;
+            if(switcher) switcher.value = activeTier;
 
             const tierBadge = document.getElementById('tier-badge');
             const sponsorBox = document.getElementById('sponsored-courier-box');
             const proDesc = document.getElementById('pro-desc');
             const proAction = document.getElementById('pro-action-container');
 
-            if (savedTier === 'free') {
-                isProUser = false;
+            if (activeTier === 'free') {
                 if(tierBadge) {
                     tierBadge.innerText = "FREE TIER";
                     tierBadge.className = "text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold";
@@ -480,39 +479,37 @@
                 if(proAction) {
                     proAction.innerHTML = `
                         <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                            Get Lifetime Access
+                            Get Lifetime Access ($9.99)
                         </a>
                     `;
                 }
             } 
-            else if (savedTier === 'pro') {
-                isProUser = true;
+            else if (activeTier === 'pro') {
                 if(tierBadge) {
                     tierBadge.innerText = "PRO LIFETIME";
                     tierBadge.className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
                 }
-                if(sponsorBox) sponsorBox.style.display = 'none';
+                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads removed
                 if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
                 if(proAction) {
                     proAction.innerHTML = `
                         <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
-                            ✨ Individual Pro Active
+                            ✨ Individual Pro Active (Unlimited)
                         </div>
                     `;
                 }
             } 
-            else if (savedTier === 'venue') {
-                isProUser = true;
+            else if (activeTier === 'venue') {
                 if(tierBadge) {
                     tierBadge.innerText = "VENUE TIER";
                     tierBadge.className = "text-[10px] bg-purple-950 text-purple-300 border border-purple-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#c084fc]";
                 }
-                if(sponsorBox) sponsorBox.style.display = 'none';
+                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads removed
                 if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet & custom branding enabled).";
                 if(proAction) {
                     proAction.innerHTML = `
                         <div class="text-center bg-purple-950 text-purple-300 font-bold py-2 rounded-lg text-xs border border-purple-500/40">
-                            🍻 Establishment Venue License Active
+                            🍻 Establishment Venue License Active (Multi-Device)
                         </div>
                     `;
                 }
@@ -524,8 +521,8 @@
         function updateFreeLimitBadge() {
             const badge = document.getElementById('free-limit-badge');
             if(!badge) return;
-            if (isProUser) {
-                badge.innerText = "Unlimited Pro Scans";
+            if (activeTier === 'pro' || activeTier === 'venue') {
+                badge.innerText = "Unlimited Scans";
                 badge.className = "text-[10px] text-yellow-400 bg-yellow-950 px-2 py-0.5 rounded border border-yellow-800";
             } else {
                 badge.innerText = `Free Scans: ${batchScannedCount}/${freeScanLimit}`;
@@ -533,7 +530,7 @@
         }
 
         function triggerRewardedAdGate() {
-            if (isProUser) return;
+            if (activeTier === 'pro' || activeTier === 'venue') return; // Pro/Venue skip ad gates entirely
             const modal = document.getElementById('ad-gate-modal');
             modal.classList.remove('hidden');
             modal.scrollIntoView({ behavior: 'smooth' });
@@ -566,287 +563,8 @@
             alert("🎁 Reward claimed! 5 new free batch scans added.");
         }
 
-        function startTimers() {
-            if (!window.drawBuddyTimer) {
-                window.drawBuddyTimer = setInterval(() => {
-                    countdownSeconds--;
-                    if (countdownSeconds <= 0) {
-                        countdownSeconds = 240;
-                        latestFetchedDraw++;
-                        const nextDrawEl = document.getElementById('header-next-draw');
-                        if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-                        notificationTriggered = false;
-                        renderHeatmap();
-                    }
-
-                    if (countdownSeconds === 60 && !notificationTriggered) {
-                        notificationTriggered = true;
-                        if (window.Notification && Notification.permission === "granted") {
-                            new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
-                                body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
-                            });
-                        }
-                    }
-
-                    const mins = Math.floor(countdownSeconds / 60);
-                    const secs = countdownSeconds % 60;
-                    const cdEl = document.getElementById('header-countdown');
-                    if(cdEl) cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                }, 1000);
-            }
-        }
-
-        function inspectNumber(num) {
-            const lookbackSize = cachedDraws.length || 100;
-            let hits = 0;
-            let lastSeenDistance = null;
-
-            cachedDraws.forEach((d, index) => {
-                if (d.winning_numbers && d.winning_numbers.includes(num)) {
-                    hits++;
-                    if (lastSeenDistance === null) {
-                        lastSeenDistance = index;
-                    }
-                }
-            });
-
-            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
-            const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
-
-            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
-            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
-            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
-            document.getElementById('stat-percentage').innerText = `${percentage}%`;
-            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
-            document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
-
-            document.getElementById('inspector-card').classList.remove('hidden');
-            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function closeInspector() {
-            document.getElementById('inspector-card').classList.add('hidden');
-        }
-
-        function loadHistoryArchive() {
-            const saved = localStorage.getItem('draw_buddy_pl_archive');
-            if (saved) {
-                try { sessionTickets = JSON.parse(saved); } catch(e) { sessionTickets = []; }
-            }
-            updateLedgerUI();
-        }
-
-        function saveHistoryArchive() {
-            localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets));
-        }
-
-        function clearHistoryArchive() {
-            if (confirm("Are you sure you want to clear your entire P/L history archive?")) {
-                sessionTickets = [];
-                localStorage.removeItem('draw_buddy_pl_archive');
-                updateLedgerUI();
-            }
-        }
-
-        function setupWagerListeners() {
-            const bw = document.getElementById('base-wager');
-            const em = document.getElementById('extra-multiplier');
-            const gb = document.getElementById('game-block');
-            
-            if(bw && !bw.dataset.listener) { bw.addEventListener('change', updateCostDisplay); bw.dataset.listener = "true"; }
-            if(em && !em.dataset.listener) { em.addEventListener('change', updateCostDisplay); em.dataset.listener = "true"; }
-            if(gb && !gb.dataset.listener) { gb.addEventListener('input', updateCostDisplay); gb.dataset.listener = "true"; }
-        }
-
-        function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || 1;
-            const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
-            return extra === 2 ? base * 2 : base;
-        }
-
-        function updateCostDisplay() {
-            const cost = getGameCost();
-            const blockSize = parseInt(document.getElementById('game-block').value) || 200;
-            const costEl = document.getElementById('calc-cost-display');
-            const cardCostEl = document.getElementById('card-cost-label');
-            const statBudgetEl = document.getElementById('stat-budget');
-
-            if(costEl) costEl.innerText = `$${cost.toFixed(2)}`;
-            if(cardCostEl) cardCostEl.innerText = `$${cost.toFixed(2)} / game`;
-            if(statBudgetEl) statBudgetEl.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
-        }
-
-        function generateMockData(count, startDraw) {
-            let mock = [];
-            for (let i = 0; i < count; i++) {
-                let nums = [];
-                while(nums.length < 20) {
-                    let r = Math.floor(Math.random() * 80) + 1;
-                    if(!nums.includes(r)) nums.push(r);
-                }
-                mock.push({ draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b), extra_multiplier: Math.random() > 0.7 ? 2 : 1 });
-            }
-            return mock;
-        }
-
-        function renderHeatmap() {
-            let freq = {};
-            for(let i=1; i<=80; i++) freq[i] = 0;
-            cachedDraws.forEach(d => {
-                if (d.winning_numbers) {
-                    d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; });
-                }
-            });
-
-            const grid = document.getElementById('heatmap-grid');
-            if (!grid) return;
-            
-            grid.innerHTML = '';
-            for (let i = 1; i <= 80; i++) {
-                const count = freq[i] || 0;
-                const cell = document.createElement('div');
-                let bgStyle = "bg-green-700 text-white";
-                if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
-                else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
-                else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                else if (count >= 13) bgStyle = "bg-blue-600 text-white";
-
-                cell.className = `heatmap-cell ${bgStyle}`;
-                cell.onclick = () => inspectNumber(i);
-                cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
-                grid.appendChild(cell);
-            }
-        }
-
-        function requestNotificationPermission() {
-            if (!("Notification" in window)) {
-                alert("This browser does not support desktop notifications.");
-                return;
-            }
-            Notification.requestPermission().then(permission => {
-                const btn = document.getElementById('notif-btn');
-                if (permission === "granted") {
-                    btn.innerText = "🔔 Active";
-                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
-                    new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
-                } else {
-                    alert("Notification permission denied.");
-                }
-            });
-        }
-
-        function applyPreset(type) {
-            if (type === 'sweet_spot') {
-                document.getElementById('spot-tier').value = "10";
-                document.getElementById('lookback-draws').value = "100";
-                document.getElementById('game-block').value = "200";
-                document.getElementById('base-wager').value = "2";
-                document.getElementById('extra-multiplier').value = "2";
-                totalBlockSize = 200;
-            } else if (type === 'quick_session') {
-                document.getElementById('spot-tier').value = "10";
-                document.getElementById('lookback-draws').value = "100";
-                document.getElementById('game-block').value = "25";
-                document.getElementById('base-wager').value = "1";
-                document.getElementById('extra-multiplier').value = "1";
-                totalBlockSize = 25;
-            }
-            currentGameIndex = 0;
-            updateCostDisplay();
-            document.getElementById('header-block-status').innerText = `1 / ${totalBlockSize}`;
-            generateTicket();
-        }
-
-        function generateTicket() {
-            const spotTier = parseInt(document.getElementById('spot-tier').value);
-            const lookback = parseInt(document.getElementById('lookback-draws').value);
-            totalBlockSize = parseInt(document.getElementById('game-block').value) || 200;
-            const costPerGame = getGameCost();
-
-            const sliceData = cachedDraws.slice(0, lookback);
-            let freq = {};
-            sliceData.forEach(d => {
-                if (d.winning_numbers) {
-                    d.winning_numbers.forEach(n => freq[n] = (freq[n] || 0) + 1);
-                }
-            });
-
-            let sortedNums = Object.keys(freq).sort((a, b) => freq[b] - freq[a]).map(Number);
-            let ticket = sortedNums.slice(0, spotTier);
-            while (ticket.length < spotTier) {
-                let r = Math.floor(Math.random() * 80) + 1;
-                if (!ticket.includes(r)) ticket.push(r);
-            }
-            ticket.sort((a, b) => a - b);
-
-            const nextDrawNum = latestFetchedDraw + 1;
-            document.getElementById('card-draw-label').innerText = `Target Draw #${nextDrawNum}`;
-            document.getElementById('stat-lookback').innerText = `${lookback} Draws`;
-            document.getElementById('stat-budget').innerText = `$${(totalBlockSize * costPerGame).toFixed(2)} (${totalBlockSize} games)`;
-            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)} / game`;
-            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-
-            const grid = document.getElementById('number-grid');
-            grid.innerHTML = '';
-            ticket.forEach(num => {
-                const ball = document.createElement('div');
-                ball.className = 'number-ball ball-active';
-                ball.innerText = num < 10 ? '0' + num : num;
-                grid.appendChild(ball);
-            });
-
-            document.getElementById('play-card').classList.remove('hidden');
-        }
-
-        async function logTicketToCloud() {
-            const nextDrawNum = latestFetchedDraw + 1;
-            const spotTier = parseInt(document.getElementById('spot-tier').value);
-            const costPerGame = getGameCost();
-            const activeBalls = Array.from(document.querySelectorAll('#number-grid .number-ball')).map(el => parseInt(el.innerText));
-
-            try {
-                await supabaseClient.from('live_tickets').insert([{
-                    draw_number: nextDrawNum,
-                    ticket_numbers: activeBalls,
-                    wager_amount: costPerGame,
-                    status: 'PENDING'
-                }]);
-            } catch (err) {
-                console.log("Cloud log simulation recorded offline.");
-            }
-
-            sessionTickets.unshift({
-                draw: nextDrawNum,
-                spot: spotTier,
-                wager: costPerGame,
-                hits: 'Pending',
-                payout: 0
-            });
-
-            saveHistoryArchive();
-            updateLedgerUI();
-
-            currentGameIndex++;
-            if (currentGameIndex >= totalBlockSize) {
-                alert(`🎉 Completed session game block of ${totalBlockSize} games!`);
-                currentGameIndex = 0;
-            }
-            latestFetchedDraw++;
-            document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
-            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-
-            generateTicket();
-        }
-
-        function handleBatchPhoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('batch-numbers').value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
-            alert("📸 Batch photo parsed successfully! Click 'Add to Ledger'.");
-        }
-
         async function processAndLogBatchTicket() {
-            if (!isProUser && batchScannedCount >= freeScanLimit) {
+            if (activeTier === 'free' && batchScannedCount >= freeScanLimit) {
                 triggerRewardedAdGate();
                 return;
             }
@@ -915,10 +633,214 @@
             updateLedgerUI();
         }
 
+        function startTimers() {
+            if (!window.drawBuddyTimer) {
+                window.drawBuddyTimer = setInterval(() => {
+                    countdownSeconds--;
+                    if (countdownSeconds <= 0) {
+                        countdownSeconds = 240;
+                        latestFetchedDraw++;
+                        const nextDrawEl = document.getElementById('header-next-draw');
+                        if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                        notificationTriggered = false;
+                        renderHeatmap();
+                    }
+
+                    if (countdownSeconds === 60 && !notificationTriggered) {
+                        notificationTriggered = true;
+                        if (window.Notification && Notification.permission === "granted") {
+                            new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
+                                body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
+                            });
+                        }
+                    }
+
+                    const mins = Math.floor(countdownSeconds / 60);
+                    const secs = countdownSeconds % 60;
+                    const cdEl = document.getElementById('header-countdown');
+                    if(cdEl) cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+        }
+
+        function inspectNumber(num) {
+            const lookbackSize = cachedDraws.length || 100;
+            let hits = 0;
+            let lastSeenDistance = null;
+
+            cachedDraws.forEach((d, index) => {
+                if (d.winning_numbers && d.winning_numbers.includes(num)) {
+                    hits++;
+                    if (lastSeenDistance === null) lastSeenDistance = index;
+                }
+            });
+
+            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
+            const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
+
+            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
+            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
+            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
+            document.getElementById('stat-percentage').innerText = `${percentage}%`;
+            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
+            document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
+
+            document.getElementById('inspector-card').classList.remove('hidden');
+            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeInspector() { document.getElementById('inspector-card').classList.add('hidden'); }
+        function loadHistoryArchive() {
+            const saved = localStorage.getItem('draw_buddy_pl_archive');
+            if (saved) { try { sessionTickets = JSON.parse(saved); } catch(e) { sessionTickets = []; } }
+            updateLedgerUI();
+        }
+        function saveHistoryArchive() { localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets)); }
+        function clearHistoryArchive() {
+            if (confirm("Are you sure you want to clear your entire P/L history archive?")) {
+                sessionTickets = [];
+                localStorage.removeItem('draw_buddy_pl_archive');
+                updateLedgerUI();
+            }
+        }
+        function setupWagerListeners() {
+            const bw = document.getElementById('base-wager');
+            const em = document.getElementById('extra-multiplier');
+            const gb = document.getElementById('game-block');
+            if(bw && !bw.dataset.listener) { bw.addEventListener('change', updateCostDisplay); bw.dataset.listener = "true"; }
+            if(em && !em.dataset.listener) { em.addEventListener('change', updateCostDisplay); em.dataset.listener = "true"; }
+            if(gb && !gb.dataset.listener) { gb.addEventListener('input', updateCostDisplay); gb.dataset.listener = "true"; }
+        }
+        function getGameCost() {
+            const base = parseFloat(document.getElementById('base-wager').value) || 1;
+            const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
+            return extra === 2 ? base * 2 : base;
+        }
+        function updateCostDisplay() {
+            const cost = getGameCost();
+            const blockSize = parseInt(document.getElementById('game-block').value) || 200;
+            document.getElementById('calc-cost-display').innerText = `$${cost.toFixed(2)}`;
+            document.getElementById('card-cost-label').innerText = `$${cost.toFixed(2)} / game`;
+            document.getElementById('stat-budget').innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
+        }
+        function generateMockData(count, startDraw) {
+            let mock = [];
+            for (let i = 0; i < count; i++) {
+                let nums = [];
+                while(nums.length < 20) {
+                    let r = Math.floor(Math.random() * 80) + 1;
+                    if(!nums.includes(r)) nums.push(r);
+                }
+                mock.push({ draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b), extra_multiplier: Math.random() > 0.7 ? 2 : 1 });
+            }
+            return mock;
+        }
+        function renderHeatmap() {
+            let freq = {};
+            for(let i=1; i<=80; i++) freq[i] = 0;
+            cachedDraws.forEach(d => {
+                if (d.winning_numbers) { d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; }); }
+            });
+            const grid = document.getElementById('heatmap-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (let i = 1; i <= 80; i++) {
+                const count = freq[i] || 0;
+                const cell = document.createElement('div');
+                let bgStyle = "bg-green-700 text-white";
+                if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
+                else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
+                else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                else if (count >= 13) bgStyle = "bg-blue-600 text-white";
+                cell.className = `heatmap-cell ${bgStyle}`;
+                cell.onclick = () => inspectNumber(i);
+                cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
+                grid.appendChild(cell);
+            }
+        }
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) { alert("This browser does not support notifications."); return; }
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") new Notification("Draw Buddy", { body: "Tactical alerts enabled!" });
+            });
+        }
+        function applyPreset(type) {
+            if (type === 'sweet_spot') {
+                document.getElementById('spot-tier').value = "10";
+                document.getElementById('lookback-draws').value = "100";
+                document.getElementById('game-block').value = "200";
+                document.getElementById('base-wager').value = "2";
+                document.getElementById('extra-multiplier').value = "2";
+                totalBlockSize = 200;
+            } else if (type === 'quick_session') {
+                document.getElementById('spot-tier').value = "10";
+                document.getElementById('lookback-draws').value = "100";
+                document.getElementById('game-block').value = "25";
+                document.getElementById('base-wager').value = "1";
+                document.getElementById('extra-multiplier').value = "1";
+                totalBlockSize = 25;
+            }
+            currentGameIndex = 0;
+            updateCostDisplay();
+            document.getElementById('header-block-status').innerText = `1 / ${totalBlockSize}`;
+            generateTicket();
+        }
+        function generateTicket() {
+            const spotTier = parseInt(document.getElementById('spot-tier').value);
+            const lookback = parseInt(document.getElementById('lookback-draws').value);
+            totalBlockSize = parseInt(document.getElementById('game-block').value) || 200;
+            const costPerGame = getGameCost();
+            const sliceData = cachedDraws.slice(0, lookback);
+            let freq = {};
+            sliceData.forEach(d => { if (d.winning_numbers) d.winning_numbers.forEach(n => freq[n] = (freq[n] || 0) + 1); });
+            let sortedNums = Object.keys(freq).sort((a, b) => freq[b] - freq[a]).map(Number);
+            let ticket = sortedNums.slice(0, spotTier);
+            while (ticket.length < spotTier) {
+                let r = Math.floor(Math.random() * 80) + 1;
+                if (!ticket.includes(r)) ticket.push(r);
+            }
+            ticket.sort((a, b) => a - b);
+            document.getElementById('card-draw-label').innerText = `Target Draw #${latestFetchedDraw + 1}`;
+            document.getElementById('stat-lookback').innerText = `${lookback} Draws`;
+            document.getElementById('stat-budget').innerText = `$${(totalBlockSize * costPerGame).toFixed(2)} (${totalBlockSize} games)`;
+            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)} / game`;
+            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+            const grid = document.getElementById('number-grid');
+            grid.innerHTML = '';
+            ticket.forEach(num => {
+                const ball = document.createElement('div');
+                ball.className = 'number-ball ball-active';
+                ball.innerText = num < 10 ? '0' + num : num;
+                grid.appendChild(ball);
+            });
+            document.getElementById('play-card').classList.remove('hidden');
+        }
+        async function logTicketToCloud() {
+            const nextDrawNum = latestFetchedDraw + 1;
+            const spotTier = parseInt(document.getElementById('spot-tier').value);
+            const costPerGame = getGameCost();
+            const activeBalls = Array.from(document.querySelectorAll('#number-grid .number-ball')).map(el => parseInt(el.innerText));
+            try {
+                await supabaseClient.from('live_tickets').insert([{ draw_number: nextDrawNum, ticket_numbers: activeBalls, wager_amount: costPerGame, status: 'PENDING' }]);
+            } catch (err) { console.log("Offline simulation."); }
+            sessionTickets.unshift({ draw: nextDrawNum, spot: spotTier, wager: costPerGame, hits: 'Pending', payout: 0 });
+            saveHistoryArchive();
+            updateLedgerUI();
+            currentGameIndex++;
+            if (currentGameIndex >= totalBlockSize) { alert(`Completed block of ${totalBlockSize} games!`); currentGameIndex = 0; }
+            latestFetchedDraw++;
+            document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
+            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+            generateTicket();
+        }
+        function handleBatchPhoto(event) {
+            if (!event.target.files[0]) return;
+            document.getElementById('batch-numbers').value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
+            alert("📸 Batch photo parsed successfully! Click 'Add to Ledger'.");
+        }
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
             if(!tbody) return;
-            
             if (sessionTickets.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
                 document.getElementById('archive-total-wager').innerText = "$0.00";
@@ -926,16 +848,12 @@
                 document.getElementById('archive-net-pnl').innerText = "$0.00";
                 return;
             }
-
             tbody.innerHTML = '';
-            let totalWagered = 0;
-            let totalPayout = 0;
-
+            let totalWagered = 0, totalPayout = 0;
             sessionTickets.forEach(t => {
                 totalWagered += (t.wager || 2);
                 totalPayout += (t.payout || 0);
                 const netTicketPnL = (t.payout || 0) - (t.wager || 2);
-
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
@@ -946,21 +864,15 @@
                 `;
                 tbody.appendChild(tr);
             });
-
             const netProfit = totalPayout - totalWagered;
             document.getElementById('archive-total-wager').innerText = `$${totalWagered.toFixed(2)}`;
             document.getElementById('archive-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
-            
             const netEl = document.getElementById('archive-net-pnl');
             netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
             netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
         }
 
-        window.onload = () => {
-            init();
-            startTimers();
-            setupWagerListeners();
-        };
+        window.onload = () => { init(); startTimers(); setupWagerListeners(); };
     </script>
 </body>
 </html>
