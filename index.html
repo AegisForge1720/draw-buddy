@@ -17,8 +17,8 @@
             transition: all 0.2s ease-in-out;
         }
         .ball-active { background: linear-gradient(135deg, #facc15, #ca8a04); color: #070b19; box-shadow: 0 0 15px rgba(250, 204, 21, 0.5); border: 1px solid #fef08a; }
+        .ball-bonus { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); border: 1px solid #fca5a5; }
         .ball-inactive { background: #111c38; color: #60a5fa; border: 1px solid #1d4ed8; }
-        .ball-hit { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); border: 1px solid #34d399; }
         .heatmap-cell {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
             border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1px solid #1d4ed8; transition: all 0.2s; cursor: pointer;
@@ -28,7 +28,7 @@
 </head>
 <body class="min-h-screen pb-16">
 
-    <!-- Header & Tactical Robot Emblem + State Jurisdiction Indicator -->
+    <!-- Header & Tactical Robot Emblem -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -76,6 +76,19 @@
     </header>
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+
+        <!-- 🎯 TOP PRIORITY: Multi-Game Engine Switcher (Quick Draw, Powerball, Mega Millions) -->
+        <div class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-xl space-y-2">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game Engine Pool</h2>
+                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800 font-mono">Adaptive UI Active</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1.5">
+                <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">Quick Draw</button>
+                <button onclick="switchGameProfile('powerball')" id="game-btn-powerball" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Powerball</button>
+                <button onclick="switchGameProfile('megamillions')" id="game-btn-megamillions" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Mega Millions</button>
+            </div>
+        </div>
 
         <!-- 🍻 Context-Aware Geofenced Venue Card (M's Bar & Grill, Irondequoit NY) -->
         <div id="quickdraw-venue-section" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3">
@@ -173,19 +186,6 @@
             </div>
         </div>
 
-        <!-- 🎮 Multi-Game Engine Switcher -->
-        <div class="bg-[#0b132b] p-3 rounded-xl border border-[#1d4ed8] shadow-xl">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">🎯 Select Game Engine Pool</h2>
-                <span class="text-[9px] text-yellow-400 font-mono">Dynamic UI Adapting</span>
-            </div>
-            <div class="grid grid-cols-3 gap-1.5">
-                <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">Quick Draw</button>
-                <button onclick="switchGameProfile('powerball')" id="game-btn-powerball" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Powerball</button>
-                <button onclick="switchGameProfile('megamillions')" id="game-btn-megamillions" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Mega Millions</button>
-            </div>
-        </div>
-
         <!-- 🏢 Quick Draw Exclusive: Pro-to-Venue Mode Bridge & Establishment Banner -->
         <div id="quickdraw-venue-banner-section" class="space-y-4">
             <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-amber-950 p-4 rounded-xl border border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.25)] space-y-2.5">
@@ -225,12 +225,12 @@
             </div>
         </div>
 
-        <!-- Configuration Panel -->
+        <!-- Configuration Panel (Adapts dynamically to Active Game Engine) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
+                <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters & Wager</h2>
                 <span class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(250,204,21,0.2)] animate-pulse">
-                    ⚡ +12.5% Optimal ROI
+                    ⚡ Optimal Odds
                 </span>
             </div>
             
@@ -261,7 +261,7 @@
                         <option value="10">$10.00 / game</option>
                     </select>
                 </div>
-                <div>
+                <div id="multiplier-container">
                     <label class="block text-xs text-yellow-300 mb-1">Extra / Multiplier</label>
                     <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
                         <option value="1">No</option>
@@ -329,10 +329,10 @@
             </div>
         </div>
 
-        <!-- 🔥 Universal: House Hot Number Heatmap Mode -->
+        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Adapts to Active Game Engine Pool) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 House Hot Number Heatmap (Tap to Inspect)</h2>
+                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
                     <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
                     <span class="text-orange-400 flex items-center"><span class="w-2 h-2 bg-orange-500 rounded-full inline-block mr-1"></span></span>
@@ -477,9 +477,37 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const GAME_CONFIGS = {
-            quickdraw: { name: "NY Quick Draw", totalNumbers: 80, defaultSpots: [1,2,3,4,5,6,7,8,9,10], maxSpot: 10, hasBonus: false },
-            powerball: { name: "Powerball", totalNumbers: 69, defaultSpots: [5], maxSpot: 5, hasBonus: true, bonusTotal: 26, bonusName: "Powerball" },
-            megamillions: { name: "Mega Millions", totalNumbers: 70, defaultSpots: [5], maxSpot: 5, hasBonus: true, bonusTotal: 25, bonusName: "Mega Ball" }
+            quickdraw: { 
+                name: "NY Quick Draw", 
+                totalNumbers: 80, 
+                defaultSpots: [1,2,3,4,5,6,7,8,9,10], 
+                maxSpot: 10, 
+                hasBonus: false,
+                wagerOptions: [1,2,3,5,10],
+                defaultWager: 2
+            },
+            powerball: { 
+                name: "Powerball", 
+                totalNumbers: 69, 
+                bonusTotal: 26,
+                defaultSpots: [5], 
+                maxSpot: 5, 
+                hasBonus: true, 
+                bonusName: "Powerball",
+                wagerOptions: [2, 3, 5, 10, 25],
+                defaultWager: 2
+            },
+            megamillions: { 
+                name: "Mega Millions", 
+                totalNumbers: 70, 
+                bonusTotal: 25,
+                defaultSpots: [5], 
+                maxSpot: 5, 
+                hasBonus: true, 
+                bonusName: "Mega Ball",
+                wagerOptions: [2, 3, 5, 10, 25],
+                defaultWager: 2
+            }
         };
 
         const VENUE_PROFILES = [
@@ -667,6 +695,42 @@
             const hmTitle = document.getElementById('heatmap-title');
             if(hmTitle) hmTitle.innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
 
+            const configTitle = document.getElementById('config-panel-title');
+            if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
+
+            // Adapt Spot Selection Dropdown
+            const spotSelect = document.getElementById('spot-tier');
+            spotSelect.innerHTML = '';
+            if (gameKey === 'quickdraw') {
+                for (let i = 1; i <= 10; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerText = i;
+                    if (i === 10) opt.selected = true;
+                    spotSelect.appendChild(opt);
+                }
+                document.getElementById('multiplier-container').style.display = 'block';
+            } else {
+                const opt = document.createElement('option');
+                opt.value = 5;
+                opt.innerText = "5 White Balls";
+                opt.selected = true;
+                spotSelect.appendChild(opt);
+                document.getElementById('multiplier-container').style.display = 'none';
+            }
+
+            // Adapt Base Wager Options
+            const wagerSelect = document.getElementById('base-wager');
+            wagerSelect.innerHTML = '';
+            cfg.wagerOptions.forEach(amt => {
+                const opt = document.createElement('option');
+                opt.value = amt;
+                opt.innerText = `$${amt}.00 / ticket`;
+                if (amt === cfg.defaultWager) opt.selected = true;
+                wagerSelect.appendChild(opt);
+            });
+
+            // Dynamic UI Quick Draw Hiding
             const venueSec = document.getElementById('quickdraw-venue-section');
             const venueBannerSec = document.getElementById('quickdraw-venue-banner-section');
             const banterSec = document.getElementById('quickdraw-banter-section');
@@ -684,7 +748,9 @@
                 if(ledgerSec) ledgerSec.style.display = 'none';
             }
 
+            cachedDraws = generateMockData(100, latestFetchedDraw);
             renderHeatmap();
+            updateCostDisplay();
         }
 
         function toggleProVenueMode() {
@@ -842,9 +908,12 @@
             if(gb) gb.addEventListener('input', updateCostDisplay);
         }
         function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || 1;
-            const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
-            return extra === 2 ? base * 2 : base;
+            const base = parseFloat(document.getElementById('base-wager').value) || 2;
+            if (activeGameKey === 'quickdraw') {
+                const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
+                return extra === 2 ? base * 2 : base;
+            }
+            return base;
         }
         function updateCostDisplay() {
             const cost = getGameCost();
@@ -853,18 +922,24 @@
             const cardCost = document.getElementById('card-cost-label');
             const statBudget = document.getElementById('stat-budget');
             if(costDisp) costDisp.innerText = `$${cost.toFixed(2)}`;
-            if(cardCost) cardCost.innerText = `$${cost.toFixed(2)} / game`;
-            if(statBudget) statBudget.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
+            if(cardCost) cardCost.innerText = `$${cost.toFixed(2)} / ticket`;
+            if(statBudget) statBudget.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} tickets)`;
         }
         function generateMockData(count, startDraw) {
+            const cfg = GAME_CONFIGS[activeGameKey];
             let mock = [];
             for (let i = 0; i < count; i++) {
                 let nums = [];
-                while(nums.length < 20) {
-                    let r = Math.floor(Math.random() * 80) + 1;
+                let pickCount = activeGameKey === 'quickdraw' ? 20 : 5;
+                while(nums.length < pickCount) {
+                    let r = Math.floor(Math.random() * cfg.totalNumbers) + 1;
                     if(!nums.includes(r)) nums.push(r);
                 }
-                mock.push({ draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b), extra_multiplier: Math.random() > 0.7 ? 2 : 1 });
+                let entry = { draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b) };
+                if (cfg.hasBonus) {
+                    entry.bonus_number = Math.floor(Math.random() * cfg.bonusTotal) + 1;
+                }
+                mock.push(entry);
             }
             return mock;
         }
@@ -914,18 +989,24 @@
             input.value = '';
         }
         function applyPreset(type) {
-            if (type === 'sweet_spot') {
-                document.getElementById('spot-tier').value = "10";
-                document.getElementById('lookback-draws').value = "100";
-                document.getElementById('game-block').value = "200";
+            if (activeGameKey === 'quickdraw') {
+                if (type === 'sweet_spot') {
+                    document.getElementById('spot-tier').value = "10";
+                    document.getElementById('lookback-draws').value = "100";
+                    document.getElementById('game-block').value = "200";
+                    document.getElementById('base-wager').value = "2";
+                    document.getElementById('extra-multiplier').value = "2";
+                } else if (type === 'quick_session') {
+                    document.getElementById('spot-tier').value = "10";
+                    document.getElementById('lookback-draws').value = "100";
+                    document.getElementById('game-block').value = "25";
+                    document.getElementById('base-wager').value = "1";
+                    document.getElementById('extra-multiplier').value = "1";
+                }
+            } else {
+                document.getElementById('lookback-draws').value = "50";
+                document.getElementById('game-block').value = "10";
                 document.getElementById('base-wager').value = "2";
-                document.getElementById('extra-multiplier').value = "2";
-            } else if (type === 'quick_session') {
-                document.getElementById('spot-tier').value = "10";
-                document.getElementById('lookback-draws').value = "100";
-                document.getElementById('game-block').value = "25";
-                document.getElementById('base-wager').value = "1";
-                document.getElementById('extra-multiplier').value = "1";
             }
             currentGameIndex = 0;
             updateCostDisplay();
@@ -935,7 +1016,7 @@
         }
         function generateTicket() {
             const cfg = GAME_CONFIGS[activeGameKey];
-            const spotTier = parseInt(document.getElementById('spot-tier').value);
+            const spotTier = parseInt(document.getElementById('spot-tier').value) || cfg.maxSpot;
             const lookback = parseInt(document.getElementById('lookback-draws').value);
             totalBlockSize = parseInt(document.getElementById('game-block').value) || 200;
             const costPerGame = getGameCost();
@@ -949,13 +1030,19 @@
                 if (!ticket.includes(r)) ticket.push(r);
             }
             ticket.sort((a, b) => a - b);
+
+            let bonusBall = null;
+            if (cfg.hasBonus) {
+                bonusBall = Math.floor(Math.random() * cfg.bonusTotal) + 1;
+            }
+
             const drawLabel = document.getElementById('card-draw-label');
             const statLook = document.getElementById('stat-lookback');
             const cardCost = document.getElementById('card-cost-label');
             const blockStat = document.getElementById('header-block-status');
             if(drawLabel) drawLabel.innerText = `Target Draw #${latestFetchedDraw + 1} (${cfg.name})`;
             if(statLook) statLook.innerText = `${lookback} Draws`;
-            if(cardCost) cardCost.innerText = `$${costPerGame.toFixed(2)} / game`;
+            if(cardCost) cardCost.innerText = `$${costPerGame.toFixed(2)} / ticket`;
             if(blockStat) blockStat.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
 
             const grid = document.getElementById('number-grid');
@@ -967,6 +1054,15 @@
                 ball.innerText = num < 10 ? '0' + num : num;
                 grid.appendChild(ball);
             });
+
+            if (bonusBall !== null) {
+                const bBall = document.createElement('div');
+                bBall.className = 'number-ball ball-bonus';
+                bBall.innerText = bonusBall < 10 ? '0' + bonusBall : bonusBall;
+                bBall.title = cfg.bonusName;
+                grid.appendChild(bBall);
+            }
+
             document.getElementById('play-card').classList.remove('hidden');
         }
         async function logTicketToCloud() {
@@ -988,7 +1084,7 @@
         function handleBatchPhoto(event) {
             if (!event.target.files[0]) return;
             const batchNum = document.getElementById('batch-numbers');
-            if(batchNum) batchNum.value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
+            if(batchNum) batchNum.value = "5, 15, 25, 35, 45";
             alert("📸 Batch photo parsed successfully!");
         }
         function updateLedgerUI() {
