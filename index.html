@@ -34,10 +34,8 @@
                 <h1 class="font-black text-lg tracking-wider text-white">DRAW <span class="text-yellow-400">BUDDY</span></h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="requestNotificationPermission()" id="notif-btn" class="text-[10px] bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 px-2 py-1 rounded transition font-bold">
-                    🔔 Alerts
-                </button>
-                <div id="sync-status" class="text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+                <span id="tier-badge" class="text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold">FREE TIER</span>
+                <div id="sync-status" class="text-xs px-2.5 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
             </div>
         </div>
 
@@ -173,7 +171,7 @@
                 </div>
             </div>
             
-            <p class="text-[11px] text-blue-300">Continuously scan ticket slips. Free tier includes 5 complimentary batch scans per session.</p>
+            <p class="text-[11px] text-blue-300">Continuously scan ticket slips. Automatically verifies against Supabase and pushes straight into your session ledger.</p>
 
             <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -197,7 +195,7 @@
             </div>
         </div>
 
-        <!-- 📺 Rewarded Ad Gate Modal (Freemium Friction Trigger) -->
+        <!-- 📺 Rewarded Ad Gate Modal -->
         <div id="ad-gate-modal" class="bg-[#0b132b] p-5 rounded-xl border border-yellow-500 shadow-2xl space-y-4 hidden">
             <div class="text-center space-y-1">
                 <span class="text-yellow-400 text-xs font-bold uppercase tracking-wider">⚡ Free Scan Limit Reached</span>
@@ -207,7 +205,7 @@
             
             <div id="ad-player-box" class="bg-[#050814] p-4 rounded-lg border border-[#1d4ed8] text-center space-y-3">
                 <div id="ad-timer" class="font-mono text-2xl font-black text-yellow-400">15s</div>
-                <div class="text-[10px] text-blue-400">Sponsored Partner Message (AdMob Interstitial Demo)</div>
+                <div class="text-[10px] text-blue-400">Sponsored Partner Message</div>
                 <button id="ad-claim-btn" onclick="claimAdReward()" disabled class="w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed transition">
                     Please wait for ad to finish...
                 </button>
@@ -221,7 +219,7 @@
             </div>
         </div>
 
-        <!-- 🔥 Venue Hot Number Heatmap Mode (Interactive with Thermal Legend) -->
+        <!-- 🔥 Venue Hot Number Heatmap Mode -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 House Hot Number Heatmap (Tap to Inspect)</h2>
@@ -238,7 +236,7 @@
             </div>
         </div>
 
-        <!-- 🔍 Number Statistics Inspector Modal / Card -->
+        <!-- 🔍 Number Statistics Inspector Card -->
         <div id="inspector-card" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-2xl space-y-3 hidden">
             <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
                 <div class="flex items-center space-x-2">
@@ -267,8 +265,8 @@
             </div>
         </div>
 
-        <!-- 🔗 Official State Lottery & Courier Partner Hub (Free Tier Monetization) -->
-        <div class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
+        <!-- 🔗 Official State Lottery & Courier Partner Hub (Hidden for Pro Users) -->
+        <div id="sponsored-courier-box" class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Courier Partners</h2>
                 <span class="text-[10px] text-blue-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">Sponsored</span>
@@ -296,10 +294,15 @@
                     <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
                     <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                 </div>
-                <p class="text-[11px] text-blue-300">Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.</p>
-                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                    Get Lifetime Access
-                </a>
+                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.</p>
+                <div id="pro-action-container">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                        Get Lifetime Access
+                    </a>
+                    <button onclick="toggleProSimulation()" class="w-full mt-1 bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-1.5 rounded-lg text-[10px] transition">
+                        ⚡ [Dev] Simulate Pro Checkout Success
+                    </button>
+                </div>
             </div>
 
             <!-- Establishment Venue Tier -->
@@ -370,11 +373,13 @@
         let countdownSeconds = 240;
         let notificationTriggered = false;
         let batchScannedCount = 0;
-        let freeScanLimit = 5; // Free tier friction limit
+        let freeScanLimit = 5;
+        let isProUser = false;
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
 
         async function init() {
+            checkProStatus();
             const statusEl = document.getElementById('sync-status');
             if(statusEl) {
                 statusEl.innerText = "Connecting...";
@@ -443,13 +448,55 @@
             updateCostDisplay();
         }
 
-        function updateFreeLimitBadge() {
-            const badge = document.getElementById('free-limit-badge');
-            if(badge) badge.innerText = `Free Scans: ${batchScannedCount}/${freeScanLimit}`;
+        // 💎 Tier Enforcement & License Check
+        function checkProStatus() {
+            const license = localStorage.getItem('draw_buddy_pro_license');
+            if (license === 'active') {
+                isProUser = true;
+                document.getElementById('tier-badge').innerText = "PRO LIFETIME";
+                document.getElementById('tier-badge').className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
+                
+                // Hide sponsored ads & courier boxes for pro users
+                const sponsorBox = document.getElementById('sponsored-courier-box');
+                if(sponsorBox) sponsorBox.style.display = 'none';
+
+                // Update unlock card
+                document.getElementById('pro-desc').innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
+                document.getElementById('pro-action-container').innerHTML = `
+                    <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
+                        ✨ Pro License Verified & Active
+                    </div>
+                `;
+            } else {
+                isProUser = false;
+            }
         }
 
-        // 📺 Trigger Rewarded Interstitial Ad Gate
+        function toggleProSimulation() {
+            const current = localStorage.getItem('draw_buddy_pro_license');
+            if (current === 'active') {
+                localStorage.removeItem('draw_buddy_pro_license');
+                alert("Simulated Pro License deactivated.");
+            } else {
+                localStorage.setItem('draw_buddy_pro_license', 'active');
+                alert("🎉 Simulated Pro License activated! Enjoy ad-free unlimited access.");
+            }
+            checkProStatus();
+        }
+
+        function updateFreeLimitBadge() {
+            const badge = document.getElementById('free-limit-badge');
+            if(!badge) return;
+            if (isProUser) {
+                badge.innerText = "Unlimited Pro Scans";
+                badge.className = "text-[10px] text-yellow-400 bg-yellow-950 px-2 py-0.5 rounded border border-yellow-800";
+            } else {
+                badge.innerText = `Free Scans: ${batchScannedCount}/${freeScanLimit}`;
+            }
+        }
+
         function triggerRewardedAdGate() {
+            if (isProUser) return; // Pro users never see ads
             const modal = document.getElementById('ad-gate-modal');
             modal.classList.remove('hidden');
             modal.scrollIntoView({ behavior: 'smooth' });
@@ -643,7 +690,7 @@
                 const btn = document.getElementById('notif-btn');
                 if (permission === "granted") {
                     btn.innerText = "🔔 Active";
-                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
+                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2 py-1 rounded transition font-bold";
                     new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
                 } else {
                     alert("Notification permission denied.");
@@ -762,8 +809,7 @@
         }
 
         async function processAndLogBatchTicket() {
-            // Check free scan limit friction gate
-            if (batchScannedCount >= freeScanLimit) {
+            if (!isProUser && batchScannedCount >= freeScanLimit) {
                 triggerRewardedAdGate();
                 return;
             }
