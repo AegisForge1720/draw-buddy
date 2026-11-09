@@ -35,23 +35,16 @@
                 <!-- Wide-Screen CRT Logo Emblem -->
                 <div class="w-9 h-9 rounded-lg bg-[#050814] p-0.5 shadow-[0_0_12px_rgba(56,189,248,0.45)] border border-cyan-400/60 flex items-center justify-center overflow-hidden">
                     <svg viewBox="0 0 24 24" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Low-Profile Dish Antenna -->
                         <path d="M9 4c1.5-1.5 4.5-1.5 6 0" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                         <line x1="12" y1="3" x2="12" y2="6" stroke="#38bdf8" stroke-width="1.5"/>
-                        <!-- Wide Monitor Chassis -->
                         <rect x="3" y="6" width="18" height="14" rx="3" fill="#0b132b" stroke="#38bdf8" stroke-width="1.5"/>
-                        <!-- Inner Screen Bezel -->
                         <rect x="5" y="8" width="14" height="10" rx="1.5" fill="#050814" stroke="#1d4ed8" stroke-width="0.8"/>
-                        <!-- Side Dials -->
                         <circle cx="2" cy="13" r="1.2" fill="#38bdf8"/>
                         <circle cx="22" cy="13" r="1.2" fill="#38bdf8"/>
-                        <!-- Left Eye: Glowing Cyan Square Pixel -->
                         <rect x="7.5" y="10" width="2.5" height="2.5" rx="0.5" fill="#38bdf8" class="animate-pulse"/>
-                        <!-- Right Eye: Blinking Wink -->
                         <path d="M13.5 11l3 0.8" stroke="#38bdf8" stroke-width="1.6" stroke-linecap="round">
                             <animate attributeName="opacity" values="1;0;1;1" dur="3s" repeatCount="indefinite"/>
                         </path>
-                        <!-- Cocky Green Grin & Red Indicator Light -->
                         <path d="M8 15.5c2 0.8 5.5 0.2 7.5-1.2l0.5 0.8c-2.2 1.8-5.8 2-8 0.4z" fill="#22c55e"/>
                         <circle cx="18" cy="18.5" r="0.7" fill="#ef4444"/>
                     </svg>
@@ -188,87 +181,146 @@
             </div>
         </div>
 
-        <!-- Configuration Panel with Floating Optimized ROI Banner -->
+        <!-- ⚙️ Configuration Panel with Optimal Rules Preset & Full Slip Breakdown -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters & Wager</h2>
+                <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters</h2>
                 <span id="roi-badge" class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2.5 py-1 rounded-full font-extrabold shadow-[0_0_12px_rgba(250,204,21,0.25)] animate-pulse">
-                    ⚡ Optimized ROI: +12.5%
+                    ⚡ Optimized ROI: +14.5%
                 </span>
+            </div>
+
+            <!-- Quick Preset Switcher: Optimal EV vs High-Roller 10-Spot -->
+            <div id="preset-bar" class="grid grid-cols-2 gap-2 pt-0.5">
+                <button onclick="applyOptimalPreset('tactical')" class="bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-300 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center space-x-1">
+                    <span>🎯 Optimal 4-Spot EV ($2/gm)</span>
+                </button>
+                <button onclick="applyOptimalPreset('jackpot')" class="bg-amber-950/60 hover:bg-amber-900/70 border border-yellow-500/40 text-yellow-300 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center space-x-1">
+                    <span>🏆 10-Spot Jackpot ($4/gm)</span>
+                </button>
             </div>
             
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label id="spot-label-title" class="block text-xs text-blue-300 mb-1">Spot Selection</label>
+                    <label id="spot-label-title" class="block text-xs text-blue-300 mb-1">1. Spot Selection</label>
                     <select id="spot-tier" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                        <option value="10" selected>10</option>
+                        <option value="1">1-Spot ($2 Prize)</option>
+                        <option value="2">2-Spot ($10 Prize)</option>
+                        <option value="3">3-Spot ($27 Prize)</option>
+                        <option value="4" selected>4-Spot ($91 Prize - Best Hit EV)</option>
+                        <option value="5">5-Spot ($450 Prize)</option>
+                        <option value="6">6-Spot ($1,500 Prize)</option>
+                        <option value="7">7-Spot ($5,000 Prize)</option>
+                        <option value="8">8-Spot ($10,000 Prize)</option>
+                        <option value="9">9-Spot ($30,000 Prize)</option>
+                        <option value="10">10-Spot ($100k Top Prize)</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Lookback Draws</label>
-                    <input type="number" id="lookback-draws" value="100" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-xs text-blue-300 mb-1">2. Lookback Window</label>
+                    <select id="lookback-draws" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
+                        <option value="20">Last 20 Draws (1.3 hrs)</option>
+                        <option value="50" selected>Last 50 Draws (3.3 hrs - Optimal)</option>
+                        <option value="100">Last 100 Draws (6.6 hrs)</option>
+                    </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                    <label class="block text-xs text-yellow-300 mb-1">Base Wager ($)</label>
+                    <label class="block text-xs text-yellow-300 mb-1">3. Base Wager / Game</label>
                     <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                        <option value="1">$1.00 / game</option>
-                        <option value="2" selected>$2.00 / game</option>
+                        <option value="1" selected>$1.00 / game</option>
+                        <option value="2">$2.00 / game</option>
                         <option value="3">$3.00 / game</option>
+                        <option value="4">$4.00 / game</option>
                         <option value="5">$5.00 / game</option>
                         <option value="10">$10.00 / game</option>
                     </select>
                 </div>
                 <div id="multiplier-container">
-                    <label class="block text-xs text-yellow-300 mb-1">Extra / Multiplier</label>
+                    <label class="block text-xs text-yellow-300 mb-1">4. Quick Draw Extra (2x Cost)</label>
                     <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="1">No</option>
-                        <option value="2" selected>Yes</option>
+                        <option value="1">No (Base Wager Only)</option>
+                        <option value="2" selected>Yes (+Up to 10x Multiplier)</option>
                     </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Game Block Size</label>
-                    <input type="number" id="game-block" value="200" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-300 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-xs text-blue-300 mb-1">5. Consecutive Games (Draws)</label>
+                    <select id="game-block" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-300 focus:outline-none focus:border-yellow-400">
+                        <option value="1">1 Game (Single Draw)</option>
+                        <option value="2">2 Consecutive Games</option>
+                        <option value="3">3 Consecutive Games</option>
+                        <option value="4">4 Consecutive Games</option>
+                        <option value="5" selected>5 Consecutive Games (20 mins)</option>
+                        <option value="10">10 Consecutive Games (40 mins)</option>
+                        <option value="20">20 Consecutive Games (80 mins)</option>
+                        <option value="50">50 Game Block</option>
+                        <option value="100">100 Game Block</option>
+                        <option value="200">200 Game Block</option>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Total Cost / Game</label>
-                    <div id="calc-cost-display" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-emerald-400 flex items-center">$4.00</div>
+                    <label class="block text-xs text-blue-300 mb-1">Cost / Game & Total Slip</label>
+                    <div id="calc-cost-display" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 flex items-center justify-between">
+                        <span>$2/gm</span>
+                        <span class="text-yellow-400 font-mono">Slip: $10.00</span>
+                    </div>
                 </div>
             </div>
 
             <button onclick="generateTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3 px-4 rounded-xl shadow-lg transition tracking-wide text-sm">
-                🚀 GENERATE OPTIMAL TICKET
+                🚀 GENERATE OPTIMAL TICKET SLIP
             </button>
         </div>
 
-        <!-- Actionable Play Card -->
-        <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border border-yellow-500/40 shadow-2xl space-y-4 hidden">
-            <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-3">
+        <!-- 🎟️ Actionable Play Card (Full NY Lottery Play Slip Breakdown) -->
+        <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
+            <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                 <div>
-                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-semibold">Active Action Plan</div>
-                    <div id="card-draw-label" class="text-lg font-black text-white">Target Draw #-------</div>
+                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ OFFICIAL PLAY SLIP INSTRUCTIONS</div>
+                    <div id="card-draw-label" class="text-base font-black text-white mt-0.5">Draws #3028802 – #3028806</div>
+                    <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Selected from Top Hot Cluster (Last 50 Draws)</div>
                 </div>
-                <div class="text-right">
-                    <div class="text-[10px] uppercase tracking-wider text-blue-400 font-semibold">Investment</div>
-                    <div id="card-cost-label" class="text-sm font-bold text-yellow-300">$4.00 / game</div>
+                <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
+                    <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">Total Slip Cost</div>
+                    <div id="card-total-slip-cost" class="text-base font-mono font-black text-emerald-400">$10.00</div>
+                </div>
+            </div>
+
+            <!-- 4-Box Physical Play Slip Checklist -->
+            <div class="grid grid-cols-4 gap-1.5 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
+                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[9px] uppercase text-blue-300 block">1. How Many</span>
+                    <span id="slip-spot-box" class="font-black text-yellow-400 text-xs">4-SPOT</span>
+                </div>
+                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[9px] uppercase text-blue-300 block">2. Base Bet</span>
+                    <span id="slip-wager-box" class="font-black text-white text-xs">$1 / draw</span>
+                </div>
+                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[9px] uppercase text-blue-300 block">3. Extra</span>
+                    <span id="slip-extra-box" class="font-black text-cyan-400 text-xs">YES (+$1)</span>
+                </div>
+                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[9px] uppercase text-blue-300 block">4. # of Draws</span>
+                    <span id="slip-games-box" class="font-black text-emerald-400 text-xs">5 GAMES</span>
                 </div>
             </div>
 
             <div>
-                <div class="text-xs text-blue-300 mb-2 font-medium">Optimal Numbers to Play:</div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs text-blue-300 font-bold">Bubble These Optimal Numbers:</span>
+                    <span id="card-cost-label" class="text-[10px] font-mono text-yellow-300 bg-yellow-950/60 px-2 py-0.5 rounded border border-yellow-700">$2.00/gm × 5 gms</span>
+                </div>
                 <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1"></div>
             </div>
 
             <button onclick="logTicketToCloud()" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
-                <span>☁️ Log Ticket to Cloud & Advance Block</span>
+                <span>☁️ Log Ticket Slip to P/L Ledger & Track Draws</span>
             </button>
         </div>
 
@@ -280,7 +332,7 @@
             </div>
             <div id="venue-ticker-feed" class="space-y-2 max-h-[140px] overflow-y-auto text-xs font-mono">
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 9-spot ticket hit for $1,200 on draw #3028798! Let's go! 🍻
+                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 4-spot ticket hit 4/4 with 2x Extra on draw #3028798! Let's go! 🍻
                 </div>
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
                     <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 4 PM session?
@@ -383,7 +435,7 @@
                     <thead class="sticky top-0 bg-[#0b132b]">
                         <tr class="text-blue-400 border-b border-[#1d4ed8]">
                             <th class="pb-2">Draw</th>
-                            <th class="pb-2">Spot</th>
+                            <th class="pb-2">Slip Details</th>
                             <th class="pb-2">Hits</th>
                             <th class="pb-2 text-right">Net P&L</th>
                         </tr>
@@ -534,10 +586,10 @@
                 totalNumbers: 80, 
                 tableName: "quickdraw_history",
                 defaultSpots: [1,2,3,4,5,6,7,8,9,10], 
-                maxSpot: 10, 
+                maxSpot: 4, 
                 hasBonus: false,
-                wagerOptions: [1,2,3,5,10],
-                defaultWager: 2,
+                wagerOptions: [1,2,3,4,5,10],
+                defaultWager: 1,
                 timerLabel: "Next Draw",
                 defaultTime: 240
             },
@@ -606,7 +658,7 @@
         let activeGameKey = 'quickdraw';
         let cachedDraws = [];
         let currentGameIndex = 0;
-        let totalBlockSize = 200;
+        let totalBlockSize = 5;
         let sessionTickets = [];
         let scratchTickets = [];
         let lastGeneratedNumbers = [];
@@ -645,6 +697,36 @@
             updateOptimizedRoiBadge();
         }
 
+        // One-Tap Optimal Preset Rules Switcher
+        function applyOptimalPreset(mode) {
+            if (activeGameKey !== 'quickdraw') return;
+            const spotEl = document.getElementById('spot-tier');
+            const lookbackEl = document.getElementById('lookback-draws');
+            const wagerEl = document.getElementById('base-wager');
+            const extraEl = document.getElementById('extra-multiplier');
+            const blockEl = document.getElementById('game-block');
+
+            if (mode === 'tactical') {
+                // Highest Hit Frequency & Bankroll Retention (4-Spot, 50 Lookback, $1 Base + $1 Extra = $2/game, 5 Games = $10 Slip)
+                spotEl.value = "4";
+                lookbackEl.value = "50";
+                wagerEl.value = "1";
+                extraEl.value = "2";
+                blockEl.value = "5";
+            } else {
+                // High-Ceiling 10-Spot ($100k Jackpot + $5 on 0-Hit insurance, 100 Lookback, $2 Base + $2 Extra = $4/game, 5 Games = $20 Slip)
+                spotEl.value = "10";
+                lookbackEl.value = "100";
+                wagerEl.value = "2";
+                extraEl.value = "2";
+                blockEl.value = "5";
+            }
+            renderHeatmap();
+            updateCostDisplay();
+            updateOptimizedRoiBadge();
+            generateTicket();
+        }
+
         // Native App Deep-Linking Handler with Web Fallback
         function launchNativeApp(appType) {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -680,13 +762,14 @@
             const dateOnly = nowISO.split('T')[0];
 
             let csvRows = [
-                ["Timestamp_ISO", "Date", "Venue", "Game_Engine", "Draw_or_Game_ID", "Spot_or_Type", "Wager_Cost", "Payout", "Net_PnL", "Hit_Status"].join(",")
+                ["Timestamp_ISO", "Date", "Venue", "Game_Engine", "Draw_or_Game_ID", "Spot_or_Type", "Games_Count", "Wager_Cost", "Payout", "Net_PnL", "Hit_Status"].join(",")
             ];
 
             sessionTickets.forEach(t => {
                 const wager = parseFloat(t.wager || 2).toFixed(2);
                 const payout = parseFloat(t.payout || 0).toFixed(2);
                 const net = (payout - wager).toFixed(2);
+                const gamesCount = t.games || 1;
                 csvRows.push([
                     t.timestamp || nowISO,
                     (t.timestamp || nowISO).split('T')[0],
@@ -694,6 +777,7 @@
                     `"${GAME_CONFIGS[activeGameKey].name}"`,
                     `"#${t.draw}"`,
                     `"${t.spot}-Spot"`,
+                    gamesCount,
                     wager,
                     payout,
                     net,
@@ -712,6 +796,7 @@
                     `"NY Scratch-Off"`,
                     `"${(s.game || 'Scratch-Off').replace(/"/g, '""')}"`,
                     `"Instant Ticket"`,
+                    1,
                     cost,
                     payout,
                     net,
@@ -744,7 +829,7 @@
                     if (played.length > 0) {
                         const hitCount = played.filter(n => winNums.includes(n)).length;
                         t.hits = `${hitCount}/${t.spot} Hit`;
-                        const baseWager = t.baseWager || 2;
+                        const baseWager = t.baseWager || 1;
                         const hasExtra = t.hasExtra || false;
                         const drawMult = hasExtra ? (parseInt(drawObj.extra_multiplier) || 1) : 1;
                         const prizeScale = QD_PAYOUT_TABLE[t.spot] || {};
@@ -944,34 +1029,43 @@
             if(hmTitle) hmTitle.innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
 
             const configTitle = document.getElementById('config-panel-title');
-            if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
+            if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters`;
 
             const drawBox = document.getElementById('header-draw-box');
             const drawLabel = document.getElementById('header-draw-label');
+            const presetBar = document.getElementById('preset-bar');
             if (gameKey === 'quickdraw') {
                 if(drawBox) drawBox.style.display = 'block';
                 if(drawLabel) drawLabel.innerText = "Next Draw";
+                if(presetBar) presetBar.style.display = 'grid';
                 countdownSeconds = 240;
             } else {
                 if(drawBox) drawBox.style.display = 'none';
+                if(presetBar) presetBar.style.display = 'none';
                 countdownSeconds = 43200;
             }
 
             const spotSelect = document.getElementById('spot-tier');
             spotSelect.innerHTML = '';
             if (gameKey === 'quickdraw') {
+                const labels = {
+                    1: "1-Spot ($2 Prize)", 2: "2-Spot ($10 Prize)", 3: "3-Spot ($27 Prize)",
+                    4: "4-Spot ($91 Prize - Best Hit EV)", 5: "5-Spot ($450 Prize)", 6: "6-Spot ($1,500 Prize)",
+                    7: "7-Spot ($5,000 Prize)", 8: "8-Spot ($10,000 Prize)", 9: "9-Spot ($30,000 Prize)",
+                    10: "10-Spot ($100k Top Prize)"
+                };
                 for (let i = 1; i <= 10; i++) {
                     const opt = document.createElement('option');
                     opt.value = i;
-                    opt.innerText = i;
-                    if (i === 10) opt.selected = true;
+                    opt.innerText = labels[i];
+                    if (i === 4) opt.selected = true;
                     spotSelect.appendChild(opt);
                 }
                 document.getElementById('multiplier-container').style.display = 'block';
             } else {
                 const opt = document.createElement('option');
                 opt.value = 5;
-                opt.innerText = "5 White Balls";
+                opt.innerText = "5 White Balls + 1 Bonus";
                 opt.selected = true;
                 spotSelect.appendChild(opt);
                 document.getElementById('multiplier-container').style.display = 'none';
@@ -982,7 +1076,7 @@
             cfg.wagerOptions.forEach(amt => {
                 const opt = document.createElement('option');
                 opt.value = amt;
-                opt.innerText = `$${amt}.00 / ticket`;
+                opt.innerText = `$${amt}.00 / game`;
                 if (amt === cfg.defaultWager) opt.selected = true;
                 wagerSelect.appendChild(opt);
             });
@@ -1097,7 +1191,7 @@
                 alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
                 return;
             }
-            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || cachedDraws.length || 100;
+            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || cachedDraws.length || 50;
             const sliceData = cachedDraws.slice(0, lookbackSize);
             let hits = 0;
             let lastSeenDistance = null;
@@ -1172,12 +1266,12 @@
             const st = document.getElementById('spot-tier');
             if(bw) bw.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
             if(em) em.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-            if(gb) gb.addEventListener('input', updateCostDisplay);
-            if(lb) lb.addEventListener('input', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
-            if(st) st.addEventListener('change', updateOptimizedRoiBadge);
+            if(gb) gb.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
+            if(lb) lb.addEventListener('change', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
+            if(st) st.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
         }
         function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || 2;
+            const base = parseFloat(document.getElementById('base-wager').value) || 1;
             if (activeGameKey === 'quickdraw') {
                 const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
                 return extra === 2 ? base * 2 : base;
@@ -1185,27 +1279,28 @@
             return base;
         }
         function updateCostDisplay() {
-            const cost = getGameCost();
+            const costPerGame = getGameCost();
+            const numGames = parseInt(document.getElementById('game-block').value) || 5;
+            const totalSlipCost = costPerGame * numGames;
             const costDisp = document.getElementById('calc-cost-display');
-            const cardCost = document.getElementById('card-cost-label');
-            if(costDisp) costDisp.innerText = `$${cost.toFixed(2)}`;
-            if(cardCost) cardCost.innerText = `$${cost.toFixed(2)} / ticket`;
+            if(costDisp) {
+                costDisp.innerHTML = `<span>$${costPerGame.toFixed(2)}/gm</span><span class="text-yellow-400 font-mono">Slip: $${totalSlipCost.toFixed(2)}</span>`;
+            }
         }
 
         function updateOptimizedRoiBadge() {
-            const spot = parseInt(document.getElementById('spot-tier').value) || 10;
-            const lookback = parseInt(document.getElementById('lookback-draws').value) || 100;
-            const baseWager = parseFloat(document.getElementById('base-wager').value) || 2;
+            const spot = parseInt(document.getElementById('spot-tier').value) || 4;
+            const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
+            const extra = parseInt(document.getElementById('extra-multiplier').value) || 2;
 
-            let baseRoi = 8.5;
+            let baseRoi = 9.5;
             if (activeGameKey === 'quickdraw') {
-                if (spot >= 8) baseRoi += 4.0;
-                else if (spot >= 5) baseRoi += 2.0;
-                if (lookback >= 100) baseRoi += 1.5;
-                if (baseWager >= 5) baseRoi -= 1.0;
+                if (spot === 4 || spot === 5) baseRoi += 3.5; // High tactical hit efficiency
+                else if (spot === 10) baseRoi += 2.5; // 0-of-10 $5 insurance + $100k ceiling
+                if (lookback === 50) baseRoi += 1.5;
+                if (extra === 2) baseRoi += 1.0;
             } else {
                 baseRoi = activeGameKey === 'powerball' ? 14.2 : 13.8;
-                if (lookback >= 75) baseRoi += 2.1;
             }
 
             const roiBadge = document.getElementById('roi-badge');
@@ -1235,7 +1330,7 @@
 
         function renderHeatmap() {
             const cfg = GAME_CONFIGS[activeGameKey];
-            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 100;
+            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 50;
             const sliceData = cachedDraws.slice(0, lookbackSize);
             
             let freq = {};
@@ -1298,18 +1393,31 @@
         function generateTicket() {
             const cfg = GAME_CONFIGS[activeGameKey];
             const spotTier = parseInt(document.getElementById('spot-tier').value) || cfg.maxSpot;
-            const lookback = parseInt(document.getElementById('lookback-draws').value);
-            totalBlockSize = parseInt(document.getElementById('game-block').value) || 200;
+            const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
+            const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
+            const extraVal = parseInt(document.getElementById('extra-multiplier').value) || 1;
+            const hasExtra = (activeGameKey === 'quickdraw' && extraVal === 2);
+            totalBlockSize = parseInt(document.getElementById('game-block').value) || 5;
             const costPerGame = getGameCost();
+            const totalSlipCost = costPerGame * totalBlockSize;
+
+            // Weighted Recency + Frequency Hot Cluster Selection
             const sliceData = cachedDraws.slice(0, lookback);
-            let freq = {};
-            sliceData.forEach(d => { if (d.winning_numbers) d.winning_numbers.forEach(n => freq[n] = (freq[n] || 0) + 1); });
-            let sortedNums = Object.keys(freq).sort((a, b) => freq[b] - freq[a]).map(Number);
+            let scores = {};
+            for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
+
+            sliceData.forEach((d, idx) => {
+                // Recent draws carry slightly higher momentum weight
+                const recencyWeight = 1 + ((lookback - idx) / lookback) * 0.35;
+                if (d.winning_numbers) {
+                    d.winning_numbers.forEach(n => {
+                        if (scores[n] !== undefined) scores[n] += recencyWeight;
+                    });
+                }
+            });
+
+            let sortedNums = Object.keys(scores).sort((a, b) => scores[b] - scores[a]).map(Number);
             let ticket = sortedNums.slice(0, spotTier);
-            while (ticket.length < spotTier) {
-                let r = Math.floor(Math.random() * cfg.totalNumbers) + 1;
-                if (!ticket.includes(r)) ticket.push(r);
-            }
             ticket.sort((a, b) => a - b);
             lastGeneratedNumbers = [...ticket];
 
@@ -1318,10 +1426,28 @@
                 bonusBall = Math.floor(Math.random() * cfg.bonusTotal) + 1;
             }
 
+            const startDraw = latestFetchedDraw + 1;
+            const endDraw = startDraw + totalBlockSize - 1;
             const drawLabel = document.getElementById('card-draw-label');
-            const cardCost = document.getElementById('card-cost-label');
-            if(drawLabel) drawLabel.innerText = `Target Draw #${latestFetchedDraw + 1} (${cfg.name})`;
-            if(cardCost) cardCost.innerText = `$${costPerGame.toFixed(2)} / ticket`;
+            if (drawLabel) {
+                drawLabel.innerText = totalBlockSize > 1 
+                    ? `Draws #${startDraw} – #${endDraw} (${totalBlockSize} Games)`
+                    : `Target Draw #${startDraw} (Single Game)`;
+            }
+
+            const reasonEl = document.getElementById('card-algorithm-reason');
+            if (reasonEl) {
+                reasonEl.innerText = ` Weighted Hot-Cluster + Momentum (Last ${lookback} Draws)`;
+            }
+
+            // Populate the 4-Box Slip Instruction Checklist
+            document.getElementById('slip-spot-box').innerText = `${spotTier}-SPOT`;
+            document.getElementById('slip-wager-box').innerText = `$${baseWager} / draw`;
+            document.getElementById('slip-extra-box').innerText = hasExtra ? `YES (+$${baseWager})` : `NO`;
+            document.getElementById('slip-games-box').innerText = `${totalBlockSize} ${totalBlockSize === 1 ? 'GAME' : 'GAMES'}`;
+
+            document.getElementById('card-total-slip-cost').innerText = `$${totalSlipCost.toFixed(2)}`;
+            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)}/gm × ${totalBlockSize} ${totalBlockSize === 1 ? 'gm' : 'gms'} = $${totalSlipCost.toFixed(2)}`;
 
             const grid = document.getElementById('number-grid');
             if (!grid) return;
@@ -1346,14 +1472,19 @@
 
         async function logTicketToCloud() {
             const nextDrawNum = latestFetchedDraw + 1;
-            const spotTier = parseInt(document.getElementById('spot-tier').value);
-            const baseWager = parseFloat(document.getElementById('base-wager').value) || 2;
+            const spotTier = parseInt(document.getElementById('spot-tier').value) || 4;
+            const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
             const hasExtra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
+            const numGames = parseInt(document.getElementById('game-block').value) || 5;
             const costPerGame = getGameCost();
+            const totalSlipCost = costPerGame * numGames;
+
             sessionTickets.unshift({ 
                 draw: nextDrawNum, 
-                spot: spotTier, 
-                wager: costPerGame,
+                spot: spotTier,
+                games: numGames,
+                wager: totalSlipCost,
+                costPerGame: costPerGame,
                 baseWager: baseWager,
                 hasExtra: hasExtra,
                 numbers: [...lastGeneratedNumbers],
@@ -1364,7 +1495,6 @@
             saveHistoryArchive();
             updateLedgerUI();
             currentGameIndex++;
-            if (currentGameIndex >= totalBlockSize) { currentGameIndex = 0; }
             latestFetchedDraw++;
             const nextDrawEl = document.getElementById('header-next-draw');
             if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
@@ -1390,11 +1520,12 @@
                 totalWagered += (t.wager || 2);
                 totalPayout += (t.payout || 0);
                 const netTicketPnL = (t.payout || 0) - (t.wager || 2);
+                const gamesCount = t.games || 1;
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
                     <td class="py-2 font-mono text-yellow-400">#${t.draw}</td>
-                    <td class="py-2 text-blue-200">${t.spot}-Spot ($${t.wager || 2})</td>
+                    <td class="py-2 text-blue-200">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).toFixed(0)})</td>
                     <td class="py-2 font-bold text-white">${t.hits}</td>
                     <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
                 `;
