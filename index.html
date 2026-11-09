@@ -29,30 +29,29 @@
     <!-- Header & Tactical Robot Emblem + State Jurisdiction Indicator -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2.5">
+            <div class="flex items-center space-x-2">
                 <!-- Tactical Robot Logo Emblem -->
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 p-0.5 shadow-[0_0_12px_#38bdf8] border border-cyan-300 flex items-center justify-center overflow-hidden">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 p-0.5 shadow-[0_0_10px_#38bdf8] border border-cyan-300 flex items-center justify-center overflow-hidden">
                     <svg viewBox="0 0 24 24" class="w-full h-full text-slate-950 fill-current" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73C12.4 5.39 12 4.74 12 4m-3 9a1.5 1.5 0 0 0-1.5 1.5a1.5 1.5 0 0 0 1.5 1.5a1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 9 11m6 0a1.5 1.5 0 0 0-1.5 1.5a1.5 1.5 0 0 0 1.5 1.5a1.5 1.5 0 0 0 1.5-1.5A1.5 1.5 0 0 0 15 11m-3 4c-1.73 0-3.21 1.05-3.8 2.5h7.6C15.21 16.05 13.73 15 12 15Z"/>
                     </svg>
                 </div>
                 <div>
-                    <div class="flex items-center space-x-1.5">
-                        <h1 class="font-black text-base tracking-wider text-white leading-none">DRAW <span class="text-yellow-400">BUDDY</span></h1>
-                        <!-- Dynamic State Jurisdiction Badge -->
-                        <span id="header-state-badge" class="text-[9px] bg-blue-950 text-cyan-300 border border-blue-600 px-1.5 py-0.5 rounded font-black tracking-wide">NY</span>
+                    <div class="flex items-center space-x-1">
+                        <h1 class="font-black text-sm tracking-wider text-white leading-none">DRAW <span class="text-yellow-400">BUDDY</span></h1>
+                        <span id="header-state-badge" class="text-[8px] bg-blue-950 text-cyan-300 border border-blue-600 px-1 py-0.5 rounded font-black">NY</span>
                     </div>
-                    <span class="text-[9px] font-bold text-blue-300 tracking-widest uppercase">TACTICAL ASSISTANT</span>
+                    <span class="text-[8px] font-bold text-blue-300 tracking-widest uppercase">TACTICAL ASSISTANT</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-2">
-                <!-- Dev Tier Switcher Dropdown -->
-                <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[10px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-2 py-1 rounded font-bold focus:outline-none">
-                    <option value="free">🧪 Free Tier</option>
-                    <option value="pro">🧪 Ind. Pro ($9.99)</option>
-                    <option value="venue">🧪 Venue Tier ($49.99)</option>
+            <div class="flex items-center space-x-1.5">
+                <!-- Compact Dev Tier Switcher (No Prices in Names) -->
+                <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
+                    <option value="free">Free</option>
+                    <option value="pro">Pro</option>
+                    <option value="venue">Venue</option>
                 </select>
-                <div id="sync-status" class="text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+                <div id="sync-status" class="text-[10px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Sync</div>
             </div>
         </div>
 
@@ -98,12 +97,12 @@
             
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Spot Tier (1-10)</label>
+                    <label class="block text-xs text-blue-300 mb-1">Spot Selection</label>
                     <select id="spot-tier" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                        <option value="1">1-Spot</option><option value="2">2-Spot</option><option value="3">3-Spot</option>
-                        <option value="4">4-Spot</option><option value="5">5-Spot</option><option value="6">6-Spot</option>
-                        <option value="7">7-Spot</option><option value="8">8-Spot</option><option value="9">9-Spot</option>
-                        <option value="10" selected>10-Spot (+12.5% ROI)</option>
+                        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+                        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+                        <option value="10" selected>10 (+12.5% ROI)</option>
                     </select>
                 </div>
                 <div>
@@ -163,9 +162,7 @@
 
             <div>
                 <div class="text-xs text-blue-300 mb-2 font-medium">Optimal Numbers to Play:</div>
-                <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1">
-                    <!-- Numbers rendered dynamically -->
-                </div>
+                <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1"></div>
             </div>
 
             <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] text-xs space-y-1">
@@ -248,9 +245,7 @@
                     <span class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 bg-green-600 rounded-full inline-block mr-1"></span></span>
                 </div>
             </div>
-            <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1">
-                <!-- 1 to 80 cells rendered dynamically -->
-            </div>
+            <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1"></div>
         </div>
 
         <!-- 🔍 Number Statistics Inspector Card -->
@@ -304,8 +299,6 @@
         <!-- Lifetime Pass & Venue License Section -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-4">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Access</h2>
-            
-            <!-- Individual Pro Lifetime Pass -->
             <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
@@ -319,7 +312,6 @@
                 </div>
             </div>
 
-            <!-- Establishment Venue Tier -->
             <div class="bg-[#050814] p-3.5 rounded-lg border border-blue-500/30 space-y-2">
                 <div class="flex justify-between items-center">
                     <span class="font-bold text-blue-300 text-xs">🍻 Establishment Venue Tier</span>
@@ -332,14 +324,13 @@
             </div>
         </div>
 
-        <!-- 📊 Historical P/L Archive & Session Tracking Ledger -->
+        <!-- 📊 Historical P/L Archive & Session Tracking Ledger (Open to All Tiers) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 P/L History Archive</h2>
                 <button onclick="clearHistoryArchive()" class="text-[10px] text-rose-400 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800 px-2 py-0.5 rounded transition">Clear Archive</button>
             </div>
 
-            <!-- Lifetime Stats Summary Bar -->
             <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
                 <div>
                     <div class="text-[9px] uppercase text-blue-300">Total Wagered</div>
@@ -388,7 +379,7 @@
         let notificationTriggered = false;
         let batchScannedCount = 0;
         let freeScanLimit = 5;
-        let activeTier = 'free'; // 'free', 'pro', or 'venue'
+        let activeTier = 'free'; 
         let currentState = localStorage.getItem('draw_buddy_state') || 'NY';
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
@@ -398,8 +389,8 @@
             setAppState(currentState);
             const statusEl = document.getElementById('sync-status');
             if(statusEl) {
-                statusEl.innerText = "Connecting...";
-                statusEl.className = "text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
+                statusEl.innerText = "Sync";
+                statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
             }
 
             renderHeatmap();
@@ -435,7 +426,7 @@
 
                     if(statusEl) {
                         statusEl.innerText = "☁️ Synced";
-                        statusEl.className = "text-xs px-2.5 py-1 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
+                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
                     }
                 } else {
                     throw new Error("No data");
@@ -454,8 +445,8 @@
                 if(batchNumEl) batchNumEl.value = latestFetchedDraw;
 
                 if(statusEl) {
-                    statusEl.innerText = "⚡ Simulated";
-                    statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
+                    statusEl.innerText = "⚡ Sim";
+                    statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800";
                 }
             }
 
@@ -471,7 +462,6 @@
             if (badge) badge.innerText = stateCode;
         }
 
-        // 🧪 Strict Tier Enforcement & Feature Gating
         function switchTestTier(tier) {
             localStorage.setItem('draw_buddy_active_tier', tier);
             checkProStatus();
@@ -498,7 +488,7 @@
                 }
             } 
             else if (activeTier === 'pro') {
-                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads stripped out
+                if(sponsorBox) sponsorBox.style.display = 'none';
                 if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! Heatmaps, inspectors, and unlimited batch scanning unlocked.";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -509,7 +499,7 @@
                 }
             } 
             else if (activeTier === 'venue') {
-                if(sponsorBox) sponsorBox.style.display = 'none'; // Ads stripped out
+                if(sponsorBox) sponsorBox.style.display = 'none';
                 if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet & custom branding enabled).";
                 if(proAction) {
                     proAction.innerHTML = `
@@ -535,7 +525,6 @@
             }
         }
 
-        // Gated Number Inspector: Free users get upgrade prompt when tapping heatmap cells
         function inspectNumber(num) {
             if (activeTier === 'free') {
                 alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
