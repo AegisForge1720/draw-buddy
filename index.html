@@ -28,23 +28,28 @@
                 <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_#facc15]"></div>
                 <h1 class="font-black text-lg tracking-wider text-white">DRAW <span class="text-yellow-400">BUDDY</span></h1>
             </div>
-            <div id="sync-status" class="text-xs px-2.5 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+            <div class="flex items-center space-x-2">
+                <button onclick="requestNotificationPermission()" id="notif-btn" class="text-[10px] bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 px-2.5 py-1 rounded transition font-bold">
+                    🔔 Enable Alerts
+                </button>
+                <div id="sync-status" class="text-xs px-2.5 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+            </div>
         </div>
 
-        <!-- Live Game & Block Status Ticker -->
+        <!-- Live Game & Block Status Ticker with Countdown -->
         <div class="bg-[#050814] border-t border-[#1d4ed8] px-4 py-2 text-xs">
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
-                <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
-                    <div class="text-blue-400 uppercase tracking-wider text-[10px]">Current Draw</div>
-                    <div id="header-curr-draw" class="font-bold text-white text-sm">#--</div>
-                </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Next Target</div>
                     <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#--</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
+                    <div class="text-blue-400 uppercase tracking-wider text-[10px]">Lock Timer</div>
+                    <div id="header-countdown" class="font-bold text-cyan-400 text-sm">03:45</div>
+                </div>
+                <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Session Block</div>
-                    <div id="header-block-status" class="font-bold text-cyan-400 text-sm">0 / 200</div>
+                    <div id="header-block-status" class="font-bold text-emerald-400 text-sm">0 / 200</div>
                 </div>
             </div>
         </div>
@@ -240,6 +245,8 @@
         let totalBlockSize = 200;
         let sessionTickets = [];
         let latestFetchedDraw = 0;
+        let countdownSeconds = 240; // 4-minute Quick Draw cycle
+        let notificationTriggered = false;
 
         async function init() {
             const statusEl = document.getElementById('sync-status');
@@ -256,7 +263,6 @@
                     cachedDraws = data;
                     latestFetchedDraw = parseInt(data[0].draw_number);
                     
-                    document.getElementById('header-curr-draw').innerText = `#${latestFetchedDraw}`;
                     document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                     document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
                     document.getElementById('scan-draw-num').value = latestFetchedDraw;
@@ -271,7 +277,6 @@
                 latestFetchedDraw = 10000000;
                 cachedDraws = generateMockData(150, latestFetchedDraw);
                 
-                document.getElementById('header-curr-draw').innerText = `#${latestFetchedDraw}`;
                 document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                 document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
                 document.getElementById('scan-draw-num').value = latestFetchedDraw;
@@ -279,6 +284,9 @@
                 statusEl.innerText = "⚡ Simulated Mode";
                 statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
             }
+
+            // Start the live draw countdown loop
+            setInterval(updateCountdown, 1000);
         }
 
         function generateMockData(count, startDraw) {
@@ -292,6 +300,49 @@
                 mock.push({ draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b), extra_multiplier: Math.random() > 0.7 ? 2 : 1 });
             }
             return mock;
+        }
+
+        // 🔔 Push Notification Permission Request
+        function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                alert("This browser does not support desktop notifications.");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                const btn = document.getElementById('notif-btn');
+                if (permission === "granted") {
+                    btn.innerText = "🔔 Alerts Active";
+                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
+                    new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
+                } else {
+                    alert("Notification permission denied.");
+                }
+            });
+        }
+
+        // ⏱️ Live Draw Countdown & Alert Loop
+        function updateCountdown() {
+            countdownSeconds--;
+            if (countdownSeconds <= 0) {
+                countdownSeconds = 240; // Reset to 4 mins
+                latestFetchedDraw++;
+                document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
+                notificationTriggered = false;
+            }
+
+            // Trigger alert when 60 seconds remain
+            if (countdownSeconds === 60 && !notificationTriggered) {
+                notificationTriggered = true;
+                if (Notification.permission === "granted") {
+                    new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
+                        body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
+                    });
+                }
+            }
+
+            const mins = Math.floor(countdownSeconds / 60);
+            const secs = countdownSeconds % 60;
+            document.getElementById('header-countdown').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
         function applyPreset(type) {
@@ -380,7 +431,6 @@
                 currentGameIndex = 0;
             }
             latestFetchedDraw++;
-            document.getElementById('header-curr-draw').innerText = `#${latestFetchedDraw}`;
             document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
             document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
 
@@ -412,17 +462,13 @@
             pnlEl.className = `text-xs font-bold ${totalProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
         }
 
-        // 📸 Ticket Photo Handler (Camera capture mock / OCR trigger)
         function handleTicketPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
-            // Simulating instant OCR read of a bar ticket for UX fluidity
             document.getElementById('scan-numbers').value = "3, 14, 22, 35, 41, 52, 63, 71, 75, 80";
             alert("📸 Ticket photo captured! Numbers auto-parsed. Click 'Verify Winner' to check against Supabase.");
         }
 
-        // 🔍 Verify Scanned Ticket against Supabase Draw History
         async function verifyScannedTicket() {
             const drawNumInput = parseInt(document.getElementById('scan-draw-num').value);
             const rawNumbers = document.getElementById('scan-numbers').value;
@@ -446,7 +492,7 @@
 
             if (!targetDraw) {
                 try {
-                    const { data, error } = await supabaseClient
+                    const { data } = await supabaseClient
                         .from('quickdraw_history')
                         .select('draw_number, winning_numbers, extra_multiplier')
                         .eq('draw_number', drawNumInput)
@@ -468,7 +514,6 @@
             const winningNums = targetDraw.winning_numbers;
             const hits = ticketNums.filter(n => winningNums.includes(n));
             
-            // Render balls
             matchedContainer.innerHTML = '';
             ticketNums.forEach(num => {
                 const ball = document.createElement('div');
@@ -481,7 +526,6 @@
                 matchedContainer.appendChild(ball);
             });
 
-            // Basic Quick Draw Payout Logic Estimation (10-spot example base)
             let estimatedPayout = 0;
             if (ticketNums.length === 10) {
                 if (hits.length === 10) estimatedPayout = 30000;
@@ -490,9 +534,9 @@
                 else if (hits.length === 7) estimatedPayout = 50;
                 else if (hits.length === 6) estimatedPayout = 15;
                 else if (hits.length === 5) estimatedPayout = 2;
-                else if (hits.length === 0) estimatedPayout = 5; // 0-spot win
+                else if (hits.length === 0) estimatedPayout = 5;
             } else {
-                estimatedPayout = hits.length * 5; // Generic proportional match
+                estimatedPayout = hits.length * 5;
             }
 
             statusTitle.innerText = `Draw #${drawNumInput} Verified: ${hits.length} Hits!`;
