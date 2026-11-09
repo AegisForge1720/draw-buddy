@@ -1074,18 +1074,18 @@
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
+        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes)
         function startTimers() {
             if (!window.drawBuddyTimer) {
-                window.drawBuddyTimer = setInterval(() => {
+                window.drawBuddyTimer = setInterval(async () => {
                     countdownSeconds--;
                     if (countdownSeconds <= 0) {
                         countdownSeconds = activeGameKey === 'quickdraw' ? 240 : 43200;
                         if (activeGameKey === 'quickdraw') {
-                            latestFetchedDraw++;
-                            const nextDrawEl = document.getElementById('header-next-draw');
-                            if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                            await fetchGameHistoryFromSupabase();
+                        } else {
+                            renderHeatmap();
                         }
-                        renderHeatmap();
                     }
                     const hrs = Math.floor(countdownSeconds / 3600);
                     const mins = Math.floor((countdownSeconds % 3600) / 60);
