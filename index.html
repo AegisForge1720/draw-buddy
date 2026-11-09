@@ -56,15 +56,15 @@
             </div>
         </div>
 
-        <!-- Live Game & Block Status Ticker with Countdown -->
+        <!-- Adaptive Header Ticker with Game-Specific Draw / Timeframe Timers -->
         <div class="bg-[#050814] border-t border-[#1d4ed8] px-4 py-2 text-xs">
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
-                <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
-                    <div class="text-blue-400 uppercase tracking-wider text-[10px]">Next Draw</div>
+                <div id="header-draw-box" class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
+                    <div id="header-draw-label" class="text-blue-400 uppercase tracking-wider text-[10px]">Next Draw</div>
                     <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#10001420</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
-                    <div class="text-blue-400 uppercase tracking-wider text-[10px]">Lock Timer</div>
+                    <div class="text-blue-400 uppercase tracking-wider text-[10px]">Till Next Draw</div>
                     <div id="header-countdown" class="font-bold text-cyan-400 text-sm">03:45</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
@@ -494,7 +494,9 @@
                 maxSpot: 10, 
                 hasBonus: false,
                 wagerOptions: [1,2,3,5,10],
-                defaultWager: 2
+                defaultWager: 2,
+                timerLabel: "Next Draw",
+                defaultTime: 240
             },
             powerball: { 
                 name: "Powerball", 
@@ -505,7 +507,9 @@
                 hasBonus: true, 
                 bonusName: "Powerball",
                 wagerOptions: [2, 3, 5, 10, 25],
-                defaultWager: 2
+                defaultWager: 2,
+                timerLabel: "Jackpot Draw",
+                defaultTime: 86400 // 24 hours mockup
             },
             megamillions: { 
                 name: "Mega Millions", 
@@ -516,7 +520,9 @@
                 hasBonus: true, 
                 bonusName: "Mega Ball",
                 wagerOptions: [2, 3, 5, 10, 25],
-                defaultWager: 2
+                defaultWager: 2,
+                timerLabel: "Jackpot Draw",
+                defaultTime: 120000 
             }
         };
 
@@ -585,6 +591,7 @@
             }
 
             updateCostDisplay();
+            updateOptimizedRoiBadge();
         }
 
         function cycleVenueLocation() {
@@ -707,6 +714,18 @@
 
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
+
+            // Adapt Header Timer Banner for Game
+            const drawBox = document.getElementById('header-draw-box');
+            const drawLabel = document.getElementById('header-draw-label');
+            if (gameKey === 'quickdraw') {
+                if(drawBox) drawBox.style.display = 'block';
+                if(drawLabel) drawLabel.innerText = "Next Draw";
+                countdownSeconds = 240;
+            } else {
+                if(drawBox) drawBox.style.display = 'none'; // Only show next draw number when quickdraw is selected
+                countdownSeconds = 43200; // Jackpot timeframe
+            }
 
             const spotSelect = document.getElementById('spot-tier');
             spotSelect.innerHTML = '';
@@ -898,16 +917,26 @@
                 window.drawBuddyTimer = setInterval(() => {
                     countdownSeconds--;
                     if (countdownSeconds <= 0) {
-                        countdownSeconds = 240;
-                        latestFetchedDraw++;
-                        const nextDrawEl = document.getElementById('header-next-draw');
-                        if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                        countdownSeconds = activeGameKey === 'quickdraw' ? 240 : 43200;
+                        if (activeGameKey === 'quickdraw') {
+                            latestFetchedDraw++;
+                            const nextDrawEl = document.getElementById('header-next-draw');
+                            if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                        }
                         renderHeatmap();
                     }
-                    const mins = Math.floor(countdownSeconds / 60);
+                    const hrs = Math.floor(countdownSeconds / 3600);
+                    const mins = Math.floor((countdownSeconds % 3600) / 60);
                     const secs = countdownSeconds % 60;
+                    
                     const cdEl = document.getElementById('header-countdown');
-                    if(cdEl) cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    if(cdEl) {
+                        if (hrs > 0) {
+                            cdEl.innerText = `${hrs}h ${mins.toString().padStart(2, '0')}m`;
+                        } else {
+                            cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                        }
+                    }
                 }, 1000);
             }
         }
@@ -962,7 +991,6 @@
             const lookback = parseInt(document.getElementById('lookback-draws').value) || 100;
             const baseWager = parseFloat(document.getElementById('base-wager').value) || 2;
 
-            // Dynamic ROI algorithmic heuristic based on selected parameters
             let baseRoi = 8.5;
             if (activeGameKey === 'quickdraw') {
                 if (spot >= 8) baseRoi += 4.0;
@@ -998,6 +1026,7 @@
             }
             return mock;
         }
+
         function renderHeatmap() {
             const cfg = GAME_CONFIGS[activeGameKey];
             const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 100;
@@ -1020,24 +1049,27 @@
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
-                    let bgStyle = "bg-green-700 text-white";
-                    if (count >= 8) bgStyle = "bg-red-500 text-white font-black";
-                    else if (count >= 6) bgStyle = "bg-orange-500 text-white font-bold";
-                    else if (count >= 4) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                    else if (count >= 2) bgStyle = "bg-blue-600 text-white";
+                    // Vibrant hot scale grading: Bright red for hot, yellow/orange for medium, blue for cold
+                    let bgStyle = "bg-blue-600 text-white"; // Cold baseline
+                    if (count >= 7) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]"; // Hot
+                    else if (count >= 5) bgStyle = "bg-orange-500 text-white font-bold";
+                    else if (count >= 3) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                    else if (count >= 1) bgStyle = "bg-blue-600 text-white";
+                    
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
 
-                    // Dynamic Indicator per Game Engine: Quick Draw shows "Hits & Hr", other games show clean number in middle with pick count
+                    // Standardized indicator: Quick Draw shows "x# Hits", other games show clean number in middle with "x#"
                     if (activeGameKey === 'quickdraw') {
-                        cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-300 font-bold mt-0.5">${count} Hits</span>`;
+                        cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-200 font-bold mt-0.5">x${count} Hits</span>`;
                     } else {
-                        cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-cyan-300 font-mono">${count}x</span>`;
+                        cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] text-cyan-200 font-mono">x${count}</span>`;
                     }
                 }
                 grid.appendChild(cell);
             }
         }
+
         function postBanter() {
             if (activeTier === 'free') {
                 alert("🔒 Live Venue Banter is a Pro feature! Upgrade to Pro ($9.99) to chat with other patrons in the venue.");
@@ -1053,6 +1085,7 @@
             feed.prepend(div);
             input.value = '';
         }
+
         function applyPreset(type) {
             if (activeGameKey === 'quickdraw') {
                 if (type === 'sweet_spot') {
@@ -1080,6 +1113,7 @@
             if(blockEl) blockEl.innerText = `1 / ${document.getElementById('game-block').value}`;
             generateTicket();
         }
+
         function generateTicket() {
             const cfg = GAME_CONFIGS[activeGameKey];
             const spotTier = parseInt(document.getElementById('spot-tier').value) || cfg.maxSpot;
@@ -1131,6 +1165,7 @@
 
             document.getElementById('play-card').classList.remove('hidden');
         }
+
         async function logTicketToCloud() {
             const nextDrawNum = latestFetchedDraw + 1;
             const spotTier = parseInt(document.getElementById('spot-tier').value);
@@ -1147,12 +1182,14 @@
             if(blockStat) blockStat.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
             generateTicket();
         }
+
         function handleBatchPhoto(event) {
             if (!event.target.files[0]) return;
             const batchNum = document.getElementById('batch-numbers');
             if(batchNum) batchNum.value = "5, 15, 25, 35, 45";
             alert("📸 Batch photo parsed successfully!");
         }
+
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
             if(!tbody) return;
