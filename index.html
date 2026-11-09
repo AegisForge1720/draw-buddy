@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Configuration Panel (Now with Active Wager & Extra Controls) -->
+        <!-- Configuration Panel (Fully Unlocked Wager Controls) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
             
@@ -98,8 +98,8 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Base Wager ($)</label>
-                    <select id="base-wager" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-xs text-yellow-300 mb-1">Base Wager ($)</label>
+                    <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
                         <option value="1">$1.00 / game</option>
                         <option value="2" selected>$2.00 / game</option>
                         <option value="3">$3.00 / game</option>
@@ -108,8 +108,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Extra Add-on</label>
-                    <select id="extra-multiplier" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-400 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-xs text-yellow-300 mb-1">Extra Add-on</label>
+                    <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
                         <option value="1">No Extra (1x Payout)</option>
                         <option value="2" selected>Play Extra (+ Equal Wager)</option>
                     </select>
@@ -312,6 +312,7 @@
             renderHeatmap();
             setInterval(updateCountdown, 1000);
             setupWagerListeners();
+            updateCostDisplay();
         }
 
         function setupWagerListeners() {
