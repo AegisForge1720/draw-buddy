@@ -77,7 +77,7 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-        <!-- 🍻 Context-Aware Geofenced Venue Card (Switches Music Provider per Bar Contract) -->
+        <!-- 🍻 Context-Aware Geofenced Venue Card (M's Bar & Grill, Irondequoit NY) -->
         <div id="quickdraw-venue-section" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3">
             <div class="flex justify-between items-start">
                 <div>
@@ -95,7 +95,7 @@
                 </div>
             </div>
 
-            <!-- Dynamic Music Jukebox Affiliate Utility (Adapts to Venue Hosting Contract) -->
+            <!-- Dynamic Music Jukebox Affiliate Utility -->
             <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
                 <div class="flex justify-between items-center text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
                     <span id="venue-music-label">📻 Hosted Jukebox: AMI Play</span>
@@ -173,7 +173,7 @@
             </div>
         </div>
 
-        <!-- 🎮 Multi-Game Engine Switcher (Quick Draw, Powerball, Mega Millions) -->
+        <!-- 🎮 Multi-Game Engine Switcher -->
         <div class="bg-[#0b132b] p-3 rounded-xl border border-[#1d4ed8] shadow-xl">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">🎯 Select Game Engine Pool</h2>
@@ -429,12 +429,12 @@
             </div>
         </div>
 
-        <!-- Affiliate Links at the Very Bottom -->
+        <!-- Affiliate Links at the Very Bottom (Jukebox, Rideshare & Sports Betting Apps) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
-            <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Utilities</h2>
+            <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Sports Betting Utilities</h2>
             <div class="grid grid-cols-3 gap-2">
-                <a href="https://www.amiplay.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
-                    <span>📻 AMI Play</span>
+                <a id="venue-bottom-music-link" href="https://www.amiplay.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span id="venue-bottom-music-name">📻 AMI Play</span>
                     <span class="text-[9px] text-blue-300 font-normal mt-0.5">Bar Music</span>
                 </a>
                 <a href="https://www.touchtunes.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
@@ -444,6 +444,21 @@
                 <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
                     <span>🚗 Uber / Lyft</span>
                     <span class="text-[9px] text-blue-300 font-normal mt-0.5">Safe Ride</span>
+                </a>
+            </div>
+            <!-- Pro Sports Betting Affiliate Row -->
+            <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
+                <a href="https://www.draftkings.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-amber-400 border border-amber-500/30 p-2 rounded-lg font-bold text-[10px] text-center transition flex flex-col items-center justify-center">
+                    <span>🏈 DraftKings</span>
+                    <span class="text-[8px] text-blue-300 font-normal mt-0.5">Sportsbook</span>
+                </a>
+                <a href="https://www.fanduel.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-blue-400 border border-blue-500/30 p-2 rounded-lg font-bold text-[10px] text-center transition flex flex-col items-center justify-center">
+                    <span>🏀 FanDuel</span>
+                    <span class="text-[8px] text-blue-300 font-normal mt-0.5">Betting App</span>
+                </a>
+                <a href="https://www.betmgm.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-amber-300 border border-yellow-600/30 p-2 rounded-lg font-bold text-[10px] text-center transition flex flex-col items-center justify-center">
+                    <span>🎲 BetMGM</span>
+                    <span class="text-[8px] text-blue-300 font-normal mt-0.5">Casino & Odds</span>
                 </a>
             </div>
         </div>
@@ -467,7 +482,6 @@
             megamillions: { name: "Mega Millions", totalNumbers: 70, defaultSpots: [5], maxSpot: 5, hasBonus: true, bonusTotal: 25, bonusName: "Mega Ball" }
         };
 
-        // Venue profiles with dynamic music system mapping
         const VENUE_PROFILES = [
             { name: "M's Bar & Grill", address: "Irondequoit, NY • Quick Draw Terminal #4", musicApp: "AMI Play", musicUrl: "https://www.amiplay.com/?ref=draw_buddy_stripe" },
             { name: "Shamrock Jack's", address: "Irondequoit, NY • Waterfront Lounge", musicApp: "TouchTunes", musicUrl: "https://www.touchtunes.com/?ref=draw_buddy_stripe" }
@@ -548,6 +562,11 @@
             document.getElementById('venue-music-icon').innerText = `📻 ${venue.musicApp}`;
             document.getElementById('venue-music-link').href = venue.musicUrl;
             document.getElementById('venue-location-badge').innerText = venue.name;
+
+            const bottomMusicName = document.getElementById('venue-bottom-music-name');
+            const bottomMusicLink = document.getElementById('venue-bottom-music-link');
+            if(bottomMusicName) bottomMusicName.innerText = `📻 ${venue.musicApp}`;
+            if(bottomMusicLink) bottomMusicLink.href = venue.musicUrl;
         }
 
         function toggleFavoriteVenue() {
@@ -648,7 +667,6 @@
             const hmTitle = document.getElementById('heatmap-title');
             if(hmTitle) hmTitle.innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
 
-            // DYNAMIC UI ADAPTATION: Drop off Quick Draw specific modules when switching to Powerball / Mega Millions
             const venueSec = document.getElementById('quickdraw-venue-section');
             const venueBannerSec = document.getElementById('quickdraw-venue-banner-section');
             const banterSec = document.getElementById('quickdraw-banter-section');
