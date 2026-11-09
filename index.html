@@ -26,12 +26,15 @@
 </head>
 <body class="min-h-screen pb-12">
 
-    <!-- Header & Tactical Status Bar -->
+    <!-- Header & Official Quick Draw Branding Bar -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <div class="w-3 h-3 bg-yellow-400 rounded-full animate-pulse shadow-[0_0_8px_#facc15]"></div>
-                <h1 class="font-black text-lg tracking-wider text-white">DRAW <span class="text-yellow-400">BUDDY</span></h1>
+            <div class="flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center font-black text-slate-950 text-xs shadow-[0_0_10px_#38bdf8] border border-cyan-300">NY</div>
+                <div>
+                    <h1 class="font-black text-base tracking-wider text-white leading-none">QUICK <span class="text-yellow-400">DRAW</span></h1>
+                    <span class="text-[9px] font-bold text-blue-300 tracking-widest uppercase">BUDDY TACTICAL</span>
+                </div>
             </div>
             <div class="flex items-center space-x-2">
                 <span id="tier-badge" class="text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold">FREE TIER</span>
@@ -265,17 +268,17 @@
             </div>
         </div>
 
-        <!-- 🔗 Official State Lottery & Courier Partner Hub (Hidden for Pro Users) -->
+        <!-- 🔗 Official State Lottery & Lotto.com Partner Hub (Free Tier Monetization) -->
         <div id="sponsored-courier-box" class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Courier Partners</h2>
+                <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Lottery Partners</h2>
                 <span class="text-[10px] text-blue-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">Sponsored</span>
             </div>
-            <p class="text-[11px] text-blue-300">Order official New York Quick Draw & multi-state draw tickets online safely through our licensed state courier partners.</p>
+            <p class="text-[11px] text-blue-300">Play official lottery games online safely through our high-converting partner courier platforms.</p>
             <div class="grid grid-cols-2 gap-2 pt-1">
-                <a href="https://jackpocket.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
-                    <span>📱 Jackpocket NY</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Official Tickets</span>
+                <a href="https://www.lotto.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>🎫 Lotto.com App</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Tickets Online</span>
                 </a>
                 <a href="https://nylottery.ny.gov" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-blue-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
                     <span>🗽 NY Lotto Official</span>
@@ -448,7 +451,6 @@
             updateCostDisplay();
         }
 
-        // 💎 Tier Enforcement & License Check
         function checkProStatus() {
             const license = localStorage.getItem('draw_buddy_pro_license');
             if (license === 'active') {
@@ -456,11 +458,9 @@
                 document.getElementById('tier-badge').innerText = "PRO LIFETIME";
                 document.getElementById('tier-badge').className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
                 
-                // Hide sponsored ads & courier boxes for pro users
                 const sponsorBox = document.getElementById('sponsored-courier-box');
                 if(sponsorBox) sponsorBox.style.display = 'none';
 
-                // Update unlock card
                 document.getElementById('pro-desc').innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
                 document.getElementById('pro-action-container').innerHTML = `
                     <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
@@ -496,7 +496,7 @@
         }
 
         function triggerRewardedAdGate() {
-            if (isProUser) return; // Pro users never see ads
+            if (isProUser) return;
             const modal = document.getElementById('ad-gate-modal');
             modal.classList.remove('hidden');
             modal.scrollIntoView({ behavior: 'smooth' });
