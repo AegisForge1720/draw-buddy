@@ -571,6 +571,20 @@
             }
         };
 
+        // NY Quick Draw Base $1 Prize Table (Spot -> Hits -> $1 Base Payout)
+        const QD_PAYOUT_TABLE = {
+            10: { 10: 100000, 9: 4250, 8: 450, 7: 40, 6: 15, 5: 2, 0: 5 },
+            9:  { 9: 30000, 8: 3000, 7: 125, 6: 20, 5: 5, 4: 1 },
+            8:  { 8: 10000, 7: 550, 6: 75, 5: 6, 4: 2 },
+            7:  { 7: 5000, 6: 100, 5: 20, 4: 2, 3: 1 },
+            6:  { 6: 1500, 5: 50, 4: 6, 3: 1 },
+            5:  { 5: 450, 4: 20, 3: 2 },
+            4:  { 4: 91, 3: 4, 2: 1 },
+            3:  { 3: 27, 2: 2 },
+            2:  { 2: 10 },
+            1:  { 1: 2 }
+        };
+
         const VENUE_PROFILES = [
             { 
                 name: "M's Bar & Grill", 
@@ -595,9 +609,9 @@
         let totalBlockSize = 200;
         let sessionTickets = [];
         let scratchTickets = [];
+        let lastGeneratedNumbers = [];
         let latestFetchedDraw = 3028800;
         let countdownSeconds = 240;
-        let notificationTriggered = false;
         let batchScannedCount = 0;
         let freeScanLimit = 5;
         let activeTier = 'free'; 
@@ -715,6 +729,38 @@
             document.body.removeChild(link);
         }
 
+        // Auto-grades Pending tickets in P/L ledger when new Supabase draws arrive
+        function gradePendingTickets() {
+            if (!cachedDraws || cachedDraws.length === 0 || sessionTickets.length === 0) return;
+            let updated = false;
+            const drawMap = {};
+            cachedDraws.forEach(d => { drawMap[parseInt(d.draw_number)] = d; });
+
+            sessionTickets.forEach(t => {
+                if (t.hits === 'Pending' && drawMap[parseInt(t.draw)]) {
+                    const drawObj = drawMap[parseInt(t.draw)];
+                    const winNums = drawObj.winning_numbers || [];
+                    const played = t.numbers || [];
+                    if (played.length > 0) {
+                        const hitCount = played.filter(n => winNums.includes(n)).length;
+                        t.hits = `${hitCount}/${t.spot} Hit`;
+                        const baseWager = t.baseWager || 2;
+                        const hasExtra = t.hasExtra || false;
+                        const drawMult = hasExtra ? (parseInt(drawObj.extra_multiplier) || 1) : 1;
+                        const prizeScale = QD_PAYOUT_TABLE[t.spot] || {};
+                        const unitPrize = prizeScale[hitCount] || 0;
+                        t.payout = unitPrize * baseWager * drawMult;
+                        updated = true;
+                    }
+                }
+            });
+
+            if (updated) {
+                saveHistoryArchive();
+                updateLedgerUI();
+            }
+        }
+
         async function fetchGameHistoryFromSupabase() {
             const cfg = GAME_CONFIGS[activeGameKey];
             try {
@@ -734,6 +780,7 @@
                         statusEl.innerText = "☁️ Synced (" + cfg.name + ")";
                         statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
                     }
+                    gradePendingTickets();
                 } else {
                     cachedDraws = generateMockData(100, latestFetchedDraw);
                     if(statusEl) {
@@ -1074,7 +1121,7 @@
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes)
+        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes & grades Pending tickets)
         function startTimers() {
             if (!window.drawBuddyTimer) {
                 window.drawBuddyTimer = setInterval(async () => {
@@ -1264,6 +1311,7 @@
                 if (!ticket.includes(r)) ticket.push(r);
             }
             ticket.sort((a, b) => a - b);
+            lastGeneratedNumbers = [...ticket];
 
             let bonusBall = null;
             if (cfg.hasBonus) {
@@ -1299,11 +1347,16 @@
         async function logTicketToCloud() {
             const nextDrawNum = latestFetchedDraw + 1;
             const spotTier = parseInt(document.getElementById('spot-tier').value);
+            const baseWager = parseFloat(document.getElementById('base-wager').value) || 2;
+            const hasExtra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
             const costPerGame = getGameCost();
             sessionTickets.unshift({ 
                 draw: nextDrawNum, 
                 spot: spotTier, 
-                wager: costPerGame, 
+                wager: costPerGame,
+                baseWager: baseWager,
+                hasExtra: hasExtra,
+                numbers: [...lastGeneratedNumbers],
                 hits: 'Pending', 
                 payout: 0,
                 timestamp: new Date().toISOString()
