@@ -239,24 +239,41 @@
             </div>
         </div>
 
-        <!-- Live Session Tracking Ledger -->
+        <!-- 📊 Historical P/L Archive & Session Tracking Ledger -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Session Ledger & Batch Auto-Log</h2>
-                <span id="session-pnl" class="text-xs font-bold text-blue-400">Net P&L: $0.00</span>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 P/L History Archive</h2>
+                <button onclick="clearHistoryArchive()" class="text-[10px] text-rose-400 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800 px-2 py-0.5 rounded transition">Clear Archive</button>
             </div>
-            <div class="overflow-x-auto">
+
+            <!-- Lifetime Stats Summary Bar -->
+            <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Wagered</div>
+                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Payout</div>
+                    <div id="archive-total-payout" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Lifetime Net P&L</div>
+                    <div id="archive-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-60 overflow-y-auto">
                 <table class="w-full text-left text-xs">
-                    <thead>
+                    <thead class="sticky top-0 bg-[#0b132b]">
                         <tr class="text-blue-400 border-b border-[#1d4ed8]">
                             <th class="pb-2">Draw</th>
                             <th class="pb-2">Spot</th>
                             <th class="pb-2">Hits</th>
-                            <th class="pb-2 text-right">Payout</th>
+                            <th class="pb-2 text-right">Net P&L</th>
                         </tr>
                     </thead>
                     <tbody id="ledger-body">
-                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No tickets logged in session yet.</td></tr>
+                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -315,10 +332,36 @@
                 statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
             }
 
+            loadHistoryArchive();
             renderHeatmap();
             setInterval(updateCountdown, 1000);
             setupWagerListeners();
             updateCostDisplay();
+        }
+
+        // Load P/L History Archive from LocalStorage / Supabase Persistence
+        function loadHistoryArchive() {
+            const saved = localStorage.getItem('draw_buddy_pl_archive');
+            if (saved) {
+                try {
+                    sessionTickets = JSON.parse(saved);
+                } catch(e) {
+                    sessionTickets = [];
+                }
+            }
+            updateLedgerUI();
+        }
+
+        function saveHistoryArchive() {
+            localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets));
+        }
+
+        function clearHistoryArchive() {
+            if (confirm("Are you sure you want to clear your entire P/L history archive?")) {
+                sessionTickets = [];
+                localStorage.removeItem('draw_buddy_pl_archive');
+                updateLedgerUI();
+            }
         }
 
         function setupWagerListeners() {
@@ -354,7 +397,6 @@
             return mock;
         }
 
-        // Thermal Red-to-Green Heatmap Renderer
         function renderHeatmap() {
             let freq = {};
             for(let i=1; i<=80; i++) freq[i] = 0;
@@ -369,12 +411,11 @@
             for (let i = 1; i <= 80; i++) {
                 const count = freq[i];
                 const cell = document.createElement('div');
-                let bgStyle = "bg-green-700 text-white"; // Coldest (Green)
-                
-                if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";       // Hottest (Red)
-                else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";                          // Hot (Orange)
-                else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";                       // Warm (Yellow)
-                else if (count >= 13) bgStyle = "bg-blue-600 text-white";                                      // Cool (Blue)
+                let bgStyle = "bg-green-700 text-white";
+                if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
+                else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
+                else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                else if (count >= 13) bgStyle = "bg-blue-600 text-white";
 
                 cell.className = `heatmap-cell ${bgStyle}`;
                 cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
@@ -511,6 +552,7 @@
                 payout: 0
             });
 
+            saveHistoryArchive();
             updateLedgerUI();
 
             currentGameIndex++;
@@ -593,32 +635,52 @@
             document.getElementById('batch-numbers').value = "";
             document.getElementById('batch-draw-num').value = drawNumInput + 1;
 
+            saveHistoryArchive();
             updateLedgerUI();
         }
 
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
             if (sessionTickets.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No tickets logged in session yet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
+                document.getElementById('archive-total-wager').innerText = "$0.00";
+                document.getElementById('archive-total-payout').innerText = "$0.00";
+                document.getElementById('archive-net-pnl').innerText = "$0.00";
+                document.getElementById('session-pnl').innerText = "Net P&L: $0.00";
                 return;
             }
+
             tbody.innerHTML = '';
-            let totalProfit = 0;
+            let totalWagered = 0;
+            let totalPayout = 0;
+
             sessionTickets.forEach(t => {
-                totalProfit += (t.payout - t.wager);
+                totalWagered += (t.wager || 2);
+                totalPayout += (t.payout || 0);
+                const netTicketPnL = (t.payout || 0) - (t.wager || 2);
+
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
                     <td class="py-2 font-mono text-yellow-400">#${t.draw}</td>
-                    <td class="py-2 text-blue-200">${t.spot}-Spot ($${t.wager})</td>
+                    <td class="py-2 text-blue-200">${t.spot}-Spot ($${t.wager || 2})</td>
                     <td class="py-2 font-bold text-white">${t.hits}</td>
-                    <td class="py-2 text-right font-mono text-cyan-300">$${t.payout.toFixed(2)}</td>
+                    <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            const netProfit = totalPayout - totalWagered;
+            document.getElementById('archive-total-wager').innerText = `$${totalWagered.toFixed(2)}`;
+            document.getElementById('archive-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
+            
+            const netEl = document.getElementById('archive-net-pnl');
+            netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
+            netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
+
             const pnlEl = document.getElementById('session-pnl');
-            pnlEl.innerText = `Net P&L: ${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`;
-            pnlEl.className = `text-xs font-bold ${totalProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
+            pnlEl.innerText = `Net P&L: ${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
+            pnlEl.className = `text-xs font-bold ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
         }
 
         window.onload = init;
