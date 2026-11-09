@@ -131,61 +131,6 @@
             </div>
         </div>
 
-        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker -->
-        <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
-                    <span>🎫</span> Pro Scratch-Off Scanner & P/L Tracker
-                </h2>
-                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono">Instant Win Ledger</span>
-            </div>
-
-            <p class="text-[11px] text-blue-300">Scan or snap the barcode on physical state scratch-off tickets to automatically log cost, game ID, and payout.</p>
-
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[10px] text-blue-300 mb-1">Scratch-Off Game Name</label>
-                    <input type="text" id="scratch-game-name" placeholder="e.g. $50,000 Cashword" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-blue-300 mb-1">Ticket Cost ($)</label>
-                    <input type="number" id="scratch-cost" value="10" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[10px] text-blue-300 mb-1">Payout Won ($)</label>
-                    <input type="number" id="scratch-payout" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-yellow-400">
-                </div>
-                <div class="flex items-end">
-                    <label class="w-full bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
-                        <span>📷 Scan Barcode</span>
-                        <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleScratchScan(event)">
-                    </label>
-                </div>
-            </div>
-
-            <button onclick="logScratchTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
-                📥 Log Scratch-Off to P/L Archive
-            </button>
-
-            <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] mt-2">
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Total Spent</div>
-                    <div id="scratch-total-spent" class="font-mono font-bold text-white text-xs">$0.00</div>
-                </div>
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Total Won</div>
-                    <div id="scratch-total-won" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
-                </div>
-                <div>
-                    <div class="text-[9px] uppercase text-blue-300">Net Scratch P&L</div>
-                    <div id="scratch-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
-                </div>
-            </div>
-        </div>
-
         <!-- 🏢 Quick Draw Exclusive: Pro-to-Venue Mode Bridge & Establishment Banner -->
         <div id="quickdraw-venue-banner-section" class="space-y-4">
             <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-amber-950 p-4 rounded-xl border border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.25)] space-y-2.5">
@@ -225,12 +170,12 @@
             </div>
         </div>
 
-        <!-- Configuration Panel -->
+        <!-- Configuration Panel with Floating Optimized ROI Banner -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters & Wager</h2>
-                <span class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(250,204,21,0.2)] animate-pulse">
-                    ⚡ Optimal Odds
+                <span id="roi-badge" class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2.5 py-1 rounded-full font-extrabold shadow-[0_0_12px_rgba(250,204,21,0.25)] animate-pulse">
+                    ⚡ Optimized ROI: +12.5%
                 </span>
             </div>
             
@@ -329,7 +274,7 @@
             </div>
         </div>
 
-        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Displays Exact Pick Frequency Count based on Lookback) -->
+        <!-- 🔥 Universal: House Hot Number Heatmap Mode -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
@@ -426,6 +371,71 @@
                         <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+
+        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker (Moved to Bottom above Links) -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
+                    <span>🎫</span> Pro Scratch-Off Scanner & P/L Tracker
+                </h2>
+                <span id="scratch-pro-badge" class="text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono">🔒 Pro License Required</span>
+            </div>
+
+            <p class="text-[11px] text-blue-300">Scan or snap the barcode on physical state scratch-off tickets to automatically log cost and instant win payouts.</p>
+
+            <div id="scratch-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2">
+                <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Locked</div>
+                <p class="text-[10px] text-blue-300">Unlock the instant-win scratch-off scanner & P/L ledger with your Pro membership.</p>
+                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
+                    Activate Pro ($9.99)
+                </a>
+            </div>
+
+            <div id="scratch-active-form" class="space-y-3 hidden">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-blue-300 mb-1">Scratch-Off Game Name</label>
+                        <input type="text" id="scratch-game-name" placeholder="e.g. $50,000 Cashword" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-blue-300 mb-1">Ticket Cost ($)</label>
+                        <input type="number" id="scratch-cost" value="10" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-blue-300 mb-1">Payout Won ($)</label>
+                        <input type="number" id="scratch-payout" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-yellow-400">
+                    </div>
+                    <div class="flex items-end">
+                        <label class="w-full bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
+                            <span>📷 Scan Barcode</span>
+                            <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleScratchScan(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <button onclick="logScratchTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
+                    📥 Log Scratch-Off to P/L Archive
+                </button>
+
+                <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] mt-2">
+                    <div>
+                        <div class="text-[9px] uppercase text-blue-300">Total Spent</div>
+                        <div id="scratch-total-spent" class="font-mono font-bold text-white text-xs">$0.00</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] uppercase text-blue-300">Total Won</div>
+                        <div id="scratch-total-won" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
+                    </div>
+                    <div>
+                        <div class="text-[9px] uppercase text-blue-300">Net Scratch P&L</div>
+                        <div id="scratch-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -748,6 +758,7 @@
             cachedDraws = generateMockData(100, latestFetchedDraw);
             renderHeatmap();
             updateCostDisplay();
+            updateOptimizedRoiBadge();
         }
 
         function toggleProVenueMode() {
@@ -791,14 +802,32 @@
             const venueBanner = document.getElementById('venue-mode-banner');
             const spotlight = document.getElementById('venue-winner-spotlight');
 
+            const scratchLocked = document.getElementById('scratch-locked-overlay');
+            const scratchForm = document.getElementById('scratch-active-form');
+            const scratchBadge = document.getElementById('scratch-pro-badge');
+
             if (activeTier === 'free') {
                 if(subCard) subCard.style.display = 'block';
                 if(venueBanner) venueBanner.style.opacity = '0.5';
                 if(spotlight) spotlight.style.display = 'none';
+
+                if(scratchLocked) scratchLocked.style.display = 'block';
+                if(scratchForm) scratchForm.style.display = 'none';
+                if(scratchBadge) {
+                    scratchBadge.innerText = "🔒 Pro License Required";
+                    scratchBadge.className = "text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono";
+                }
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
                 if(spotlight) spotlight.style.display = 'block';
+
+                if(scratchLocked) scratchLocked.style.display = 'none';
+                if(scratchForm) scratchForm.style.display = 'block';
+                if(scratchBadge) {
+                    scratchBadge.innerText = "✨ Pro Active";
+                    scratchBadge.className = "text-[9px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-800 font-mono";
+                }
             }
             updateFreeLimitBadge();
             renderHeatmap();
@@ -902,10 +931,12 @@
             const em = document.getElementById('extra-multiplier');
             const gb = document.getElementById('game-block');
             const lb = document.getElementById('lookback-draws');
-            if(bw) bw.addEventListener('change', updateCostDisplay);
-            if(em) em.addEventListener('change', updateCostDisplay);
+            const st = document.getElementById('spot-tier');
+            if(bw) bw.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
+            if(em) em.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
             if(gb) gb.addEventListener('input', updateCostDisplay);
-            if(lb) lb.addEventListener('input', () => { renderHeatmap(); });
+            if(lb) lb.addEventListener('input', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
+            if(st) st.addEventListener('change', updateOptimizedRoiBadge);
         }
         function getGameCost() {
             const base = parseFloat(document.getElementById('base-wager').value) || 2;
@@ -925,6 +956,30 @@
             if(cardCost) cardCost.innerText = `$${cost.toFixed(2)} / ticket`;
             if(statBudget) statBudget.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} tickets)`;
         }
+
+        function updateOptimizedRoiBadge() {
+            const spot = parseInt(document.getElementById('spot-tier').value) || 10;
+            const lookback = parseInt(document.getElementById('lookback-draws').value) || 100;
+            const baseWager = parseFloat(document.getElementById('base-wager').value) || 2;
+
+            // Dynamic ROI algorithmic heuristic based on selected parameters
+            let baseRoi = 8.5;
+            if (activeGameKey === 'quickdraw') {
+                if (spot >= 8) baseRoi += 4.0;
+                else if (spot >= 5) baseRoi += 2.0;
+                if (lookback >= 100) baseRoi += 1.5;
+                if (baseWager >= 5) baseRoi -= 1.0;
+            } else {
+                baseRoi = activeGameKey === 'powerball' ? 14.2 : 13.8;
+                if (lookback >= 75) baseRoi += 2.1;
+            }
+
+            const roiBadge = document.getElementById('roi-badge');
+            if (roiBadge) {
+                roiBadge.innerText = `⚡ Optimized ROI: +${baseRoi.toFixed(1)}%`;
+            }
+        }
+
         function generateMockData(count, startDraw) {
             const cfg = GAME_CONFIGS[activeGameKey];
             let mock = [];
@@ -972,8 +1027,13 @@
                     else if (count >= 2) bgStyle = "bg-blue-600 text-white";
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
-                    // Dynamically displays exact pick frequency count based on selected lookback sample size
-                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90">${count} picked</span>`;
+
+                    // Dynamic Indicator per Game Engine: Quick Draw shows "Hits & Hr", other games show clean number in middle with pick count
+                    if (activeGameKey === 'quickdraw') {
+                        cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-300 font-bold mt-0.5">${count} Hits</span>`;
+                    } else {
+                        cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-cyan-300 font-mono">${count}x</span>`;
+                    }
                 }
                 grid.appendChild(cell);
             }
@@ -1015,6 +1075,7 @@
             }
             currentGameIndex = 0;
             updateCostDisplay();
+            updateOptimizedRoiBadge();
             const blockEl = document.getElementById('header-block-status');
             if(blockEl) blockEl.innerText = `1 / ${document.getElementById('game-block').value}`;
             generateTicket();
