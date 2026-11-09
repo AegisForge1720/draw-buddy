@@ -28,12 +28,12 @@
 </head>
 <body class="min-h-screen pb-16">
 
-    <!-- Header & Wide-Screen CRT Tactical Robot Emblem -->
+    <!-- Header & Wide-Screen CRT Tactical Robot Emblem (Spaced Cleanly) -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
-        <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2.5">
-                <!-- Wide-Screen CRT Logo Emblem -->
-                <div class="w-9 h-9 rounded-lg bg-[#050814] p-0.5 shadow-[0_0_12px_rgba(56,189,248,0.45)] border border-cyan-400/60 flex items-center justify-center overflow-hidden">
+        <div class="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+            <!-- Left Brand Group -->
+            <div class="flex items-center space-x-2 shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-[#050814] p-0.5 shadow-[0_0_12px_rgba(56,189,248,0.45)] border border-cyan-400/60 flex items-center justify-center overflow-hidden shrink-0">
                     <svg viewBox="0 0 24 24" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
                         <path d="M9 4c1.5-1.5 4.5-1.5 6 0" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                         <line x1="12" y1="3" x2="12" y2="6" stroke="#38bdf8" stroke-width="1.5"/>
@@ -49,25 +49,24 @@
                         <circle cx="18" cy="18.5" r="0.7" fill="#ef4444"/>
                     </svg>
                 </div>
-                <div>
-                    <div class="flex items-center space-x-1">
-                        <h1 class="font-black text-sm tracking-wider text-white leading-none">DRAW <span class="text-yellow-400">BUDDY</span></h1>
-                        <span id="header-state-badge" class="text-[8px] bg-blue-950 text-cyan-300 border border-blue-600 px-1 py-0.5 rounded font-black">NY</span>
-                    </div>
+                <div class="flex items-center space-x-1.5">
+                    <h1 class="font-black text-sm tracking-wider text-white leading-none whitespace-nowrap">DRAW <span class="text-yellow-400">BUDDY</span></h1>
+                    <span id="header-state-badge" class="text-[8px] bg-blue-950 text-cyan-300 border border-blue-600 px-1.5 py-0.5 rounded font-black leading-none">NY</span>
                 </div>
             </div>
-            <div class="flex items-center space-x-1.5">
-                <!-- Compact Dev Tier Switcher -->
+
+            <!-- Right Controls Group (Separated from NY Badge) -->
+            <div class="flex items-center space-x-2 shrink-0 ml-auto">
                 <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
                     <option value="venue">Venue</option>
                 </select>
-                <div id="sync-status" class="text-[10px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Sync</div>
+                <div id="sync-status" class="text-[9px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8] whitespace-nowrap">Sync</div>
             </div>
         </div>
 
-        <!-- Adaptive Header Ticker with Game-Specific Draw / Timeframe Timers -->
+        <!-- Adaptive Header Ticker -->
         <div class="bg-[#050814] border-t border-[#1d4ed8] px-4 py-2 text-xs">
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
                 <div id="header-draw-box" class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
@@ -88,7 +87,7 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-        <!-- 🎯 TOP PRIORITY: Multi-Game Engine Switcher -->
+        <!-- 🎯 Multi-Game Engine Switcher -->
         <div class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-xl space-y-2">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game Engine Pool</h2>
@@ -101,92 +100,12 @@
             </div>
         </div>
 
-        <!-- 🍻 Context-Aware Geofenced Venue Card (Auto-Switches on Venue Entry) -->
-        <div id="quickdraw-venue-section" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3">
-            <div class="flex justify-between items-start">
-                <div>
-                    <span class="text-[9px] uppercase tracking-widest text-cyan-400 font-black">📍 AUTO-GEOFENCED VENUE HUB</span>
-                    <h2 id="venue-name-display" class="text-base font-black text-white">M's Bar & Grill</h2>
-                    <p id="venue-address-display" class="text-[11px] text-blue-300">Irondequoit, NY • Auto-Matched GPS</p>
-                </div>
-                <div class="flex flex-col items-end space-y-1">
-                    <button onclick="toggleFavoriteVenue()" id="favorite-venue-btn" class="bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1">
-                        <span id="fav-star">⭐</span> <span id="fav-text">Favorite</span>
-                    </button>
-                    <button onclick="cycleVenueLocation()" class="text-[9px] text-yellow-400 bg-yellow-950/60 border border-yellow-800 px-2 py-0.5 rounded hover:bg-yellow-900 transition">
-                        🔄 Override GPS
-                    </button>
-                </div>
-            </div>
-
-            <!-- Dynamic Music Jukebox Deep-Linked Affiliate Utility -->
-            <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
-                <div class="flex justify-between items-center text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
-                    <span id="venue-music-label">📻 Hosted Jukebox: AMI Play</span>
-                    <span class="text-[8px] text-emerald-400 font-mono bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">Deep-Linked App</span>
-                </div>
-                <div class="grid grid-cols-3 gap-1.5">
-                    <a id="venue-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
-                        <span id="venue-music-icon">📻 AMI Play</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Open App</span>
-                    </a>
-                    <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
-                        <span>🚗 Uber Safe</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Request Ride</span>
-                    </a>
-                    <a href="https://www.lyft.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-pink-400 border border-pink-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
-                        <span>🚙 Lyft Ride</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Designated Driver</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 🏢 Quick Draw Exclusive: Pro-to-Venue Mode Bridge & Establishment Banner -->
-        <div id="quickdraw-venue-banner-section" class="space-y-4">
-            <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-amber-950 p-4 rounded-xl border border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.25)] space-y-2.5">
-                <div class="flex justify-between items-center">
-                    <span class="text-[10px] uppercase tracking-widest text-yellow-400 font-black flex items-center gap-1.5">
-                        <span>🍻</span> ESTABLISHMENT VENUE HUB ACTIVE
-                    </span>
-                    <span id="venue-location-badge" class="text-[9px] bg-black/50 text-cyan-300 px-2.5 py-0.5 rounded border border-cyan-500/30 font-mono">M's Bar & Grill</span>
-                </div>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <div class="text-sm font-black text-white" id="venue-banner-title">Table 4 (Connected to Venue Network)</div>
-                        <div class="text-[11px] text-yellow-300 font-bold" id="venue-banner-subtitle">Interacting with other active patrons</div>
-                    </div>
-                    <button onclick="toggleProVenueMode()" id="venue-mode-toggle-btn" class="bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs shadow transition">
-                        Switch View
-                    </button>
-                </div>
-            </div>
-
-            <!-- 🏆 Live Venue Winner Spotlight Banner -->
-            <div id="venue-winner-spotlight" class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-lg space-y-1.5">
-                <div class="flex justify-between items-center">
-                    <span class="text-[9px] uppercase tracking-widest text-yellow-400 font-black animate-pulse">🔥 LIVE VENUE CHAMPION SPOTLIGHT</span>
-                    <span class="text-[9px] bg-[#050814] text-cyan-300 px-2 py-0.5 rounded border border-[#1d4ed8]">Draw #3028800</span>
-                </div>
-                <div class="flex justify-between items-end">
-                    <div>
-                        <div id="winner-name" class="text-sm font-black text-white">Table 2 (VIP Pro Member)</div>
-                        <div id="winner-details" class="text-[11px] text-yellow-300 font-bold">Hit 9/10 Spot Wager</div>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-[9px] uppercase text-blue-300 font-semibold">Verified Payout</div>
-                        <div id="winner-payout" class="text-base font-mono font-black text-emerald-400">+$4,005.00</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ⚙️ Configuration Panel with Pro Live Cluster Optimizer & Full Slip Breakdown -->
+        <!-- ⚙️ Configuration Panel (Clean Minimal Selectors & Smaller ROI Flag) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters</h2>
-                <span id="roi-badge" class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2.5 py-1 rounded-full font-extrabold shadow-[0_0_12px_rgba(250,204,21,0.25)] animate-pulse">
-                    ⚡ Optimized ROI: +14.5%
+            <div class="flex justify-between items-center gap-2">
+                <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate">⚙️ Session Parameters</h2>
+                <span id="roi-badge" class="text-[8px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0">
+                    ⚡ ROI: +14.5%
                 </span>
             </div>
 
@@ -199,78 +118,78 @@
                     <span id="cluster-pro-badge" class="text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono">🔒 Pro Only</span>
                 </div>
                 <button onclick="autoOptimizeByLiveCluster()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-2 px-3 rounded-lg text-xs shadow-md transition flex items-center justify-center space-x-1.5">
-                    <span>⚡ Auto-Select Best Spot & Rules from Live DB</span>
+                    <span>⚡ Auto-Select Best Spot & Rules</span>
                 </button>
-                <div id="cluster-diagnostic-text" class="text-[10px] text-slate-400 font-mono text-center">
-                    Scans live Supabase draw density to pick 3, 4, 5, or 10-Spot
+                <div id="cluster-diagnostic-text" class="text-[9px] text-slate-400 font-mono text-center">
+                    Scans live draw density to lock optimal Spot & Wager
                 </div>
             </div>
             
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label id="spot-label-title" class="block text-xs text-blue-300 mb-1">1. Spot Selection</label>
+                    <label id="spot-label-title" class="block text-xs text-blue-300 mb-1">Spot Selection</label>
                     <select id="spot-tier" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                        <option value="1">1-Spot ($2 Prize)</option>
-                        <option value="2">2-Spot ($10 Prize)</option>
-                        <option value="3">3-Spot ($27 Prize)</option>
-                        <option value="4" selected>4-Spot ($91 Prize - Best Hit EV)</option>
-                        <option value="5">5-Spot ($450 Prize)</option>
-                        <option value="6">6-Spot ($1,500 Prize)</option>
-                        <option value="7">7-Spot ($5,000 Prize)</option>
-                        <option value="8">8-Spot ($10,000 Prize)</option>
-                        <option value="9">9-Spot ($30,000 Prize)</option>
-                        <option value="10">10-Spot ($100k Top Prize)</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">2. Lookback Window</label>
+                    <label class="block text-xs text-blue-300 mb-1">Lookback Draws</label>
                     <select id="lookback-draws" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="20">Last 20 Draws (1.3 hrs)</option>
-                        <option value="50" selected>Last 50 Draws (3.3 hrs - Optimal)</option>
-                        <option value="100">Last 100 Draws (6.6 hrs)</option>
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
+                        <option value="100">100</option>
                     </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                    <label class="block text-xs text-yellow-300 mb-1">3. Base Wager / Game</label>
+                    <label class="block text-xs text-yellow-300 mb-1">Base Wager ($)</label>
                     <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
-                        <option value="1" selected>$1.00 / game</option>
-                        <option value="2">$2.00 / game</option>
-                        <option value="3">$3.00 / game</option>
-                        <option value="4">$4.00 / game</option>
-                        <option value="5">$5.00 / game</option>
-                        <option value="10">$10.00 / game</option>
+                        <option value="1" selected>$1</option>
+                        <option value="2">$2</option>
+                        <option value="3">$3</option>
+                        <option value="4">$4</option>
+                        <option value="5">$5</option>
+                        <option value="10">$10</option>
                     </select>
                 </div>
                 <div id="multiplier-container">
-                    <label class="block text-xs text-yellow-300 mb-1">4. Quick Draw Extra (2x Cost)</label>
+                    <label class="block text-xs text-yellow-300 mb-1">Extra</label>
                     <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="1">No (Base Wager Only)</option>
-                        <option value="2" selected>Yes (+Up to 10x Multiplier)</option>
+                        <option value="1">No</option>
+                        <option value="2" selected>Yes</option>
                     </select>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">5. Consecutive Games (Draws)</label>
+                    <label class="block text-xs text-blue-300 mb-1">Consecutive Games</label>
                     <select id="game-block" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-300 focus:outline-none focus:border-yellow-400">
-                        <option value="1">1 Game (Single Draw)</option>
-                        <option value="2">2 Consecutive Games</option>
-                        <option value="3">3 Consecutive Games</option>
-                        <option value="4">4 Consecutive Games</option>
-                        <option value="5" selected>5 Consecutive Games (20 mins)</option>
-                        <option value="10">10 Consecutive Games (40 mins)</option>
-                        <option value="20">20 Consecutive Games (80 mins)</option>
-                        <option value="50">50 Game Block</option>
-                        <option value="100">100 Game Block</option>
-                        <option value="200">200 Game Block</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Cost / Game & Total Slip</label>
+                    <label class="block text-xs text-blue-300 mb-1">Total Slip Cost</label>
                     <div id="calc-cost-display" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 flex items-center justify-between">
                         <span>$2/gm</span>
                         <span class="text-yellow-400 font-mono">Slip: $10.00</span>
@@ -300,20 +219,20 @@
             <!-- 4-Box Physical Play Slip Checklist -->
             <div class="grid grid-cols-4 gap-1.5 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
                 <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">1. How Many</span>
+                    <span class="text-[9px] uppercase text-blue-300 block">1. Spot</span>
                     <span id="slip-spot-box" class="font-black text-yellow-400 text-xs">4-SPOT</span>
                 </div>
                 <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">2. Base Bet</span>
-                    <span id="slip-wager-box" class="font-black text-white text-xs">$1 / draw</span>
+                    <span class="text-[9px] uppercase text-blue-300 block">2. Base</span>
+                    <span id="slip-wager-box" class="font-black text-white text-xs">$1</span>
                 </div>
                 <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
                     <span class="text-[9px] uppercase text-blue-300 block">3. Extra</span>
-                    <span id="slip-extra-box" class="font-black text-cyan-400 text-xs">YES (+$1)</span>
+                    <span id="slip-extra-box" class="font-black text-cyan-400 text-xs">YES</span>
                 </div>
                 <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">4. # of Draws</span>
-                    <span id="slip-games-box" class="font-black text-emerald-400 text-xs">5 GAMES</span>
+                    <span class="text-[9px] uppercase text-blue-300 block">4. Games</span>
+                    <span id="slip-games-box" class="font-black text-emerald-400 text-xs">5</span>
                 </div>
             </div>
 
@@ -330,34 +249,14 @@
             </button>
         </div>
 
-        <!-- 💬 Quick Draw Exclusive: Live Venue Trash-Talk Banter Ticker Feed -->
-        <div id="quickdraw-banter-section" class="bg-[#0b132b] p-4 rounded-xl border border-amber-500/40 shadow-xl space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-amber-400 font-semibold">💬 Live Venue Banter Ticker</h2>
-                <span class="text-[9px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-mono">Irondequoit Hub</span>
-            </div>
-            <div id="venue-ticker-feed" class="space-y-2 max-h-[140px] overflow-y-auto text-xs font-mono">
-                <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 4-spot ticket hit 4/4 with 2x Extra on draw #3028798! Let's go! 🍻
-                </div>
-                <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 4 PM session?
-                </div>
-            </div>
-            <div class="flex gap-2 pt-1">
-                <input type="text" id="banter-input" placeholder="Type venue trash talk..." class="flex-1 bg-[#050814] border border-[#1d4ed8] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
-                <button onclick="postBanter()" class="px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold uppercase">Send</button>
-            </div>
-        </div>
-
-        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Strict 3-Color Scale: Red, Yellow, Blue) -->
+        <!-- 🔥 Interactive Heatmap (Strict 3-Color Scale: Red, Yellow, Blue) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
+                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 Interactive Heatmap</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
-                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot (Red)</span>
-                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med (Yellow)</span>
-                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold (Blue)</span>
+                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
+                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med</span>
+                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold</span>
                 </div>
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
@@ -392,24 +291,7 @@
             </div>
         </div>
 
-        <!-- Lifetime Pass Section (Hidden in Pro/Venue Mode) -->
-        <div id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-4">
-            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Access & Venue Referral Network</h2>
-            <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
-                    <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
-                </div>
-                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, 3-color thermal heatmap, scratch-off scanning, and zero ads.</p>
-                <div id="pro-action-container">
-                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                        Get Lifetime Access ($9.99)
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- 📊 Quick Draw Exclusive: Historical P/L Archive Ledger & Power BI Export -->
+        <!-- 📊 Multi-Draw Slip P/L Archive & Power BI Export -->
         <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
@@ -453,11 +335,11 @@
             </div>
         </div>
 
-        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & EV Probability Engine -->
+        <!-- 🎫 PRO FEATURE: Pro Scratch-Off Engine -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
-                    <span>🎫</span> Pro Scratch-Off EV & Probability Engine
+                    <span>🎫</span> Pro Scratch-Off Engine
                 </h2>
                 <span id="scratch-pro-badge" class="text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono">🔒 Pro License Required</span>
             </div>
@@ -466,7 +348,7 @@
 
             <div id="scratch-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Locked</div>
-                <p class="text-[10px] text-blue-300">Unlock the scratch-off EV probability engine & P/L ledger with your Pro membership.</p>
+                <p class="text-[10px] text-blue-300">Unlock the Pro Scratch-Off Engine & P/L ledger with your Pro membership.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
                     Activate Pro ($9.99)
                 </a>
@@ -539,9 +421,105 @@
             </div>
         </div>
 
-        <!-- Affiliate Links at the Very Bottom (Jukebox, Rideshare & Sports Betting Apps) -->
+        <!-- 🍻 Consolidated Single Venue Hub (Moved Below Scratch-Off Engine) -->
+        <div id="quickdraw-venue-section" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3.5">
+            <!-- Top Row: Geofenced Venue Header + Favorite / Override -->
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[9px] uppercase tracking-widest text-cyan-400 font-black">📍 AUTO-GEOFENCED VENUE HUB</span>
+                    <h2 id="venue-name-display" class="text-base font-black text-white">M's Bar & Grill</h2>
+                    <p id="venue-address-display" class="text-[11px] text-blue-300">Irondequoit, NY • Quick Draw Terminal #4</p>
+                </div>
+                <div class="flex flex-col items-end space-y-1">
+                    <button onclick="toggleFavoriteVenue()" id="favorite-venue-btn" class="bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1">
+                        <span id="fav-star">⭐</span> <span id="fav-text">Favorite</span>
+                    </button>
+                    <button onclick="cycleVenueLocation()" class="text-[9px] text-yellow-400 bg-yellow-950/60 border border-yellow-800 px-2 py-0.5 rounded hover:bg-yellow-900 transition">
+                        🔄 Switch Venue
+                    </button>
+                </div>
+            </div>
+
+            <!-- Unified Table Connection & Champion Spotlight Strip -->
+            <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950/90 via-yellow-950/90 to-amber-950/90 p-3 rounded-lg border border-yellow-500/60 space-y-2">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <div class="text-xs font-black text-white" id="venue-banner-title">🍻 Table 4 Connected • <span id="venue-location-badge" class="text-cyan-300">M's Bar & Grill</span></div>
+                        <div class="text-[10px] text-yellow-300" id="venue-banner-subtitle">🔥 Venue Champ: Table 2 hit 9/10 Spot (+$4,005)</div>
+                    </div>
+                    <button onclick="toggleProVenueMode()" id="venue-mode-toggle-btn" class="bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black px-2.5 py-1 rounded text-[10px] shadow transition shrink-0">
+                        Hide Spotlight
+                    </button>
+                </div>
+                <div id="venue-winner-spotlight" class="text-[10px] text-emerald-400 font-mono bg-black/40 px-2.5 py-1 rounded border border-emerald-500/30 flex justify-between">
+                    <span>🏆 Last Verified Bar Hit: Draw #3028800</span>
+                    <span class="font-bold">+$4,005.00</span>
+                </div>
+            </div>
+
+            <!-- Integrated Live Venue Banter Ticker -->
+            <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold">💬 Live Venue Banter Ticker</span>
+                    <span class="text-[8px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-mono">Patron Feed</span>
+                </div>
+                <div id="venue-ticker-feed" class="space-y-1.5 max-h-[110px] overflow-y-auto text-xs font-mono">
+                    <div class="p-2 bg-[#050814] rounded border border-slate-800">
+                        <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 4-spot ticket hit 4/4 with 2x Extra on draw #3028798! Let's go! 🍻
+                    </div>
+                    <div class="p-2 bg-[#050814] rounded border border-slate-800">
+                        <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 4 PM session?
+                    </div>
+                </div>
+                <div class="flex gap-2 pt-0.5">
+                    <input type="text" id="banter-input" placeholder="Post to venue feed..." class="flex-1 bg-[#050814] border border-[#1d4ed8] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <button onclick="postBanter()" class="px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold uppercase">Send</button>
+                </div>
+            </div>
+
+            <!-- Venue Jukebox & Safe Ride Quick Actions -->
+            <div class="border-t border-[#1d4ed8] pt-2.5 space-y-1.5">
+                <div class="flex justify-between items-center text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
+                    <span id="venue-music-label">📻 Venue Jukebox: AMI Play</span>
+                    <span class="text-[8px] text-emerald-400 font-mono">Quick Launch</span>
+                </div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <a id="venue-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
+                        <span id="venue-music-icon">📻 AMI Play</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Jukebox</span>
+                    </a>
+                    <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                        <span>🚗 Uber Safe</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Request Ride</span>
+                    </a>
+                    <a href="https://www.lyft.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-pink-400 border border-pink-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                        <span>🚙 Lyft Ride</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Safe Ride</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lifetime Pass Section (Hidden in Pro/Venue Mode) -->
+        <div id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
+            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Pro Lifetime Access</h2>
+            <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
+                    <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
+                </div>
+                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Pro Scratch-Off Engine, and zero ads.</p>
+                <div id="pro-action-container">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                        Get Lifetime Access ($9.99)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🎯 More Fun at Your Fingertips (Bottom Entertainment Hub) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
-            <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Sports Betting Utilities</h2>
+            <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🎯 More Fun at Your Fingertips</h2>
             <div class="grid grid-cols-3 gap-2">
                 <a id="venue-bottom-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span id="venue-bottom-music-name">📻 AMI Play</span>
@@ -556,7 +534,6 @@
                     <span class="text-[9px] text-blue-300 font-normal mt-0.5">Safe Ride</span>
                 </a>
             </div>
-            <!-- Pro Sports Betting Affiliate Row -->
             <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
                 <a href="https://www.draftkings.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-amber-400 border border-amber-500/30 p-2 rounded-lg font-bold text-[10px] text-center transition flex flex-col items-center justify-center">
                     <span>🏈 DraftKings</span>
@@ -693,7 +670,7 @@
             const statusEl = document.getElementById('sync-status');
             if(statusEl) {
                 statusEl.innerText = "Sync";
-                statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
+                statusEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8] whitespace-nowrap";
             }
 
             renderHeatmap();
@@ -729,7 +706,6 @@
             const sorted20 = Object.values(freq20).sort((a, b) => b - a);
             const sorted50 = Object.values(freq50).sort((a, b) => b - a);
 
-            // Average hits per number in 20 draws is 5.0; in 50 draws is 12.5
             const top3Avg20 = (sorted20[0] + sorted20[1] + sorted20[2]) / 3;
             const top4Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3]) / 4;
             const top5Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3] + sorted50[4]) / 5;
@@ -743,37 +719,33 @@
             let diagSummary = "";
 
             if (top3Avg20 >= 9.0) {
-                // Ultra-tight short-term hot surge -> 3-Spot sniper
                 bestSpot = "3";
                 bestLookback = "20";
                 bestWager = "2";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🔥 Tight 3-Number Surge Detected (Top-3 hitting ${(top3Avg20 / 20 * 100).toFixed(0)}% in last 20 draws) → Locked 3-Spot`;
+                diagSummary = `🔥 Tight 3-Number Surge (${(top3Avg20 / 20 * 100).toFixed(0)}% hit rate in 20 draws) → Locked 3-Spot`;
             } else if (top4Avg50 >= 18.0) {
-                // Strong core 4-number cluster -> 4-Spot tactical EV
                 bestSpot = "4";
                 bestLookback = "50";
                 bestWager = "1";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `⚡ High-Density 4-Number Cluster (Top-4 averaging ${top4Avg50.toFixed(1)} hits/50 draws) → Locked 4-Spot`;
+                diagSummary = `⚡ High-Density 4-Number Cluster (${top4Avg50.toFixed(1)} avg hits/50) → Locked 4-Spot`;
             } else if (top5Avg50 >= 17.0 && top10Spread <= 3) {
-                // Broad mid-tier cluster -> 5-Spot ($450 base prize)
                 bestSpot = "5";
                 bestLookback = "50";
                 bestWager = "1";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🎯 Balanced 5-Number Cluster (Top-5 averaging ${top5Avg50.toFixed(1)} hits/50 draws) → Locked 5-Spot`;
+                diagSummary = `🎯 Balanced 5-Number Cluster (${top5Avg50.toFixed(1)} avg hits/50) → Locked 5-Spot`;
             } else {
-                // High dispersion / wide variance -> 10-Spot ($100k ceiling + $5 0-Hit insurance)
                 bestSpot = "10";
                 bestLookback = "100";
                 bestWager = "2";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🛡️ Wide Cluster Dispersion (Spread ${top10Spread}) → Locked 10-Spot for 0-Hit Insurance & $100k Ceiling`;
+                diagSummary = `🛡️ Wide Cluster Dispersion (Spread ${top10Spread}) → Locked 10-Spot (0-Hit Insurance)`;
             }
 
             document.getElementById('spot-tier').value = bestSpot;
@@ -786,7 +758,7 @@
             const diagEl = document.getElementById('cluster-diagnostic-text');
             if (diagEl) {
                 diagEl.innerText = diagSummary;
-                diagEl.className = "text-[10px] text-emerald-400 font-mono font-bold text-center";
+                diagEl.className = "text-[9px] text-emerald-400 font-mono font-bold text-center";
             }
 
             renderHeatmap();
@@ -884,7 +856,7 @@
             document.body.removeChild(link);
         }
 
-        // 📊 Multi-Draw Slip Auto-Grading Engine (Grades all N consecutive draws on a slip as they arrive)
+        // 📊 Multi-Draw Slip Auto-Grading Engine
         function gradePendingTickets() {
             if (!cachedDraws || cachedDraws.length === 0 || sessionTickets.length === 0) return;
             let updated = false;
@@ -923,7 +895,6 @@
                     }
                 }
 
-                // Format multi-draw status label
                 const gradedCount = t.gradedDraws.length;
                 if (gradedCount === 0) {
                     t.hits = numGames > 1 ? `Pending (0/${numGames} gms)` : `Pending`;
@@ -958,15 +929,15 @@
                     const nextDrawEl = document.getElementById('header-next-draw');
                     if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
                     if(statusEl) {
-                        statusEl.innerText = "☁️ Synced (" + cfg.name + ")";
-                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
+                        statusEl.innerText = "☁️ Synced";
+                        statusEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40 whitespace-nowrap";
                     }
                     gradePendingTickets();
                 } else {
                     cachedDraws = generateMockData(100, latestFetchedDraw);
                     if(statusEl) {
-                        statusEl.innerText = "⚡ Simulated DB";
-                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-yellow-400 border border-yellow-500/40";
+                        statusEl.innerText = "⚡ Sim DB";
+                        statusEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-[#050814] text-yellow-400 border border-yellow-500/40 whitespace-nowrap";
                     }
                 }
                 renderHeatmap();
@@ -1017,8 +988,8 @@
         function updateVenueUI() {
             const venue = VENUE_PROFILES[currentVenueIndex];
             document.getElementById('venue-name-display').innerText = venue.name;
-            document.getElementById('venue-address-display').innerText = venue.address + " • Auto-Geofenced";
-            document.getElementById('venue-music-label').innerText = `📻 Hosted Jukebox: ${venue.musicApp}`;
+            document.getElementById('venue-address-display').innerText = venue.address;
+            document.getElementById('venue-music-label').innerText = `📻 Venue Jukebox: ${venue.musicApp}`;
             document.getElementById('venue-music-icon').innerText = `📻 ${venue.musicApp}`;
             document.getElementById('venue-location-badge').innerText = venue.name;
             
@@ -1062,7 +1033,7 @@
 
         function logScratchTicket() {
             if (activeTier === 'free') {
-                alert("🔒 Scratch-Off P/L Tracker is a Pro feature! Upgrade to Pro ($9.99) to unlock instant win analytics.");
+                alert("🔒 Pro Scratch-Off Engine is a Pro feature! Upgrade to Pro ($9.99) to unlock instant win analytics.");
                 return;
             }
             const gameName = document.getElementById('scratch-game-name').value || "Standard Scratch-Off";
@@ -1122,10 +1093,10 @@
             if(engineModeEl) engineModeEl.innerText = cfg.name;
 
             const hmTitle = document.getElementById('heatmap-title');
-            if(hmTitle) hmTitle.innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
+            if(hmTitle) hmTitle.innerText = "🔥 Interactive Heatmap";
 
             const configTitle = document.getElementById('config-panel-title');
-            if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters`;
+            if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Parameters`;
 
             const drawBox = document.getElementById('header-draw-box');
             const drawLabel = document.getElementById('header-draw-label');
@@ -1141,19 +1112,14 @@
                 countdownSeconds = 43200;
             }
 
+            // Minimal Clean Numbers Only in Selectors
             const spotSelect = document.getElementById('spot-tier');
             spotSelect.innerHTML = '';
             if (gameKey === 'quickdraw') {
-                const labels = {
-                    1: "1-Spot ($2 Prize)", 2: "2-Spot ($10 Prize)", 3: "3-Spot ($27 Prize)",
-                    4: "4-Spot ($91 Prize - Best Hit EV)", 5: "5-Spot ($450 Prize)", 6: "6-Spot ($1,500 Prize)",
-                    7: "7-Spot ($5,000 Prize)", 8: "8-Spot ($10,000 Prize)", 9: "9-Spot ($30,000 Prize)",
-                    10: "10-Spot ($100k Top Prize)"
-                };
                 for (let i = 1; i <= 10; i++) {
                     const opt = document.createElement('option');
                     opt.value = i;
-                    opt.innerText = labels[i];
+                    opt.innerText = i;
                     if (i === 4) opt.selected = true;
                     spotSelect.appendChild(opt);
                 }
@@ -1161,7 +1127,7 @@
             } else {
                 const opt = document.createElement('option');
                 opt.value = 5;
-                opt.innerText = "5 White Balls + 1 Bonus";
+                opt.innerText = "5";
                 opt.selected = true;
                 spotSelect.appendChild(opt);
                 document.getElementById('multiplier-container').style.display = 'none';
@@ -1172,25 +1138,19 @@
             cfg.wagerOptions.forEach(amt => {
                 const opt = document.createElement('option');
                 opt.value = amt;
-                opt.innerText = `$${amt}.00 / game`;
+                opt.innerText = `$${amt}`;
                 if (amt === cfg.defaultWager) opt.selected = true;
                 wagerSelect.appendChild(opt);
             });
 
             const venueSec = document.getElementById('quickdraw-venue-section');
-            const venueBannerSec = document.getElementById('quickdraw-venue-banner-section');
-            const banterSec = document.getElementById('quickdraw-banter-section');
             const ledgerSec = document.getElementById('quickdraw-ledger-section');
 
             if (gameKey === 'quickdraw') {
                 if(venueSec) venueSec.style.display = 'block';
-                if(venueBannerSec) venueBannerSec.style.display = 'block';
-                if(banterSec) banterSec.style.display = 'block';
                 if(ledgerSec) ledgerSec.style.display = 'block';
             } else {
                 if(venueSec) venueSec.style.display = 'none';
-                if(venueBannerSec) venueBannerSec.style.display = 'none';
-                if(banterSec) banterSec.style.display = 'none';
                 if(ledgerSec) ledgerSec.style.display = 'none';
             }
 
@@ -1205,17 +1165,14 @@
                 return;
             }
             isVenueViewActive = !isVenueViewActive;
-            const banner = document.getElementById('venue-mode-banner');
             const spotlight = document.getElementById('venue-winner-spotlight');
             const toggleBtn = document.getElementById('venue-mode-toggle-btn');
             if (isVenueViewActive) {
-                if(banner) banner.style.display = 'block';
-                if(spotlight) spotlight.style.display = 'block';
-                if(toggleBtn) toggleBtn.innerText = "Switch View";
+                if(spotlight) spotlight.style.display = 'flex';
+                if(toggleBtn) toggleBtn.innerText = "Hide Spotlight";
             } else {
-                if(banner) banner.style.display = 'block';
                 if(spotlight) spotlight.style.display = 'none';
-                if(toggleBtn) toggleBtn.innerText = "Join Venue Hub";
+                if(toggleBtn) toggleBtn.innerText = "Show Spotlight";
             }
         }
 
@@ -1247,7 +1204,7 @@
 
             if (activeTier === 'free') {
                 if(subCard) subCard.style.display = 'block';
-                if(venueBanner) venueBanner.style.opacity = '0.5';
+                if(venueBanner) venueBanner.style.opacity = '0.6';
                 if(spotlight) spotlight.style.display = 'none';
 
                 if(scratchLocked) scratchLocked.style.display = 'block';
@@ -1263,7 +1220,7 @@
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
-                if(spotlight) spotlight.style.display = 'block';
+                if(spotlight) spotlight.style.display = 'flex';
 
                 if(scratchLocked) scratchLocked.style.display = 'none';
                 if(scratchForm) scratchForm.style.display = 'block';
@@ -1293,7 +1250,7 @@
 
         function inspectNumber(num) {
             if (activeTier === 'free') {
-                alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
+                alert("🔒 Interactive Heatmap Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock number statistics and draw intervals.");
                 return;
             }
             const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || cachedDraws.length || 50;
@@ -1310,17 +1267,16 @@
             const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
 
             document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
-            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive (${lookbackSize} Lookback)`;
+            document.getElementById('inspector-title').innerText = `Number #${num} Deep-Dive (${lookbackSize} Draws)`;
             document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
             document.getElementById('stat-percentage').innerText = `${percentage}%`;
-            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
+            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Current draw!' : `${lastSeenDistance} draws ago`;
             document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
 
             document.getElementById('inspector-card').classList.remove('hidden');
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes & grades Multi-Draw Slips)
         function startTimers() {
             if (!window.drawBuddyTimer) {
                 window.drawBuddyTimer = setInterval(async () => {
@@ -1389,7 +1345,7 @@
             const totalSlipCost = costPerGame * numGames;
             const costDisp = document.getElementById('calc-cost-display');
             if(costDisp) {
-                costDisp.innerHTML = `<span>$${costPerGame.toFixed(2)}/gm</span><span class="text-yellow-400 font-mono">Slip: $${totalSlipCost.toFixed(2)}</span>`;
+                costDisp.innerHTML = `<span>$${costPerGame.toFixed(0)}/gm</span><span class="text-yellow-400 font-mono">Slip: $${totalSlipCost.toFixed(2)}</span>`;
             }
         }
 
@@ -1410,7 +1366,7 @@
 
             const roiBadge = document.getElementById('roi-badge');
             if (roiBadge) {
-                roiBadge.innerText = `⚡ Optimized ROI: +${baseRoi.toFixed(1)}%`;
+                roiBadge.innerText = `⚡ ROI: +${baseRoi.toFixed(1)}%`;
             }
         }
 
@@ -1506,7 +1462,6 @@
             const costPerGame = getGameCost();
             const totalSlipCost = costPerGame * totalBlockSize;
 
-            // Weighted Recency + Frequency Hot Cluster Selection
             const sliceData = cachedDraws.slice(0, lookback);
             let scores = {};
             for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
@@ -1544,11 +1499,10 @@
                 reasonEl.innerText = customReason || `Weighted Hot-Cluster + Momentum (Last ${lookback} Draws)`;
             }
 
-            // Populate the 4-Box Slip Instruction Checklist
             document.getElementById('slip-spot-box').innerText = `${spotTier}-SPOT`;
-            document.getElementById('slip-wager-box').innerText = `$${baseWager} / draw`;
-            document.getElementById('slip-extra-box').innerText = hasExtra ? `YES (+$${baseWager})` : `NO`;
-            document.getElementById('slip-games-box').innerText = `${totalBlockSize} ${totalBlockSize === 1 ? 'GAME' : 'GAMES'}`;
+            document.getElementById('slip-wager-box').innerText = `$${baseWager}`;
+            document.getElementById('slip-extra-box').innerText = hasExtra ? `YES` : `NO`;
+            document.getElementById('slip-games-box').innerText = `${totalBlockSize}`;
 
             document.getElementById('card-total-slip-cost').innerText = `$${totalSlipCost.toFixed(2)}`;
             document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)}/gm × ${totalBlockSize} ${totalBlockSize === 1 ? 'gm' : 'gms'} = $${totalSlipCost.toFixed(2)}`;
