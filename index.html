@@ -298,7 +298,7 @@
             </button>
         </div>
 
-        <!-- 🔥 Interactive Heatmap -->
+        <!-- 🔥 Interactive Heatmap with Integrated Deep-Dive Inspector -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 Interactive Heatmap</h2>
@@ -309,33 +309,32 @@
                 </div>
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
-        </div>
 
-        <!-- 🔍 Number Statistics Inspector Card -->
-        <div id="inspector-card" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-2xl space-y-3 hidden">
-            <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
-                <div class="flex items-center space-x-2">
-                    <div id="inspector-ball-badge" class="w-8 h-8 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-sm">#--</div>
-                    <h3 id="inspector-title" class="font-bold text-white text-sm">Number Statistics Inspector</h3>
+            <!-- Integrated Inspector Card (Now inside the same Heatmap window) -->
+            <div id="inspector-card" class="bg-[#050814] p-3 rounded-lg border border-yellow-500/50 space-y-2.5 mt-3">
+                <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
+                    <div class="flex items-center space-x-2">
+                        <div id="inspector-ball-badge" class="w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-xs">#--</div>
+                        <h3 id="inspector-title" class="font-bold text-white text-xs">Tap Any Number Above for Deep-Dive</h3>
+                    </div>
                 </div>
-                <button onclick="closeInspector()" class="text-blue-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕ Close</button>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
-                    <span class="text-blue-300 block text-[10px]">Total Hits (Lookback)</span>
-                    <span id="stat-hits" class="font-bold text-yellow-400 text-sm">--</span>
-                </div>
-                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
-                    <span class="text-blue-300 block text-[10px]">Hit Percentage</span>
-                    <span id="stat-percentage" class="font-bold text-emerald-400 text-sm">--%</span>
-                </div>
-                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
-                    <span class="text-blue-300 block text-[10px]">Last Seen Draw Distance</span>
-                    <span id="stat-last-seen" class="font-bold text-cyan-300 text-sm">-- draws ago</span>
-                </div>
-                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
-                    <span class="text-blue-300 block text-[10px]">Avg Draw Interval</span>
-                    <span id="stat-interval" class="font-bold text-white text-sm">~4.2 draws</span>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                        <span class="text-blue-300 block text-[9px]">Total Hits (Lookback)</span>
+                        <span id="stat-hits" class="font-bold text-yellow-400 text-xs">--</span>
+                    </div>
+                    <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                        <span class="text-blue-300 block text-[9px]">Hit Percentage</span>
+                        <span id="stat-percentage" class="font-bold text-emerald-400 text-xs">--%</span>
+                    </div>
+                    <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                        <span class="text-blue-300 block text-[9px]">Last Seen Draw Distance</span>
+                        <span id="stat-last-seen" class="font-bold text-cyan-300 text-xs">-- draws ago</span>
+                    </div>
+                    <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                        <span class="text-blue-300 block text-[9px]">Avg Draw Interval</span>
+                        <span id="stat-interval" class="font-bold text-white text-xs">~4.2 draws</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -384,7 +383,7 @@
             </div>
         </div>
 
-        <!-- 🎫 Pro Scratch-Off Engine with Game Rotation & Search / Select -->
+        <!-- 🎫 Pro Scratch-Off Engine -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
@@ -404,7 +403,6 @@
             </div>
 
             <div id="scratch-active-form" class="space-y-3 hidden">
-                <!-- Search / Select & Game Rotation Controls -->
                 <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                     <div class="flex justify-between items-center text-xs">
                         <label class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">Search / Select Scratch-Off Game:</label>
@@ -774,7 +772,6 @@
             document.getElementById('stat-odds').innerText = data.odds;
             document.getElementById('stat-roi').innerText = data.roi;
             document.getElementById('scratch-cost').value = data.cost;
-            document.getElementById('scratch-game-name').value = gameName;
             document.getElementById('scratch-game-selector').value = gameName;
         }
 
@@ -1369,7 +1366,6 @@
             document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Current draw!' : `${lastSeenDistance} draws ago`;
             document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
 
-            document.getElementById('inspector-card').classList.remove('hidden');
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -1401,7 +1397,6 @@
             }
         }
 
-        function closeInspector() { document.getElementById('inspector-card').classList.add('hidden'); }
         function loadHistoryArchive() {
             const saved = localStorage.getItem('draw_buddy_pl_archive');
             if (saved) { try { sessionTickets = JSON.parse(saved); } catch(e) { sessionTickets = []; } }
