@@ -79,7 +79,7 @@
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
                 <div id="header-draw-box" class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div id="header-draw-label" class="text-blue-400 uppercase tracking-wider text-[10px]">Next Draw</div>
-                    <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#10001420</div>
+                    <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#3028801</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Till Next Draw</div>
@@ -173,7 +173,7 @@
             <div id="venue-winner-spotlight" class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-lg space-y-1.5">
                 <div class="flex justify-between items-center">
                     <span class="text-[9px] uppercase tracking-widest text-yellow-400 font-black animate-pulse">🔥 LIVE VENUE CHAMPION SPOTLIGHT</span>
-                    <span class="text-[9px] bg-[#050814] text-cyan-300 px-2 py-0.5 rounded border border-[#1d4ed8]">Draw #10001419</span>
+                    <span class="text-[9px] bg-[#050814] text-cyan-300 px-2 py-0.5 rounded border border-[#1d4ed8]">Draw #3028800</span>
                 </div>
                 <div class="flex justify-between items-end">
                     <div>
@@ -280,10 +280,10 @@
             </div>
             <div id="venue-ticker-feed" class="space-y-2 max-h-[140px] overflow-y-auto text-xs font-mono">
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 9-spot ticket hit for $1,200 on draw #1418! Let's go! 🍻
+                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 9-spot ticket hit for $1,200 on draw #3028798! Let's go! 🍻
                 </div>
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 9 PM drawing?
+                    <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 4 PM session?
                 </div>
             </div>
             <div class="flex gap-2 pt-1">
@@ -525,7 +525,7 @@
 
     <script>
         const SUPABASE_URL = "https://kcvtuzadkyripylluqlj.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI..."; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdnR1emFka3lyaXB5bGx1cWxqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5NDE0MjY2NCwiZXhwIjoyMTA5NzE4NjY0fQ.sZUWUjdPj3LlJdoGXdqh3aLkMn30sNy_i_pFc-2qOw8"; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const GAME_CONFIGS = {
@@ -595,7 +595,7 @@
         let totalBlockSize = 200;
         let sessionTickets = [];
         let scratchTickets = [];
-        let latestFetchedDraw = 10000000;
+        let latestFetchedDraw = 3028800;
         let countdownSeconds = 240;
         let notificationTriggered = false;
         let batchScannedCount = 0;
@@ -727,7 +727,7 @@
                 const statusEl = document.getElementById('sync-status');
                 if (!error && data && data.length > 0) {
                     cachedDraws = data;
-                    latestFetchedDraw = parseInt(data[0].draw_number || 10000000);
+                    latestFetchedDraw = parseInt(data[0].draw_number || 3028800);
                     const nextDrawEl = document.getElementById('header-next-draw');
                     if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
                     if(statusEl) {
