@@ -181,7 +181,7 @@
             </div>
         </div>
 
-        <!-- ⚙️ Configuration Panel with Optimal Rules Preset & Full Slip Breakdown -->
+        <!-- ⚙️ Configuration Panel with Pro Live Cluster Optimizer & Full Slip Breakdown -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters</h2>
@@ -190,14 +190,20 @@
                 </span>
             </div>
 
-            <!-- Quick Preset Switcher: Optimal EV vs High-Roller 10-Spot -->
-            <div id="preset-bar" class="grid grid-cols-2 gap-2 pt-0.5">
-                <button onclick="applyOptimalPreset('tactical')" class="bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-400/50 text-cyan-300 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center space-x-1">
-                    <span>🎯 Optimal 4-Spot EV ($2/gm)</span>
+            <!-- 🧠 PRO FEATURE: Live Cluster Auto-Spot Optimizer Button -->
+            <div id="pro-cluster-box" class="bg-[#050814] p-2.5 rounded-lg border border-cyan-500/50 space-y-1.5">
+                <div class="flex justify-between items-center">
+                    <span class="text-[10px] uppercase tracking-wider text-cyan-400 font-black flex items-center gap-1">
+                        <span>🧠</span> AI Live Cluster Spot Optimizer
+                    </span>
+                    <span id="cluster-pro-badge" class="text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono">🔒 Pro Only</span>
+                </div>
+                <button onclick="autoOptimizeByLiveCluster()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-2 px-3 rounded-lg text-xs shadow-md transition flex items-center justify-center space-x-1.5">
+                    <span>⚡ Auto-Select Best Spot & Rules from Live DB</span>
                 </button>
-                <button onclick="applyOptimalPreset('jackpot')" class="bg-amber-950/60 hover:bg-amber-900/70 border border-yellow-500/40 text-yellow-300 py-1.5 px-2 rounded-lg text-[10px] font-bold transition flex items-center justify-center space-x-1">
-                    <span>🏆 10-Spot Jackpot ($4/gm)</span>
-                </button>
+                <div id="cluster-diagnostic-text" class="text-[10px] text-slate-400 font-mono text-center">
+                    Scans live Supabase draw density to pick 3, 4, 5, or 10-Spot
+                </div>
             </div>
             
             <div class="grid grid-cols-2 gap-3">
@@ -283,7 +289,7 @@
                 <div>
                     <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ OFFICIAL PLAY SLIP INSTRUCTIONS</div>
                     <div id="card-draw-label" class="text-base font-black text-white mt-0.5">Draws #3028802 – #3028806</div>
-                    <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Selected from Top Hot Cluster (Last 50 Draws)</div>
+                    <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Weighted Hot-Cluster + Momentum (Last 50 Draws)</div>
                 </div>
                 <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
                     <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">Total Slip Cost</div>
@@ -320,7 +326,7 @@
             </div>
 
             <button onclick="logTicketToCloud()" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
-                <span>☁️ Log Ticket Slip to P/L Ledger & Track Draws</span>
+                <span>☁️ Log Multi-Draw Slip to P/L Ledger & Auto-Grade</span>
             </button>
         </div>
 
@@ -394,7 +400,7 @@
                     <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
                     <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                 </div>
-                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for advanced lookbacks, scratch-off scanning, and zero ads.</p>
+                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, 3-color thermal heatmap, scratch-off scanning, and zero ads.</p>
                 <div id="pro-action-container">
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
@@ -406,7 +412,7 @@
         <!-- 📊 Quick Draw Exclusive: Historical P/L Archive Ledger & Power BI Export -->
         <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 P/L History Archive</h2>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
                 <div class="flex items-center space-x-1.5">
                     <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2 py-0.5 rounded font-bold transition">
                         📥 Export Power BI CSV
@@ -434,9 +440,9 @@
                 <table class="w-full text-left text-xs">
                     <thead class="sticky top-0 bg-[#0b132b]">
                         <tr class="text-blue-400 border-b border-[#1d4ed8]">
-                            <th class="pb-2">Draw</th>
-                            <th class="pb-2">Slip Details</th>
-                            <th class="pb-2">Hits</th>
+                            <th class="pb-2">Draws</th>
+                            <th class="pb-2">Slip Spec</th>
+                            <th class="pb-2">Slip Progress & Hits</th>
                             <th class="pb-2 text-right">Net P&L</th>
                         </tr>
                     </thead>
@@ -662,6 +668,7 @@
         let sessionTickets = [];
         let scratchTickets = [];
         let lastGeneratedNumbers = [];
+        let lastClusterDiagnostic = "";
         let latestFetchedDraw = 3028800;
         let countdownSeconds = 240;
         let batchScannedCount = 0;
@@ -697,34 +704,95 @@
             updateOptimizedRoiBadge();
         }
 
-        // One-Tap Optimal Preset Rules Switcher
-        function applyOptimalPreset(mode) {
-            if (activeGameKey !== 'quickdraw') return;
-            const spotEl = document.getElementById('spot-tier');
-            const lookbackEl = document.getElementById('lookback-draws');
-            const wagerEl = document.getElementById('base-wager');
-            const extraEl = document.getElementById('extra-multiplier');
-            const blockEl = document.getElementById('game-block');
-
-            if (mode === 'tactical') {
-                // Highest Hit Frequency & Bankroll Retention (4-Spot, 50 Lookback, $1 Base + $1 Extra = $2/game, 5 Games = $10 Slip)
-                spotEl.value = "4";
-                lookbackEl.value = "50";
-                wagerEl.value = "1";
-                extraEl.value = "2";
-                blockEl.value = "5";
-            } else {
-                // High-Ceiling 10-Spot ($100k Jackpot + $5 on 0-Hit insurance, 100 Lookback, $2 Base + $2 Extra = $4/game, 5 Games = $20 Slip)
-                spotEl.value = "10";
-                lookbackEl.value = "100";
-                wagerEl.value = "2";
-                extraEl.value = "2";
-                blockEl.value = "5";
+        // 🧠 PRO FEATURE: Auto-Select Best Spot Size & Wager Rules by Live Cluster Density
+        function autoOptimizeByLiveCluster() {
+            if (activeTier === 'free') {
+                alert("🔒 AI Live Cluster Spot Optimizer is a Pro feature! Upgrade to Pro ($9.99) to automatically scan live Supabase draw clusters and lock in the highest-EV Spot size.");
+                return;
             }
+            if (activeGameKey !== 'quickdraw') return;
+
+            const sampleSize = Math.min(cachedDraws.length, 50) || 50;
+            const recent20 = cachedDraws.slice(0, 20);
+            const recent50 = cachedDraws.slice(0, sampleSize);
+
+            let freq20 = {}, freq50 = {};
+            for (let i = 1; i <= 80; i++) { freq20[i] = 0; freq50[i] = 0; }
+
+            recent20.forEach(d => {
+                if (d.winning_numbers) d.winning_numbers.forEach(n => { if (freq20[n] !== undefined) freq20[n]++; });
+            });
+            recent50.forEach(d => {
+                if (d.winning_numbers) d.winning_numbers.forEach(n => { if (freq50[n] !== undefined) freq50[n]++; });
+            });
+
+            const sorted20 = Object.values(freq20).sort((a, b) => b - a);
+            const sorted50 = Object.values(freq50).sort((a, b) => b - a);
+
+            // Average hits per number in 20 draws is 5.0; in 50 draws is 12.5
+            const top3Avg20 = (sorted20[0] + sorted20[1] + sorted20[2]) / 3;
+            const top4Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3]) / 4;
+            const top5Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3] + sorted50[4]) / 5;
+            const top10Spread = sorted50[0] - sorted50[9];
+
+            let bestSpot = "4";
+            let bestLookback = "50";
+            let bestWager = "1";
+            let bestExtra = "2";
+            let bestBlock = "5";
+            let diagSummary = "";
+
+            if (top3Avg20 >= 9.0) {
+                // Ultra-tight short-term hot surge -> 3-Spot sniper
+                bestSpot = "3";
+                bestLookback = "20";
+                bestWager = "2";
+                bestExtra = "2";
+                bestBlock = "5";
+                diagSummary = `🔥 Tight 3-Number Surge Detected (Top-3 hitting ${(top3Avg20 / 20 * 100).toFixed(0)}% in last 20 draws) → Locked 3-Spot`;
+            } else if (top4Avg50 >= 18.0) {
+                // Strong core 4-number cluster -> 4-Spot tactical EV
+                bestSpot = "4";
+                bestLookback = "50";
+                bestWager = "1";
+                bestExtra = "2";
+                bestBlock = "5";
+                diagSummary = `⚡ High-Density 4-Number Cluster (Top-4 averaging ${top4Avg50.toFixed(1)} hits/50 draws) → Locked 4-Spot`;
+            } else if (top5Avg50 >= 17.0 && top10Spread <= 3) {
+                // Broad mid-tier cluster -> 5-Spot ($450 base prize)
+                bestSpot = "5";
+                bestLookback = "50";
+                bestWager = "1";
+                bestExtra = "2";
+                bestBlock = "5";
+                diagSummary = `🎯 Balanced 5-Number Cluster (Top-5 averaging ${top5Avg50.toFixed(1)} hits/50 draws) → Locked 5-Spot`;
+            } else {
+                // High dispersion / wide variance -> 10-Spot ($100k ceiling + $5 0-Hit insurance)
+                bestSpot = "10";
+                bestLookback = "100";
+                bestWager = "2";
+                bestExtra = "2";
+                bestBlock = "5";
+                diagSummary = `🛡️ Wide Cluster Dispersion (Spread ${top10Spread}) → Locked 10-Spot for 0-Hit Insurance & $100k Ceiling`;
+            }
+
+            document.getElementById('spot-tier').value = bestSpot;
+            document.getElementById('lookback-draws').value = bestLookback;
+            document.getElementById('base-wager').value = bestWager;
+            document.getElementById('extra-multiplier').value = bestExtra;
+            document.getElementById('game-block').value = bestBlock;
+
+            lastClusterDiagnostic = diagSummary;
+            const diagEl = document.getElementById('cluster-diagnostic-text');
+            if (diagEl) {
+                diagEl.innerText = diagSummary;
+                diagEl.className = "text-[10px] text-emerald-400 font-mono font-bold text-center";
+            }
+
             renderHeatmap();
             updateCostDisplay();
             updateOptimizedRoiBadge();
-            generateTicket();
+            generateTicket(diagSummary);
         }
 
         // Native App Deep-Linking Handler with Web Fallback
@@ -762,7 +830,7 @@
             const dateOnly = nowISO.split('T')[0];
 
             let csvRows = [
-                ["Timestamp_ISO", "Date", "Venue", "Game_Engine", "Draw_or_Game_ID", "Spot_or_Type", "Games_Count", "Wager_Cost", "Payout", "Net_PnL", "Hit_Status"].join(",")
+                ["Timestamp_ISO", "Date", "Venue", "Game_Engine", "Draw_Range", "Spot_or_Type", "Games_Count", "Wager_Cost", "Payout", "Net_PnL", "Hit_Status"].join(",")
             ];
 
             sessionTickets.forEach(t => {
@@ -770,12 +838,14 @@
                 const payout = parseFloat(t.payout || 0).toFixed(2);
                 const net = (payout - wager).toFixed(2);
                 const gamesCount = t.games || 1;
+                const endDraw = t.endDraw || (t.draw + gamesCount - 1);
+                const rangeLabel = gamesCount > 1 ? `#${t.draw}-#${endDraw}` : `#${t.draw}`;
                 csvRows.push([
                     t.timestamp || nowISO,
                     (t.timestamp || nowISO).split('T')[0],
                     `"${venueName}"`,
                     `"${GAME_CONFIGS[activeGameKey].name}"`,
-                    `"#${t.draw}"`,
+                    `"${rangeLabel}"`,
                     `"${t.spot}-Spot"`,
                     gamesCount,
                     wager,
@@ -814,7 +884,7 @@
             document.body.removeChild(link);
         }
 
-        // Auto-grades Pending tickets in P/L ledger when new Supabase draws arrive
+        // 📊 Multi-Draw Slip Auto-Grading Engine (Grades all N consecutive draws on a slip as they arrive)
         function gradePendingTickets() {
             if (!cachedDraws || cachedDraws.length === 0 || sessionTickets.length === 0) return;
             let updated = false;
@@ -822,21 +892,47 @@
             cachedDraws.forEach(d => { drawMap[parseInt(d.draw_number)] = d; });
 
             sessionTickets.forEach(t => {
-                if (t.hits === 'Pending' && drawMap[parseInt(t.draw)]) {
-                    const drawObj = drawMap[parseInt(t.draw)];
-                    const winNums = drawObj.winning_numbers || [];
-                    const played = t.numbers || [];
-                    if (played.length > 0) {
+                const startDraw = parseInt(t.draw);
+                const numGames = parseInt(t.games || 1);
+                const endDraw = parseInt(t.endDraw || (startDraw + numGames - 1));
+                if (!t.gradedDraws) t.gradedDraws = [];
+                if (typeof t.bestHits !== 'number') t.bestHits = 0;
+                if (typeof t.winningGamesCount !== 'number') t.winningGamesCount = 0;
+
+                const played = t.numbers || [];
+                if (played.length === 0) return;
+
+                for (let dNum = startDraw; dNum <= endDraw; dNum++) {
+                    if (!t.gradedDraws.includes(dNum) && drawMap[dNum]) {
+                        const drawObj = drawMap[dNum];
+                        const winNums = drawObj.winning_numbers || [];
                         const hitCount = played.filter(n => winNums.includes(n)).length;
-                        t.hits = `${hitCount}/${t.spot} Hit`;
+
                         const baseWager = t.baseWager || 1;
                         const hasExtra = t.hasExtra || false;
                         const drawMult = hasExtra ? (parseInt(drawObj.extra_multiplier) || 1) : 1;
                         const prizeScale = QD_PAYOUT_TABLE[t.spot] || {};
-                        const unitPrize = prizeScale[hitCount] || 0;
-                        t.payout = unitPrize * baseWager * drawMult;
+                        const unitPrize = prizeScale[hitCount] !== undefined ? prizeScale[hitCount] : 0;
+                        const drawPayout = unitPrize * baseWager * drawMult;
+
+                        t.payout = (parseFloat(t.payout) || 0) + drawPayout;
+                        if (hitCount > t.bestHits) t.bestHits = hitCount;
+                        if (drawPayout > 0) t.winningGamesCount++;
+                        t.gradedDraws.push(dNum);
                         updated = true;
                     }
+                }
+
+                // Format multi-draw status label
+                const gradedCount = t.gradedDraws.length;
+                if (gradedCount === 0) {
+                    t.hits = numGames > 1 ? `Pending (0/${numGames} gms)` : `Pending`;
+                } else if (gradedCount < numGames) {
+                    t.hits = `Live (${gradedCount}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`;
+                } else {
+                    t.hits = numGames > 1
+                        ? `Done (${numGames}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`
+                        : `${t.bestHits}/${t.spot} Hit`;
                 }
             });
 
@@ -1033,15 +1129,15 @@
 
             const drawBox = document.getElementById('header-draw-box');
             const drawLabel = document.getElementById('header-draw-label');
-            const presetBar = document.getElementById('preset-bar');
+            const proClusterBox = document.getElementById('pro-cluster-box');
             if (gameKey === 'quickdraw') {
                 if(drawBox) drawBox.style.display = 'block';
                 if(drawLabel) drawLabel.innerText = "Next Draw";
-                if(presetBar) presetBar.style.display = 'grid';
+                if(proClusterBox) proClusterBox.style.display = 'block';
                 countdownSeconds = 240;
             } else {
                 if(drawBox) drawBox.style.display = 'none';
-                if(presetBar) presetBar.style.display = 'none';
+                if(proClusterBox) proClusterBox.style.display = 'none';
                 countdownSeconds = 43200;
             }
 
@@ -1147,6 +1243,7 @@
             const scratchLocked = document.getElementById('scratch-locked-overlay');
             const scratchForm = document.getElementById('scratch-active-form');
             const scratchBadge = document.getElementById('scratch-pro-badge');
+            const clusterProBadge = document.getElementById('cluster-pro-badge');
 
             if (activeTier === 'free') {
                 if(subCard) subCard.style.display = 'block';
@@ -1159,6 +1256,10 @@
                     scratchBadge.innerText = "🔒 Pro License Required";
                     scratchBadge.className = "text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono";
                 }
+                if(clusterProBadge) {
+                    clusterProBadge.innerText = "🔒 Pro Only";
+                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono";
+                }
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
@@ -1169,6 +1270,10 @@
                 if(scratchBadge) {
                     scratchBadge.innerText = "✨ Pro Active";
                     scratchBadge.className = "text-[9px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-800 font-mono";
+                }
+                if(clusterProBadge) {
+                    clusterProBadge.innerText = "✨ Pro Unlocked";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
                 }
             }
             updateFreeLimitBadge();
@@ -1215,7 +1320,7 @@
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes & grades Pending tickets)
+        // Live Auto-Sync Timer (Fetches newest draw from Supabase every 4 minutes & grades Multi-Draw Slips)
         function startTimers() {
             if (!window.drawBuddyTimer) {
                 window.drawBuddyTimer = setInterval(async () => {
@@ -1295,8 +1400,8 @@
 
             let baseRoi = 9.5;
             if (activeGameKey === 'quickdraw') {
-                if (spot === 4 || spot === 5) baseRoi += 3.5; // High tactical hit efficiency
-                else if (spot === 10) baseRoi += 2.5; // 0-of-10 $5 insurance + $100k ceiling
+                if (spot === 3 || spot === 4 || spot === 5) baseRoi += 3.5;
+                else if (spot === 10) baseRoi += 2.5;
                 if (lookback === 50) baseRoi += 1.5;
                 if (extra === 2) baseRoi += 1.0;
             } else {
@@ -1390,7 +1495,7 @@
             input.value = '';
         }
 
-        function generateTicket() {
+        function generateTicket(customReason) {
             const cfg = GAME_CONFIGS[activeGameKey];
             const spotTier = parseInt(document.getElementById('spot-tier').value) || cfg.maxSpot;
             const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
@@ -1407,7 +1512,6 @@
             for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
 
             sliceData.forEach((d, idx) => {
-                // Recent draws carry slightly higher momentum weight
                 const recencyWeight = 1 + ((lookback - idx) / lookback) * 0.35;
                 if (d.winning_numbers) {
                     d.winning_numbers.forEach(n => {
@@ -1437,7 +1541,7 @@
 
             const reasonEl = document.getElementById('card-algorithm-reason');
             if (reasonEl) {
-                reasonEl.innerText = ` Weighted Hot-Cluster + Momentum (Last ${lookback} Draws)`;
+                reasonEl.innerText = customReason || `Weighted Hot-Cluster + Momentum (Last ${lookback} Draws)`;
             }
 
             // Populate the 4-Box Slip Instruction Checklist
@@ -1471,16 +1575,18 @@
         }
 
         async function logTicketToCloud() {
-            const nextDrawNum = latestFetchedDraw + 1;
+            const startDrawNum = latestFetchedDraw + 1;
             const spotTier = parseInt(document.getElementById('spot-tier').value) || 4;
             const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
             const hasExtra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
             const numGames = parseInt(document.getElementById('game-block').value) || 5;
+            const endDrawNum = startDrawNum + numGames - 1;
             const costPerGame = getGameCost();
             const totalSlipCost = costPerGame * numGames;
 
             sessionTickets.unshift({ 
-                draw: nextDrawNum, 
+                draw: startDrawNum,
+                endDraw: endDrawNum,
                 spot: spotTier,
                 games: numGames,
                 wager: totalSlipCost,
@@ -1488,14 +1594,17 @@
                 baseWager: baseWager,
                 hasExtra: hasExtra,
                 numbers: [...lastGeneratedNumbers],
-                hits: 'Pending', 
+                gradedDraws: [],
+                bestHits: 0,
+                winningGamesCount: 0,
+                hits: numGames > 1 ? `Pending (0/${numGames} gms)` : 'Pending', 
                 payout: 0,
                 timestamp: new Date().toISOString()
             });
             saveHistoryArchive();
             updateLedgerUI();
             currentGameIndex++;
-            latestFetchedDraw++;
+            latestFetchedDraw = endDrawNum;
             const nextDrawEl = document.getElementById('header-next-draw');
             if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
             generateTicket();
@@ -1521,12 +1630,14 @@
                 totalPayout += (t.payout || 0);
                 const netTicketPnL = (t.payout || 0) - (t.wager || 2);
                 const gamesCount = t.games || 1;
+                const endDraw = t.endDraw || (t.draw + gamesCount - 1);
+                const drawRangeText = gamesCount > 1 ? `#${t.draw}–#${endDraw}` : `#${t.draw}`;
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
-                    <td class="py-2 font-mono text-yellow-400">#${t.draw}</td>
-                    <td class="py-2 text-blue-200">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).toFixed(0)})</td>
-                    <td class="py-2 font-bold text-white">${t.hits}</td>
+                    <td class="py-2 font-mono text-yellow-400 text-[10px]">${drawRangeText}</td>
+                    <td class="py-2 text-blue-200 text-[11px]">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).toFixed(0)})</td>
+                    <td class="py-2 font-bold text-white text-[10px]">${t.hits}</td>
                     <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
                 `;
                 tbody.appendChild(tr);
