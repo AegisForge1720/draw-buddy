@@ -132,6 +132,35 @@
             </button>
         </div>
 
+        <!-- Dual-Tier Membership Upgrade Section -->
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl space-y-4">
+            <h2 class="text-xs uppercase tracking-wider text-slate-400 font-semibold">💎 Upgrade Memberships</h2>
+            
+            <!-- Individual Pro Tier -->
+            <div class="bg-slate-950 p-3.5 rounded-lg border border-emerald-500/30 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-white text-xs">👤 Individual Pro Tier</span>
+                    <span class="text-emerald-400 font-mono text-xs font-bold">$9.99/mo</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Advanced 10-spot lookback optimization and session tracking.</p>
+                <a href="https://buy.stripe.com/test_your_individual_link_here" target="_blank" class="block text-center bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-lg text-xs transition">
+                    Get Individual Pro
+                </a>
+            </div>
+
+            <!-- Establishment Venue Tier -->
+            <div class="bg-slate-950 p-3.5 rounded-lg border border-indigo-500/30 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-indigo-300 text-xs">🍻 Establishment Venue Tier</span>
+                    <span class="text-indigo-400 font-mono text-xs font-bold">$49.99/mo</span>
+                </div>
+                <p class="text-[11px] text-slate-400">Multi-device venue access, custom branding, and tablet licensing.</p>
+                <a href="https://buy.stripe.com/test_your_venue_link_here" target="_blank" class="block text-center bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-lg text-xs transition">
+                    License Your Venue
+                </a>
+            </div>
+        </div>
+
         <!-- Live Session Tracking Ledger -->
         <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
@@ -158,9 +187,8 @@
     </main>
 
     <script>
-        // Supabase Configuration
         const SUPABASE_URL = "https://kcvtuzadkyripylluqlj.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI..."; // Replace with public anon key if needed
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI..."; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let cachedDraws = [];
@@ -184,7 +212,6 @@
                     cachedDraws = data;
                     latestFetchedDraw = parseInt(data[0].draw_number);
                     
-                    // Update Header Ticker
                     document.getElementById('header-curr-draw').innerText = `#${latestFetchedDraw}`;
                     document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                     document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
@@ -282,7 +309,6 @@
             const spotTier = parseInt(document.getElementById('spot-tier').value);
             const activeBalls = Array.from(document.querySelectorAll('#number-grid .number-ball')).map(el => parseInt(el.innerText));
 
-            // Log to Supabase live_tickets table
             try {
                 await supabaseClient.from('live_tickets').insert([{
                     draw_number: nextDrawNum,
@@ -293,7 +319,6 @@
                 console.log("Cloud log simulation recorded offline.");
             }
 
-            // Add to session ledger
             sessionTickets.unshift({
                 draw: nextDrawNum,
                 spot: spotTier,
@@ -303,7 +328,6 @@
 
             updateLedgerUI();
 
-            // Advance Game Block
             currentGameIndex++;
             if (currentGameIndex >= totalBlockSize) {
                 alert(`🎉 Completed session game block of ${totalBlockSize} games!`);
