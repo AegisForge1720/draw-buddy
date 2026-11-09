@@ -54,7 +54,7 @@
                 </div>
             </div>
 
-            <!-- Header Controls: QR Invite Button, Tier Switcher, Sync -->
+            <!-- Header Controls: QR Invite Button, Simplified Free/Pro Tier Switcher, Sync -->
             <div class="flex items-center space-x-1.5 shrink-0 ml-auto">
                 <button onclick="openInviteModal()" class="text-[9px] bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 px-2 py-1 rounded font-black whitespace-nowrap flex items-center gap-1">
                     <span>🔗 QR</span>
@@ -62,7 +62,6 @@
                 <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
-                    <option value="venue">Venue</option>
                 </select>
                 <div id="sync-status" class="text-[9px] px-1.5 py-0.5 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8] whitespace-nowrap">Sync</div>
             </div>
@@ -86,7 +85,7 @@
         </div>
     </header>
 
-    <!-- 🔗 Pro/Venue-Gated Peer Invite QR Code Modal -->
+    <!-- 🔗 Pro-Gated Peer Invite QR Code Modal -->
     <div id="invite-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#0b132b] border-2 border-cyan-400 rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-[0_0_30px_rgba(56,189,248,0.3)]">
             <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
@@ -96,7 +95,7 @@
             
             <div id="invite-locked-view" class="text-center space-y-3 py-2 hidden">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Required</div>
-                <p class="text-[11px] text-blue-300">Peer-to-peer invite QR codes are unlocked exclusively for Pro & Venue members to share Draw Buddy with table neighbors.</p>
+                <p class="text-[11px] text-blue-300">Peer-to-peer invite QR codes are unlocked exclusively for Pro members to share Draw Buddy with table neighbors.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded text-xs">
                     Unlock Pro ($9.99)
                 </a>
@@ -508,24 +507,35 @@
             </div>
         </div>
 
-        <!-- Lifetime Pass Section (Hidden in Pro/Venue Mode) -->
+        <!-- Lifetime Pro Pass & Venue B2B Subscription Section (Visible in Free Mode) -->
         <div id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
-            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Pro Lifetime Access</h2>
-            <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
-                    <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
-                </div>
-                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Pro Scratch-Off Engine, and zero ads.</p>
-                <div id="pro-action-container">
+            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Draw Buddy Access</h2>
+            <div class="space-y-3">
+                <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
+                        <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
+                    </div>
+                    <p class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Pro Scratch-Off Engine, and zero ads.</p>
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
+                    </a>
+                </div>
+
+                <div class="bg-[#050814] p-3.5 rounded-lg border border-cyan-500/30 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-white text-xs">🏢 B2B Venue Terminal Subscription</span>
+                        <span class="text-cyan-400 font-mono text-xs font-bold">$75.00 / mo</span>
+                    </div>
+                    <p class="text-[11px] text-blue-300">Dedicated terminal display, live bar leaderboards, winner spotlights, and patron banter feeds for local taverns.</p>
+                    <a href="https://buy.stripe.com/test_venue_sub_75" target="_blank" class="block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-black py-2 rounded-lg text-xs transition">
+                        Subscribe Venue Terminal ($75/mo)
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- 📊 Multi-Draw Slip P/L Archive (Positioned Above Affiliate Hub) -->
+        <!-- 📊 Multi-Draw Slip P/L Archive -->
         <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
@@ -1252,23 +1262,6 @@
             updateOptimizedRoiBadge();
         }
 
-        function toggleProVenueMode() {
-            if (activeTier === 'free') {
-                alert("🔒 Venue Interaction & Inter-Patron Ticker are Pro / Venue features. Upgrade to Pro ($9.99) to unlock bar networking.");
-                return;
-            }
-            isVenueViewActive = !isVenueViewActive;
-            const spotlight = document.getElementById('venue-winner-spotlight');
-            const toggleBtn = document.getElementById('venue-mode-toggle-btn');
-            if (isVenueViewActive) {
-                if(spotlight) spotlight.style.display = 'flex';
-                if(toggleBtn) toggleBtn.innerText = "Hide Spotlight";
-            } else {
-                if(spotlight) spotlight.style.display = 'none';
-                if(toggleBtn) toggleBtn.innerText = "Show Spotlight";
-            }
-        }
-
         function setAppState(stateCode) {
             currentState = stateCode;
             localStorage.setItem('draw_buddy_state', stateCode);
@@ -1308,7 +1301,7 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "🔒 Pro Only";
-                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono";
                 }
             } else {
                 if(subCard) subCard.style.display = 'none';
@@ -1323,7 +1316,7 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
                 }
             }
             updateFreeLimitBadge();
@@ -1333,7 +1326,7 @@
         function updateFreeLimitBadge() {
             const badge = document.getElementById('free-limit-badge');
             if(!badge) return;
-            if (activeTier === 'pro' || activeTier === 'venue') {
+            if (activeTier === 'pro') {
                 badge.innerText = "Unlimited Scans";
                 badge.className = "text-[10px] text-yellow-400 bg-yellow-950 px-2 py-0.5 rounded border border-yellow-800";
             } else {
