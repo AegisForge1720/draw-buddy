@@ -372,29 +372,50 @@
             </div>
         </div>
 
-        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker (Bottom above Links) -->
+        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & EV Probability Engine -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
-                    <span>🎫</span> Pro Scratch-Off Scanner & P/L Tracker
+                    <span>🎫</span> Pro Scratch-Off EV & Probability Engine
                 </h2>
                 <span id="scratch-pro-badge" class="text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono">🔒 Pro License Required</span>
             </div>
 
-            <p class="text-[11px] text-blue-300">Scan or snap the barcode on physical state scratch-off tickets to automatically log cost and instant win payouts.</p>
+            <p class="text-[11px] text-blue-300">Scan or select state scratch-off games to calculate real-time Expected Value (EV), remaining top prizes, and ROI probability.</p>
 
             <div id="scratch-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Locked</div>
-                <p class="text-[10px] text-blue-300">Unlock the instant-win scratch-off scanner & P/L ledger with your Pro membership.</p>
+                <p class="text-[10px] text-blue-300">Unlock the scratch-off EV probability engine & P/L ledger with your Pro membership.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
                     Activate Pro ($9.99)
                 </a>
             </div>
 
             <div id="scratch-active-form" class="space-y-3 hidden">
+                <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-white">Featured Game Analysis: $50,000 Cashword</span>
+                        <span id="scratch-ev-badge" class="text-[10px] text-emerald-400 font-mono font-bold">EV: +$2.15 (High Value)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center text-[10px] pt-1">
+                        <div class="bg-[#111c38] p-1.5 rounded">
+                            <span class="text-blue-300 block">Top Prizes Left</span>
+                            <span id="stat-top-prizes" class="font-bold text-yellow-400">3 / 5</span>
+                        </div>
+                        <div class="bg-[#111c38] p-1.5 rounded">
+                            <span class="text-blue-300 block">Est. Odds</span>
+                            <span id="stat-odds" class="font-bold text-cyan-300">1 in 3.42</span>
+                        </div>
+                        <div class="bg-[#111c38] p-1.5 rounded">
+                            <span class="text-blue-300 block">Return (ROI)</span>
+                            <span id="stat-roi" class="font-bold text-emerald-400">+14.2%</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-[10px] text-blue-300 mb-1">Scratch-Off Game Name</label>
+                        <label class="block text-[10px] text-blue-300 mb-1">Scanned Game Name</label>
                         <input type="text" id="scratch-game-name" placeholder="e.g. $50,000 Cashword" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
                     </div>
                     <div>
@@ -603,11 +624,9 @@
                 storeUrl = isIOS ? "https://apps.apple.com/app/touchtunes/id299878235" : "https://play.google.com/store/apps/details?id=com.touchtunes.mobile";
             }
 
-            // Attempt deep link launch
             const start = Date.now();
             window.location.href = deepLinkUrl;
 
-            // If app is not installed, fallback to app store after 1.5s timeout
             setTimeout(() => {
                 if (Date.now() - start < 2000) {
                     window.open(storeUrl, '_blank');
