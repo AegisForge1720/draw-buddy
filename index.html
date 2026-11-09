@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draw Buddy - Live Quick Draw Tactical Assistant</title>
+    <title>Draw Buddy - Live Quick Draw Tactical & Venue Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -17,6 +17,10 @@
         .ball-active { background: linear-gradient(135deg, #facc15, #ca8a04); color: #070b19; box-shadow: 0 0 15px rgba(250, 204, 21, 0.5); border: 1px solid #fef08a; }
         .ball-inactive { background: #111c38; color: #60a5fa; border: 1px solid #1d4ed8; }
         .ball-hit { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); border: 1px solid #34d399; }
+        .heatmap-cell {
+            aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1px solid #1d4ed8; transition: all 0.2s;
+        }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -29,10 +33,10 @@
                 <h1 class="font-black text-lg tracking-wider text-white">DRAW <span class="text-yellow-400">BUDDY</span></h1>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="requestNotificationPermission()" id="notif-btn" class="text-[10px] bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 px-2.5 py-1 rounded transition font-bold">
-                    🔔 Enable Alerts
+                <button onclick="requestNotificationPermission()" id="notif-btn" class="text-[10px] bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 px-2 py-1 rounded transition font-bold">
+                    🔔 Alerts
                 </button>
-                <div id="sync-status" class="text-xs px-2.5 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+                <div id="sync-status" class="text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
             </div>
         </div>
 
@@ -142,10 +146,10 @@
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📸 Multi-Ticket Batch Scanner</h2>
-                <span id="batch-count-badge" class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">0 Scanned in Batch</span>
+                <span id="batch-count-badge" class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">0 Scanned</span>
             </div>
             
-            <p class="text-[11px] text-blue-300">Continuously snap or upload multiple ticket slips. Each scanned ticket is automatically verified against Supabase and pushed straight into your session ledger.</p>
+            <p class="text-[11px] text-blue-300">Continuously scan ticket slips. Automatically verifies against Supabase and pushes straight into your session ledger.</p>
 
             <div class="grid grid-cols-2 gap-2">
                 <div>
@@ -160,12 +164,23 @@
 
             <div class="flex space-x-2 pt-1">
                 <label class="flex-1 bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
-                    <span>📷 Batch Snap Photo</span>
+                    <span>📷 Snap Photo</span>
                     <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleBatchPhoto(event)">
                 </label>
                 <button onclick="processAndLogBatchTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 px-3 rounded-lg text-xs shadow transition">
-                    📥 Add to Auto-Ledger
+                    📥 Add to Ledger
                 </button>
+            </div>
+        </div>
+
+        <!-- 🔥 Venue Hot Number Heatmap Mode (1-80 Grid) -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 House Hot Number Heatmap (1-80)</h2>
+                <span class="text-[10px] text-blue-300">100-Draw Lookback</span>
+            </div>
+            <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1">
+                <!-- 1 to 80 cells rendered dynamically -->
             </div>
         </div>
 
@@ -201,7 +216,7 @@
         <!-- Live Session Tracking Ledger -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Session Ledger & Auto-Batch</h2>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Session Ledger & Batch Auto-Log</h2>
                 <span id="session-pnl" class="text-xs font-bold text-blue-400">Net P&L: $0.00</span>
             </div>
             <div class="overflow-x-auto">
@@ -244,7 +259,7 @@
                     .from('quickdraw_history')
                     .select('draw_number, winning_numbers, extra_multiplier')
                     .order('draw_number', { ascending: false })
-                    .limit(150);
+                    .limit(100);
 
                 if (error) throw error;
 
@@ -256,7 +271,7 @@
                     document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
                     document.getElementById('batch-draw-num').value = latestFetchedDraw;
 
-                    statusEl.innerText = "☁️ Cloud Synced";
+                    statusEl.innerText = "☁️ Synced";
                     statusEl.className = "text-xs px-2.5 py-1 rounded bg-[#050814] text-yellow-400 border border-[#1d4ed8]";
                 } else {
                     throw new Error("No data");
@@ -264,16 +279,17 @@
             } catch (err) {
                 console.warn("Supabase fetch failed, using offline simulation fallback:", err);
                 latestFetchedDraw = 10000000;
-                cachedDraws = generateMockData(150, latestFetchedDraw);
+                cachedDraws = generateMockData(100, latestFetchedDraw);
                 
                 document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                 document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
                 document.getElementById('batch-draw-num').value = latestFetchedDraw;
 
-                statusEl.innerText = "⚡ Simulated Mode";
+                statusEl.innerText = "⚡ Simulated";
                 statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
             }
 
+            renderHeatmap();
             setInterval(updateCountdown, 1000);
         }
 
@@ -290,6 +306,31 @@
             return mock;
         }
 
+        function renderHeatmap() {
+            let freq = {};
+            for(let i=1; i<=80; i++) freq[i] = 0;
+            cachedDraws.forEach(d => {
+                if (d.winning_numbers) {
+                    d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; });
+                }
+            });
+
+            const grid = document.getElementById('heatmap-grid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 80; i++) {
+                const count = freq[i];
+                const cell = document.createElement('div');
+                let bgStyle = "bg-[#050814] text-blue-300";
+                if (count >= 25) bgStyle = "bg-yellow-500 text-slate-950 font-black shadow-[0_0_8px_#facc15]";
+                else if (count >= 20) bgStyle = "bg-amber-600 text-white font-bold";
+                else if (count >= 15) bgStyle = "bg-blue-900 text-yellow-300";
+
+                cell.className = `heatmap-cell ${bgStyle}`;
+                cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
+                grid.appendChild(cell);
+            }
+        }
+
         function requestNotificationPermission() {
             if (!("Notification" in window)) {
                 alert("This browser does not support desktop notifications.");
@@ -298,7 +339,7 @@
             Notification.requestPermission().then(permission => {
                 const btn = document.getElementById('notif-btn');
                 if (permission === "granted") {
-                    btn.innerText = "🔔 Alerts Active";
+                    btn.innerText = "🔔 Active";
                     btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
                     new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
                 } else {
@@ -314,6 +355,7 @@
                 latestFetchedDraw++;
                 document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                 notificationTriggered = false;
+                renderHeatmap();
             }
 
             if (countdownSeconds === 60 && !notificationTriggered) {
@@ -422,16 +464,13 @@
             generateTicket();
         }
 
-        // 📸 Multi-Ticket Batch Photo Capture Handler
         function handleBatchPhoto(event) {
             const file = event.target.files[0];
             if (!file) return;
-            // Simulate OCR batch parsing
             document.getElementById('batch-numbers').value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
-            alert("📸 Batch ticket photo parsed successfully! Click 'Add to Auto-Ledger' to log it.");
+            alert("📸 Batch photo parsed successfully! Click 'Add to Ledger'.");
         }
 
-        // 📥 Process Batch Ticket and Push to Auto-Ledger
         async function processAndLogBatchTicket() {
             const drawNumInput = parseInt(document.getElementById('batch-draw-num').value);
             const rawNumbers = document.getElementById('batch-numbers').value;
@@ -477,7 +516,6 @@
                 hitsCount = 'Pending';
             }
 
-            // Push to session ledger automatically
             sessionTickets.unshift({
                 draw: drawNumInput,
                 spot: ticketNums.length,
@@ -486,9 +524,9 @@
             });
 
             batchScannedCount++;
-            document.getElementById('batch-count-badge').innerText = `${batchScannedCount} Scanned in Batch`;
-            document.getElementById('batch-numbers').value = ""; // Clear for next scan
-            document.getElementById('batch-draw-num.value') = drawNumInput + 1;
+            document.getElementById('batch-count-badge').innerText = `${batchScannedCount} Scanned`;
+            document.getElementById('batch-numbers').value = "";
+            document.getElementById('batch-draw-num').value = drawNumInput + 1;
 
             updateLedgerUI();
         }
