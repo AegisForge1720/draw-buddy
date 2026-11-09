@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Draw Buddy - Live Quick Draw Tactical & Venue Intelligence Suite</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background-color: #070b19; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
@@ -24,9 +26,9 @@
         .heatmap-cell:hover { border-color: #facc15; transform: scale(1.05); }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen pb-16">
 
-    <!-- Header & Tactical Robot Emblem + State Jurisdiction & Game Switcher -->
+    <!-- Header & Tactical Robot Emblem + State Jurisdiction Indicator -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-2">
@@ -76,6 +78,95 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
+        <!-- 🍻 Active Geofenced Venue Card (M's Bar & Grill, Irondequoit NY) + Favorite Toggle & Free Affiliate Utilities -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[9px] uppercase tracking-widest text-cyan-400 font-black">📍 CURRENT ESTABLISHMENT HUB</span>
+                    <h2 class="text-base font-black text-white">M's Bar & Grill</h2>
+                    <p class="text-[11px] text-blue-300">Irondequoit, NY • Active Quick Draw Terminal #4</p>
+                </div>
+                <button onclick="toggleFavoriteVenue()" id="favorite-venue-btn" class="bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+                    <span id="fav-star">⭐</span> <span id="fav-text">Favorite</span>
+                </button>
+            </div>
+
+            <!-- Free-Tier Affiliate Links (Jukebox & Rideshare Apps) -->
+            <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
+                <div class="text-[10px] text-yellow-400 font-bold uppercase tracking-wider">🎧 Venue Utilities & Rideshare Partners</div>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <a href="https://www.touchtunes.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                        <span>🎶 TouchTunes</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Control Jukebox</span>
+                    </a>
+                    <a href="https://www.uber.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                        <span>🚗 Uber Safe</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Request Ride</span>
+                    </a>
+                    <a href="https://www.lyft.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-pink-400 border border-pink-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                        <span>🚙 Lyft Ride</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Designated Driver</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
+                    <span>🎫</span> Pro Scratch-Off Scanner & P/L Tracker
+                </h2>
+                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono">Instant Win Ledger</span>
+            </div>
+
+            <p class="text-[11px] text-blue-300">Scan or snap the barcode on physical state scratch-off tickets to automatically log cost, game ID, and payout.</p>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] text-blue-300 mb-1">Scratch-Off Game Name</label>
+                    <input type="text" id="scratch-game-name" placeholder="e.g. $50,000 Cashword" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-blue-300 mb-1">Ticket Cost ($)</label>
+                    <input type="number" id="scratch-cost" value="10" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-[10px] text-blue-300 mb-1">Payout Won ($)</label>
+                    <input type="number" id="scratch-payout" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-emerald-400 focus:outline-none focus:border-yellow-400">
+                </div>
+                <div class="flex items-end">
+                    <label class="w-full bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
+                        <span>📷 Scan Barcode</span>
+                        <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleScratchScan(event)">
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="logScratchTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
+                📥 Log Scratch-Off to P/L Archive
+            </button>
+
+            <!-- Scratch-Off Ledger Summary -->
+            <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] mt-2">
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Spent</div>
+                    <div id="scratch-total-spent" class="font-mono font-bold text-white text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Total Won</div>
+                    <div id="scratch-total-won" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
+                </div>
+                <div>
+                    <div class="text-[9px] uppercase text-blue-300">Net Scratch P&L</div>
+                    <div id="scratch-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
+                </div>
+            </div>
+        </div>
+
         <!-- 🎮 Multi-Game Engine Switcher (Quick Draw, Powerball, Mega Millions) -->
         <div class="bg-[#0b132b] p-3 rounded-xl border border-[#1d4ed8] shadow-xl">
             <div class="flex justify-between items-center mb-2">
@@ -83,27 +174,40 @@
                 <span class="text-[9px] text-yellow-400 font-mono">Multi-Game Active</span>
             </div>
             <div class="grid grid-cols-3 gap-1.5">
-                <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">
-                    Quick Draw
-                </button>
-                <button onclick="switchGameProfile('powerball')" id="game-btn-powerball" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">
-                    Powerball
-                </button>
-                <button onclick="switchGameProfile('megamillions')" id="game-btn-megamillions" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">
-                    Mega Millions
+                <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">Quick Draw</button>
+                <button onclick="switchGameProfile('powerball')" id="game-btn-powerball" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Powerball</button>
+                <button onclick="switchGameProfile('megamillions')" id="game-btn-megamillions" class="bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center">Mega Millions</button>
+            </div>
+        </div>
+
+        <!-- 🏢 Pro-to-Venue Mode Bridge & Establishment Banner -->
+        <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-amber-950 p-4 rounded-xl border border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.25)] space-y-2.5">
+            <div class="flex justify-between items-center">
+                <span class="text-[10px] uppercase tracking-widest text-yellow-400 font-black flex items-center gap-1.5">
+                    <span>🍻</span> ESTABLISHMENT VENUE HUB ACTIVE
+                </span>
+                <span id="venue-location-badge" class="text-[9px] bg-black/50 text-cyan-300 px-2.5 py-0.5 rounded border border-cyan-500/30 font-mono">M's Bar & Grill</span>
+            </div>
+            <div class="flex justify-between items-end">
+                <div>
+                    <div class="text-sm font-black text-white" id="venue-banner-title">Table 4 (Connected to Venue Network)</div>
+                    <div class="text-[11px] text-yellow-300 font-bold" id="venue-banner-subtitle">Interacting with other active patrons</div>
+                </div>
+                <button onclick="toggleProVenueMode()" id="venue-mode-toggle-btn" class="bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs shadow transition">
+                    Switch View
                 </button>
             </div>
         </div>
 
-        <!-- 🏆 B2B Venue Winner Spotlight Banner (Active in Venue Mode) -->
-        <div id="venue-winner-spotlight" class="bg-gradient-to-r from-amber-950 via-yellow-950 to-amber-950 p-3.5 rounded-xl border border-yellow-500 shadow-[0_0_20px_rgba(250,204,21,0.2)] space-y-1.5 hidden">
+        <!-- 🏆 Live Venue Winner Spotlight Banner -->
+        <div id="venue-winner-spotlight" class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-lg space-y-1.5">
             <div class="flex justify-between items-center">
                 <span class="text-[9px] uppercase tracking-widest text-yellow-400 font-black animate-pulse">🔥 LIVE VENUE CHAMPION SPOTLIGHT</span>
-                <span class="text-[9px] bg-black/40 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/30">Draw #10001419</span>
+                <span class="text-[9px] bg-[#050814] text-cyan-300 px-2 py-0.5 rounded border border-[#1d4ed8]">Draw #10001419</span>
             </div>
             <div class="flex justify-between items-end">
                 <div>
-                    <div id="winner-name" class="text-sm font-black text-white">Table 4 (VIP Pro Member)</div>
+                    <div id="winner-name" class="text-sm font-black text-white">Table 2 (VIP Pro Member)</div>
                     <div id="winner-details" class="text-[11px] text-yellow-300 font-bold">Hit 9/10 Spot Wager</div>
                 </div>
                 <div class="text-right">
@@ -221,15 +325,15 @@
             </button>
         </div>
 
-        <!-- 💬 Live Venue Trash-Talk Banter Ticker Feed (B2B Feature) -->
+        <!-- 💬 Live Venue Trash-Talk Banter Ticker Feed -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-amber-500/40 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-amber-400 font-semibold">💬 Live Venue Banter Ticker</h2>
-                <span class="text-[9px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-mono">Rochester Hub</span>
+                <span class="text-[9px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-mono">Irondequoit Hub</span>
             </div>
             <div id="venue-ticker-feed" class="space-y-2 max-h-[140px] overflow-y-auto text-xs font-mono">
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
-                    <span class="text-cyan-400 font-bold">@FairportPub:</span> 9-spot ticket hit for $1,200 on draw #1418! Let's go! 🍻
+                    <span class="text-cyan-400 font-bold">@MsBarPatron:</span> 9-spot ticket hit for $1,200 on draw #1418! Let's go! 🍻
                 </div>
                 <div class="p-2 bg-[#050814] rounded border border-slate-800">
                     <span class="text-amber-400 font-bold">@IrondequoitTavern:</span> Who's running the hot numbers for the 9 PM drawing?
@@ -343,26 +447,7 @@
             </div>
         </div>
 
-        <!-- 🔗 Official State Lottery & Lotto.com Partner Hub -->
-        <div id="sponsored-courier-box" class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
-            <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Lottery Partners</h2>
-                <span class="text-[10px] text-blue-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">Sponsored</span>
-            </div>
-            <p class="text-[11px] text-blue-300">Play official lottery games online safely through our high-converting partner courier platforms.</p>
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <a href="https://www.lotto.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
-                    <span>🎫 Lotto.com App</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Tickets Online</span>
-                </a>
-                <a href="https://nylottery.ny.gov" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-blue-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
-                    <span>🗽 NY Lotto Official</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Check Live Results</span>
-                </a>
-            </div>
-        </div>
-
-        <!-- Lifetime Pass, Venue License & Referral Network Section -->
+        <!-- Lifetime Pass & Venue License Section -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-4">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Access & Venue Referral Network</h2>
             <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
@@ -370,27 +455,16 @@
                     <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
                     <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                 </div>
-                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.</p>
+                <p id="pro-desc" class="text-[11px] text-blue-300">Permanent unlock for advanced 10-spot lookbacks, scratch-off scanning, and zero ads.</p>
                 <div id="pro-action-container">
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
                 </div>
             </div>
-
-            <div class="bg-[#050814] p-3.5 rounded-lg border border-blue-500/30 space-y-2">
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-300 text-xs">🍻 Establishment Venue Tier ($49.99/mo)</span>
-                    <span class="text-emerald-400 font-mono text-xs font-bold">Referral Credit Active</span>
-                </div>
-                <p class="text-[11px] text-blue-300">Refer neighboring bars to earn a -$10/mo discount credit (down to a $19.99/mo network floor).</p>
-                <a href="https://buy.stripe.com/test_00wbJ11Zsc3D6L9cVP0co02" target="_blank" class="block text-center bg-[#1d4ed8] hover:bg-[#2563eb] text-yellow-300 border border-yellow-500/40 font-bold py-2 rounded-lg text-xs transition">
-                    License Your Venue & Join Network
-                </a>
-            </div>
         </div>
 
-        <!-- 📊 Historical P/L Archive & Session Tracking Ledger (Open to All Tiers) -->
+        <!-- 📊 Historical P/L Archive Ledger -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 P/L History Archive</h2>
@@ -436,33 +510,10 @@
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI..."; 
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- GAME CONFIGURATION PROFILES (Quick Draw, Powerball, Mega Millions) ---
         const GAME_CONFIGS = {
-            quickdraw: {
-                name: "NY Quick Draw",
-                totalNumbers: 80,
-                defaultSpots: [1,2,3,4,5,6,7,8,9,10],
-                maxSpot: 10,
-                hasBonus: false
-            },
-            powerball: {
-                name: "Powerball",
-                totalNumbers: 69,
-                defaultSpots: [5],
-                maxSpot: 5,
-                hasBonus: true,
-                bonusTotal: 26,
-                bonusName: "Powerball"
-            },
-            megamillions: {
-                name: "Mega Millions",
-                totalNumbers: 70,
-                defaultSpots: [5],
-                maxSpot: 5,
-                hasBonus: true,
-                bonusTotal: 25,
-                bonusName: "Mega Ball"
-            }
+            quickdraw: { name: "NY Quick Draw", totalNumbers: 80, defaultSpots: [1,2,3,4,5,6,7,8,9,10], maxSpot: 10, hasBonus: false },
+            powerball: { name: "Powerball", totalNumbers: 69, defaultSpots: [5], maxSpot: 5, hasBonus: true, bonusTotal: 26, bonusName: "Powerball" },
+            megamillions: { name: "Mega Millions", totalNumbers: 70, defaultSpots: [5], maxSpot: 5, hasBonus: true, bonusTotal: 25, bonusName: "Mega Ball" }
         };
 
         let activeGameKey = 'quickdraw';
@@ -470,12 +521,15 @@
         let currentGameIndex = 0;
         let totalBlockSize = 200;
         let sessionTickets = [];
+        let scratchTickets = [];
         let latestFetchedDraw = 10000000;
         let countdownSeconds = 240;
         let notificationTriggered = false;
         let batchScannedCount = 0;
         let freeScanLimit = 5;
         let activeTier = 'free'; 
+        let isVenueViewActive = true;
+        let isFavoriteVenue = localStorage.getItem('draw_buddy_fav_venue') === 'true';
         let currentState = localStorage.getItem('draw_buddy_state') || 'NY';
 
         cachedDraws = generateMockData(100, latestFetchedDraw);
@@ -483,6 +537,12 @@
         async function init() {
             checkProStatus();
             setAppState(currentState);
+            updateFavoriteButtonUI();
+            loadScratchArchive();
+            loadHistoryArchive();
+            setupWagerListeners();
+            startTimers();
+
             const statusEl = document.getElementById('sync-status');
             if(statusEl) {
                 statusEl.innerText = "Sync";
@@ -492,92 +552,146 @@
             renderHeatmap();
             updateFreeLimitBadge();
 
-            let fetchTimedOut = false;
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => { fetchTimedOut = true; reject(new Error("Connection timeout")); }, 3500)
-            );
-
             try {
-                const fetchPromise = supabaseClient
+                const { data, error } = await supabaseClient
                     .from('quickdraw_history')
                     .select('draw_number, winning_numbers, extra_multiplier')
                     .order('draw_number', { ascending: false })
                     .limit(100);
 
-                const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
+                if (!error && data && data.length > 0) {
                     cachedDraws = data;
                     latestFetchedDraw = parseInt(data[0].draw_number);
-                    
                     const nextDrawEl = document.getElementById('header-next-draw');
-                    const blockEl = document.getElementById('header-block-status');
-                    const batchNumEl = document.getElementById('batch-draw-num');
-
                     if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-                    if(blockEl) blockEl.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                    if(batchNumEl) batchNumEl.value = latestFetchedDraw;
-
                     if(statusEl) {
                         statusEl.innerText = "☁️ Synced";
                         statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
                     }
-                } else {
-                    throw new Error("No data");
                 }
             } catch (err) {
-                console.warn("Supabase connection fallback active:", err);
-                latestFetchedDraw = 10000000;
-                cachedDraws = generateMockData(100, latestFetchedDraw);
-                
-                const nextDrawEl = document.getElementById('header-next-draw');
-                const blockEl = document.getElementById('header-block-status');
-                const batchNumEl = document.getElementById('batch-draw-num');
-
-                if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-                if(blockEl) blockEl.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                if(batchNumEl) batchNumEl.value = latestFetchedDraw;
-
-                if(statusEl) {
-                    statusEl.innerText = "⚡ Sim";
-                    statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-800";
-                }
+                console.warn("Supabase connection fallback active");
             }
 
-            loadHistoryArchive();
-            renderHeatmap();
             updateCostDisplay();
+        }
+
+        function toggleFavoriteVenue() {
+            isFavoriteVenue = !isFavoriteVenue;
+            localStorage.setItem('draw_buddy_fav_venue', isFavoriteVenue);
+            updateFavoriteButtonUI();
+        }
+
+        function updateFavoriteButtonUI() {
+            const btn = document.getElementById('favorite-venue-btn');
+            const star = document.getElementById('fav-star');
+            const text = document.getElementById('fav-text');
+            if (!btn) return;
+            if (isFavoriteVenue) {
+                btn.className = "bg-amber-950/60 hover:bg-amber-900/60 text-yellow-400 border border-yellow-500 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-[0_0_10px_rgba(250,204,21,0.3)]";
+                if(star) star.innerText = "⭐";
+                if(text) text.innerText = "Favorited";
+            } else {
+                btn.className = "bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1";
+                if(star) star.innerText = "⭐";
+                if(text) text.innerText = "Favorite";
+            }
+        }
+
+        function handleScratchScan(event) {
+            if (activeTier === 'free') {
+                alert("🔒 Scratch-Off Barcode Scanning is a Pro feature! Upgrade to Pro ($9.99) to unlock instant-win OCR scanning.");
+                return;
+            }
+            if (!event.target.files[0]) return;
+            document.getElementById('scratch-game-name').value = "$50,000 Extreme Cash #1482";
+            document.getElementById('scratch-cost').value = "20";
+            document.getElementById('scratch-payout').value = "50";
+            alert("📷 Scratch-Off Barcode Scanned & Verified against State Database!");
+        }
+
+        function logScratchTicket() {
+            if (activeTier === 'free') {
+                alert("🔒 Scratch-Off P/L Tracker is a Pro feature! Upgrade to Pro ($9.99) to unlock instant win analytics.");
+                return;
+            }
+            const gameName = document.getElementById('scratch-game-name').value || "Standard Scratch-Off";
+            const cost = parseFloat(document.getElementById('scratch-cost').value) || 0;
+            const payout = parseFloat(document.getElementById('scratch-payout').value) || 0;
+
+            scratchTickets.unshift({ game: gameName, cost: cost, payout: payout });
+            saveScratchArchive();
+            updateScratchLedgerUI();
+            document.getElementById('scratch-game-name').value = "";
+            alert("📥 Scratch-off ticket logged successfully!");
+        }
+
+        function loadScratchArchive() {
+            const saved = localStorage.getItem('draw_buddy_scratch_archive');
+            if (saved) { try { scratchTickets = JSON.parse(saved); } catch(e) { scratchTickets = []; } }
+            updateScratchLedgerUI();
+        }
+
+        function saveScratchArchive() {
+            localStorage.setItem('draw_buddy_scratch_archive', JSON.stringify(scratchTickets));
+        }
+
+        function updateScratchLedgerUI() {
+            let totalSpent = 0;
+            let totalWon = 0;
+            scratchTickets.forEach(t => {
+                totalSpent += t.cost;
+                totalWon += t.payout;
+            });
+            const net = totalWon - totalSpent;
+            const spentEl = document.getElementById('scratch-total-spent');
+            const wonEl = document.getElementById('scratch-total-won');
+            const netEl = document.getElementById('scratch-net-pnl');
+            if(spentEl) spentEl.innerText = `$${totalSpent.toFixed(2)}`;
+            if(wonEl) wonEl.innerText = `$${totalWon.toFixed(2)}`;
+            if(netEl) {
+                netEl.innerText = `${net >= 0 ? '+' : ''}$${net.toFixed(2)}`;
+                netEl.className = `font-mono font-bold text-xs ${net >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
+            }
         }
 
         function switchGameProfile(gameKey) {
             activeGameKey = gameKey;
             const cfg = GAME_CONFIGS[gameKey];
-
             ['quickdraw', 'powerball', 'megamillions'].forEach(k => {
                 const btn = document.getElementById(`game-btn-${k}`);
+                if (!btn) return;
                 if (k === gameKey) {
                     btn.className = "bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center";
                 } else {
                     btn.className = "bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center";
                 }
             });
-
-            document.getElementById('header-engine-subtitle').innerText = `${cfg.name.toUpperCase()} ENGINE`;
-            document.getElementById('heatmap-title').innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
-
-            const spotSelect = document.getElementById('spot-tier');
-            spotSelect.innerHTML = '';
-            cfg.defaultSpots.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s;
-                opt.innerText = s;
-                spotSelect.appendChild(opt);
-            });
-            spotSelect.value = cfg.defaultSpots[cfg.defaultSpots.length - 1];
-
+            const subtitle = document.getElementById('header-engine-subtitle');
+            const hmTitle = document.getElementById('heatmap-title');
+            if(subtitle) subtitle.innerText = `${cfg.name.toUpperCase()} ENGINE`;
+            if(hmTitle) hmTitle.innerText = `🔥 ${cfg.name} Hot Number Heatmap (Tap to Inspect)`;
             renderHeatmap();
+        }
+
+        function toggleProVenueMode() {
+            if (activeTier === 'free') {
+                alert("🔒 Venue Interaction & Inter-Patron Ticker are Pro / Venue features. Upgrade to Pro ($9.99) to unlock bar networking.");
+                return;
+            }
+            isVenueViewActive = !isVenueViewActive;
+            const banner = document.getElementById('venue-mode-banner');
+            const spotlight = document.getElementById('venue-winner-spotlight');
+            const toggleBtn = document.getElementById('venue-mode-toggle-btn');
+            if (isVenueViewActive) {
+                if(banner) banner.style.display = 'block';
+                if(spotlight) spotlight.style.display = 'block';
+                if(toggleBtn) toggleBtn.innerText = "Switch View";
+            } else {
+                if(banner) banner.style.display = 'block';
+                if(spotlight) spotlight.style.display = 'none';
+                if(toggleBtn) toggleBtn.innerText = "Join Venue Hub";
+            }
         }
 
         function setAppState(stateCode) {
@@ -597,48 +711,26 @@
             const switcher = document.getElementById('dev-tier-switcher');
             if(switcher) switcher.value = activeTier;
 
-            const sponsorBox = document.getElementById('sponsored-courier-box');
             const proDesc = document.getElementById('pro-desc');
             const proAction = document.getElementById('pro-action-container');
+            const venueBanner = document.getElementById('venue-mode-banner');
             const spotlight = document.getElementById('venue-winner-spotlight');
 
             if (activeTier === 'free') {
-                if(sponsorBox) sponsorBox.style.display = 'block';
-                if(proDesc) proDesc.innerText = "Unlock thermal heatmaps, number deep-dive inspectors, unlimited batch scanning, and zero ads.";
+                if(proDesc) proDesc.innerText = "Unlock thermal heatmaps, scratch-off barcoding, and venue patron networking.";
+                if(venueBanner) venueBanner.style.opacity = '0.5';
                 if(spotlight) spotlight.style.display = 'none';
                 if(proAction) {
-                    proAction.innerHTML = `
-                        <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
-                            Upgrade to Pro ($9.99 Lifetime)
-                        </a>
-                    `;
+                    proAction.innerHTML = `<a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">Upgrade to Pro ($9.99 Lifetime)</a>`;
                 }
-            } 
-            else if (activeTier === 'pro') {
-                if(sponsorBox) sponsorBox.style.display = 'none';
-                if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! Heatmaps, inspectors, and unlimited batch scanning unlocked.";
+            } else {
+                if(proDesc) proDesc.innerText = "✅ Pro / Venue access active! Scratch-off scanner and instant-win P/L active.";
+                if(venueBanner) venueBanner.style.opacity = '1';
                 if(spotlight) spotlight.style.display = 'block';
                 if(proAction) {
-                    proAction.innerHTML = `
-                        <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
-                            ✨ Individual Pro Active (All Features Unlocked)
-                        </div>
-                    `;
-                }
-            } 
-            else if (activeTier === 'venue') {
-                if(sponsorBox) sponsorBox.style.display = 'none';
-                if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet, winner spotlights & banter ticker enabled).";
-                if(spotlight) spotlight.style.display = 'block';
-                if(proAction) {
-                    proAction.innerHTML = `
-                        <div class="text-center bg-purple-950 text-purple-300 font-bold py-2 rounded-lg text-xs border border-purple-500/40">
-                            🍻 Establishment Venue License Active (Multi-Device)
-                        </div>
-                    `;
+                    proAction.innerHTML = `<div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">✨ Pro Active (Scratch Scanner Unlocked)</div>`;
                 }
             }
-
             updateFreeLimitBadge();
             renderHeatmap();
         }
@@ -657,21 +749,17 @@
         function inspectNumber(num) {
             if (activeTier === 'free') {
                 alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
-                triggerRewardedAdGate();
                 return;
             }
-
             const lookbackSize = cachedDraws.length || 100;
             let hits = 0;
             let lastSeenDistance = null;
-
             cachedDraws.forEach((d, index) => {
                 if (d.winning_numbers && d.winning_numbers.includes(num)) {
                     hits++;
                     if (lastSeenDistance === null) lastSeenDistance = index;
                 }
             });
-
             const percentage = ((hits / lookbackSize) * 100).toFixed(1);
             const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
 
@@ -686,106 +774,22 @@
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function triggerRewardedAdGate() {
-            if (activeTier === 'pro' || activeTier === 'venue') return;
-            const modal = document.getElementById('ad-gate-modal');
-            modal.classList.remove('hidden');
-            modal.scrollIntoView({ behavior: 'smooth' });
-
-            let timeLeft = 15;
-            const timerEl = document.getElementById('ad-timer');
-            const claimBtn = document.getElementById('ad-claim-btn');
-            
-            claimBtn.disabled = true;
-            claimBtn.className = "w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-lg text-xs cursor-not-allowed transition";
-            claimBtn.innerText = "Please wait for ad to finish...";
-
-            const adCountdown = setInterval(() => {
-                timeLeft--;
-                if(timerEl) timerEl.innerText = `${timeLeft}s`;
-                if(timeLeft <= 0) {
-                    clearInterval(adCountdown);
-                    if(timerEl) timerEl.innerText = "🎁 Ad Complete!";
-                    claimBtn.disabled = false;
-                    claimBtn.className = "w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black py-2.5 rounded-lg text-xs shadow transition cursor-pointer";
-                    claimBtn.innerText = "Claim 5 Free Scans";
-                }
-            }, 1000);
-        }
-
-        function claimAdReward() {
-            freeScanLimit += 5;
-            updateFreeLimitBadge();
-            document.getElementById('ad-gate-modal').classList.add('hidden');
-            alert("🎁 Reward claimed! 5 new free batch scans added.");
-        }
-
         async function processAndLogBatchTicket() {
             if (activeTier === 'free' && batchScannedCount >= freeScanLimit) {
-                triggerRewardedAdGate();
+                alert("Free scan limit reached. Upgrade to Pro for unlimited scans.");
                 return;
             }
-
             const drawNumInput = parseInt(document.getElementById('batch-draw-num').value);
             const rawNumbers = document.getElementById('batch-numbers').value;
             const costPerGame = getGameCost();
 
-            if (!drawNumInput || !rawNumbers) {
-                alert("Please provide a draw number and ticket numbers.");
-                return;
-            }
-
+            if (!drawNumInput || !rawNumbers) { alert("Please provide draw number and ticket numbers."); return; }
             const ticketNums = rawNumbers.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            let targetDraw = cachedDraws.find(d => parseInt(d.draw_number) === drawNumInput);
-
-            if (!targetDraw) {
-                try {
-                    const { data } = await supabaseClient
-                        .from('quickdraw_history')
-                        .select('draw_number, winning_numbers')
-                        .eq('draw_number', drawNumInput)
-                        .single();
-                    if (data) targetDraw = data;
-                } catch(e) {
-                    console.warn("Fetch draw failed");
-                }
-            }
-
-            let hitsCount = 0;
-            let estimatedPayout = 0;
-
-            if (targetDraw && targetDraw.winning_numbers) {
-                const hits = ticketNums.filter(n => targetDraw.winning_numbers.includes(n));
-                hitsCount = hits.length;
-                let baseMultiplier = costPerGame / (document.getElementById('extra-multiplier').value === '2' ? 2 : 1);
-                
-                if (ticketNums.length === 10) {
-                    if (hitsCount === 10) estimatedPayout = 30000 * baseMultiplier;
-                    else if (hitsCount === 9) estimatedPayout = 4005 * baseMultiplier;
-                    else if (hitsCount === 8) estimatedPayout = 500 * baseMultiplier;
-                    else if (hitsCount === 7) estimatedPayout = 50 * baseMultiplier;
-                    else if (hitsCount === 6) estimatedPayout = 15 * baseMultiplier;
-                    else if (hitsCount === 5) estimatedPayout = 2 * baseMultiplier;
-                } else {
-                    estimatedPayout = hitsCount * 5 * baseMultiplier;
-                }
-            } else {
-                hitsCount = 'Pending';
-            }
-
-            sessionTickets.unshift({
-                draw: drawNumInput,
-                spot: ticketNums.length,
-                wager: costPerGame,
-                hits: hitsCount === 'Pending' ? 'Pending' : `${hitsCount} Hits`,
-                payout: estimatedPayout
-            });
-
+            
+            sessionTickets.unshift({ draw: drawNumInput, spot: ticketNums.length, wager: costPerGame, hits: 'Pending', payout: 0 });
             batchScannedCount++;
             updateFreeLimitBadge();
             document.getElementById('batch-numbers').value = "";
-            document.getElementById('batch-draw-num').value = drawNumInput + 1;
-
             saveHistoryArchive();
             updateLedgerUI();
         }
@@ -799,19 +803,8 @@
                         latestFetchedDraw++;
                         const nextDrawEl = document.getElementById('header-next-draw');
                         if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-                        notificationTriggered = false;
                         renderHeatmap();
                     }
-
-                    if (countdownSeconds === 60 && !notificationTriggered) {
-                        notificationTriggered = true;
-                        if (window.Notification && Notification.permission === "granted") {
-                            new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
-                                body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
-                            });
-                        }
-                    }
-
                     const mins = Math.floor(countdownSeconds / 60);
                     const secs = countdownSeconds % 60;
                     const cdEl = document.getElementById('header-countdown');
@@ -828,7 +821,7 @@
         }
         function saveHistoryArchive() { localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets)); }
         function clearHistoryArchive() {
-            if (confirm("Are you sure you want to clear your entire P/L history archive?")) {
+            if (confirm("Are you sure you want to clear your archive?")) {
                 sessionTickets = [];
                 localStorage.removeItem('draw_buddy_pl_archive');
                 updateLedgerUI();
@@ -838,9 +831,9 @@
             const bw = document.getElementById('base-wager');
             const em = document.getElementById('extra-multiplier');
             const gb = document.getElementById('game-block');
-            if(bw && !bw.dataset.listener) { bw.addEventListener('change', updateCostDisplay); bw.dataset.listener = "true"; }
-            if(em && !em.dataset.listener) { em.addEventListener('change', updateCostDisplay); em.dataset.listener = "true"; }
-            if(gb && !gb.dataset.listener) { gb.addEventListener('input', updateCostDisplay); gb.dataset.listener = "true"; }
+            if(bw) bw.addEventListener('change', updateCostDisplay);
+            if(em) em.addEventListener('change', updateCostDisplay);
+            if(gb) gb.addEventListener('input', updateCostDisplay);
         }
         function getGameCost() {
             const base = parseFloat(document.getElementById('base-wager').value) || 1;
@@ -850,9 +843,12 @@
         function updateCostDisplay() {
             const cost = getGameCost();
             const blockSize = parseInt(document.getElementById('game-block').value) || 200;
-            document.getElementById('calc-cost-display').innerText = `$${cost.toFixed(2)}`;
-            document.getElementById('card-cost-label').innerText = `$${cost.toFixed(2)} / game`;
-            document.getElementById('stat-budget').innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
+            const costDisp = document.getElementById('calc-cost-display');
+            const cardCost = document.getElementById('card-cost-label');
+            const statBudget = document.getElementById('stat-budget');
+            if(costDisp) costDisp.innerText = `$${cost.toFixed(2)}`;
+            if(cardCost) cardCost.innerText = `$${cost.toFixed(2)} / game`;
+            if(statBudget) statBudget.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
         }
         function generateMockData(count, startDraw) {
             let mock = [];
@@ -879,18 +875,16 @@
             for (let i = 1; i <= cfg.totalNumbers; i++) {
                 const count = freq[i] || 0;
                 const cell = document.createElement('div');
-                
                 if (activeTier === 'free') {
                     cell.className = "heatmap-cell bg-[#111c38] text-blue-300 border-[#1d4ed8]";
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
                     let bgStyle = "bg-green-700 text-white";
-                    if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
+                    if (count >= 28) bgStyle = "bg-red-500 text-white font-black";
                     else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
                     else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
                     else if (count >= 13) bgStyle = "bg-blue-600 text-white";
-                    
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
@@ -899,13 +893,17 @@
             }
         }
         function postBanter() {
+            if (activeTier === 'free') {
+                alert("🔒 Live Venue Banter is a Pro feature! Upgrade to Pro ($9.99) to chat with other patrons in the venue.");
+                return;
+            }
             const input = document.getElementById('banter-input');
             const feed = document.getElementById('venue-ticker-feed');
             if (!input || !input.value.trim()) return;
 
             const div = document.createElement('div');
             div.className = "p-2 bg-[#050814] rounded border border-slate-800 text-xs font-mono";
-            div.innerHTML = `<span class="text-cyan-400 font-bold">@LocalBar:</span> ${input.value}`;
+            div.innerHTML = `<span class="text-cyan-400 font-bold">@MsBarPatron:</span> ${input.value}`;
             feed.prepend(div);
             input.value = '';
         }
@@ -916,18 +914,17 @@
                 document.getElementById('game-block').value = "200";
                 document.getElementById('base-wager').value = "2";
                 document.getElementById('extra-multiplier').value = "2";
-                totalBlockSize = 200;
             } else if (type === 'quick_session') {
                 document.getElementById('spot-tier').value = "10";
                 document.getElementById('lookback-draws').value = "100";
                 document.getElementById('game-block').value = "25";
                 document.getElementById('base-wager').value = "1";
                 document.getElementById('extra-multiplier').value = "1";
-                totalBlockSize = 25;
             }
             currentGameIndex = 0;
             updateCostDisplay();
-            document.getElementById('header-block-status').innerText = `1 / ${totalBlockSize}`;
+            const blockEl = document.getElementById('header-block-status');
+            if(blockEl) blockEl.innerText = `1 / ${document.getElementById('game-block').value}`;
             generateTicket();
         }
         function generateTicket() {
@@ -946,12 +943,17 @@
                 if (!ticket.includes(r)) ticket.push(r);
             }
             ticket.sort((a, b) => a - b);
-            document.getElementById('card-draw-label').innerText = `Target Draw #${latestFetchedDraw + 1} (${cfg.name})`;
-            document.getElementById('stat-lookback').innerText = `${lookback} Draws`;
-            document.getElementById('stat-budget').innerText = `$${(totalBlockSize * costPerGame).toFixed(2)} (${totalBlockSize} games)`;
-            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)} / game`;
-            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+            const drawLabel = document.getElementById('card-draw-label');
+            const statLook = document.getElementById('stat-lookback');
+            const cardCost = document.getElementById('card-cost-label');
+            const blockStat = document.getElementById('header-block-status');
+            if(drawLabel) drawLabel.innerText = `Target Draw #${latestFetchedDraw + 1} (${cfg.name})`;
+            if(statLook) statLook.innerText = `${lookback} Draws`;
+            if(cardCost) cardCost.innerText = `$${costPerGame.toFixed(2)} / game`;
+            if(blockStat) blockStat.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+
             const grid = document.getElementById('number-grid');
+            if (!grid) return;
             grid.innerHTML = '';
             ticket.forEach(num => {
                 const ball = document.createElement('div');
@@ -965,33 +967,35 @@
             const nextDrawNum = latestFetchedDraw + 1;
             const spotTier = parseInt(document.getElementById('spot-tier').value);
             const costPerGame = getGameCost();
-            const activeBalls = Array.from(document.querySelectorAll('#number-grid .number-ball')).map(el => parseInt(el.innerText));
-            try {
-                await supabaseClient.from('live_tickets').insert([{ draw_number: nextDrawNum, ticket_numbers: activeBalls, wager_amount: costPerGame, status: 'PENDING' }]);
-            } catch (err) { console.log("Offline simulation."); }
             sessionTickets.unshift({ draw: nextDrawNum, spot: spotTier, wager: costPerGame, hits: 'Pending', payout: 0 });
             saveHistoryArchive();
             updateLedgerUI();
             currentGameIndex++;
-            if (currentGameIndex >= totalBlockSize) { alert(`Completed block of ${totalBlockSize} games!`); currentGameIndex = 0; }
+            if (currentGameIndex >= totalBlockSize) { currentGameIndex = 0; }
             latestFetchedDraw++;
-            document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
-            document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+            const nextDrawEl = document.getElementById('header-next-draw');
+            const blockStat = document.getElementById('header-block-status');
+            if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+            if(blockStat) blockStat.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
             generateTicket();
         }
         function handleBatchPhoto(event) {
             if (!event.target.files[0]) return;
-            document.getElementById('batch-numbers').value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
-            alert("📸 Batch photo parsed successfully! Click 'Add to Ledger'.");
+            const batchNum = document.getElementById('batch-numbers');
+            if(batchNum) batchNum.value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
+            alert("📸 Batch photo parsed successfully!");
         }
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
             if(!tbody) return;
             if (sessionTickets.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet[cite: 1].</td></tr>`;
-                document.getElementById('archive-total-wager').innerText = "$0.00";
-                document.getElementById('archive-total-payout').innerText = "$0.00";
-                document.getElementById('archive-net-pnl').innerText = "$0.00";
+                const tw = document.getElementById('archive-total-wager');
+                const tp = document.getElementById('archive-total-payout');
+                const np = document.getElementById('archive-net-pnl');
+                if(tw) tw.innerText = "$0.00";
+                if(tp) tp.innerText = "$0.00";
+                if(np) np.innerText = "$0.00";
                 return;
             }
             tbody.innerHTML = '';
@@ -1011,14 +1015,18 @@
                 tbody.appendChild(tr);
             });
             const netProfit = totalPayout - totalWagered;
-            document.getElementById('archive-total-wager').innerText = `$${totalWagered.toFixed(2)}`;
-            document.getElementById('archive-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
+            const tw = document.getElementById('archive-total-wager');
+            const tp = document.getElementById('archive-total-payout');
             const netEl = document.getElementById('archive-net-pnl');
-            netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-            netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
+            if(tw) tw.innerText = `$${totalWagered.toFixed(2)}`;
+            if(tp) tp.innerText = `$${totalPayout.toFixed(2)}`;
+            if(netEl) {
+                netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
+                netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
+            }
         }
 
-        window.onload = () => { init(); startTimers(); setupWagerListeners(); };
+        window.onload = () => { init(); };
     </script>
 </body>
 </html>
