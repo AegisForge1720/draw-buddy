@@ -37,8 +37,13 @@
                 </div>
             </div>
             <div class="flex items-center space-x-2">
-                <span id="tier-badge" class="text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold">FREE TIER</span>
-                <div id="sync-status" class="text-xs px-2.5 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
+                <!-- Dev Tier Switcher Dropdown -->
+                <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[10px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-2 py-1 rounded font-bold focus:outline-none">
+                    <option value="free">🧪 Free Tier</option>
+                    <option value="pro">🧪 Ind. Pro ($9.99)</option>
+                    <option value="venue">🧪 Venue Tier ($49.99)</option>
+                </select>
+                <div id="sync-status" class="text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]">Connecting...</div>
             </div>
         </div>
 
@@ -268,7 +273,7 @@
             </div>
         </div>
 
-        <!-- 🔗 Official State Lottery & Lotto.com Partner Hub (Free Tier Monetization) -->
+        <!-- 🔗 Official State Lottery & Lotto.com Partner Hub -->
         <div id="sponsored-courier-box" class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Lottery Partners</h2>
@@ -302,9 +307,6 @@
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access
                     </a>
-                    <button onclick="toggleProSimulation()" class="w-full mt-1 bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-1.5 rounded-lg text-[10px] transition">
-                        ⚡ [Dev] Simulate Pro Checkout Success
-                    </button>
                 </div>
             </div>
 
@@ -451,37 +453,72 @@
             updateCostDisplay();
         }
 
-        function checkProStatus() {
-            const license = localStorage.getItem('draw_buddy_pro_license');
-            if (license === 'active') {
-                isProUser = true;
-                document.getElementById('tier-badge').innerText = "PRO LIFETIME";
-                document.getElementById('tier-badge').className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
-                
-                const sponsorBox = document.getElementById('sponsored-courier-box');
-                if(sponsorBox) sponsorBox.style.display = 'none';
-
-                document.getElementById('pro-desc').innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
-                document.getElementById('pro-action-container').innerHTML = `
-                    <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
-                        ✨ Pro License Verified & Active
-                    </div>
-                `;
-            } else {
-                isProUser = false;
-            }
+        // 🧪 Tier Switcher Logic for Testing
+        function switchTestTier(tier) {
+            localStorage.setItem('draw_buddy_active_tier', tier);
+            checkProStatus();
         }
 
-        function toggleProSimulation() {
-            const current = localStorage.getItem('draw_buddy_pro_license');
-            if (current === 'active') {
-                localStorage.removeItem('draw_buddy_pro_license');
-                alert("Simulated Pro License deactivated.");
-            } else {
-                localStorage.setItem('draw_buddy_pro_license', 'active');
-                alert("🎉 Simulated Pro License activated! Enjoy ad-free unlimited access.");
+        function checkProStatus() {
+            const savedTier = localStorage.getItem('draw_buddy_active_tier') || 'free';
+            const switcher = document.getElementById('dev-tier-switcher');
+            if(switcher) switcher.value = savedTier;
+
+            const tierBadge = document.getElementById('tier-badge');
+            const sponsorBox = document.getElementById('sponsored-courier-box');
+            const proDesc = document.getElementById('pro-desc');
+            const proAction = document.getElementById('pro-action-container');
+
+            if (savedTier === 'free') {
+                isProUser = false;
+                if(tierBadge) {
+                    tierBadge.innerText = "FREE TIER";
+                    tierBadge.className = "text-[10px] bg-blue-950 text-blue-300 border border-blue-600 px-2.5 py-1 rounded font-bold";
+                }
+                if(sponsorBox) sponsorBox.style.display = 'block';
+                if(proDesc) proDesc.innerText = "Permanent unlock for advanced 10-spot lookbacks, session tracking, and zero ads.";
+                if(proAction) {
+                    proAction.innerHTML = `
+                        <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                            Get Lifetime Access
+                        </a>
+                    `;
+                }
+            } 
+            else if (savedTier === 'pro') {
+                isProUser = true;
+                if(tierBadge) {
+                    tierBadge.innerText = "PRO LIFETIME";
+                    tierBadge.className = "text-[10px] bg-yellow-950 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#facc15]";
+                }
+                if(sponsorBox) sponsorBox.style.display = 'none';
+                if(proDesc) proDesc.innerText = "✅ Lifetime Pro active! All ads removed, unlimited batch scanning unlocked.";
+                if(proAction) {
+                    proAction.innerHTML = `
+                        <div class="text-center bg-emerald-950 text-emerald-400 font-bold py-2 rounded-lg text-xs border border-emerald-500/40">
+                            ✨ Individual Pro Active
+                        </div>
+                    `;
+                }
+            } 
+            else if (savedTier === 'venue') {
+                isProUser = true;
+                if(tierBadge) {
+                    tierBadge.innerText = "VENUE TIER";
+                    tierBadge.className = "text-[10px] bg-purple-950 text-purple-300 border border-purple-500 px-2.5 py-1 rounded font-black shadow-[0_0_8px_#c084fc]";
+                }
+                if(sponsorBox) sponsorBox.style.display = 'none';
+                if(proDesc) proDesc.innerText = "🏢 Establishment Venue License active (Multi-tablet & custom branding enabled).";
+                if(proAction) {
+                    proAction.innerHTML = `
+                        <div class="text-center bg-purple-950 text-purple-300 font-bold py-2 rounded-lg text-xs border border-purple-500/40">
+                            🍻 Establishment Venue License Active
+                        </div>
+                    `;
+                }
             }
-            checkProStatus();
+
+            updateFreeLimitBadge();
         }
 
         function updateFreeLimitBadge() {
@@ -887,7 +924,6 @@
                 document.getElementById('archive-total-wager').innerText = "$0.00";
                 document.getElementById('archive-total-payout').innerText = "$0.00";
                 document.getElementById('archive-net-pnl').innerText = "$0.00";
-                document.getElementById('session-pnl').innerText = "Net P&L: $0.00";
                 return;
             }
 
@@ -918,10 +954,6 @@
             const netEl = document.getElementById('archive-net-pnl');
             netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
             netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
-
-            const pnlEl = document.getElementById('session-pnl');
-            pnlEl.innerText = `Net P&L: ${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-            pnlEl.className = `text-xs font-bold ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
         }
 
         window.onload = () => {
