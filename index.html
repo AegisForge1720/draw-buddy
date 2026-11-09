@@ -19,8 +19,9 @@
         .ball-hit { background: linear-gradient(135deg, #10b981, #059669); color: white; box-shadow: 0 0 15px rgba(16, 185, 129, 0.5); border: 1px solid #34d399; }
         .heatmap-cell {
             aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1px solid #1d4ed8; transition: all 0.2s;
+            border-radius: 8px; font-weight: 700; font-size: 0.85rem; border: 1px solid #1d4ed8; transition: all 0.2s; cursor: pointer;
         }
+        .heatmap-cell:hover { border-color: #facc15; transform: scale(1.05); }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -193,10 +194,10 @@
             </div>
         </div>
 
-        <!-- 🔥 Venue Hot Number Heatmap Mode (1-80 Grid with Red-to-Green Thermal Legend) -->
+        <!-- 🔥 Venue Hot Number Heatmap Mode (Interactive with Deep-Dive Inspector) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 House Hot Number Heatmap (1-80)</h2>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 House Hot Number Heatmap (Tap to Inspect)</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
                     <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
                     <span class="text-orange-400 flex items-center"><span class="w-2 h-2 bg-orange-500 rounded-full inline-block mr-1"></span></span>
@@ -206,7 +207,36 @@
                 </div>
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1">
-                <!-- 1 to 80 cells rendered dynamically -->
+                <!-- 1 to 80 cells rendered dynamically with click handlers -->
+            </div>
+        </div>
+
+        <!-- 🔍 Number Statistics Inspector Modal / Card -->
+        <div id="inspector-card" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-2xl space-y-3 hidden">
+            <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
+                <div class="flex items-center space-x-2">
+                    <div id="inspector-ball-badge" class="w-8 h-8 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-sm">#--</div>
+                    <h3 id="inspector-title" class="font-bold text-white text-sm">Number Statistics Inspector</h3>
+                </div>
+                <button onclick="closeInspector()" class="text-blue-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕ Close</button>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
+                    <span class="text-blue-300 block text-[10px]">Total Hits (Lookback)</span>
+                    <span id="stat-hits" class="font-bold text-yellow-400 text-sm">--</span>
+                </div>
+                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
+                    <span class="text-blue-300 block text-[10px]">Hit Percentage</span>
+                    <span id="stat-percentage" class="font-bold text-emerald-400 text-sm">--%</span>
+                </div>
+                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
+                    <span class="text-blue-300 block text-[10px]">Last Seen Draw Distance</span>
+                    <span id="stat-last-seen" class="font-bold text-cyan-300 text-sm">-- draws ago</span>
+                </div>
+                <div class="bg-[#050814] p-2.5 rounded border border-[#1d4ed8]">
+                    <span class="text-blue-300 block text-[10px]">Avg Draw Interval</span>
+                    <span id="stat-interval" class="font-bold text-white text-sm">~4.2 draws</span>
+                </div>
             </div>
         </div>
 
@@ -339,15 +369,43 @@
             updateCostDisplay();
         }
 
-        // Load P/L History Archive from LocalStorage / Supabase Persistence
+        // 🔍 Number Deep-Dive Inspector Logic
+        function inspectNumber(num) {
+            const lookbackSize = cachedDraws.length;
+            let hits = 0;
+            let lastSeenDistance = null;
+
+            cachedDraws.forEach((d, index) => {
+                if (d.winning_numbers && d.winning_numbers.includes(num)) {
+                    hits++;
+                    if (lastSeenDistance === null) {
+                        lastSeenDistance = index; // index 0 is most recent draw
+                    }
+                }
+            });
+
+            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
+            const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
+
+            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
+            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
+            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
+            document.getElementById('stat-percentage').innerText = `${percentage}%`;
+            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
+            document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
+
+            document.getElementById('inspector-card').classList.remove('hidden');
+            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeInspector() {
+            document.getElementById('inspector-card').classList.add('hidden');
+        }
+
         function loadHistoryArchive() {
             const saved = localStorage.getItem('draw_buddy_pl_archive');
             if (saved) {
-                try {
-                    sessionTickets = JSON.parse(saved);
-                } catch(e) {
-                    sessionTickets = [];
-                }
+                try { sessionTickets = JSON.parse(saved); } catch(e) { sessionTickets = []; }
             }
             updateLedgerUI();
         }
@@ -418,6 +476,7 @@
                 else if (count >= 13) bgStyle = "bg-blue-600 text-white";
 
                 cell.className = `heatmap-cell ${bgStyle}`;
+                cell.onclick = () => inspectNumber(i);
                 cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
                 grid.appendChild(cell);
             }
@@ -585,105 +644,4 @@
             }
 
             const ticketNums = rawNumbers.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            let targetDraw = cachedDraws.find(d => parseInt(d.draw_number) === drawNumInput);
-
-            if (!targetDraw) {
-                try {
-                    const { data } = await supabaseClient
-                        .from('quickdraw_history')
-                        .select('draw_number, winning_numbers')
-                        .eq('draw_number', drawNumInput)
-                        .single();
-                    if (data) targetDraw = data;
-                } catch(e) {
-                    console.warn("Fetch draw failed");
-                }
-            }
-
-            let hitsCount = 0;
-            let estimatedPayout = 0;
-
-            if (targetDraw && targetDraw.winning_numbers) {
-                const hits = ticketNums.filter(n => targetDraw.winning_numbers.includes(n));
-                hitsCount = hits.length;
-                let baseMultiplier = costPerGame / (document.getElementById('extra-multiplier').value === '2' ? 2 : 1);
-                
-                if (ticketNums.length === 10) {
-                    if (hitsCount === 10) estimatedPayout = 30000 * baseMultiplier;
-                    else if (hitsCount === 9) estimatedPayout = 4005 * baseMultiplier;
-                    else if (hitsCount === 8) estimatedPayout = 500 * baseMultiplier;
-                    else if (hitsCount === 7) estimatedPayout = 50 * baseMultiplier;
-                    else if (hitsCount === 6) estimatedPayout = 15 * baseMultiplier;
-                    else if (hitsCount === 5) estimatedPayout = 2 * baseMultiplier;
-                } else {
-                    estimatedPayout = hitsCount * 5 * baseMultiplier;
-                }
-            } else {
-                hitsCount = 'Pending';
-            }
-
-            sessionTickets.unshift({
-                draw: drawNumInput,
-                spot: ticketNums.length,
-                wager: costPerGame,
-                hits: hitsCount === 'Pending' ? 'Pending' : `${hitsCount} Hits`,
-                payout: estimatedPayout
-            });
-
-            batchScannedCount++;
-            document.getElementById('batch-count-badge').innerText = `${batchScannedCount} Scanned`;
-            document.getElementById('batch-numbers').value = "";
-            document.getElementById('batch-draw-num').value = drawNumInput + 1;
-
-            saveHistoryArchive();
-            updateLedgerUI();
-        }
-
-        function updateLedgerUI() {
-            const tbody = document.getElementById('ledger-body');
-            if (sessionTickets.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
-                document.getElementById('archive-total-wager').innerText = "$0.00";
-                document.getElementById('archive-total-payout').innerText = "$0.00";
-                document.getElementById('archive-net-pnl').innerText = "$0.00";
-                document.getElementById('session-pnl').innerText = "Net P&L: $0.00";
-                return;
-            }
-
-            tbody.innerHTML = '';
-            let totalWagered = 0;
-            let totalPayout = 0;
-
-            sessionTickets.forEach(t => {
-                totalWagered += (t.wager || 2);
-                totalPayout += (t.payout || 0);
-                const netTicketPnL = (t.payout || 0) - (t.wager || 2);
-
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-[#1d4ed8]';
-                tr.innerHTML = `
-                    <td class="py-2 font-mono text-yellow-400">#${t.draw}</td>
-                    <td class="py-2 text-blue-200">${t.spot}-Spot ($${t.wager || 2})</td>
-                    <td class="py-2 font-bold text-white">${t.hits}</td>
-                    <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            const netProfit = totalPayout - totalWagered;
-            document.getElementById('archive-total-wager').innerText = `$${totalWagered.toFixed(2)}`;
-            document.getElementById('archive-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
-            
-            const netEl = document.getElementById('archive-net-pnl');
-            netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-            netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
-
-            const pnlEl = document.getElementById('session-pnl');
-            pnlEl.innerText = `Net P&L: ${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-            pnlEl.className = `text-xs font-bold ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
-        }
-
-        window.onload = init;
-    </script>
-</body>
-</html>
+            let targetDraw = cachedDraws.find(d => parseInt(d.draw_number
