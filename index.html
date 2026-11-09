@@ -274,19 +274,17 @@
             </div>
         </div>
 
-        <!-- 🔥 Universal: House Hot Number Heatmap Mode -->
+        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Strict 3-Color Scale: Red, Yellow, Blue) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
                     <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
-                    <span class="text-orange-400 flex items-center"><span class="w-2 h-2 bg-orange-500 rounded-full inline-block mr-1"></span></span>
-                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span></span>
-                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span></span>
-                    <span class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 bg-green-600 rounded-full inline-block mr-1"></span></span>
+                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med</span>
+                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold</span>
                 </div>
             </div>
-            <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1"></div>
+            <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
         </div>
 
         <!-- 🔍 Universal: Number Statistics Inspector Card -->
@@ -374,7 +372,7 @@
             </div>
         </div>
 
-        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker (Moved to Bottom above Links) -->
+        <!-- 🎟️ PRO FEATURE: Scratch-Off Barcode / OCR Scanner & P/L Tracker (Bottom above Links) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold flex items-center gap-1.5">
@@ -532,7 +530,7 @@
                 address: "Irondequoit, NY • Quick Draw Terminal #4", 
                 musicApp: "AMI Play", 
                 musicUrl: "https://www.amiplay.com/?ref=draw_buddy_stripe",
-                lat: 43.215, lng: -77.585 // Irondequoit coordinates anchor
+                lat: 43.215, lng: -77.585
             },
             { 
                 name: "Shamrock Jack's", 
@@ -566,10 +564,7 @@
             checkProStatus();
             setAppState(currentState);
             updateFavoriteButtonUI();
-            
-            // Auto-Geofence Venue Matching on App Open
             detectUserVenueByGeolocation();
-
             loadScratchArchive();
             loadHistoryArchive();
             setupWagerListeners();
@@ -609,15 +604,12 @@
             updateOptimizedRoiBadge();
         }
 
-        // Automatic Geolocation Venue Switching
         function detectUserVenueByGeolocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         const userLat = position.coords.latitude;
                         const userLng = position.coords.longitude;
-                        
-                        // Find closest venue within ~5km geofence radius
                         let closestIndex = 0;
                         let minDistance = Infinity;
 
@@ -629,14 +621,12 @@
                             }
                         });
 
-                        // If within proximity threshold, auto-switch venue
                         if (minDistance < 0.1) {
                             currentVenueIndex = closestIndex;
                         }
                         updateVenueUI();
                     },
                     (error) => {
-                        console.warn("Geolocation permission denied or unavailable. Defaulting to primary venue.");
                         updateVenueUI();
                     },
                     { timeout: 10000 }
@@ -767,7 +757,6 @@
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
 
-            // Adapt Header Timer Banner for Game (Hide Quick Draw draw ticker when playing lotteries)
             const drawBox = document.getElementById('header-draw-box');
             const drawLabel = document.getElementById('header-draw-label');
             if (gameKey === 'quickdraw') {
@@ -1101,12 +1090,11 @@
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
-                    // Vibrant thermal scale grading: Bright red for hot, yellow/orange for medium, blue for cold
+                    // STRICT 3-COLOR THERMAL SCALE: Bright Red for hot, Yellow for medium, Blue for cold
                     let bgStyle = "bg-blue-600 text-white"; // Cold baseline
-                    if (count >= 7) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]"; // Hot
-                    else if (count >= 5) bgStyle = "bg-orange-500 text-white font-bold";
-                    else if (count >= 3) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                    else if (count >= 1) bgStyle = "bg-blue-600 text-white";
+                    if (count >= 6) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]"; // Hot
+                    else if (count >= 3) bgStyle = "bg-yellow-500 text-slate-950 font-bold"; // Medium
+                    else bgStyle = "bg-blue-600 text-white"; // Cold
                     
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
