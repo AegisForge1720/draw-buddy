@@ -81,7 +81,7 @@
         <div class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-xl space-y-2">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game Engine Pool</h2>
-                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800 font-mono">Adaptive UI Active</span>
+                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800 font-mono">Multi-DB Active</span>
             </div>
             <div class="grid grid-cols-3 gap-1.5">
                 <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">Quick Draw</button>
@@ -108,16 +108,16 @@
                 </div>
             </div>
 
-            <!-- Dynamic Music Jukebox Affiliate Utility -->
+            <!-- Dynamic Music Jukebox Deep-Linked Affiliate Utility -->
             <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
                 <div class="flex justify-between items-center text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
                     <span id="venue-music-label">📻 Hosted Jukebox: AMI Play</span>
-                    <span class="text-[8px] text-emerald-400 font-mono bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">Stripe Connected</span>
+                    <span class="text-[8px] text-emerald-400 font-mono bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">Deep-Linked App</span>
                 </div>
                 <div class="grid grid-cols-3 gap-1.5">
-                    <a id="venue-music-link" href="https://www.amiplay.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                    <a id="venue-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
                         <span id="venue-music-icon">📻 AMI Play</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Queue Music</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Open App</span>
                     </a>
                     <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
                         <span>🚗 Uber Safe</span>
@@ -279,9 +279,9 @@
             <div class="flex justify-between items-center">
                 <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
-                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
-                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med</span>
-                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold</span>
+                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot (Red)</span>
+                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med (Yellow)</span>
+                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold (Blue)</span>
                 </div>
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
@@ -441,13 +441,13 @@
         <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
             <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Sports Betting Utilities</h2>
             <div class="grid grid-cols-3 gap-2">
-                <a id="venue-bottom-music-link" href="https://www.amiplay.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                <a id="venue-bottom-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span id="venue-bottom-music-name">📻 AMI Play</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Bar Music</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Open App</span>
                 </a>
-                <a href="https://www.touchtunes.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                <a href="#" onclick="launchNativeApp('touchtunes')" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span>🎶 TouchTunes</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Jukebox</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Open App</span>
                 </a>
                 <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
                     <span>🚗 Uber / Lyft</span>
@@ -488,6 +488,7 @@
             quickdraw: { 
                 name: "NY Quick Draw", 
                 totalNumbers: 80, 
+                tableName: "quickdraw_history",
                 defaultSpots: [1,2,3,4,5,6,7,8,9,10], 
                 maxSpot: 10, 
                 hasBonus: false,
@@ -499,6 +500,7 @@
             powerball: { 
                 name: "Powerball", 
                 totalNumbers: 69, 
+                tableName: "powerball_history",
                 bonusTotal: 26,
                 defaultSpots: [5], 
                 maxSpot: 5, 
@@ -512,6 +514,7 @@
             megamillions: { 
                 name: "Mega Millions", 
                 totalNumbers: 70, 
+                tableName: "megamillions_history",
                 bonusTotal: 25,
                 defaultSpots: [5], 
                 maxSpot: 5, 
@@ -578,30 +581,72 @@
 
             renderHeatmap();
             updateFreeLimitBadge();
-
-            try {
-                const { data, error } = await supabaseClient
-                    .from('quickdraw_history')
-                    .select('draw_number, winning_numbers, extra_multiplier')
-                    .order('draw_number', { ascending: false })
-                    .limit(100);
-
-                if (!error && data && data.length > 0) {
-                    cachedDraws = data;
-                    latestFetchedDraw = parseInt(data[0].draw_number);
-                    const nextDrawEl = document.getElementById('header-next-draw');
-                    if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-                    if(statusEl) {
-                        statusEl.innerText = "☁️ Synced";
-                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
-                    }
-                }
-            } catch (err) {
-                console.warn("Supabase connection fallback active");
-            }
+            await fetchGameHistoryFromSupabase();
 
             updateCostDisplay();
             updateOptimizedRoiBadge();
+        }
+
+        // Native App Deep-Linking Handler with Web Fallback
+        function launchNativeApp(appType) {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isAndroid = /Android/.test(navigator.userAgent);
+
+            let deepLinkUrl = "";
+            let storeUrl = "";
+
+            if (appType === 'amiplay') {
+                deepLinkUrl = "amiplay://";
+                storeUrl = isIOS ? "https://apps.apple.com/app/ami-music/id415664177" : "https://play.google.com/store/apps/details?id=com.amientertainment.amiplay";
+            } else if (appType === 'touchtunes') {
+                deepLinkUrl = "touchtunes://";
+                storeUrl = isIOS ? "https://apps.apple.com/app/touchtunes/id299878235" : "https://play.google.com/store/apps/details?id=com.touchtunes.mobile";
+            }
+
+            // Attempt deep link launch
+            const start = Date.now();
+            window.location.href = deepLinkUrl;
+
+            // If app is not installed, fallback to app store after 1.5s timeout
+            setTimeout(() => {
+                if (Date.now() - start < 2000) {
+                    window.open(storeUrl, '_blank');
+                }
+            }, 1500);
+        }
+
+        async function fetchGameHistoryFromSupabase() {
+            const cfg = GAME_CONFIGS[activeGameKey];
+            try {
+                const { data, error } = await supabaseClient
+                    .from(cfg.tableName)
+                    .select('*')
+                    .order('draw_number', { ascending: false })
+                    .limit(100);
+
+                const statusEl = document.getElementById('sync-status');
+                if (!error && data && data.length > 0) {
+                    cachedDraws = data;
+                    latestFetchedDraw = parseInt(data[0].draw_number || 10000000);
+                    const nextDrawEl = document.getElementById('header-next-draw');
+                    if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                    if(statusEl) {
+                        statusEl.innerText = "☁️ Synced (" + cfg.name + ")";
+                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
+                    }
+                } else {
+                    cachedDraws = generateMockData(100, latestFetchedDraw);
+                    if(statusEl) {
+                        statusEl.innerText = "⚡ Simulated DB";
+                        statusEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-[#050814] text-yellow-400 border border-yellow-500/40";
+                    }
+                }
+                renderHeatmap();
+            } catch (err) {
+                console.warn("Supabase table query fallback active for " + cfg.tableName);
+                cachedDraws = generateMockData(100, latestFetchedDraw);
+                renderHeatmap();
+            }
         }
 
         function detectUserVenueByGeolocation() {
@@ -647,13 +692,10 @@
             document.getElementById('venue-address-display').innerText = venue.address + " • Auto-Geofenced";
             document.getElementById('venue-music-label').innerText = `📻 Hosted Jukebox: ${venue.musicApp}`;
             document.getElementById('venue-music-icon').innerText = `📻 ${venue.musicApp}`;
-            document.getElementById('venue-music-link').href = venue.musicUrl;
             document.getElementById('venue-location-badge').innerText = venue.name;
-
+            
             const bottomMusicName = document.getElementById('venue-bottom-music-name');
-            const bottomMusicLink = document.getElementById('venue-bottom-music-link');
             if(bottomMusicName) bottomMusicName.innerText = `📻 ${venue.musicApp}`;
-            if(bottomMusicLink) bottomMusicLink.href = venue.musicUrl;
         }
 
         function toggleFavoriteVenue() {
@@ -735,7 +777,7 @@
             }
         }
 
-        function switchGameProfile(gameKey) {
+        async function switchGameProfile(gameKey) {
             activeGameKey = gameKey;
             const cfg = GAME_CONFIGS[gameKey];
             ['quickdraw', 'powerball', 'megamillions'].forEach(k => {
@@ -815,8 +857,7 @@
                 if(ledgerSec) ledgerSec.style.display = 'none';
             }
 
-            cachedDraws = generateMockData(100, latestFetchedDraw);
-            renderHeatmap();
+            await fetchGameHistoryFromSupabase();
             updateCostDisplay();
             updateOptimizedRoiBadge();
         }
@@ -1079,6 +1120,13 @@
                 if (d.winning_numbers) { d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; }); }
             });
 
+            let counts = Object.values(freq);
+            let maxCount = Math.max(...counts, 1);
+            let minCount = Math.min(...counts, 0);
+            let thresholdRange = maxCount - minCount;
+            let hotCutoff = minCount + (thresholdRange * 0.70);
+            let medCutoff = minCount + (thresholdRange * 0.35);
+
             const grid = document.getElementById('heatmap-grid');
             if (!grid) return;
             grid.innerHTML = '';
@@ -1090,16 +1138,18 @@
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
-                    // STRICT 3-COLOR THERMAL SCALE: Bright Red for hot, Yellow for medium, Blue for cold
-                    let bgStyle = "bg-blue-600 text-white"; // Cold baseline
-                    if (count >= 6) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]"; // Hot
-                    else if (count >= 3) bgStyle = "bg-yellow-500 text-slate-950 font-bold"; // Medium
-                    else bgStyle = "bg-blue-600 text-white"; // Cold
+                    // STRICT 3-COLOR SCALE: Bright Red (Hot), Yellow (Medium), Blue (Cold)
+                    let bgStyle = "bg-blue-600 text-white";
+                    if (count >= hotCutoff) {
+                        bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]";
+                    } else if (count >= medCutoff) {
+                        bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                    } else {
+                        bgStyle = "bg-blue-600 text-white font-semibold";
+                    }
                     
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
-
-                    // Standardized indicator format "x#" across all games
                     cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90 font-mono">x${count}</span>`;
                 }
                 grid.appendChild(cell);
