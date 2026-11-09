@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -67,18 +67,18 @@
             <div class="grid grid-cols-2 gap-2">
                 <button onclick="applyPreset('sweet_spot')" class="bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 p-2.5 rounded-lg font-black text-xs shadow-md transition flex flex-col items-center justify-center">
                     <span>🎯 The Sweet Spot</span>
-                    <span class="text-[10px] text-slate-900 font-bold mt-0.5">10-Spot | 100 Lookback | 200 Games</span>
+                    <span class="text-[10px] text-slate-900 font-bold mt-0.5">10-Spot | 100 Lookback | $2 Wager</span>
                 </button>
                 <button onclick="applyPreset('quick_session')" class="bg-[#111c38] hover:bg-[#1e293b] text-yellow-300 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs shadow-md transition flex flex-col items-center justify-center">
                     <span>⚡ Quick Session</span>
-                    <span class="text-[10px] text-blue-300 font-normal mt-0.5">10-Spot | 100 Lookback | 25 Games</span>
+                    <span class="text-[10px] text-blue-300 font-normal mt-0.5">10-Spot | 25 Games | $1 Wager</span>
                 </button>
             </div>
         </div>
 
-        <!-- Configuration Panel -->
+        <!-- Configuration Panel (Now with Active Wager & Extra Controls) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
-            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters</h2>
+            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
             
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -98,12 +98,32 @@
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
+                    <label class="block text-xs text-blue-300 mb-1">Base Wager ($)</label>
+                    <select id="base-wager" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                        <option value="1">$1.00 / game</option>
+                        <option value="2" selected>$2.00 / game</option>
+                        <option value="3">$3.00 / game</option>
+                        <option value="5">$5.00 / game</option>
+                        <option value="10">$10.00 / game</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs text-blue-300 mb-1">Extra Add-on</label>
+                    <select id="extra-multiplier" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-400 focus:outline-none focus:border-yellow-400">
+                        <option value="1">No Extra (1x Payout)</option>
+                        <option value="2" selected>Play Extra (+ Equal Wager)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
                     <label class="block text-xs text-blue-300 mb-1">Game Block Size</label>
                     <input type="number" id="game-block" value="200" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-yellow-300 focus:outline-none focus:border-yellow-400">
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Wager ($/game)</label>
-                    <input type="text" value="$2 ($1 Base + $1 Extra)" disabled class="w-full bg-[#050814]/50 border border-[#1e3a8a] rounded-lg p-2 text-xs text-blue-400 cursor-not-allowed">
+                    <label class="block text-xs text-blue-300 mb-1">Total Cost / Game</label>
+                    <div id="calc-cost-display" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-emerald-400 flex items-center">$4.00</div>
                 </div>
             </div>
 
@@ -121,7 +141,7 @@
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] uppercase tracking-wider text-blue-400 font-semibold">Investment</div>
-                    <div id="card-cost-label" class="text-sm font-bold text-yellow-300">$2.00 / game</div>
+                    <div id="card-cost-label" class="text-sm font-bold text-yellow-300">$4.00 / game</div>
                 </div>
             </div>
 
@@ -134,7 +154,7 @@
 
             <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] text-xs space-y-1">
                 <div class="flex justify-between"><span class="text-blue-300">Strategy Lookback:</span> <span id="stat-lookback" class="font-bold text-white">100 Draws</span></div>
-                <div class="flex justify-between"><span class="text-blue-300">Session Budget:</span> <span id="stat-budget" class="font-bold text-yellow-300">$400.00 (200 games)</span></div>
+                <div class="flex justify-between"><span class="text-blue-300">Session Budget:</span> <span id="stat-budget" class="font-bold text-yellow-300">$800.00 (200 games)</span></div>
             </div>
 
             <button onclick="logTicketToCloud()" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
@@ -291,6 +311,27 @@
 
             renderHeatmap();
             setInterval(updateCountdown, 1000);
+            setupWagerListeners();
+        }
+
+        function setupWagerListeners() {
+            document.getElementById('base-wager').addEventListener('change', updateCostDisplay);
+            document.getElementById('extra-multiplier').addEventListener('change', updateCostDisplay);
+            document.getElementById('game-block').addEventListener('input', updateCostDisplay);
+        }
+
+        function getGameCost() {
+            const base = parseFloat(document.getElementById('base-wager').value) || 1;
+            const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
+            return extra === 2 ? base * 2 : base;
+        }
+
+        function updateCostDisplay() {
+            const cost = getGameCost();
+            const blockSize = parseInt(document.getElementById('game-block').value) || 200;
+            document.getElementById('calc-cost-display').innerText = `$${cost.toFixed(2)}`;
+            document.getElementById('card-cost-label').innerText = `$${cost.toFixed(2)} / game`;
+            document.getElementById('stat-budget').innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
         }
 
         function generateMockData(count, startDraw) {
@@ -377,14 +418,19 @@
                 document.getElementById('spot-tier').value = "10";
                 document.getElementById('lookback-draws').value = "100";
                 document.getElementById('game-block').value = "200";
+                document.getElementById('base-wager').value = "2";
+                document.getElementById('extra-multiplier').value = "2";
                 totalBlockSize = 200;
             } else if (type === 'quick_session') {
                 document.getElementById('spot-tier').value = "10";
                 document.getElementById('lookback-draws').value = "100";
                 document.getElementById('game-block').value = "25";
+                document.getElementById('base-wager').value = "1";
+                document.getElementById('extra-multiplier').value = "1";
                 totalBlockSize = 25;
             }
             currentGameIndex = 0;
+            updateCostDisplay();
             document.getElementById('header-block-status').innerText = `1 / ${totalBlockSize}`;
             generateTicket();
         }
@@ -393,6 +439,7 @@
             const spotTier = parseInt(document.getElementById('spot-tier').value);
             const lookback = parseInt(document.getElementById('lookback-draws').value);
             totalBlockSize = parseInt(document.getElementById('game-block').value) || 200;
+            const costPerGame = getGameCost();
 
             const sliceData = cachedDraws.slice(0, lookback);
             let freq = {};
@@ -413,7 +460,8 @@
             const nextDrawNum = latestFetchedDraw + 1;
             document.getElementById('card-draw-label').innerText = `Target Draw #${nextDrawNum}`;
             document.getElementById('stat-lookback').innerText = `${lookback} Draws`;
-            document.getElementById('stat-budget').innerText = `$${(totalBlockSize * 2).toFixed(2)} (${totalBlockSize} games)`;
+            document.getElementById('stat-budget').innerText = `$${(totalBlockSize * costPerGame).toFixed(2)} (${totalBlockSize} games)`;
+            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)} / game`;
             document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
 
             const grid = document.getElementById('number-grid');
@@ -431,12 +479,14 @@
         async function logTicketToCloud() {
             const nextDrawNum = latestFetchedDraw + 1;
             const spotTier = parseInt(document.getElementById('spot-tier').value);
+            const costPerGame = getGameCost();
             const activeBalls = Array.from(document.querySelectorAll('#number-grid .number-ball')).map(el => parseInt(el.innerText));
 
             try {
                 await supabaseClient.from('live_tickets').insert([{
                     draw_number: nextDrawNum,
                     ticket_numbers: activeBalls,
+                    wager_amount: costPerGame,
                     status: 'PENDING'
                 }]);
             } catch (err) {
@@ -446,6 +496,7 @@
             sessionTickets.unshift({
                 draw: nextDrawNum,
                 spot: spotTier,
+                wager: costPerGame,
                 hits: 'Pending',
                 payout: 0
             });
@@ -474,6 +525,7 @@
         async function processAndLogBatchTicket() {
             const drawNumInput = parseInt(document.getElementById('batch-draw-num').value);
             const rawNumbers = document.getElementById('batch-numbers').value;
+            const costPerGame = getGameCost();
 
             if (!drawNumInput || !rawNumbers) {
                 alert("Please provide a draw number and ticket numbers.");
@@ -502,15 +554,17 @@
             if (targetDraw && targetDraw.winning_numbers) {
                 const hits = ticketNums.filter(n => targetDraw.winning_numbers.includes(n));
                 hitsCount = hits.length;
+                let baseMultiplier = costPerGame / (document.getElementById('extra-multiplier').value === '2' ? 2 : 1);
+                
                 if (ticketNums.length === 10) {
-                    if (hitsCount === 10) estimatedPayout = 30000;
-                    else if (hitsCount === 9) estimatedPayout = 4005;
-                    else if (hitsCount === 8) estimatedPayout = 500;
-                    else if (hitsCount === 7) estimatedPayout = 50;
-                    else if (hitsCount === 6) estimatedPayout = 15;
-                    else if (hitsCount === 5) estimatedPayout = 2;
+                    if (hitsCount === 10) estimatedPayout = 30000 * baseMultiplier;
+                    else if (hitsCount === 9) estimatedPayout = 4005 * baseMultiplier;
+                    else if (hitsCount === 8) estimatedPayout = 500 * baseMultiplier;
+                    else if (hitsCount === 7) estimatedPayout = 50 * baseMultiplier;
+                    else if (hitsCount === 6) estimatedPayout = 15 * baseMultiplier;
+                    else if (hitsCount === 5) estimatedPayout = 2 * baseMultiplier;
                 } else {
-                    estimatedPayout = hitsCount * 5;
+                    estimatedPayout = hitsCount * 5 * baseMultiplier;
                 }
             } else {
                 hitsCount = 'Pending';
@@ -519,6 +573,7 @@
             sessionTickets.unshift({
                 draw: drawNumInput,
                 spot: ticketNums.length,
+                wager: costPerGame,
                 hits: hitsCount === 'Pending' ? 'Pending' : `${hitsCount} Hits`,
                 payout: estimatedPayout
             });
@@ -540,12 +595,12 @@
             tbody.innerHTML = '';
             let totalProfit = 0;
             sessionTickets.forEach(t => {
-                totalProfit += (t.payout - 2);
+                totalProfit += (t.payout - t.wager);
                 const tr = document.createElement('tr');
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
                     <td class="py-2 font-mono text-yellow-400">#${t.draw}</td>
-                    <td class="py-2 text-blue-200">${t.spot}-Spot</td>
+                    <td class="py-2 text-blue-200">${t.spot}-Spot ($${t.wager})</td>
                     <td class="py-2 font-bold text-white">${t.hits}</td>
                     <td class="py-2 text-right font-mono text-cyan-300">$${t.payout.toFixed(2)}</td>
                 `;
