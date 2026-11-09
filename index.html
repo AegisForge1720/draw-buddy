@@ -203,7 +203,7 @@
                     <span class="text-orange-400 flex items-center"><span class="w-2 h-2 bg-orange-500 rounded-full inline-block mr-1"></span></span>
                     <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span></span>
                     <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span></span>
-                    <span class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 bg-green-600 rounded-full inline-block mr-1"></span>Cold</span>
+                    <span class="text-green-400 font-bold flex items-center"><span class="w-2 h-2 bg-green-600 rounded-full inline-block mr-1"></span></span>
                 </div>
             </div>
             <div id="heatmap-grid" class="grid grid-cols-10 gap-1 py-1">
@@ -237,6 +237,25 @@
                     <span class="text-blue-300 block text-[10px]">Avg Draw Interval</span>
                     <span id="stat-interval" class="font-bold text-white text-sm">~4.2 draws</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- 🔗 Official State Lottery & Courier Partner Hub (Free Tier Monetization) -->
+        <div class="bg-[#0b132b] p-4 rounded-xl border border-emerald-500/40 shadow-xl space-y-3">
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">🌐 Official Courier Partners</h2>
+                <span class="text-[10px] text-blue-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">Sponsored</span>
+            </div>
+            <p class="text-[11px] text-blue-300">Order official New York Quick Draw & multi-state draw tickets online safely through our licensed state courier partners.</p>
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <a href="https://jackpocket.com" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>📱 Jackpocket NY</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Official Tickets</span>
+                </a>
+                <a href="https://nylottery.ny.gov" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-blue-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>🗽 NY Lotto Official</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Check Live Results</span>
+                </a>
             </div>
         </div>
 
@@ -325,7 +344,6 @@
         let notificationTriggered = false;
         let batchScannedCount = 0;
 
-        // Immediate fallback render so the heatmap is never blank while connecting
         cachedDraws = generateMockData(100, latestFetchedDraw);
 
         async function init() {
@@ -335,7 +353,6 @@
                 statusEl.className = "text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
             }
 
-            // Immediately render heatmap with fallback data so user sees the grid right away
             renderHeatmap();
 
             let fetchTimedOut = false;
@@ -397,7 +414,6 @@
             updateCostDisplay();
         }
 
-        // Decoupled robust timer loop
         function startTimers() {
             if (!window.drawBuddyTimer) {
                 window.drawBuddyTimer = setInterval(() => {
