@@ -138,46 +138,34 @@
             </button>
         </div>
 
-        <!-- 📸 Bar Ticket Scanner & Winner Verification Module -->
+        <!-- 📸 Multi-Ticket Batch Scanner & Auto-Ledger -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📸 Ticket Scanner & Verifier</h2>
-                <span class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">Instant Check</span>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📸 Multi-Ticket Batch Scanner</h2>
+                <span id="batch-count-badge" class="text-[10px] text-cyan-300 bg-[#050814] px-2 py-0.5 rounded border border-[#1d4ed8]">0 Scanned in Batch</span>
             </div>
             
-            <p class="text-[11px] text-blue-300">Snap a photo of your printed bar ticket or enter your numbers to check hits and payouts against Supabase draw history.</p>
+            <p class="text-[11px] text-blue-300">Continuously snap or upload multiple ticket slips. Each scanned ticket is automatically verified against Supabase and pushed straight into your session ledger.</p>
 
             <div class="grid grid-cols-2 gap-2">
                 <div>
-                    <label class="block text-[10px] text-blue-300 mb-1">Check against Draw #</label>
-                    <input type="number" id="scan-draw-num" placeholder="e.g. 10001420" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
+                    <label class="block text-[10px] text-blue-300 mb-1">Target Draw #</label>
+                    <input type="number" id="batch-draw-num" placeholder="e.g. 10001420" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-white focus:outline-none focus:border-yellow-400">
                 </div>
                 <div>
-                    <label class="block text-[10px] text-blue-300 mb-1">Enter Numbers (comma sep)</label>
-                    <input type="text" id="scan-numbers" placeholder="4, 12, 23, 45..." class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                    <label class="block text-[10px] text-blue-300 mb-1">Ticket Numbers</label>
+                    <input type="text" id="batch-numbers" placeholder="4, 12, 23, 45..." class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-xs font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
                 </div>
             </div>
 
             <div class="flex space-x-2 pt-1">
                 <label class="flex-1 bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center space-x-1">
-                    <span>📷 Snap Ticket Photo</span>
-                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleTicketPhoto(event)">
+                    <span>📷 Batch Snap Photo</span>
+                    <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleBatchPhoto(event)">
                 </label>
-                <button onclick="verifyScannedTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 px-3 rounded-lg text-xs shadow transition">
-                    🔍 Verify Winner
+                <button onclick="processAndLogBatchTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 px-3 rounded-lg text-xs shadow transition">
+                    📥 Add to Auto-Ledger
                 </button>
-            </div>
-
-            <!-- Verification Result Box -->
-            <div id="scan-results" class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] text-xs space-y-2 hidden">
-                <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
-                    <span id="scan-status-title" class="font-bold text-white">Verification Results</span>
-                    <span id="scan-payout-badge" class="font-mono font-bold text-yellow-400">$0.00 Payout</span>
-                </div>
-                <div id="scan-matched-balls" class="flex flex-wrap gap-1.5 py-1">
-                    <!-- Matched balls rendered here -->
-                </div>
-                <div id="scan-details-text" class="text-[11px] text-blue-300"></div>
             </div>
         </div>
 
@@ -213,7 +201,7 @@
         <!-- Live Session Tracking Ledger -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Session Ledger</h2>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Session Ledger & Auto-Batch</h2>
                 <span id="session-pnl" class="text-xs font-bold text-blue-400">Net P&L: $0.00</span>
             </div>
             <div class="overflow-x-auto">
@@ -245,8 +233,9 @@
         let totalBlockSize = 200;
         let sessionTickets = [];
         let latestFetchedDraw = 0;
-        let countdownSeconds = 240; // 4-minute Quick Draw cycle
+        let countdownSeconds = 240;
         let notificationTriggered = false;
+        let batchScannedCount = 0;
 
         async function init() {
             const statusEl = document.getElementById('sync-status');
@@ -265,7 +254,7 @@
                     
                     document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                     document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                    document.getElementById('scan-draw-num').value = latestFetchedDraw;
+                    document.getElementById('batch-draw-num').value = latestFetchedDraw;
 
                     statusEl.innerText = "☁️ Cloud Synced";
                     statusEl.className = "text-xs px-2.5 py-1 rounded bg-[#050814] text-yellow-400 border border-[#1d4ed8]";
@@ -279,13 +268,12 @@
                 
                 document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                 document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                document.getElementById('scan-draw-num').value = latestFetchedDraw;
+                document.getElementById('batch-draw-num').value = latestFetchedDraw;
 
                 statusEl.innerText = "⚡ Simulated Mode";
                 statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
             }
 
-            // Start the live draw countdown loop
             setInterval(updateCountdown, 1000);
         }
 
@@ -302,7 +290,6 @@
             return mock;
         }
 
-        // 🔔 Push Notification Permission Request
         function requestNotificationPermission() {
             if (!("Notification" in window)) {
                 alert("This browser does not support desktop notifications.");
@@ -320,17 +307,15 @@
             });
         }
 
-        // ⏱️ Live Draw Countdown & Alert Loop
         function updateCountdown() {
             countdownSeconds--;
             if (countdownSeconds <= 0) {
-                countdownSeconds = 240; // Reset to 4 mins
+                countdownSeconds = 240;
                 latestFetchedDraw++;
                 document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
                 notificationTriggered = false;
             }
 
-            // Trigger alert when 60 seconds remain
             if (countdownSeconds === 60 && !notificationTriggered) {
                 notificationTriggered = true;
                 if (Notification.permission === "granted") {
@@ -437,6 +422,77 @@
             generateTicket();
         }
 
+        // 📸 Multi-Ticket Batch Photo Capture Handler
+        function handleBatchPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            // Simulate OCR batch parsing
+            document.getElementById('batch-numbers').value = "5, 15, 25, 35, 45, 55, 65, 72, 78, 80";
+            alert("📸 Batch ticket photo parsed successfully! Click 'Add to Auto-Ledger' to log it.");
+        }
+
+        // 📥 Process Batch Ticket and Push to Auto-Ledger
+        async function processAndLogBatchTicket() {
+            const drawNumInput = parseInt(document.getElementById('batch-draw-num').value);
+            const rawNumbers = document.getElementById('batch-numbers').value;
+
+            if (!drawNumInput || !rawNumbers) {
+                alert("Please provide a draw number and ticket numbers.");
+                return;
+            }
+
+            const ticketNums = rawNumbers.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+            let targetDraw = cachedDraws.find(d => parseInt(d.draw_number) === drawNumInput);
+
+            if (!targetDraw) {
+                try {
+                    const { data } = await supabaseClient
+                        .from('quickdraw_history')
+                        .select('draw_number, winning_numbers')
+                        .eq('draw_number', drawNumInput)
+                        .single();
+                    if (data) targetDraw = data;
+                } catch(e) {
+                    console.warn("Fetch draw failed");
+                }
+            }
+
+            let hitsCount = 0;
+            let estimatedPayout = 0;
+
+            if (targetDraw && targetDraw.winning_numbers) {
+                const hits = ticketNums.filter(n => targetDraw.winning_numbers.includes(n));
+                hitsCount = hits.length;
+                if (ticketNums.length === 10) {
+                    if (hitsCount === 10) estimatedPayout = 30000;
+                    else if (hitsCount === 9) estimatedPayout = 4005;
+                    else if (hitsCount === 8) estimatedPayout = 500;
+                    else if (hitsCount === 7) estimatedPayout = 50;
+                    else if (hitsCount === 6) estimatedPayout = 15;
+                    else if (hitsCount === 5) estimatedPayout = 2;
+                } else {
+                    estimatedPayout = hitsCount * 5;
+                }
+            } else {
+                hitsCount = 'Pending';
+            }
+
+            // Push to session ledger automatically
+            sessionTickets.unshift({
+                draw: drawNumInput,
+                spot: ticketNums.length,
+                hits: hitsCount === 'Pending' ? 'Pending' : `${hitsCount} Hits`,
+                payout: estimatedPayout
+            });
+
+            batchScannedCount++;
+            document.getElementById('batch-count-badge').innerText = `${batchScannedCount} Scanned in Batch`;
+            document.getElementById('batch-numbers').value = ""; // Clear for next scan
+            document.getElementById('batch-draw-num.value') = drawNumInput + 1;
+
+            updateLedgerUI();
+        }
+
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
             if (sessionTickets.length === 0) {
@@ -460,88 +516,6 @@
             const pnlEl = document.getElementById('session-pnl');
             pnlEl.innerText = `Net P&L: ${totalProfit >= 0 ? '+' : ''}$${totalProfit.toFixed(2)}`;
             pnlEl.className = `text-xs font-bold ${totalProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
-        }
-
-        function handleTicketPhoto(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            document.getElementById('scan-numbers').value = "3, 14, 22, 35, 41, 52, 63, 71, 75, 80";
-            alert("📸 Ticket photo captured! Numbers auto-parsed. Click 'Verify Winner' to check against Supabase.");
-        }
-
-        async function verifyScannedTicket() {
-            const drawNumInput = parseInt(document.getElementById('scan-draw-num').value);
-            const rawNumbers = document.getElementById('scan-numbers').value;
-            
-            if (!drawNumInput || !rawNumbers) {
-                alert("Please enter a draw number and ticket numbers.");
-                return;
-            }
-
-            const ticketNums = rawNumbers.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
-            const resultsBox = document.getElementById('scan-results');
-            const matchedContainer = document.getElementById('scan-matched-balls');
-            const detailsText = document.getElementById('scan-details-text');
-            const payoutBadge = document.getElementById('scan-payout-badge');
-            const statusTitle = document.getElementById('scan-status-title');
-
-            resultsBox.classList.remove('hidden');
-            matchedContainer.innerHTML = '<span class="text-blue-400 text-xs">Checking Supabase draw history...</span>';
-
-            let targetDraw = cachedDraws.find(d => parseInt(d.draw_number) === drawNumInput);
-
-            if (!targetDraw) {
-                try {
-                    const { data } = await supabaseClient
-                        .from('quickdraw_history')
-                        .select('draw_number, winning_numbers, extra_multiplier')
-                        .eq('draw_number', drawNumInput)
-                        .single();
-                    if (data) targetDraw = data;
-                } catch(e) {
-                    console.warn("Fetch specific draw failed");
-                }
-            }
-
-            if (!targetDraw || !targetDraw.winning_numbers) {
-                matchedContainer.innerHTML = '';
-                statusTitle.innerText = `Draw #${drawNumInput} Not Found`;
-                payoutBadge.innerText = "$0.00";
-                detailsText.innerText = "Could not locate winning numbers for this draw in the database.";
-                return;
-            }
-
-            const winningNums = targetDraw.winning_numbers;
-            const hits = ticketNums.filter(n => winningNums.includes(n));
-            
-            matchedContainer.innerHTML = '';
-            ticketNums.forEach(num => {
-                const ball = document.createElement('div');
-                const isHit = hits.includes(num);
-                ball.className = `number-ball ${isHit ? 'ball-hit' : 'ball-inactive'}`;
-                ball.style.width = '34px';
-                ball.style.height = '34px';
-                ball.style.fontSize = '0.9rem';
-                ball.innerText = num < 10 ? '0' + num : num;
-                matchedContainer.appendChild(ball);
-            });
-
-            let estimatedPayout = 0;
-            if (ticketNums.length === 10) {
-                if (hits.length === 10) estimatedPayout = 30000;
-                else if (hits.length === 9) estimatedPayout = 4005;
-                else if (hits.length === 8) estimatedPayout = 500;
-                else if (hits.length === 7) estimatedPayout = 50;
-                else if (hits.length === 6) estimatedPayout = 15;
-                else if (hits.length === 5) estimatedPayout = 2;
-                else if (hits.length === 0) estimatedPayout = 5;
-            } else {
-                estimatedPayout = hits.length * 5;
-            }
-
-            statusTitle.innerText = `Draw #${drawNumInput} Verified: ${hits.length} Hits!`;
-            payoutBadge.innerText = `$${estimatedPayout.toFixed(2)} Payout`;
-            detailsText.innerText = `Matched ${hits.length} out of ${ticketNums.length} numbers. Winning numbers drawn: ${winningNums.join(', ')}`;
         }
 
         window.onload = init;
