@@ -46,7 +46,7 @@
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Next Target</div>
-                    <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#--</div>
+                    <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">#10001420</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Lock Timer</div>
@@ -54,7 +54,7 @@
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
                     <div class="text-blue-400 uppercase tracking-wider text-[10px]">Session Block</div>
-                    <div id="header-block-status" class="font-bold text-emerald-400 text-sm">0 / 200</div>
+                    <div id="header-block-status" class="font-bold text-emerald-400 text-sm">1 / 200</div>
                 </div>
             </div>
         </div>
@@ -320,19 +320,27 @@
         let currentGameIndex = 0;
         let totalBlockSize = 200;
         let sessionTickets = [];
-        let latestFetchedDraw = 0;
+        let latestFetchedDraw = 10000000;
         let countdownSeconds = 240;
         let notificationTriggered = false;
         let batchScannedCount = 0;
 
+        // Immediate fallback render so the heatmap is never blank while connecting
+        cachedDraws = generateMockData(100, latestFetchedDraw);
+
         async function init() {
             const statusEl = document.getElementById('sync-status');
-            statusEl.innerText = "Connecting...";
-            statusEl.className = "text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
+            if(statusEl) {
+                statusEl.innerText = "Connecting...";
+                statusEl.className = "text-xs px-2 py-1 rounded bg-[#070b19] text-yellow-400 border border-[#1d4ed8]";
+            }
+
+            // Immediately render heatmap with fallback data so user sees the grid right away
+            renderHeatmap();
 
             let fetchTimedOut = false;
             const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => { fetchTimedOut = true; reject(new Error("Connection timeout")); }, 4000)
+                setTimeout(() => { fetchTimedOut = true; reject(new Error("Connection timeout")); }, 3500)
             );
 
             try {
@@ -350,41 +358,78 @@
                     cachedDraws = data;
                     latestFetchedDraw = parseInt(data[0].draw_number);
                     
-                    document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
-                    document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                    document.getElementById('batch-draw-num').value = latestFetchedDraw;
+                    const nextDrawEl = document.getElementById('header-next-draw');
+                    const blockEl = document.getElementById('header-block-status');
+                    const batchNumEl = document.getElementById('batch-draw-num');
 
-                    statusEl.innerText = "☁️ Synced";
-                    statusEl.className = "text-xs px-2.5 py-1 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
+                    if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                    if(blockEl) blockEl.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+                    if(batchNumEl) batchNumEl.value = latestFetchedDraw;
+
+                    if(statusEl) {
+                        statusEl.innerText = "☁️ Synced";
+                        statusEl.className = "text-xs px-2.5 py-1 rounded bg-[#050814] text-emerald-400 border border-emerald-500/40";
+                    }
                 } else {
                     throw new Error("No data");
                 }
             } catch (err) {
-                console.warn("Supabase connection fallback triggered:", err);
+                console.warn("Supabase connection fallback active:", err);
                 latestFetchedDraw = 10000000;
                 cachedDraws = generateMockData(100, latestFetchedDraw);
                 
-                document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
-                document.getElementById('header-block-status').innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
-                document.getElementById('batch-draw-num').value = latestFetchedDraw;
+                const nextDrawEl = document.getElementById('header-next-draw');
+                const blockEl = document.getElementById('header-block-status');
+                const batchNumEl = document.getElementById('batch-draw-num');
 
-                statusEl.innerText = "⚡ Simulated";
-                statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
+                if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                if(blockEl) blockEl.innerText = `${currentGameIndex + 1} / ${totalBlockSize}`;
+                if(batchNumEl) batchNumEl.value = latestFetchedDraw;
+
+                if(statusEl) {
+                    statusEl.innerText = "⚡ Simulated";
+                    statusEl.className = "text-xs px-2.5 py-1 rounded bg-amber-950 text-amber-400 border border-amber-800";
+                }
             }
 
             loadHistoryArchive();
             renderHeatmap();
-            
-            if (!window.drawBuddyTimer) {
-                window.drawBuddyTimer = setInterval(updateCountdown, 1000);
-            }
-            
-            setupWagerListeners();
             updateCostDisplay();
         }
 
+        // Decoupled robust timer loop
+        function startTimers() {
+            if (!window.drawBuddyTimer) {
+                window.drawBuddyTimer = setInterval(() => {
+                    countdownSeconds--;
+                    if (countdownSeconds <= 0) {
+                        countdownSeconds = 240;
+                        latestFetchedDraw++;
+                        const nextDrawEl = document.getElementById('header-next-draw');
+                        if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
+                        notificationTriggered = false;
+                        renderHeatmap();
+                    }
+
+                    if (countdownSeconds === 60 && !notificationTriggered) {
+                        notificationTriggered = true;
+                        if (window.Notification && Notification.permission === "granted") {
+                            new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
+                                body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
+                            });
+                        }
+                    }
+
+                    const mins = Math.floor(countdownSeconds / 60);
+                    const secs = countdownSeconds % 60;
+                    const cdEl = document.getElementById('header-countdown');
+                    if(cdEl) cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+        }
+
         function inspectNumber(num) {
-            const lookbackSize = cachedDraws.length;
+            const lookbackSize = cachedDraws.length || 100;
             let hits = 0;
             let lastSeenDistance = null;
 
@@ -454,9 +499,13 @@
         function updateCostDisplay() {
             const cost = getGameCost();
             const blockSize = parseInt(document.getElementById('game-block').value) || 200;
-            document.getElementById('calc-cost-display').innerText = `$${cost.toFixed(2)}`;
-            document.getElementById('card-cost-label').innerText = `$${cost.toFixed(2)} / game`;
-            document.getElementById('stat-budget').innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
+            const costEl = document.getElementById('calc-cost-display');
+            const cardCostEl = document.getElementById('card-cost-label');
+            const statBudgetEl = document.getElementById('stat-budget');
+
+            if(costEl) costEl.innerText = `$${cost.toFixed(2)}`;
+            if(cardCostEl) cardCostEl.innerText = `$${cost.toFixed(2)} / game`;
+            if(statBudgetEl) statBudgetEl.innerText = `$${(blockSize * cost).toFixed(2)} (${blockSize} games)`;
         }
 
         function generateMockData(count, startDraw) {
@@ -482,9 +531,11 @@
             });
 
             const grid = document.getElementById('heatmap-grid');
+            if (!grid) return;
+            
             grid.innerHTML = '';
             for (let i = 1; i <= 80; i++) {
-                const count = freq[i];
+                const count = freq[i] || 0;
                 const cell = document.createElement('div');
                 let bgStyle = "bg-green-700 text-white";
                 if (count >= 28) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_#ef4444]";
@@ -508,36 +559,12 @@
                 const btn = document.getElementById('notif-btn');
                 if (permission === "granted") {
                     btn.innerText = "🔔 Active";
-                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2.5 py-1 rounded transition font-bold";
+                    btn.className = "text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-500 px-2 py-1 rounded transition font-bold";
                     new Notification("Draw Buddy", { body: "Tactical draw alerts successfully enabled!" });
                 } else {
                     alert("Notification permission denied.");
                 }
             });
-        }
-
-        function updateCountdown() {
-            countdownSeconds--;
-            if (countdownSeconds <= 0) {
-                countdownSeconds = 240;
-                latestFetchedDraw++;
-                document.getElementById('header-next-draw').innerText = `#${latestFetchedDraw + 1}`;
-                notificationTriggered = false;
-                renderHeatmap();
-            }
-
-            if (countdownSeconds === 60 && !notificationTriggered) {
-                notificationTriggered = true;
-                if (Notification.permission === "granted") {
-                    new Notification("🎯 Draw # " + (latestFetchedDraw + 1) + " Locking Soon!", {
-                        body: "60 seconds remaining. Generate your optimal ticket and place your wager at the terminal!"
-                    });
-                }
-            }
-
-            const mins = Math.floor(countdownSeconds / 60);
-            const secs = countdownSeconds % 60;
-            document.getElementById('header-countdown').innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
         }
 
         function applyPreset(type) {
@@ -717,6 +744,8 @@
 
         function updateLedgerUI() {
             const tbody = document.getElementById('ledger-body');
+            if(!tbody) return;
+            
             if (sessionTickets.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
                 document.getElementById('archive-total-wager').innerText = "$0.00";
@@ -759,7 +788,11 @@
             pnlEl.className = `text-xs font-bold ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
         }
 
-        window.onload = init;
+        window.onload = () => {
+            init();
+            startTimers();
+            setupWagerListeners();
+        };
     </script>
 </body>
 </html>
