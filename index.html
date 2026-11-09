@@ -90,20 +90,20 @@
             </div>
         </div>
 
-        <!-- 🍻 Context-Aware Geofenced Venue Card (M's Bar & Grill, Irondequoit NY) -->
+        <!-- 🍻 Context-Aware Geofenced Venue Card (Auto-Switches on Venue Entry) -->
         <div id="quickdraw-venue-section" class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500/60 shadow-xl space-y-3">
             <div class="flex justify-between items-start">
                 <div>
-                    <span class="text-[9px] uppercase tracking-widest text-cyan-400 font-black">📍 ACTIVE ESTABLISHMENT GEOFENCE</span>
+                    <span class="text-[9px] uppercase tracking-widest text-cyan-400 font-black">📍 AUTO-GEOFENCED VENUE HUB</span>
                     <h2 id="venue-name-display" class="text-base font-black text-white">M's Bar & Grill</h2>
-                    <p id="venue-address-display" class="text-[11px] text-blue-300">Irondequoit, NY • Quick Draw Terminal #4</p>
+                    <p id="venue-address-display" class="text-[11px] text-blue-300">Irondequoit, NY • Auto-Matched GPS</p>
                 </div>
                 <div class="flex flex-col items-end space-y-1">
                     <button onclick="toggleFavoriteVenue()" id="favorite-venue-btn" class="bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1">
                         <span id="fav-star">⭐</span> <span id="fav-text">Favorite</span>
                     </button>
                     <button onclick="cycleVenueLocation()" class="text-[9px] text-yellow-400 bg-yellow-950/60 border border-yellow-800 px-2 py-0.5 rounded hover:bg-yellow-900 transition">
-                        🔄 Switch Venue
+                        🔄 Override GPS
                     </button>
                 </div>
             </div>
@@ -509,7 +509,7 @@
                 wagerOptions: [2, 3, 5, 10, 25],
                 defaultWager: 2,
                 timerLabel: "Jackpot Draw",
-                defaultTime: 86400 // 24 hours mockup
+                defaultTime: 86400 
             },
             megamillions: { 
                 name: "Mega Millions", 
@@ -527,8 +527,20 @@
         };
 
         const VENUE_PROFILES = [
-            { name: "M's Bar & Grill", address: "Irondequoit, NY • Quick Draw Terminal #4", musicApp: "AMI Play", musicUrl: "https://www.amiplay.com/?ref=draw_buddy_stripe" },
-            { name: "Shamrock Jack's", address: "Irondequoit, NY • Waterfront Lounge", musicApp: "TouchTunes", musicUrl: "https://www.touchtunes.com/?ref=draw_buddy_stripe" }
+            { 
+                name: "M's Bar & Grill", 
+                address: "Irondequoit, NY • Quick Draw Terminal #4", 
+                musicApp: "AMI Play", 
+                musicUrl: "https://www.amiplay.com/?ref=draw_buddy_stripe",
+                lat: 43.215, lng: -77.585 // Irondequoit coordinates anchor
+            },
+            { 
+                name: "Shamrock Jack's", 
+                address: "Irondequoit, NY • Waterfront Lounge", 
+                musicApp: "TouchTunes", 
+                musicUrl: "https://www.touchtunes.com/?ref=draw_buddy_stripe",
+                lat: 43.245, lng: -77.535 
+            }
         ];
         let currentVenueIndex = 0;
 
@@ -554,7 +566,10 @@
             checkProStatus();
             setAppState(currentState);
             updateFavoriteButtonUI();
-            updateVenueUI();
+            
+            // Auto-Geofence Venue Matching on App Open
+            detectUserVenueByGeolocation();
+
             loadScratchArchive();
             loadHistoryArchive();
             setupWagerListeners();
@@ -594,6 +609,43 @@
             updateOptimizedRoiBadge();
         }
 
+        // Automatic Geolocation Venue Switching
+        function detectUserVenueByGeolocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const userLat = position.coords.latitude;
+                        const userLng = position.coords.longitude;
+                        
+                        // Find closest venue within ~5km geofence radius
+                        let closestIndex = 0;
+                        let minDistance = Infinity;
+
+                        VENUE_PROFILES.forEach((venue, idx) => {
+                            const dist = Math.hypot(venue.lat - userLat, venue.lng - userLng);
+                            if (dist < minDistance) {
+                                minDistance = dist;
+                                closestIndex = idx;
+                            }
+                        });
+
+                        // If within proximity threshold, auto-switch venue
+                        if (minDistance < 0.1) {
+                            currentVenueIndex = closestIndex;
+                        }
+                        updateVenueUI();
+                    },
+                    (error) => {
+                        console.warn("Geolocation permission denied or unavailable. Defaulting to primary venue.");
+                        updateVenueUI();
+                    },
+                    { timeout: 10000 }
+                );
+            } else {
+                updateVenueUI();
+            }
+        }
+
         function cycleVenueLocation() {
             currentVenueIndex = (currentVenueIndex + 1) % VENUE_PROFILES.length;
             updateVenueUI();
@@ -602,7 +654,7 @@
         function updateVenueUI() {
             const venue = VENUE_PROFILES[currentVenueIndex];
             document.getElementById('venue-name-display').innerText = venue.name;
-            document.getElementById('venue-address-display').innerText = venue.address;
+            document.getElementById('venue-address-display').innerText = venue.address + " • Auto-Geofenced";
             document.getElementById('venue-music-label').innerText = `📻 Hosted Jukebox: ${venue.musicApp}`;
             document.getElementById('venue-music-icon').innerText = `📻 ${venue.musicApp}`;
             document.getElementById('venue-music-link').href = venue.musicUrl;
@@ -626,11 +678,11 @@
             const text = document.getElementById('fav-text');
             if (!btn) return;
             if (isFavoriteVenue) {
-                btn.className = "bg-amber-950/60 hover:bg-amber-900/60 text-yellow-400 border border-yellow-500 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow-[0_0_10px_rgba(250,204,21,0.3)]";
+                btn.className = "bg-amber-950/60 hover:bg-amber-900/60 text-yellow-400 border border-yellow-500 px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1 shadow-[0_0_10px_rgba(250,204,21,0.3)]";
                 if(star) star.innerText = "⭐";
                 if(text) text.innerText = "Favorited";
             } else {
-                btn.className = "bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1";
+                btn.className = "bg-[#050814] hover:bg-[#111c38] text-slate-400 border border-[#1d4ed8] px-2.5 py-1 rounded-lg text-[10px] font-bold transition flex items-center space-x-1";
                 if(star) star.innerText = "⭐";
                 if(text) text.innerText = "Favorite";
             }
@@ -715,7 +767,7 @@
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
 
-            // Adapt Header Timer Banner for Game
+            // Adapt Header Timer Banner for Game (Hide Quick Draw draw ticker when playing lotteries)
             const drawBox = document.getElementById('header-draw-box');
             const drawLabel = document.getElementById('header-draw-label');
             if (gameKey === 'quickdraw') {
@@ -723,8 +775,8 @@
                 if(drawLabel) drawLabel.innerText = "Next Draw";
                 countdownSeconds = 240;
             } else {
-                if(drawBox) drawBox.style.display = 'none'; // Only show next draw number when quickdraw is selected
-                countdownSeconds = 43200; // Jackpot timeframe
+                if(drawBox) drawBox.style.display = 'none';
+                countdownSeconds = 43200;
             }
 
             const spotSelect = document.getElementById('spot-tier');
@@ -1049,7 +1101,7 @@
                     cell.onclick = () => inspectNumber(i);
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
-                    // Vibrant hot scale grading: Bright red for hot, yellow/orange for medium, blue for cold
+                    // Vibrant thermal scale grading: Bright red for hot, yellow/orange for medium, blue for cold
                     let bgStyle = "bg-blue-600 text-white"; // Cold baseline
                     if (count >= 7) bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]"; // Hot
                     else if (count >= 5) bgStyle = "bg-orange-500 text-white font-bold";
@@ -1059,12 +1111,8 @@
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
 
-                    // Standardized indicator: Quick Draw shows "x# Hits", other games show clean number in middle with "x#"
-                    if (activeGameKey === 'quickdraw') {
-                        cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-200 font-bold mt-0.5">x${count} Hits</span>`;
-                    } else {
-                        cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] text-cyan-200 font-mono">x${count}</span>`;
-                    }
+                    // Standardized indicator format "x#" across all games
+                    cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90 font-mono">x${count}</span>`;
                 }
                 grid.appendChild(cell);
             }
