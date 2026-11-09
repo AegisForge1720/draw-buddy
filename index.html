@@ -77,7 +77,7 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-        <!-- 🎯 TOP PRIORITY: Multi-Game Engine Switcher (Quick Draw, Powerball, Mega Millions) -->
+        <!-- 🎯 TOP PRIORITY: Multi-Game Engine Switcher -->
         <div class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-xl space-y-2">
             <div class="flex justify-between items-center">
                 <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game Engine Pool</h2>
@@ -225,7 +225,7 @@
             </div>
         </div>
 
-        <!-- Configuration Panel (Adapts dynamically to Active Game Engine) -->
+        <!-- Configuration Panel -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="config-panel-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ NY Quick Draw Session Parameters & Wager</h2>
@@ -329,7 +329,7 @@
             </div>
         </div>
 
-        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Adapts to Active Game Engine Pool) -->
+        <!-- 🔥 Universal: House Hot Number Heatmap Mode (Displays Exact Pick Frequency Count based on Lookback) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
                 <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 NY Quick Draw Hot Number Heatmap (Tap to Inspect)</h2>
@@ -423,7 +423,7 @@
                         </tr>
                     </thead>
                     <tbody id="ledger-body">
-                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet[cite: 1].</td></tr>
+                        <tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -698,7 +698,6 @@
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Session Parameters & Wager`;
 
-            // Adapt Spot Selection Dropdown
             const spotSelect = document.getElementById('spot-tier');
             spotSelect.innerHTML = '';
             if (gameKey === 'quickdraw') {
@@ -719,7 +718,6 @@
                 document.getElementById('multiplier-container').style.display = 'none';
             }
 
-            // Adapt Base Wager Options
             const wagerSelect = document.getElementById('base-wager');
             wagerSelect.innerHTML = '';
             cfg.wagerOptions.forEach(amt => {
@@ -730,7 +728,6 @@
                 wagerSelect.appendChild(opt);
             });
 
-            // Dynamic UI Quick Draw Hiding
             const venueSec = document.getElementById('quickdraw-venue-section');
             const venueBannerSec = document.getElementById('quickdraw-venue-banner-section');
             const banterSec = document.getElementById('quickdraw-banter-section');
@@ -823,10 +820,11 @@
                 alert("🔒 Number Deep-Dive Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock heat map statistics and draw intervals.");
                 return;
             }
-            const lookbackSize = cachedDraws.length || 100;
+            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || cachedDraws.length || 100;
+            const sliceData = cachedDraws.slice(0, lookbackSize);
             let hits = 0;
             let lastSeenDistance = null;
-            cachedDraws.forEach((d, index) => {
+            sliceData.forEach((d, index) => {
                 if (d.winning_numbers && d.winning_numbers.includes(num)) {
                     hits++;
                     if (lastSeenDistance === null) lastSeenDistance = index;
@@ -836,7 +834,7 @@
             const avgInterval = (lookbackSize / (hits || 1)).toFixed(1);
 
             document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
-            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive`;
+            document.getElementById('inspector-title').innerText = `Number #${num} Tactical Deep-Dive (${lookbackSize} Lookback)`;
             document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
             document.getElementById('stat-percentage').innerText = `${percentage}%`;
             document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Drawn in current draw!' : `${lastSeenDistance} draws ago`;
@@ -903,9 +901,11 @@
             const bw = document.getElementById('base-wager');
             const em = document.getElementById('extra-multiplier');
             const gb = document.getElementById('game-block');
+            const lb = document.getElementById('lookback-draws');
             if(bw) bw.addEventListener('change', updateCostDisplay);
             if(em) em.addEventListener('change', updateCostDisplay);
             if(gb) gb.addEventListener('input', updateCostDisplay);
+            if(lb) lb.addEventListener('input', () => { renderHeatmap(); });
         }
         function getGameCost() {
             const base = parseFloat(document.getElementById('base-wager').value) || 2;
@@ -945,11 +945,15 @@
         }
         function renderHeatmap() {
             const cfg = GAME_CONFIGS[activeGameKey];
+            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 100;
+            const sliceData = cachedDraws.slice(0, lookbackSize);
+            
             let freq = {};
             for(let i=1; i<=cfg.totalNumbers; i++) freq[i] = 0;
-            cachedDraws.forEach(d => {
+            sliceData.forEach(d => {
                 if (d.winning_numbers) { d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; }); }
             });
+
             const grid = document.getElementById('heatmap-grid');
             if (!grid) return;
             grid.innerHTML = '';
@@ -962,13 +966,14 @@
                     cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
                 } else {
                     let bgStyle = "bg-green-700 text-white";
-                    if (count >= 28) bgStyle = "bg-red-500 text-white font-black";
-                    else if (count >= 23) bgStyle = "bg-orange-500 text-white font-bold";
-                    else if (count >= 18) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                    else if (count >= 13) bgStyle = "bg-blue-600 text-white";
+                    if (count >= 8) bgStyle = "bg-red-500 text-white font-black";
+                    else if (count >= 6) bgStyle = "bg-orange-500 text-white font-bold";
+                    else if (count >= 4) bgStyle = "bg-yellow-500 text-slate-950 font-bold";
+                    else if (count >= 2) bgStyle = "bg-blue-600 text-white";
                     cell.className = `heatmap-cell ${bgStyle}`;
                     cell.onclick = () => inspectNumber(i);
-                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-75">${count}h</span>`;
+                    // Dynamically displays exact pick frequency count based on selected lookback sample size
+                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90">${count} picked</span>`;
                 }
                 grid.appendChild(cell);
             }
@@ -1091,7 +1096,7 @@
             const tbody = document.getElementById('ledger-body');
             if(!tbody) return;
             if (sessionTickets.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet[cite: 1].</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
                 const tw = document.getElementById('archive-total-wager');
                 const tp = document.getElementById('archive-total-payout');
                 const np = document.getElementById('archive-net-pnl');
