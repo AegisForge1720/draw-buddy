@@ -45,7 +45,7 @@
                 </div>
             </div>
             <div class="flex items-center space-x-1.5">
-                <!-- Compact Dev Tier Switcher (No Prices in Names) -->
+                <!-- Compact Dev Tier Switcher -->
                 <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
@@ -93,7 +93,13 @@
 
         <!-- Configuration Panel -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
-            <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">⚙️ Session Parameters & Wager</h2>
+                <!-- Floating Eye-Catcher Badge -->
+                <span class="text-[9px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-extrabold shadow-[0_0_10px_rgba(250,204,21,0.2)] animate-pulse">
+                    ⚡ +12.5% Optimal ROI
+                </span>
+            </div>
             
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -102,7 +108,7 @@
                         <option value="1">1</option><option value="2">2</option><option value="3">3</option>
                         <option value="4">4</option><option value="5">5</option><option value="6">6</option>
                         <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-                        <option value="10" selected>10 (+12.5% ROI)</option>
+                        <option value="10" selected>10</option>
                     </select>
                 </div>
                 <div>
@@ -111,7 +117,12 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <!-- Optimized Rolling Parameters Disclaimer -->
+            <div class="text-[9px] text-blue-400/80 italic px-0.5">
+                *ROI metrics & simulations derived from optimized rolling parameters. Past performance does not guarantee future results.
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 pt-1">
                 <div>
                     <label class="block text-xs text-yellow-300 mb-1">Base Wager ($)</label>
                     <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
@@ -123,10 +134,10 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-yellow-300 mb-1">Extra Add-on</label>
+                    <label class="block text-xs text-yellow-300 mb-1">Extra</label>
                     <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="1">No Extra (1x Payout)</option>
-                        <option value="2" selected>Play Extra (+ Equal Wager)</option>
+                        <option value="1">No</option>
+                        <option value="2" selected>Yes</option>
                     </select>
                 </div>
             </div>
