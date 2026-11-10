@@ -349,7 +349,7 @@
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Total Hits (Lookback)</span>
-                        <span id="stat-hits" class="font-bold text-yellow-400 text-xs">-- / -- draws</span>
+                        <span id="stat-hits" class="font-bold text-yellow-400 text-xs">--</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Hit Percentage</span>
@@ -357,7 +357,7 @@
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Last Seen Draw Distance</span>
-                        <span id="stat-last-seen" class="font-bold text-cyan-300 text-xs">-- draws ago</span>
+                        <span id="stat-last-seen" class="font-bold text-cyan-300 text-xs">--</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Markov Transition Prob</span>
@@ -365,11 +365,11 @@
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Statistical Mean Cycle Interval</span>
-                        <span id="stat-interval" class="font-bold text-white text-xs">-- draws</span>
+                        <span id="stat-interval" class="font-bold text-white text-xs">--</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                         <span class="text-blue-300 block text-[9px]">Cluster Density Rating</span>
-                        <span id="stat-density" class="font-bold text-emerald-400 text-xs">Optimal (Tier 1)</span>
+                        <span id="stat-density" class="font-bold text-emerald-400 text-xs">Standby</span>
                     </div>
                 </div>
 
@@ -382,7 +382,7 @@
                     <p class="text-slate-300 leading-tight">Calculates the exact historical probability of this number appearing based on winning numbers drawn in the <em>immediately preceding</em> draw.</p>
                 </div>
 
-                <!-- 🧮 Kelly & Monte Carlo Visual Display Cards -->
+                <!-- 🧮 Kelly & Monte Carlo Visual Display Cards (Zero-State Handled) -->
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div onclick="runKellyOptimizerModal()" class="bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-yellow-500/45 cursor-pointer transition space-y-1">
                         <div class="flex justify-between text-[9px] font-bold text-yellow-400">
@@ -390,9 +390,9 @@
                             <span>Optimal</span>
                         </div>
                         <div id="visual-kelly-bar" class="w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-yellow-500/30">
-                            <div class="bg-yellow-400 h-full w-[65%]"></div>
+                            <div id="kelly-fill-bar" class="bg-yellow-400 h-full w-[0%] transition-all"></div>
                         </div>
-                        <div class="text-[8px] text-blue-300 truncate">Half-Kelly Stake: $4 / Draw</div>
+                        <div id="kelly-text-sub" class="text-[8px] text-blue-300 truncate">Select Number for Stake</div>
                     </div>
 
                     <div onclick="runMonteCarloModal()" class="bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-cyan-500/45 cursor-pointer transition space-y-1">
@@ -401,9 +401,9 @@
                             <span>10k Sims</span>
                         </div>
                         <div id="visual-mc-bar" class="w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-cyan-500/30">
-                            <div class="bg-cyan-400 h-full w-[82%]"></div>
+                            <div id="mc-fill-bar" class="bg-cyan-400 h-full w-[0%] transition-all"></div>
                         </div>
-                        <div class="text-[8px] text-blue-300 truncate">Win Prob: 8.2% • Stable</div>
+                        <div id="mc-text-sub" class="text-[8px] text-blue-300 truncate">Select Number for Sim</div>
                     </div>
                 </div>
             </div>
@@ -1315,7 +1315,6 @@
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚡ CONFIG QUANTUM MATRIX`;
 
-            // Auto-adjust lookback dropdown options based on game selection and cap them correctly
             const lookbackSelect = document.getElementById('lookback-draws');
             if (lookbackSelect) {
                 lookbackSelect.innerHTML = '';
@@ -1555,6 +1554,13 @@
             document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Current draw!' : `${lastSeenDistance} draws ago`;
             document.getElementById('stat-markov').innerText = markovProb;
             document.getElementById('stat-interval').innerText = `~${meanCycleInterval} draws`;
+            document.getElementById('stat-density').innerText = `Optimal (Tier 1)`;
+
+            // Update visual card bars when a number is selected
+            document.getElementById('kelly-fill-bar').style.width = '65%';
+            document.getElementById('kelly-text-sub').innerText = 'Half-Kelly Stake: $4 / Draw';
+            document.getElementById('mc-fill-bar').style.width = '82%';
+            document.getElementById('mc-text-sub').innerText = 'Win Prob: 8.2% • Stable';
 
             document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
