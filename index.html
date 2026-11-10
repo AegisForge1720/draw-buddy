@@ -223,11 +223,11 @@
             </button>
         </div>
 
-        <!-- 🎟️ Actionable Play Card with Lotto.com Integration -->
+        <!-- 🎟️ Actionable Play Card with Lotto.com Integration & 5-Column ROI Layout -->
         <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
             <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                 <div>
-                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ OFFICIAL PLAY SLIP INSTRUCTIONS</div>
+                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ SYNTHESIZED NUMBERS ANALYSIS</div>
                     <div id="card-draw-label" class="text-base font-black text-white mt-0.5">Draws #3028802 – #3028806</div>
                     <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Weighted Hot-Cluster + Momentum (Last 50 Draws)</div>
                 </div>
@@ -248,22 +248,27 @@
                 </a>
             </div>
 
-            <div class="grid grid-cols-4 gap-1.5 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
-                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">1. Spot</span>
-                    <span id="slip-spot-box" class="font-black text-yellow-400 text-xs">4-SPOT</span>
+            <!-- 5-Column Grid Layout: Spot, Base, Extra, Games, ROI -->
+            <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[8px] uppercase text-blue-300 block">Spot</span>
+                    <span id="slip-spot-box" class="font-black text-yellow-400 text-[11px]">4-SPOT</span>
                 </div>
-                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">2. Base</span>
-                    <span id="slip-wager-box" class="font-black text-white text-xs">$1</span>
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[8px] uppercase text-blue-300 block">Base</span>
+                    <span id="slip-wager-box" class="font-black text-white text-[11px]">$1</span>
                 </div>
-                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">3. Extra</span>
-                    <span id="slip-extra-box" class="font-black text-cyan-400 text-xs">YES</span>
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[8px] uppercase text-blue-300 block">Extra</span>
+                    <span id="slip-extra-box" class="font-black text-cyan-400 text-[11px]">YES</span>
                 </div>
-                <div class="p-1.5 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[9px] uppercase text-blue-300 block">4. Games</span>
-                    <span id="slip-games-box" class="font-black text-emerald-400 text-xs">5</span>
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[8px] uppercase text-blue-300 block">Games</span>
+                    <span id="slip-games-box" class="font-black text-emerald-400 text-[11px]">5</span>
+                </div>
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
+                    <span class="text-[8px] uppercase text-blue-300 block">ROI</span>
+                    <span id="slip-roi-box" class="font-black text-amber-400 text-[11px]">+14.5%</span>
                 </div>
             </div>
 
@@ -337,7 +342,7 @@
                 <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
             </div>
 
-            <!-- Integrated Inspector Card with Zero-State Handling -->
+            <!-- Integrated Inspector Card with True Zero-State Handling -->
             <div id="inspector-card" class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/50 space-y-3 mt-3 scroll-mt-20">
                 <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
                     <div class="flex items-center space-x-2">
@@ -382,7 +387,7 @@
                     <p class="text-slate-300 leading-tight">Calculates the exact historical probability of this number appearing based on winning numbers drawn in the <em>immediately preceding</em> draw.</p>
                 </div>
 
-                <!-- 🧮 Kelly & Monte Carlo Visual Display Cards (Zero-State Handled) -->
+                <!-- 🧮 Kelly & Monte Carlo Visual Display Cards (Zero-State Fixed) -->
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div onclick="runKellyOptimizerModal()" class="bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-yellow-500/45 cursor-pointer transition space-y-1">
                         <div class="flex justify-between text-[9px] font-bold text-yellow-400">
@@ -1450,7 +1455,7 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700 font-mono";
                 }
 
                 if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
@@ -1556,7 +1561,6 @@
             document.getElementById('stat-interval').innerText = `~${meanCycleInterval} draws`;
             document.getElementById('stat-density').innerText = `Optimal (Tier 1)`;
 
-            // Update visual card bars when a number is selected
             document.getElementById('kelly-fill-bar').style.width = '65%';
             document.getElementById('kelly-text-sub').innerText = 'Half-Kelly Stake: $4 / Draw';
             document.getElementById('mc-fill-bar').style.width = '82%';
@@ -1654,6 +1658,10 @@
             const roiBadge = document.getElementById('roi-badge');
             if (roiBadge) {
                 roiBadge.innerText = `⚡ ROI: +${baseRoi.toFixed(1)}%`;
+            }
+            const slipRoiBox = document.getElementById('slip-roi-box');
+            if (slipRoiBox) {
+                slipRoiBox.innerText = `+${baseRoi.toFixed(1)}%`;
             }
         }
 
@@ -1785,6 +1793,8 @@
             document.getElementById('slip-wager-box').innerText = `$${baseWager}`;
             document.getElementById('slip-extra-box').innerText = hasExtra ? `YES` : `NO`;
             document.getElementById('slip-games-box').innerText = `${totalBlockSize}`;
+
+            updateOptimizedRoiBadge();
 
             document.getElementById('card-total-slip-cost').innerText = `$${totalSlipCost.toFixed(2)}`;
             document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)}/gm × ${totalBlockSize} ${totalBlockSize === 1 ? 'gm' : 'gms'} = $${totalSlipCost.toFixed(2)}`;
