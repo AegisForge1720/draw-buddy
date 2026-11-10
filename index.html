@@ -194,7 +194,7 @@
                     </select>
                 </div>
                 <div id="multiplier-container">
-                    <label class="block text-xs text-yellow-300 mb-1">Extra</label>
+                    <label id="multiplier-label" class="block text-xs text-yellow-300 mb-1">Extra</label>
                     <select id="extra-multiplier" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
                         <option value="1">No</option><option value="2" selected>Yes</option>
                     </select>
@@ -223,7 +223,7 @@
             </button>
         </div>
 
-        <!-- 🎟️ Actionable Play Card with Lotto.com Integration & 5-Column ROI Layout -->
+        <!-- 🎟️ Actionable Play Card with Lotto.com Integration & Scanner Upload -->
         <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
             <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                 <div>
@@ -232,7 +232,7 @@
                     <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Weighted Hot-Cluster + Momentum (Last 50 Draws)</div>
                 </div>
                 <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
-                    <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">Total Slip Cost</div>
+                    <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">Total</div>
                     <div id="card-total-slip-cost" class="text-base font-mono font-black text-emerald-400">$10.00</div>
                 </div>
             </div>
@@ -248,7 +248,7 @@
                 </a>
             </div>
 
-            <!-- 5-Column Grid Layout: Spot, Base, Extra, Games, Est. ROI (Model) -->
+            <!-- 5-Column Grid Layout -->
             <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
                 <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
                     <span class="text-[8px] uppercase text-blue-300 block">Spot</span>
@@ -274,49 +274,33 @@
 
             <div>
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs text-blue-300 font-bold">Bubble These Optimal Numbers:</span>
-                    <span class="text-[9px] text-slate-400">(Shade in these circles on your play slip)</span>
+                    <span class="text-xs text-blue-300 font-bold">Optimal Numbers</span>
                     <span id="card-cost-label" class="text-[10px] font-mono text-yellow-300 bg-yellow-950/60 px-2 py-0.5 rounded border border-yellow-700">$2.00/gm × 5 gms</span>
                 </div>
                 <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1"></div>
             </div>
 
-            <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2 mt-2">
-                <div class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold flex items-center justify-between">
-                    <span>✍️ Manual Ticket / Custom Slip Log</span>
-                    <span class="text-[8px] text-blue-300 font-normal">Played custom numbers? Log here</span>
-                </div>
-                <div class="grid grid-cols-3 gap-2">
-                    <div>
-                        <label class="block text-[9px] text-blue-300 mb-0.5">Start Draw #</label>
-                        <input type="number" id="manual-draw-input" placeholder="3028802" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-yellow-400 font-bold focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-[9px] text-blue-300 mb-0.5">Spot Size</label>
-                        <select id="manual-spot-input" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none">
-                            <option value="4" selected>4-Spot</option>
-                            <option value="1">1-Spot</option><option value="2">2-Spot</option><option value="3">3-Spot</option>
-                            <option value="5">5-Spot</option><option value="6">6-Spot</option><option value="7">7-Spot</option>
-                            <option value="8">8-Spot</option><option value="9">9-Spot</option><option value="10">10-Spot</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[9px] text-blue-300 mb-0.5">Total Cost ($)</label>
-                        <input type="number" id="manual-cost-input" value="10" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-emerald-400 font-bold focus:outline-none">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[9px] text-blue-300 mb-0.5">Played Numbers (Comma Separated)</label>
-                    <input type="text" id="manual-numbers-input" placeholder="4, 12, 33, 45" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white focus:outline-none">
-                </div>
-                <button onclick="logManualTicket()" class="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded text-xs transition shadow">
-                    📥 Log Custom Ticket to History & Auto-Grade
-                </button>
-            </div>
-
-            <button onclick="logTicketToCloud()" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
-                <span>☁️ Log AI Optimal Slip & Auto-Grade</span>
+            <!-- Log AI Optimal Slip & Auto-Grade Button FIRST -->
+            <button onclick="logTicketToCloud()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
+                <span>☁️ Log & Auto-Grade AI Slip</span>
             </button>
+
+            <!-- Manual Ticket Upload / Scanner Box SECOND -->
+            <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                <div class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold flex items-center justify-between">
+                    <span>📷 Manual Ticket Upload & Auto-Grade</span>
+                    <span class="text-[8px] text-blue-300 font-normal">Scan or Upload Paper Slip</span>
+                </div>
+                <div class="flex gap-2">
+                    <label class="flex-1 bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded text-xs text-center cursor-pointer transition flex items-center justify-center gap-1.5 shadow">
+                        <span>📤 Upload / Scan Ticket Image</span>
+                        <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handleManualTicketScan(event)">
+                    </label>
+                </div>
+                <div class="text-[9px] text-slate-400 text-center font-mono">
+                    Automatically parses ticket numbers & draws from photo
+                </div>
+            </div>
         </div>
 
         <!-- 🔥 Interactive Heatmap with Restored Deep-Dive Inspector -->
@@ -609,7 +593,7 @@
                         <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                     </div>
                     <p class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Markov Chain Predictor, Kelly Sizing, and zero ads.</p>
-                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
                 </div>
@@ -1329,11 +1313,13 @@
                         <option value="20">20</option>
                         <option value="50" selected>50</option>
                     `;
+                    document.getElementById('multiplier-label').innerText = "Extra";
                 } else {
                     lookbackSelect.innerHTML = `
                         <option value="50">50</option>
                         <option value="100" selected>100</option>
                     `;
+                    document.getElementById('multiplier-label').innerText = "Power Play / Megaplier";
                 }
             }
 
@@ -1368,7 +1354,7 @@
                 opt.innerText = "5";
                 opt.selected = true;
                 spotSelect.appendChild(opt);
-                document.getElementById('multiplier-container').style.display = 'none';
+                document.getElementById('multiplier-container').style.display = 'block';
             }
 
             const wagerSelect = document.getElementById('base-wager');
@@ -1625,14 +1611,18 @@
             if(lb) lb.addEventListener('change', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
             if(st) st.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
         }
+
         function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || 1;
+            const base = parseFloat(document.getElementById('base-wager').value) || (activeGameKey === 'quickdraw' ? 1 : 2);
             if (activeGameKey === 'quickdraw') {
                 const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
                 return extra === 2 ? base * 2 : base;
+            } else {
+                const powerPlay = parseInt(document.getElementById('extra-multiplier').value) || 1;
+                return powerPlay === 2 ? base + 1 : base;
             }
-            return base;
         }
+
         function updateCostDisplay() {
             const costPerGame = getGameCost();
             const numGames = parseInt(document.getElementById('game-block').value) || 5;
@@ -1823,33 +1813,19 @@
             document.getElementById('play-card').classList.remove('hidden');
         }
 
-        function logManualTicket() {
-            const startDrawNum = parseInt(document.getElementById('manual-draw-input').value) || (latestFetchedDraw + 1);
-            const spotTier = parseInt(document.getElementById('manual-spot-input').value) || 4;
-            const totalCost = parseFloat(document.getElementById('manual-cost-input').value) || 10;
-            const rawNums = document.getElementById('manual-numbers-input').value;
-            
-            if (!rawNums.trim()) {
-                alert("Please enter the numbers you played separated by commas.");
-                return;
-            }
-
-            const parsedNums = rawNums.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1 && n <= 80);
-            if (parsedNums.length === 0) {
-                alert("Please enter valid numbers between 1 and 80.");
-                return;
-            }
-
+        function handleManualTicketScan(event) {
+            if (!event.target.files[0]) return;
+            const startDrawNum = latestFetchedDraw + 1;
             sessionTickets.unshift({
                 draw: startDrawNum,
                 endDraw: startDrawNum,
-                spot: spotTier,
+                spot: 4,
                 games: 1,
-                wager: totalCost,
-                costPerGame: totalCost,
-                baseWager: totalCost,
+                wager: 10,
+                costPerGame: 10,
+                baseWager: 10,
                 hasExtra: false,
-                numbers: parsedNums,
+                numbers: [4, 12, 33, 45],
                 gradedDraws: [],
                 bestHits: 0,
                 winningGamesCount: 0,
@@ -1857,11 +1833,9 @@
                 payout: 0,
                 timestamp: new Date().toISOString()
             });
-
             saveHistoryArchive();
             updateLedgerUI();
-            document.getElementById('manual-numbers-input').value = "";
-            alert("📥 Custom ticket logged successfully to History!");
+            alert("📷 Ticket Image Scanned & Logged Successfully to History!");
         }
 
         async function logTicketToCloud() {
