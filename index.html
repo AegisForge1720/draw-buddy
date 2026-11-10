@@ -227,7 +227,7 @@
         <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
             <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                 <div>
-                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ SYNTHESIZED NUMBERS ANALYSIS</div>
+                    <div class="text-[10px] uppercase tracking-wider text-yellow-400 font-black">🎟️ NUMBERS SYNTHESIZED</div>
                     <div id="card-draw-label" class="text-base font-black text-white mt-0.5">Draws #3028802 – #3028806</div>
                     <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Weighted Hot-Cluster + Momentum (Last 50 Draws)</div>
                 </div>
@@ -608,7 +608,7 @@
                         <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                     </div>
                     <p class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Markov Chain Predictor, Kelly Sizing, and zero ads.</p>
-                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
                 </div>
@@ -1325,13 +1325,13 @@
                 lookbackSelect.innerHTML = '';
                 if (gameKey === 'quickdraw') {
                     lookbackSelect.innerHTML = `
-                        <option value="20">20 (Ultra-Short)</option>
-                        <option value="50" selected>50 (Optimal)</option>
+                        <option value="20">20</option>
+                        <option value="50" selected>50</option>
                     `;
                 } else {
                     lookbackSelect.innerHTML = `
                         <option value="50">50</option>
-                        <option value="100" selected>100 (Ceiling)</option>
+                        <option value="100" selected>100</option>
                     `;
                 }
             }
@@ -1455,7 +1455,7 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-yellow-700 font-mono";
                 }
 
                 if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
@@ -1538,7 +1538,7 @@
                 alert("🔒 Interactive Heatmap Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock number statistics and draw intervals.");
                 return;
             }
-            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || cachedDraws.length || 50;
+            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 50;
             const sliceData = cachedDraws.slice(0, lookbackSize);
             let hits = 0;
             let lastSeenDistance = null;
@@ -1923,7 +1923,7 @@
                 tr.className = 'border-b border-[#1d4ed8]';
                 tr.innerHTML = `
                     <td class="py-2 font-mono text-yellow-400 text-[10px]">${drawRangeText}</td>
-                    <td class="py-2 text-blue-200 text-[11px]">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).toFixed(0)})</td>
+                    <td class="py-2 text-blue-200 text-[11px]">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).getToken ? '' : ''}${(t.wager || 2).toFixed(0)})</td>
                     <td class="py-2 font-bold text-white text-[10px]">${t.hits}</td>
                     <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
                 `;
