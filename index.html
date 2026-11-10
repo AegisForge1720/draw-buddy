@@ -142,7 +142,7 @@
             <div class="flex justify-between items-center gap-2">
                 <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">⚡ CONFIG QUANTUM MATRIX</h2>
                 <span id="roi-badge" class="text-[8px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0">
-                    ⚡ ROI: +14.5%
+                    ⚡ Est. ROI (Model): +14.5%
                 </span>
             </div>
 
@@ -248,7 +248,7 @@
                 </a>
             </div>
 
-            <!-- 5-Column Grid Layout: Spot, Base, Extra, Games, ROI -->
+            <!-- 5-Column Grid Layout: Spot, Base, Extra, Games, Est. ROI (Model) -->
             <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
                 <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
                     <span class="text-[8px] uppercase text-blue-300 block">Spot</span>
@@ -266,8 +266,8 @@
                     <span class="text-[8px] uppercase text-blue-300 block">Games</span>
                     <span id="slip-games-box" class="font-black text-emerald-400 text-[11px]">5</span>
                 </div>
-                <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
-                    <span class="text-[8px] uppercase text-blue-300 block">ROI</span>
+                <div class="p-1 bg-[#0b132b] rounded border border-slate-800" title="Model projection only. Not a guarantee.">
+                    <span class="text-[8px] uppercase text-amber-300 block">Est. ROI</span>
                     <span id="slip-roi-box" class="font-black text-amber-400 text-[11px]">+14.5%</span>
                 </div>
             </div>
@@ -275,6 +275,7 @@
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs text-blue-300 font-bold">Bubble These Optimal Numbers:</span>
+                    <span class="text-[9px] text-slate-400">(Shade in these circles on your play slip)</span>
                     <span id="card-cost-label" class="text-[10px] font-mono text-yellow-300 bg-yellow-950/60 px-2 py-0.5 rounded border border-yellow-700">$2.00/gm × 5 gms</span>
                 </div>
                 <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1"></div>
@@ -608,7 +609,7 @@
                         <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                     </div>
                     <p class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Markov Chain Predictor, Kelly Sizing, and zero ads.</p>
-                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
                 </div>
@@ -1442,6 +1443,7 @@
                 }
 
                 if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'block';
+                if(heatmapGridContainer) heatmapGridContainer.style.filter = 'blur(6px)';
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
@@ -1459,6 +1461,7 @@
                 }
 
                 if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
+                if(heatmapGridContainer) heatmapGridContainer.style.filter = 'none';
             }
             updateFreeLimitBadge();
             renderHeatmap();
@@ -1657,7 +1660,7 @@
 
             const roiBadge = document.getElementById('roi-badge');
             if (roiBadge) {
-                roiBadge.innerText = `⚡ ROI: +${baseRoi.toFixed(1)}%`;
+                roiBadge.innerText = `⚡ Est. ROI (Model): +${baseRoi.toFixed(1)}%`;
             }
             const slipRoiBox = document.getElementById('slip-roi-box');
             if (slipRoiBox) {
@@ -1895,50 +1898,6 @@
             const nextDrawEl = document.getElementById('header-next-draw');
             if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
             generateTicket();
-        }
-
-        function updateLedgerUI() {
-            const tbody = document.getElementById('ledger-body');
-            if(!tbody) return;
-            if (sessionTickets.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-blue-500 py-3">No historical tickets archived yet.</td></tr>`;
-                const tw = document.getElementById('archive-total-wager');
-                const tp = document.getElementById('archive-total-payout');
-                const np = document.getElementById('archive-net-pnl');
-                if(tw) tw.innerText = "$0.00";
-                if(tp) tp.innerText = "$0.00";
-                if(np) np.innerText = "$0.00";
-                return;
-            }
-            tbody.innerHTML = '';
-            let totalWagered = 0, totalPayout = 0;
-            sessionTickets.forEach(t => {
-                totalWagered += (t.wager || 2);
-                totalPayout += (t.payout || 0);
-                const netTicketPnL = (t.payout || 0) - (t.wager || 2);
-                const gamesCount = t.games || 1;
-                const endDraw = t.endDraw || (t.draw + gamesCount - 1);
-                const drawRangeText = gamesCount > 1 ? `#${t.draw}–#${endDraw}` : `#${t.draw}`;
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-[#1d4ed8]';
-                tr.innerHTML = `
-                    <td class="py-2 font-mono text-yellow-400 text-[10px]">${drawRangeText}</td>
-                    <td class="py-2 text-blue-200 text-[11px]">${t.spot}-Spot • ${gamesCount}x ($${(t.wager || 2).getToken ? '' : ''}${(t.wager || 2).toFixed(0)})</td>
-                    <td class="py-2 font-bold text-white text-[10px]">${t.hits}</td>
-                    <td class="py-2 text-right font-mono ${netTicketPnL >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${netTicketPnL >= 0 ? '+' : ''}${netTicketPnL.toFixed(2)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-            const netProfit = totalPayout - totalWagered;
-            const tw = document.getElementById('archive-total-wager');
-            const tp = document.getElementById('archive-total-payout');
-            const netEl = document.getElementById('archive-net-pnl');
-            if(tw) tw.innerText = `$${totalWagered.toFixed(2)}`;
-            if(tp) tp.innerText = `$${totalPayout.toFixed(2)}`;
-            if(netEl) {
-                netEl.innerText = `${netProfit >= 0 ? '+' : ''}$${netProfit.toFixed(2)}`;
-                netEl.className = `font-mono font-bold text-xs ${netProfit >= 0 ? 'text-yellow-400' : 'text-rose-400'}`;
-            }
         }
 
         window.onload = () => { init(); };
