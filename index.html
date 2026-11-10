@@ -54,10 +54,10 @@
                 </div>
             </div>
 
-            <!-- Header Controls: QR Invite Button, Simplified Free/Pro Tier Switcher, Sync -->
+            <!-- Header Controls: Exclusive Access Button, Tier Switcher, Sync -->
             <div class="flex items-center space-x-1.5 shrink-0 ml-auto">
                 <button onclick="openInviteModal()" class="text-[9px] bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 px-2 py-1 rounded font-black whitespace-nowrap flex items-center gap-1">
-                    <span>🔗 QR</span>
+                    <span>🔒 Exclusive Access</span>
                 </button>
                 <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
@@ -85,17 +85,17 @@
         </div>
     </header>
 
-    <!-- 🔗 Pro-Gated Peer Invite QR Code Modal -->
+    <!-- 🔒 Exclusive VIP Invite Modal -->
     <div id="invite-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#0b132b] border-2 border-cyan-400 rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-[0_0_30px_rgba(56,189,248,0.3)]">
             <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
-                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider">🤝 Pro Peer Invite QR</div>
+                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider">🔒 Exclusive VIP Invite</div>
                 <button onclick="closeInviteModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕</button>
             </div>
             
             <div id="invite-locked-view" class="text-center space-y-3 py-2 hidden">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Required</div>
-                <p class="text-[11px] text-blue-300">Peer-to-peer invite QR codes are unlocked exclusively for Pro members to share Draw Buddy with table neighbors.</p>
+                <p class="text-[11px] text-blue-300">Exclusive VIP table invite QR codes are unlocked exclusively for Pro members to share Draw Buddy with table neighbors.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded text-xs">
                     Unlock Pro ($9.99)
                 </a>
@@ -113,10 +113,10 @@
                     </svg>
                 </div>
                 <div class="bg-[#050814] p-2 rounded border border-[#1d4ed8] text-[10px] font-mono text-yellow-300 truncate">
-                    https://amourgides.github.io/draw-buddy/?invite=pro_peer_m_grill
+                    https://amourgides.github.io/draw-buddy/?invite=vip_m_grill
                 </div>
-                <button onclick="navigator.clipboard.writeText('https://amourgides.github.io/draw-buddy/?invite=pro_peer_m_grill'); alert('📋 Invite link copied to clipboard!');" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs transition">
-                    📋 Copy Table Invite Link
+                <button onclick="navigator.clipboard.writeText('https://amourgides.github.io/draw-buddy/?invite=vip_m_grill'); alert('📋 Exclusive invite link copied!');" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs transition">
+                    📋 Copy Exclusive VIP Link
                 </button>
             </div>
         </div>
@@ -124,11 +124,11 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-        <!-- 🎯 Multi-Game Engine Switcher -->
+        <!-- 🎯 Select Game -->
         <div class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 shadow-xl space-y-2">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game Engine Pool</h2>
-                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800 font-mono">Multi-DB Active</span>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-bold">🎯 Select Game</h2>
+                <span class="text-[9px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-800 font-mono">Live Sync</span>
             </div>
             <div class="grid grid-cols-3 gap-1.5">
                 <button onclick="switchGameProfile('quickdraw')" id="game-btn-quickdraw" class="bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center">Quick Draw</button>
@@ -137,7 +137,7 @@
             </div>
         </div>
 
-        <!-- ⚙️ Configuration Panel -->
+        <!-- ⚙️ Session Parameters -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center gap-2">
                 <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate">⚙️ Session Parameters</h2>
@@ -175,7 +175,12 @@
                 <div>
                     <label class="block text-xs text-blue-300 mb-1">Lookback Draws</label>
                     <select id="lookback-draws" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="20">20</option><option value="50" selected>50</option><option value="100">100</option>
+                        <option value="20">20 Draws</option>
+                        <option value="50" selected>50 Draws</option>
+                        <option value="100">100 Draws</option>
+                        <option value="250">250 Draws</option>
+                        <option value="500">500 Draws</option>
+                        <option value="1000">1,000 Draws</option>
                     </select>
                 </div>
             </div>
@@ -288,7 +293,7 @@
                     <input type="text" id="manual-numbers-input" placeholder="4, 12, 33, 45" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white focus:outline-none">
                 </div>
                 <button onclick="logManualTicket()" class="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded text-xs transition shadow">
-                    📥 Log Custom Ticket to P/L Archive & Auto-Grade
+                    📥 Log Custom Ticket to History & Auto-Grade
                 </button>
             </div>
 
@@ -307,10 +312,22 @@
                     <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold</span>
                 </div>
             </div>
-            <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
+
+            <!-- Free Locked Heatmap Overlay Banner -->
+            <div id="heatmap-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2 hidden">
+                <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap Feature Locked</div>
+                <p class="text-[10px] text-blue-300">Unlock the live interactive heatmap and number deep-dive inspector with your Pro membership.</p>
+                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
+                    Activate Pro ($9.99)
+                </a>
+            </div>
+
+            <div id="heatmap-grid-container" class="relative">
+                <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
+            </div>
 
             <!-- Integrated Inspector Card -->
-            <div id="inspector-card" class="bg-[#050814] p-3 rounded-lg border border-yellow-500/50 space-y-2.5 mt-3">
+            <div id="inspector-card" class="bg-[#050814] p-3 rounded-lg border border-yellow-500/50 space-y-2.5 mt-3 scroll-mt-20">
                 <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
                     <div class="flex items-center space-x-2">
                         <div id="inspector-ball-badge" class="w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-xs">#--</div>
@@ -351,7 +368,7 @@
 
             <div id="scratch-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Locked</div>
-                <p class="text-[10px] text-blue-300">Unlock the Pro Scratch-Off Engine & P/L ledger with your Pro membership.</p>
+                <p class="text-[10px] text-blue-300">Unlock the Pro Scratch-Off Engine & History ledger with your Pro membership.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
                     Activate Pro ($9.99)
                 </a>
@@ -375,7 +392,11 @@
 
                     <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-800">
                         <span id="scratch-game-title-display" class="font-bold text-white text-xs">Featured: $50,000 Cashword</span>
-                        <span id="scratch-ev-badge" class="text-[10px] text-emerald-400 font-mono font-bold">EV: +$2.15 (High Value)</span>
+                        <span id="scratch-ev-badge" class="text-[10px] text-emerald-400 font-mono font-bold" title="Expected Value (EV): Average dollar return per ticket over the long run">EV: +$2.15 (High Value)</span>
+                    </div>
+
+                    <div class="text-[9px] text-blue-300 italic bg-[#0b132b] p-1.5 rounded border border-slate-800">
+                        💡 <strong>What is EV?</strong> Expected Value calculates the statistical average payout per ticket minus cost. A positive EV means remaining top prizes give you a mathematical edge!
                     </div>
 
                     <div class="grid grid-cols-3 gap-2 text-center text-[10px] pt-1">
@@ -407,7 +428,7 @@
 
                 <div class="flex gap-2">
                     <button onclick="logScratchTicket()" class="flex-1 bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs shadow transition">
-                        📥 Log Scratch-Off to Archive
+                        📥 Log Scratch-Off to History
                     </button>
                     <label class="bg-[#111c38] hover:bg-[#1e293b] text-cyan-300 border border-cyan-500/30 font-bold py-2.5 px-3 rounded-lg text-xs text-center cursor-pointer transition flex items-center justify-center shrink-0">
                         <span>📷 Scan</span>
@@ -450,6 +471,17 @@
                 </div>
             </div>
 
+            <!-- Lotto.com Courier Quick-Access Button in Venue Hub -->
+            <div class="bg-[#050814] p-3 rounded-lg border border-emerald-500/40 flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-black text-emerald-400">🎟️ Order Official NY Draw Tickets Online</div>
+                    <div class="text-[10px] text-blue-300">Play Quick Draw, Powerball & Mega Millions via Lotto.com</div>
+                </div>
+                <a href="https://www.lotto.com/?ref=draw_buddy_stripe" target="_blank" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-black px-3 py-2 rounded-lg text-xs shadow transition shrink-0">
+                    Lotto.com ↗
+                </a>
+            </div>
+
             <div id="venue-mode-banner" class="bg-gradient-to-r from-amber-950/90 via-yellow-950/90 to-amber-950/90 p-3 rounded-lg border border-yellow-500/60 space-y-2">
                 <div class="flex justify-between items-center">
                     <div>
@@ -468,7 +500,7 @@
 
             <div class="border-t border-[#1d4ed8] pt-2.5 space-y-2">
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold">💬 Live Venue Banter Ticker</span>
+                    <span class="text-[10px] uppercase tracking-wider text-amber-400 font-bold">💬 Live Banter</span>
                     <span class="text-[8px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-mono">Patron Feed</span>
                 </div>
                 <div id="venue-ticker-feed" class="space-y-1.5 max-h-[110px] overflow-y-auto text-xs font-mono">
@@ -480,20 +512,20 @@
                     </div>
                 </div>
                 <div class="flex gap-2 pt-0.5">
-                    <input type="text" id="banter-input" placeholder="Post to venue feed..." class="flex-1 bg-[#050814] border border-[#1d4ed8] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
+                    <input type="text" id="banter-input" placeholder="Post to live banter..." class="flex-1 bg-[#050814] border border-[#1d4ed8] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-cyan-500">
                     <button onclick="postBanter()" class="px-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-xs font-bold uppercase">Send</button>
                 </div>
             </div>
 
             <div class="border-t border-[#1d4ed8] pt-2.5 space-y-1.5">
                 <div class="flex justify-between items-center text-[10px] text-yellow-400 font-bold uppercase tracking-wider">
-                    <span id="venue-music-label">📻 Venue Jukebox: AMI Play</span>
+                    <span id="venue-music-label">📻 Music</span>
                     <span class="text-[8px] text-emerald-400 font-mono">Quick Launch</span>
                 </div>
                 <div class="grid grid-cols-3 gap-1.5">
                     <a id="venue-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
-                        <span id="venue-music-icon">📻 AMI Play</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Jukebox</span>
+                        <span id="venue-music-icon">📻 Music</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Music</span>
                     </a>
                     <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
                         <span>🚗 Uber Safe</span>
@@ -535,13 +567,13 @@
             </div>
         </div>
 
-        <!-- 📊 Multi-Draw Slip P/L Archive -->
+        <!-- 📊 History -->
         <div id="quickdraw-ledger-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center">
-                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Multi-Draw Slip P/L Archive</h2>
+                <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 History</h2>
                 <div class="flex items-center space-x-1.5">
-                    <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2 py-0.5 rounded font-bold transition">
-                        📥 Export Power BI CSV
+                    <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2.5 py-0.5 rounded font-bold transition">
+                        📥 Export
                     </button>
                     <button onclick="clearHistoryArchive()" class="text-[10px] text-rose-400 bg-rose-950/50 hover:bg-rose-900/50 border border-rose-800 px-2 py-0.5 rounded transition">Clear</button>
                 </div>
@@ -579,21 +611,21 @@
             </div>
         </div>
 
-        <!-- 🎯 More Fun at Your Fingertips -->
+        <!-- 🎯 More Fun at Your Fingertips (Lotto.com Pinned First) -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
             <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🎯 More Fun at Your Fingertips</h2>
             <div class="grid grid-cols-3 gap-2">
+                <a href="https://www.lotto.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/40 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
+                    <span>🎟️ Lotto.com</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Online</span>
+                </a>
                 <a id="venue-bottom-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span id="venue-bottom-music-name">📻 AMI Play</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Open App</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Music</span>
                 </a>
                 <a href="#" onclick="launchNativeApp('touchtunes')" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span>🎶 TouchTunes</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Open App</span>
-                </a>
-                <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
-                    <span>🚗 Uber / Lyft</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Safe Ride</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Music</span>
                 </a>
             </div>
             <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
@@ -696,14 +728,14 @@
             { 
                 name: "M's Bar & Grill", 
                 address: "Irondequoit, NY • Quick Draw Terminal #4", 
-                musicApp: "AMI Play", 
+                musicApp: "Music", 
                 musicUrl: "https://www.amiplay.com/?ref=draw_buddy_stripe",
                 lat: 43.215, lng: -77.585
             },
             { 
                 name: "Shamrock Jack's", 
                 address: "Irondequoit, NY • Waterfront Lounge", 
-                musicApp: "TouchTunes", 
+                musicApp: "Music", 
                 musicUrl: "https://www.touchtunes.com/?ref=draw_buddy_stripe",
                 lat: 43.245, lng: -77.535 
             }
@@ -727,7 +759,7 @@
         let isFavoriteVenue = localStorage.getItem('draw_buddy_fav_venue') === 'true';
         let currentState = localStorage.getItem('draw_buddy_state') || 'NY';
 
-        cachedDraws = generateMockData(100, latestFetchedDraw);
+        cachedDraws = generateMockData(1000, latestFetchedDraw);
 
         async function init() {
             checkProStatus();
@@ -1026,7 +1058,7 @@
                     .from(cfg.tableName)
                     .select('*')
                     .order('draw_number', { ascending: false })
-                    .limit(100);
+                    .limit(1000);
 
                 const statusEl = document.getElementById('sync-status');
                 if (!error && data && data.length > 0) {
@@ -1040,7 +1072,7 @@
                     }
                     gradePendingTickets();
                 } else {
-                    cachedDraws = generateMockData(100, latestFetchedDraw);
+                    cachedDraws = generateMockData(1000, latestFetchedDraw);
                     if(statusEl) {
                         statusEl.innerText = "⚡ Sim DB";
                         statusEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-[#050814] text-yellow-400 border border-yellow-500/40 whitespace-nowrap";
@@ -1049,7 +1081,7 @@
                 renderHeatmap();
             } catch (err) {
                 console.warn("Supabase table query fallback active for " + cfg.tableName);
-                cachedDraws = generateMockData(100, latestFetchedDraw);
+                cachedDraws = generateMockData(1000, latestFetchedDraw);
                 renderHeatmap();
             }
         }
@@ -1095,12 +1127,12 @@
             const venue = VENUE_PROFILES[currentVenueIndex];
             document.getElementById('venue-name-display').innerText = venue.name;
             document.getElementById('venue-address-display').innerText = venue.address;
-            document.getElementById('venue-music-label').innerText = `📻 Venue Jukebox: ${venue.musicApp}`;
-            document.getElementById('venue-music-icon').innerText = `📻 ${venue.musicApp}`;
+            document.getElementById('venue-music-label').innerText = `📻 Music`;
+            document.getElementById('venue-music-icon').innerText = `📻 Music`;
             document.getElementById('venue-location-badge').innerText = venue.name;
             
             const bottomMusicName = document.getElementById('venue-bottom-music-name');
-            if(bottomMusicName) bottomMusicName.innerText = `📻 ${venue.musicApp}`;
+            if(bottomMusicName) bottomMusicName.innerText = `📻 Music`;
         }
 
         function toggleFavoriteVenue() {
@@ -1288,6 +1320,9 @@
             const scratchBadge = document.getElementById('scratch-pro-badge');
             const clusterProBadge = document.getElementById('cluster-pro-badge');
 
+            const heatmapLocked = document.getElementById('heatmap-locked-overlay');
+            const heatmapGridContainer = document.getElementById('heatmap-grid-container');
+
             if (activeTier === 'free') {
                 if(subCard) subCard.style.display = 'block';
                 if(venueBanner) venueBanner.style.opacity = '0.6';
@@ -1303,6 +1338,9 @@
                     clusterProBadge.innerText = "🔒 Pro Only";
                     clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono";
                 }
+
+                if(heatmapLocked) heatmapLocked.style.display = 'block';
+                if(heatmapGridContainer) heatmapGridContainer.style.opacity = '0.25';
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
@@ -1318,6 +1356,9 @@
                     clusterProBadge.innerText = "✨ Pro Unlocked";
                     clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
                 }
+
+                if(heatmapLocked) heatmapLocked.style.display = 'none';
+                if(heatmapGridContainer) heatmapGridContainer.style.opacity = '1';
             }
             updateFreeLimitBadge();
             renderHeatmap();
@@ -1359,7 +1400,7 @@
             document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Current draw!' : `${lastSeenDistance} draws ago`;
             document.getElementById('stat-interval').innerText = `~${avgInterval} draws`;
 
-            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function startTimers() {
@@ -1397,7 +1438,7 @@
         }
         function saveHistoryArchive() { localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets)); }
         function clearHistoryArchive() {
-            if (confirm("Are you sure you want to clear your archive?")) {
+            if (confirm("Are you sure you want to clear your history?")) {
                 sessionTickets = [];
                 localStorage.removeItem('draw_buddy_pl_archive');
                 updateLedgerUI();
@@ -1521,7 +1562,7 @@
 
         function postBanter() {
             if (activeTier === 'free') {
-                alert("🔒 Live Venue Banter is a Pro feature! Upgrade to Pro ($9.99) to chat with other patrons in the venue.");
+                alert("🔒 Live Banter is a Pro feature! Upgrade to Pro ($9.99) to chat with other patrons in the venue.");
                 return;
             }
             const input = document.getElementById('banter-input');
@@ -1650,7 +1691,7 @@
             saveHistoryArchive();
             updateLedgerUI();
             document.getElementById('manual-numbers-input').value = "";
-            alert("📥 Custom ticket logged successfully to P/L Archive!");
+            alert("📥 Custom ticket logged successfully to History!");
         }
 
         async function logTicketToCloud() {
