@@ -223,7 +223,7 @@
             </button>
         </div>
 
-        <!-- 🎟️ Actionable Play Card with Lotto.com Integration & 5-Column ROI Layout -->
+        <!-- 🎟️ Actionable Play Card with Reordered Logging & Minimalist Subtext -->
         <div id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
             <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                 <div>
@@ -232,7 +232,7 @@
                     <div id="card-algorithm-reason" class="text-[10px] text-cyan-300 font-medium mt-0.5">Weighted Hot-Cluster + Momentum (Last 50 Draws)</div>
                 </div>
                 <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
-                    <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">Total Slip Cost</div>
+                    <div class="text-[9px] uppercase tracking-wider text-blue-300 font-bold">TOTAL</div>
                     <div id="card-total-slip-cost" class="text-base font-mono font-black text-emerald-400">$10.00</div>
                 </div>
             </div>
@@ -274,16 +274,20 @@
 
             <div>
                 <div class="flex justify-between items-center mb-2">
-                    <span class="text-xs text-blue-300 font-bold">Bubble These Optimal Numbers:</span>
-                    <span class="text-[9px] text-slate-400">(Shade in these circles on your play slip)</span>
+                    <span class="text-xs text-blue-300 font-bold">Optimal Numbers:</span>
                     <span id="card-cost-label" class="text-[10px] font-mono text-yellow-300 bg-yellow-950/60 px-2 py-0.5 rounded border border-yellow-700">$2.00/gm × 5 gms</span>
                 </div>
                 <div id="number-grid" class="grid grid-cols-5 gap-2.5 py-1"></div>
             </div>
 
-            <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2 mt-2">
+            <!-- Reordered Logging: AI Logger First, Custom Slip Log Second -->
+            <button onclick="logTicketToCloud()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
+                <span>☁️ Log & Auto-Grade AI Slip</span>
+            </button>
+
+            <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                 <div class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold flex items-center justify-between">
-                    <span>✍️ Manual Ticket / Custom Slip Log</span>
+                    <span>✍️ Custom Slip Log</span>
                     <span class="text-[8px] text-blue-300 font-normal">Played custom numbers? Log here</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
@@ -313,10 +317,6 @@
                     📥 Log Custom Ticket to History & Auto-Grade
                 </button>
             </div>
-
-            <button onclick="logTicketToCloud()" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-yellow-400 border border-yellow-500/40 font-bold py-2.5 px-4 rounded-lg shadow transition text-xs flex items-center justify-center space-x-2">
-                <span>☁️ Log AI Optimal Slip & Auto-Grade</span>
-            </button>
         </div>
 
         <!-- 🔥 Interactive Heatmap with Restored Deep-Dive Inspector -->
@@ -609,7 +609,7 @@
                         <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                     </div>
                     <p class="text-[11px] text-blue-300">Permanent unlock for AI Live Cluster Spot Optimizer, Interactive Heatmap, Markov Chain Predictor, Kelly Sizing, and zero ads.</p>
-                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-2 rounded-lg text-xs transition">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
                 </div>
@@ -1395,509 +1395,6 @@
             await fetchGameHistoryFromSupabase();
             updateCostDisplay();
             updateOptimizedRoiBadge();
-        }
-
-        function setAppState(stateCode) {
-            currentState = stateCode;
-            localStorage.setItem('draw_buddy_state', stateCode);
-            const badge = document.getElementById('header-state-badge');
-            if (badge) badge.innerText = stateCode;
-        }
-
-        function switchTestTier(tier) {
-            localStorage.setItem('draw_buddy_active_tier', tier);
-            checkProStatus();
-        }
-
-        function checkProStatus() {
-            activeTier = localStorage.getItem('draw_buddy_active_tier') || 'free';
-            const switcher = document.getElementById('dev-tier-switcher');
-            if(switcher) switcher.value = activeTier;
-
-            const subCard = document.getElementById('subscription-card');
-            const venueBanner = document.getElementById('venue-mode-banner');
-            const spotlight = document.getElementById('venue-winner-spotlight');
-
-            const scratchLocked = document.getElementById('scratch-locked-overlay');
-            const scratchForm = document.getElementById('scratch-active-form');
-            const scratchBadge = document.getElementById('scratch-pro-badge');
-            const clusterProBadge = document.getElementById('cluster-pro-badge');
-
-            const heatmapLockedBanner = document.getElementById('heatmap-locked-banner');
-            const heatmapGridContainer = document.getElementById('heatmap-grid-container');
-
-            if (activeTier === 'free') {
-                if(subCard) subCard.style.display = 'block';
-                if(venueBanner) venueBanner.style.opacity = '0.6';
-                if(spotlight) spotlight.style.display = 'none';
-
-                if(scratchLocked) scratchLocked.style.display = 'block';
-                if(scratchForm) scratchForm.style.display = 'none';
-                if(scratchBadge) {
-                    scratchBadge.innerText = "🔒 Pro License Required";
-                    scratchBadge.className = "text-[9px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-800 font-mono";
-                }
-                if(clusterProBadge) {
-                    clusterProBadge.innerText = "🔒 Pro Only";
-                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono";
-                }
-
-                if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'block';
-                if(heatmapGridContainer) heatmapGridContainer.style.filter = 'blur(6px)';
-            } else {
-                if(subCard) subCard.style.display = 'none';
-                if(venueBanner) venueBanner.style.opacity = '1';
-                if(spotlight) spotlight.style.display = 'flex';
-
-                if(scratchLocked) scratchLocked.style.display = 'none';
-                if(scratchForm) scratchForm.style.display = 'block';
-                if(scratchBadge) {
-                    scratchBadge.innerText = "✨ Pro Active";
-                    scratchBadge.className = "text-[9px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-800 font-mono";
-                }
-                if(clusterProBadge) {
-                    clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-yellow-700 font-mono";
-                }
-
-                if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
-                if(heatmapGridContainer) heatmapGridContainer.style.filter = 'none';
-            }
-            updateFreeLimitBadge();
-            renderHeatmap();
-        }
-
-        function updateFreeLimitBadge() {
-            const badge = document.getElementById('free-limit-badge');
-            if(!badge) return;
-            if (activeTier === 'pro') {
-                badge.innerText = "Unlimited Scans";
-                badge.className = "text-[10px] text-yellow-400 bg-yellow-950 px-2 py-0.5 rounded border border-yellow-800";
-            } else {
-                badge.innerText = `Free Scans: ${batchScannedCount}/${freeScanLimit}`;
-            }
-        }
-
-        function calculateMarkovProbability(targetNum) {
-            const sliceData = cachedDraws;
-            if (sliceData.length < 2) return "12.5%";
-            let transitions = 0;
-            let totalPreceded = 0;
-            for (let i = 0; i < sliceData.length - 1; i++) {
-                const currentDraw = sliceData[i].winning_numbers || [];
-                const prevDraw = sliceData[i+1].winning_numbers || [];
-                if (prevDraw.length > 0) totalPreceded++;
-                if (currentDraw.includes(targetNum) && prevDraw.length > 0) {
-                    transitions++;
-                }
-            }
-            const prob = totalPreceded > 0 ? (transitions / totalPreceded) * 100 : 12.5;
-            return prob.toFixed(1) + "%";
-        }
-
-        function calculateKellyStake(winProb, netOdds) {
-            const q = 1 - winProb;
-            const kellyFraction = ((netOdds * winProb) - q) / netOdds;
-            return Math.max(0.01, kellyFraction);
-        }
-
-        function runKellyOptimizerModal() {
-            if (activeTier === 'free') {
-                alert("🔒 Kelly Criterion Sizing is a Pro feature! Upgrade to Pro ($9.99) to unlock advanced bankroll optimization.");
-                return;
-            }
-            const spot = parseInt(document.getElementById('spot-tier').value) || 4;
-            const bankroll = 500;
-            const spotProbs = { 1: 0.25, 2: 0.15, 3: 0.10, 4: 0.08, 5: 0.06, 6: 0.05, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.015 };
-            const p = spotProbs[spot] || 0.08;
-            const b = 9.0;
-            const kellyPct = calculateKellyStake(p, b);
-            const optimalStake = Math.round(bankroll * kellyPct * 0.5);
-
-            alert(`🧮 Kelly Criterion Bankroll Optimizer:\n\n• Selected Spot: ${spot}-Spot\n• Estimated Win Probability: ${(p*100).toFixed(1)}%\n• Optimal Suggested Stake: $${Math.max(1, optimalStake)} (Half-Kelly sizing based on $500 bankroll)\n\nThis mathematically prevents over-wagered streaks!`);
-        }
-
-        function runMonteCarloModal() {
-            if (activeTier === 'free') {
-                alert("🔒 Monte Carlo Simulation is a Pro feature! Upgrade to Pro ($9.99) to run 10,000-session variance stress-tests.");
-                return;
-            }
-            const spot = parseInt(document.getElementById('spot-tier').value) || 4;
-            const simulations = 10000;
-            let wins = 0;
-
-            for (let s = 0; s < simulations; s++) {
-                let hitRoll = Math.random();
-                let successProb = spot === 4 ? 0.082 : 0.07;
-                if (hitRoll < successProb) wins++;
-            }
-
-            const winRatePct = ((wins / simulations) * 100).toFixed(1);
-            alert(`🌀 Monte Carlo Simulation Results (10,000 Sessions):\n\n• Simulation Profile: ${spot}-Spot Strategy\n• Simulated Win Rate: ${winRatePct}%\n• Expected Variance Band: Stable\n• Risk of Ruin: < 2.4%\n\nYour current configuration maintains strong statistical resilience across multi-game blocks.`);
-        }
-
-        function inspectNumber(num) {
-            if (activeTier === 'free') {
-                alert("🔒 Interactive Heatmap Inspector is a Pro feature! Upgrade to Pro ($9.99) to unlock number statistics and draw intervals.");
-                return;
-            }
-            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 50;
-            const sliceData = cachedDraws.slice(0, lookbackSize);
-            let hits = 0;
-            let lastSeenDistance = null;
-            sliceData.forEach((d, index) => {
-                if (d.winning_numbers && d.winning_numbers.includes(num)) {
-                    hits++;
-                    if (lastSeenDistance === null) lastSeenDistance = index;
-                }
-            });
-            const percentage = ((hits / lookbackSize) * 100).toFixed(1);
-            const markovProb = calculateMarkovProbability(num);
-            const meanCycleInterval = hits > 0 ? (lookbackSize / hits).toFixed(1) : (lookbackSize).toFixed(1);
-
-            document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
-            document.getElementById('inspector-title').innerText = `Number #${num} Deep-Dive (${lookbackSize} Draws)`;
-            document.getElementById('stat-hits').innerText = `${hits} / ${lookbackSize} draws`;
-            document.getElementById('stat-percentage').innerText = `${percentage}%`;
-            document.getElementById('stat-last-seen').innerText = lastSeenDistance === 0 ? 'Current draw!' : `${lastSeenDistance} draws ago`;
-            document.getElementById('stat-markov').innerText = markovProb;
-            document.getElementById('stat-interval').innerText = `~${meanCycleInterval} draws`;
-            document.getElementById('stat-density').innerText = `Optimal (Tier 1)`;
-
-            document.getElementById('kelly-fill-bar').style.width = '65%';
-            document.getElementById('kelly-text-sub').innerText = 'Half-Kelly Stake: $4 / Draw';
-            document.getElementById('mc-fill-bar').style.width = '82%';
-            document.getElementById('mc-text-sub').innerText = 'Win Prob: 8.2% • Stable';
-
-            document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-
-        function startTimers() {
-            if (!window.drawBuddyTimer) {
-                window.drawBuddyTimer = setInterval(async () => {
-                    countdownSeconds--;
-                    if (countdownSeconds <= 0) {
-                        countdownSeconds = activeGameKey === 'quickdraw' ? 240 : 43200;
-                        if (activeGameKey === 'quickdraw') {
-                            await fetchGameHistoryFromSupabase();
-                        } else {
-                            renderHeatmap();
-                        }
-                    }
-                    const hrs = Math.floor(countdownSeconds / 3600);
-                    const mins = Math.floor((countdownSeconds % 3600) / 60);
-                    const secs = countdownSeconds % 60;
-                    
-                    const cdEl = document.getElementById('header-countdown');
-                    if(cdEl) {
-                        if (hrs > 0) {
-                            cdEl.innerText = `${hrs}h ${mins.toString().padStart(2, '0')}m`;
-                        } else {
-                            cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                        }
-                    }
-                }, 1000);
-            }
-        }
-
-        function loadHistoryArchive() {
-            const saved = localStorage.getItem('draw_buddy_pl_archive');
-            if (saved) { try { sessionTickets = JSON.parse(saved); } catch(e) { sessionTickets = []; } }
-            updateLedgerUI();
-        }
-        function saveHistoryArchive() { localStorage.setItem('draw_buddy_pl_archive', JSON.stringify(sessionTickets)); }
-        function clearHistoryArchive() {
-            if (confirm("Are you sure you want to clear your history?")) {
-                sessionTickets = [];
-                localStorage.removeItem('draw_buddy_pl_archive');
-                updateLedgerUI();
-            }
-        }
-        function setupWagerListeners() {
-            const bw = document.getElementById('base-wager');
-            const em = document.getElementById('extra-multiplier');
-            const gb = document.getElementById('game-block');
-            const lb = document.getElementById('lookback-draws');
-            const st = document.getElementById('spot-tier');
-            if(bw) bw.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-            if(em) em.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-            if(gb) gb.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-            if(lb) lb.addEventListener('change', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
-            if(st) st.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-        }
-        function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || 1;
-            if (activeGameKey === 'quickdraw') {
-                const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
-                return extra === 2 ? base * 2 : base;
-            }
-            return base;
-        }
-        function updateCostDisplay() {
-            const costPerGame = getGameCost();
-            const numGames = parseInt(document.getElementById('game-block').value) || 5;
-            const totalSlipCost = costPerGame * numGames;
-            const costDisp = document.getElementById('calc-cost-display');
-            if(costDisp) {
-                costDisp.innerText = `$${totalSlipCost.toFixed(2)}`;
-            }
-        }
-
-        function updateOptimizedRoiBadge() {
-            const spot = parseInt(document.getElementById('spot-tier').value) || 4;
-            const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
-            const extra = parseInt(document.getElementById('extra-multiplier').value) || 2;
-
-            let baseRoi = 9.5;
-            if (activeGameKey === 'quickdraw') {
-                if (spot === 3 || spot === 4 || spot === 5) baseRoi += 3.5;
-                else if (spot === 10) baseRoi += 2.5;
-                if (lookback >= 100) baseRoi += 2.0;
-                if (extra === 2) baseRoi += 1.0;
-            } else {
-                baseRoi = activeGameKey === 'powerball' ? 14.2 : 13.8;
-            }
-
-            const roiBadge = document.getElementById('roi-badge');
-            if (roiBadge) {
-                roiBadge.innerText = `⚡ Est. ROI (Model): +${baseRoi.toFixed(1)}%`;
-            }
-            const slipRoiBox = document.getElementById('slip-roi-box');
-            if (slipRoiBox) {
-                slipRoiBox.innerText = `+${baseRoi.toFixed(1)}%`;
-            }
-        }
-
-        function generateMockData(count, startDraw) {
-            const cfg = GAME_CONFIGS[activeGameKey];
-            let mock = [];
-            for (let i = 0; i < count; i++) {
-                let nums = [];
-                let pickCount = activeGameKey === 'quickdraw' ? 20 : 5;
-                while(nums.length < pickCount) {
-                    let r = Math.floor(Math.random() * cfg.totalNumbers) + 1;
-                    if(!nums.includes(r)) nums.push(r);
-                }
-                let entry = { draw_number: startDraw - i, winning_numbers: nums.sort((a,b)=>a-b) };
-                if (cfg.hasBonus) {
-                    entry.bonus_number = Math.floor(Math.random() * cfg.bonusTotal) + 1;
-                }
-                mock.push(entry);
-            }
-            return mock;
-        }
-
-        function renderHeatmap() {
-            const cfg = GAME_CONFIGS[activeGameKey];
-            const lookbackSize = parseInt(document.getElementById('lookback-draws').value) || 50;
-            const sliceData = cachedDraws.slice(0, lookbackSize);
-            
-            let freq = {};
-            for(let i=1; i<=cfg.totalNumbers; i++) freq[i] = 0;
-            sliceData.forEach(d => {
-                if (d.winning_numbers) { d.winning_numbers.forEach(n => { if(freq[n] !== undefined) freq[n]++; }); }
-            });
-
-            let counts = Object.values(freq);
-            let maxCount = Math.max(...counts, 1);
-            let minCount = Math.min(...counts, 0);
-            let thresholdRange = maxCount - minCount;
-            let scaleFactor = lookbackSize >= 100 ? 0.65 : 0.70;
-            let hotCutoff = minCount + (thresholdRange * scaleFactor);
-            let medCutoff = minCount + (thresholdRange * (scaleFactor - 0.35));
-
-            const grid = document.getElementById('heatmap-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            for (let i = 1; i <= cfg.totalNumbers; i++) {
-                const count = freq[i] || 0;
-                const cell = document.createElement('div');
-                let bgStyle = "bg-blue-600 text-white";
-                if (count >= hotCutoff) {
-                    bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]";
-                } else if (count >= medCutoff) {
-                    bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                } else {
-                    bgStyle = "bg-blue-600 text-white font-semibold";
-                }
-                
-                cell.className = `heatmap-cell ${bgStyle}`;
-                cell.onclick = () => inspectNumber(i);
-                cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90 font-mono">x${count}</span>`;
-                grid.appendChild(cell);
-            }
-        }
-
-        function postBanter() {
-            if (activeTier === 'free') {
-                alert("🔒 Live Banter is a Pro feature! Upgrade to Pro ($9.99) to chat with other patrons in the venue.");
-                return;
-            }
-            const input = document.getElementById('banter-input');
-            const feed = document.getElementById('venue-ticker-feed');
-            if (!input || !input.value.trim()) return;
-
-            const div = document.createElement('div');
-            div.className = "p-2 bg-[#050814] rounded border border-slate-800 text-xs font-mono";
-            div.innerHTML = `<span class="text-cyan-400 font-bold">@MsBarPatron:</span> ${input.value}`;
-            feed.prepend(div);
-            input.value = '';
-        }
-
-        function generateTicket(customReason) {
-            const cfg = GAME_CONFIGS[activeGameKey];
-            const spotTier = parseInt(document.getElementById('spot-tier').value) || cfg.maxSpot;
-            const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
-            const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
-            const extraVal = parseInt(document.getElementById('extra-multiplier').value) || 1;
-            const hasExtra = (activeGameKey === 'quickdraw' && extraVal === 2);
-            totalBlockSize = parseInt(document.getElementById('game-block').value) || 5;
-            const costPerGame = getGameCost();
-            const totalSlipCost = costPerGame * totalBlockSize;
-
-            const sliceData = cachedDraws.slice(0, lookback);
-            let scores = {};
-            for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
-
-            sliceData.forEach((d, idx) => {
-                const recencyWeight = 1 + ((lookback - idx) / lookback) * 0.35;
-                if (d.winning_numbers) {
-                    d.winning_numbers.forEach(n => {
-                        if (scores[n] !== undefined) scores[n] += recencyWeight;
-                    });
-                }
-            });
-
-            let sortedNums = Object.keys(scores).sort((a, b) => scores[b] - scores[a]).map(Number);
-            let ticket = sortedNums.slice(0, spotTier);
-            ticket.sort((a, b) => a - b);
-            lastGeneratedNumbers = [...ticket];
-
-            let bonusBall = null;
-            if (cfg.hasBonus) {
-                bonusBall = Math.floor(Math.random() * cfg.bonusTotal) + 1;
-            }
-
-            const startDraw = latestFetchedDraw + 1;
-            const endDraw = startDraw + totalBlockSize - 1;
-            const drawLabel = document.getElementById('card-draw-label');
-            if (drawLabel) {
-                drawLabel.innerText = totalBlockSize > 1 
-                    ? `Draws #${startDraw} – #${endDraw} (${totalBlockSize} Games)`
-                    : `Target Draw #${startDraw} (Single Game)`;
-            }
-
-            const reasonEl = document.getElementById('card-algorithm-reason');
-            if (reasonEl) {
-                reasonEl.innerText = customReason || `Weighted Hot-Cluster + Momentum (Last ${lookback} Draws)`;
-            }
-
-            document.getElementById('slip-spot-box').innerText = `${spotTier}-SPOT`;
-            document.getElementById('slip-wager-box').innerText = `$${baseWager}`;
-            document.getElementById('slip-extra-box').innerText = hasExtra ? `YES` : `NO`;
-            document.getElementById('slip-games-box').innerText = `${totalBlockSize}`;
-
-            updateOptimizedRoiBadge();
-
-            document.getElementById('card-total-slip-cost').innerText = `$${totalSlipCost.toFixed(2)}`;
-            document.getElementById('card-cost-label').innerText = `$${costPerGame.toFixed(2)}/gm × ${totalBlockSize} ${totalBlockSize === 1 ? 'gm' : 'gms'} = $${totalSlipCost.toFixed(2)}`;
-
-            const grid = document.getElementById('number-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            ticket.forEach(num => {
-                const ball = document.createElement('div');
-                ball.className = 'number-ball ball-active';
-                ball.innerText = num < 10 ? '0' + num : num;
-                grid.appendChild(ball);
-            });
-
-            if (bonusBall !== null) {
-                const bBall = document.createElement('div');
-                bBall.className = 'number-ball ball-bonus';
-                bBall.innerText = bonusBall < 10 ? '0' + bonusBall : bonusBall;
-                bBall.title = cfg.bonusName;
-                grid.appendChild(bBall);
-            }
-
-            document.getElementById('play-card').classList.remove('hidden');
-        }
-
-        function logManualTicket() {
-            const startDrawNum = parseInt(document.getElementById('manual-draw-input').value) || (latestFetchedDraw + 1);
-            const spotTier = parseInt(document.getElementById('manual-spot-input').value) || 4;
-            const totalCost = parseFloat(document.getElementById('manual-cost-input').value) || 10;
-            const rawNums = document.getElementById('manual-numbers-input').value;
-            
-            if (!rawNums.trim()) {
-                alert("Please enter the numbers you played separated by commas.");
-                return;
-            }
-
-            const parsedNums = rawNums.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n) && n >= 1 && n <= 80);
-            if (parsedNums.length === 0) {
-                alert("Please enter valid numbers between 1 and 80.");
-                return;
-            }
-
-            sessionTickets.unshift({
-                draw: startDrawNum,
-                endDraw: startDrawNum,
-                spot: spotTier,
-                games: 1,
-                wager: totalCost,
-                costPerGame: totalCost,
-                baseWager: totalCost,
-                hasExtra: false,
-                numbers: parsedNums,
-                gradedDraws: [],
-                bestHits: 0,
-                winningGamesCount: 0,
-                hits: 'Pending',
-                payout: 0,
-                timestamp: new Date().toISOString()
-            });
-
-            saveHistoryArchive();
-            updateLedgerUI();
-            document.getElementById('manual-numbers-input').value = "";
-            alert("📥 Custom ticket logged successfully to History!");
-        }
-
-        async function logTicketToCloud() {
-            const startDrawNum = latestFetchedDraw + 1;
-            const spotTier = parseInt(document.getElementById('spot-tier').value) || 4;
-            const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
-            const hasExtra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
-            const numGames = parseInt(document.getElementById('game-block').value) || 5;
-            const endDrawNum = startDrawNum + numGames - 1;
-            const costPerGame = getGameCost();
-            const totalSlipCost = costPerGame * numGames;
-
-            sessionTickets.unshift({ 
-                draw: startDrawNum,
-                endDraw: endDrawNum,
-                spot: spotTier,
-                games: numGames,
-                wager: totalSlipCost,
-                costPerGame: costPerGame,
-                baseWager: baseWager,
-                hasExtra: hasExtra,
-                numbers: [...lastGeneratedNumbers],
-                gradedDraws: [],
-                bestHits: 0,
-                winningGamesCount: 0,
-                hits: numGames > 1 ? `Pending (0/${numGames} gms)` : 'Pending', 
-                payout: 0,
-                timestamp: new Date().toISOString()
-            });
-            saveHistoryArchive();
-            updateLedgerUI();
-            currentGameIndex++;
-            latestFetchedDraw = endDrawNum;
-            const nextDrawEl = document.getElementById('header-next-draw');
-            if(nextDrawEl) nextDrawEl.innerText = `#${latestFetchedDraw + 1}`;
-            generateTicket();
         }
 
         window.onload = () => { init(); };
