@@ -313,12 +313,12 @@
                 </div>
             </div>
 
-            <!-- Free Locked Heatmap Overlay Banner -->
-            <div id="heatmap-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2 hidden">
-                <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap Feature Locked</div>
-                <p class="text-[10px] text-blue-300">Unlock the live interactive heatmap and number deep-dive inspector with your Pro membership.</p>
-                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1.5 px-4 rounded text-xs transition">
-                    Activate Pro ($9.99)
+            <!-- Free Locked Heatmap Banner Preview -->
+            <div id="heatmap-locked-banner" class="bg-gradient-to-r from-amber-950/80 to-yellow-950/80 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5 hidden">
+                <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap & Quantum Deep-Dive Locked</div>
+                <p class="text-[10px] text-blue-300">Upgrade to Pro ($9.99) to unlock dynamic lookback weighting, Markov sequence probabilities, and Kelly Sizing.</p>
+                <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1 px-3 rounded text-[10px] transition">
+                    Unlock Pro Features ($9.99)
                 </a>
             </div>
 
@@ -1330,7 +1330,7 @@
             const scratchBadge = document.getElementById('scratch-pro-badge');
             const clusterProBadge = document.getElementById('cluster-pro-badge');
 
-            const heatmapLocked = document.getElementById('heatmap-locked-overlay');
+            const heatmapLockedBanner = document.getElementById('heatmap-locked-banner');
             const heatmapGridContainer = document.getElementById('heatmap-grid-container');
 
             if (activeTier === 'free') {
@@ -1346,11 +1346,10 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "🔒 Pro Only";
-                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2.5 py-0.5 rounded border border-yellow-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-yellow-950 text-yellow-300 px-2 py-0.5 rounded border border-yellow-700 font-mono";
                 }
 
-                if(heatmapLocked) heatmapLocked.style.display = 'block';
-                if(heatmapGridContainer) heatmapGridContainer.style.opacity = '0.25';
+                if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'block';
             } else {
                 if(subCard) subCard.style.display = 'none';
                 if(venueBanner) venueBanner.style.opacity = '1';
@@ -1364,11 +1363,10 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
                 }
 
-                if(heatmapLocked) heatmapLocked.style.display = 'none';
-                if(heatmapGridContainer) heatmapGridContainer.style.opacity = '1';
+                if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
             }
             updateFreeLimitBadge();
             renderHeatmap();
@@ -1403,7 +1401,6 @@
         }
 
         function calculateKellyStake(winProb, netOdds) {
-            // Kelly Formula: f* = (bp - q) / b  where b = net odds, p = win prob, q = 1 - p
             const q = 1 - winProb;
             const kellyFraction = ((netOdds * winProb) - q) / netOdds;
             return Math.max(0.01, kellyFraction);
@@ -1415,17 +1412,14 @@
                 return;
             }
             const spot = parseInt(document.getElementById('spot-tier').value) || 4;
-            const baseWager = parseFloat(document.getElementById('base-wager').value) || 1;
-            const bankroll = 500; // assumed session bankroll
-            
-            // Approximate hit probabilities & odds for Quick Draw spots
+            const bankroll = 500;
             const spotProbs = { 1: 0.25, 2: 0.15, 3: 0.10, 4: 0.08, 5: 0.06, 6: 0.05, 7: 0.04, 8: 0.03, 9: 0.02, 10: 0.015 };
             const p = spotProbs[spot] || 0.08;
-            const b = 9.0; // net odds multiplier
+            const b = 9.0;
             const kellyPct = calculateKellyStake(p, b);
-            const optimalStake = Math.round(bankroll * kellyPct * 0.5); // Half-Kelly safety margin
+            const optimalStake = Math.round(bankroll * kellyPct * 0.5);
 
-            alert(`🧮 Kelly Criterion Bankroll Optimizer:\n\n• Selected Spot: ${spot}-Spot\n• Estimated Win Probability: ${(p*100).toFixed(1)}%\n• Optimal Suggested Stake: $${Math.max(1, optimalStake)} (Half-Kelly sizing based on $500 bankroll)\n\nThis mathematically prevents over-wengering during cold streaks!`);
+            alert(`🧮 Kelly Criterion Bankroll Optimizer:\n\n• Selected Spot: ${spot}-Spot\n• Estimated Win Probability: ${(p*100).toFixed(1)}%\n• Optimal Suggested Stake: $${Math.max(1, optimalStake)} (Half-Kelly sizing based on $500 bankroll)\n\nThis mathematically prevents over-wagered streaks!`);
         }
 
         function runMonteCarloModal() {
@@ -1436,7 +1430,6 @@
             const spot = parseInt(document.getElementById('spot-tier').value) || 4;
             const simulations = 10000;
             let wins = 0;
-            let maxDrawdown = 0;
 
             for (let s = 0; s < simulations; s++) {
                 let hitRoll = Math.random();
@@ -1602,8 +1595,9 @@
             let maxCount = Math.max(...counts, 1);
             let minCount = Math.min(...counts, 0);
             let thresholdRange = maxCount - minCount;
-            let hotCutoff = minCount + (thresholdRange * 0.70);
-            let medCutoff = minCount + (thresholdRange * 0.35);
+            // Dynamic weighting scaling based on selected lookback window
+            let hotCutoff = minCount + (thresholdRange * (lookbackSize >= 500 ? 0.65 : 0.70));
+            let medCutoff = minCount + (thresholdRange * (lookbackSize >= 500 ? 0.30 : 0.35));
 
             const grid = document.getElementById('heatmap-grid');
             if (!grid) return;
@@ -1611,24 +1605,18 @@
             for (let i = 1; i <= cfg.totalNumbers; i++) {
                 const count = freq[i] || 0;
                 const cell = document.createElement('div');
-                if (activeTier === 'free') {
-                    cell.className = "heatmap-cell bg-[#111c38] text-blue-300 border-[#1d4ed8]";
-                    cell.onclick = () => inspectNumber(i);
-                    cell.innerHTML = `<span>${i < 10 ? '0'+i : i}</span><span class="text-[7px] text-yellow-400 font-bold">🔒 PRO</span>`;
+                let bgStyle = "bg-blue-600 text-white";
+                if (count >= hotCutoff) {
+                    bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]";
+                } else if (count >= medCutoff) {
+                    bgStyle = "bg-yellow-500 text-slate-950 font-bold";
                 } else {
-                    let bgStyle = "bg-blue-600 text-white";
-                    if (count >= hotCutoff) {
-                        bgStyle = "bg-red-500 text-white font-black shadow-[0_0_10px_rgba(239,68,68,0.6)]";
-                    } else if (count >= medCutoff) {
-                        bgStyle = "bg-yellow-500 text-slate-950 font-bold";
-                    } else {
-                        bgStyle = "bg-blue-600 text-white font-semibold";
-                    }
-                    
-                    cell.className = `heatmap-cell ${bgStyle}`;
-                    cell.onclick = () => inspectNumber(i);
-                    cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90 font-mono">x${count}</span>`;
+                    bgStyle = "bg-blue-600 text-white font-semibold";
                 }
+                
+                cell.className = `heatmap-cell ${bgStyle}`;
+                cell.onclick = () => inspectNumber(i);
+                cell.innerHTML = `<span class="text-sm font-black">${i < 10 ? '0'+i : i}</span><span class="text-[8px] opacity-90 font-mono">x${count}</span>`;
                 grid.appendChild(cell);
             }
         }
