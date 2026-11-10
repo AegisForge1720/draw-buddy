@@ -54,10 +54,10 @@
                 </div>
             </div>
 
-            <!-- Header Controls: Exclusive Access Button, Tier Switcher, Sync -->
+            <!-- Header Controls: Retro Pass Button, Tier Switcher, Sync -->
             <div class="flex items-center space-x-1.5 shrink-0 ml-auto">
                 <button onclick="openInviteModal()" class="text-[9px] bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/50 px-2 py-1 rounded font-black whitespace-nowrap flex items-center gap-1">
-                    <span>🔒 Exclusive Access</span>
+                    <span>👾 RETRO-NET PASS</span>
                 </button>
                 <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
@@ -85,17 +85,17 @@
         </div>
     </header>
 
-    <!-- 🔒 Exclusive VIP Invite Modal -->
+    <!-- 👾 Retro-Net VIP Beacon Modal -->
     <div id="invite-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-[#0b132b] border-2 border-cyan-400 rounded-2xl max-w-xs w-full p-5 space-y-4 shadow-[0_0_30px_rgba(56,189,248,0.3)]">
             <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
-                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider">🔒 Exclusive VIP Invite</div>
+                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider">👾 Retro-Net VIP Beacon</div>
                 <button onclick="closeInviteModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕</button>
             </div>
             
             <div id="invite-locked-view" class="text-center space-y-3 py-2 hidden">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Feature Required</div>
-                <p class="text-[11px] text-blue-300">Exclusive VIP table invite QR codes are unlocked exclusively for Pro members to share Draw Buddy with table neighbors.</p>
+                <p class="text-[11px] text-blue-300">Retro-Net table invite QR codes are unlocked exclusively for Pro members to share Draw Buddy with table neighbors.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded text-xs">
                     Unlock Pro ($9.99)
                 </a>
@@ -115,8 +115,8 @@
                 <div class="bg-[#050814] p-2 rounded border border-[#1d4ed8] text-[10px] font-mono text-yellow-300 truncate">
                     https://amourgides.github.io/draw-buddy/?invite=vip_m_grill
                 </div>
-                <button onclick="navigator.clipboard.writeText('https://amourgides.github.io/draw-buddy/?invite=vip_m_grill'); alert('📋 Exclusive invite link copied!');" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs transition">
-                    📋 Copy Exclusive VIP Link
+                <button onclick="navigator.clipboard.writeText('https://amourgides.github.io/draw-buddy/?invite=vip_m_grill'); alert('📋 Retro-Net link copied!');" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs transition">
+                    📋 Copy Retro-Net Link
                 </button>
             </div>
         </div>
@@ -248,7 +248,7 @@
                 </a>
             </div>
 
-            <!-- 5-Column Grid Layout -->
+            <!-- 5-Column Grid Layout: Spot, Base, Extra, Games, Est. ROI (Model) -->
             <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
                 <div class="p-1 bg-[#0b132b] rounded border border-slate-800">
                     <span class="text-[8px] uppercase text-blue-300 block">Spot</span>
@@ -285,7 +285,7 @@
                 <span>☁️ Log & Auto-Grade AI Slip</span>
             </button>
 
-            <!-- Manual Ticket Upload / Scanner Box SECOND -->
+            <!-- Manual Ticket Upload & Scanner Box SECOND -->
             <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                 <div class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold flex items-center justify-between">
                     <span>📷 Manual Ticket Upload & Auto-Grade</span>
@@ -567,11 +567,11 @@
                     <span class="text-[8px] text-emerald-400 font-mono">Quick Launch</span>
                 </div>
                 <div class="grid grid-cols-3 gap-1.5">
-                    <a id="venue-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
+                    <a id="venue-music-link" href="https://www.amientertainment.com/" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center cursor-pointer">
                         <span id="venue-music-icon">📻 AMI Play</span>
-                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Music</span>
+                        <span class="text-[8px] text-blue-300 font-normal mt-0.5">Jukebox ↗</span>
                     </a>
-                    <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/30 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
+                    <a href="https://www.uber.com/?ref=draw_buddy_stripe" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/40 p-2 rounded-lg text-[10px] font-bold text-center transition flex flex-col items-center justify-center">
                         <span>🚗 Uber Safe</span>
                         <span class="text-[8px] text-blue-300 font-normal mt-0.5">Request Ride</span>
                     </a>
@@ -604,7 +604,7 @@
                         <span class="text-cyan-400 font-mono text-xs font-bold">$75.00 / mo</span>
                     </div>
                     <p class="text-[11px] text-blue-300">Dedicated terminal display, live bar leaderboards, winner spotlights, and patron banter feeds for local taverns.</p>
-                    <a href="https://buy.stripe.com/test_venue_sub_75" target="_blank" class="block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-black py-2 rounded-lg text-xs transition">
+                    <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-cyan-600 hover:bg-cyan-500 text-white font-black py-2 rounded-lg text-xs transition">
                         Subscribe Venue Terminal ($75/mo)
                     </a>
                 </div>
@@ -663,13 +663,13 @@
                     <span>🎟️ Lotto.com</span>
                     <span class="text-[9px] text-blue-300 font-normal mt-0.5">Order Online</span>
                 </a>
-                <a id="venue-bottom-music-link" href="#" onclick="launchNativeApp('amiplay')" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
+                <a id="venue-bottom-music-link" href="https://www.amientertainment.com/" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-yellow-400 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span id="venue-bottom-music-name">📻 AMI Play</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Music</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Jukebox ↗</span>
                 </a>
-                <a href="#" onclick="launchNativeApp('touchtunes')" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
+                <a href="https://www.touchtunes.com/" target="_blank" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center cursor-pointer">
                     <span>🎶 TouchTunes</span>
-                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Music</span>
+                    <span class="text-[9px] text-blue-300 font-normal mt-0.5">Jukebox ↗</span>
                 </a>
             </div>
             <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
@@ -1336,6 +1336,7 @@
                 if(proClusterBox) proClusterBox.style.display = 'none';
                 countdownSeconds = 43200;
             }
+            startTimers();
 
             const spotSelect = document.getElementById('spot-tier');
             spotSelect.innerHTML = '';
@@ -1347,14 +1348,12 @@
                     if (i === 4) opt.selected = true;
                     spotSelect.appendChild(opt);
                 }
-                document.getElementById('multiplier-container').style.display = 'block';
             } else {
                 const opt = document.createElement('option');
                 opt.value = 5;
                 opt.innerText = "5";
                 opt.selected = true;
                 spotSelect.appendChild(opt);
-                document.getElementById('multiplier-container').style.display = 'block';
             }
 
             const wagerSelect = document.getElementById('base-wager');
@@ -1559,31 +1558,32 @@
         }
 
         function startTimers() {
-            if (!window.drawBuddyTimer) {
-                window.drawBuddyTimer = setInterval(async () => {
-                    countdownSeconds--;
-                    if (countdownSeconds <= 0) {
-                        countdownSeconds = activeGameKey === 'quickdraw' ? 240 : 43200;
-                        if (activeGameKey === 'quickdraw') {
-                            await fetchGameHistoryFromSupabase();
-                        } else {
-                            renderHeatmap();
-                        }
-                    }
-                    const hrs = Math.floor(countdownSeconds / 3600);
-                    const mins = Math.floor((countdownSeconds % 3600) / 60);
-                    const secs = countdownSeconds % 60;
-                    
-                    const cdEl = document.getElementById('header-countdown');
-                    if(cdEl) {
-                        if (hrs > 0) {
-                            cdEl.innerText = `${hrs}h ${mins.toString().padStart(2, '0')}m`;
-                        } else {
-                            cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                        }
-                    }
-                }, 1000);
+            if (window.drawBuddyTimer) {
+                clearInterval(window.drawBuddyTimer);
             }
+            window.drawBuddyTimer = setInterval(async () => {
+                countdownSeconds--;
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = activeGameKey === 'quickdraw' ? 240 : 43200;
+                    if (activeGameKey === 'quickdraw') {
+                        await fetchGameHistoryFromSupabase();
+                    } else {
+                        renderHeatmap();
+                    }
+                }
+                const hrs = Math.floor(countdownSeconds / 3600);
+                const mins = Math.floor((countdownSeconds % 3600) / 60);
+                const secs = countdownSeconds % 60;
+                
+                const cdEl = document.getElementById('header-countdown');
+                if(cdEl) {
+                    if (hrs > 0) {
+                        cdEl.innerText = `${hrs}h ${mins.toString().padStart(2, '0')}m`;
+                    } else {
+                        cdEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                    }
+                }
+            }, 1000);
         }
 
         function loadHistoryArchive() {
@@ -1610,52 +1610,6 @@
             if(gb) gb.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
             if(lb) lb.addEventListener('change', () => { renderHeatmap(); updateOptimizedRoiBadge(); });
             if(st) st.addEventListener('change', () => { updateCostDisplay(); updateOptimizedRoiBadge(); });
-        }
-
-        function getGameCost() {
-            const base = parseFloat(document.getElementById('base-wager').value) || (activeGameKey === 'quickdraw' ? 1 : 2);
-            if (activeGameKey === 'quickdraw') {
-                const extra = parseInt(document.getElementById('extra-multiplier').value) || 1;
-                return extra === 2 ? base * 2 : base;
-            } else {
-                const powerPlay = parseInt(document.getElementById('extra-multiplier').value) || 1;
-                return powerPlay === 2 ? base + 1 : base;
-            }
-        }
-
-        function updateCostDisplay() {
-            const costPerGame = getGameCost();
-            const numGames = parseInt(document.getElementById('game-block').value) || 5;
-            const totalSlipCost = costPerGame * numGames;
-            const costDisp = document.getElementById('calc-cost-display');
-            if(costDisp) {
-                costDisp.innerText = `$${totalSlipCost.toFixed(2)}`;
-            }
-        }
-
-        function updateOptimizedRoiBadge() {
-            const spot = parseInt(document.getElementById('spot-tier').value) || 4;
-            const lookback = parseInt(document.getElementById('lookback-draws').value) || 50;
-            const extra = parseInt(document.getElementById('extra-multiplier').value) || 2;
-
-            let baseRoi = 9.5;
-            if (activeGameKey === 'quickdraw') {
-                if (spot === 3 || spot === 4 || spot === 5) baseRoi += 3.5;
-                else if (spot === 10) baseRoi += 2.5;
-                if (lookback >= 100) baseRoi += 2.0;
-                if (extra === 2) baseRoi += 1.0;
-            } else {
-                baseRoi = activeGameKey === 'powerball' ? 14.2 : 13.8;
-            }
-
-            const roiBadge = document.getElementById('roi-badge');
-            if (roiBadge) {
-                roiBadge.innerText = `⚡ Est. ROI (Model): +${baseRoi.toFixed(1)}%`;
-            }
-            const slipRoiBox = document.getElementById('slip-roi-box');
-            if (slipRoiBox) {
-                slipRoiBox.innerText = `+${baseRoi.toFixed(1)}%`;
-            }
         }
 
         function generateMockData(count, startDraw) {
@@ -1811,31 +1765,6 @@
             }
 
             document.getElementById('play-card').classList.remove('hidden');
-        }
-
-        function handleManualTicketScan(event) {
-            if (!event.target.files[0]) return;
-            const startDrawNum = latestFetchedDraw + 1;
-            sessionTickets.unshift({
-                draw: startDrawNum,
-                endDraw: startDrawNum,
-                spot: 4,
-                games: 1,
-                wager: 10,
-                costPerGame: 10,
-                baseWager: 10,
-                hasExtra: false,
-                numbers: [4, 12, 33, 45],
-                gradedDraws: [],
-                bestHits: 0,
-                winningGamesCount: 0,
-                hits: 'Pending',
-                payout: 0,
-                timestamp: new Date().toISOString()
-            });
-            saveHistoryArchive();
-            updateLedgerUI();
-            alert("📷 Ticket Image Scanned & Logged Successfully to History!");
         }
 
         async function logTicketToCloud() {
