@@ -173,14 +173,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Lookback Draws (Optimal)</label>
+                    <label class="block text-xs text-blue-300 mb-1">Lookback Draws (Engine-Optimized)</label>
                     <select id="lookback-draws" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
                         <option value="20">20 Draws (Ultra-Short)</option>
                         <option value="50" selected>50 Draws (Quick Draw Optimal)</option>
-                        <option value="100">100 Draws (Balanced Trend)</option>
-                        <option value="250">250 Draws (Deep Macro)</option>
-                        <option value="500">500 Draws (Extended)</option>
-                        <option value="1000">1,000 Draws (Jackpot Horizon)</option>
+                        <option value="100">100 Draws (Jackpot Ceiling)</option>
                     </select>
                 </div>
             </div>
@@ -791,7 +788,7 @@
         let isFavoriteVenue = localStorage.getItem('draw_buddy_fav_venue') === 'true';
         let currentState = localStorage.getItem('draw_buddy_state') || 'NY';
 
-        cachedDraws = generateMockData(1000, latestFetchedDraw);
+        cachedDraws = generateMockData(100, latestFetchedDraw);
 
         async function init() {
             checkProStatus();
@@ -1090,7 +1087,7 @@
                     .from(cfg.tableName)
                     .select('*')
                     .order('draw_number', { ascending: false })
-                    .limit(1000);
+                    .limit(100);
 
                 const statusEl = document.getElementById('sync-status');
                 if (!error && data && data.length > 0) {
@@ -1104,7 +1101,7 @@
                     }
                     gradePendingTickets();
                 } else {
-                    cachedDraws = generateMockData(1000, latestFetchedDraw);
+                    cachedDraws = generateMockData(100, latestFetchedDraw);
                     if(statusEl) {
                         statusEl.innerText = "⚡ Sim DB";
                         statusEl.className = "text-[9px] px-1.5 py-0.5 rounded bg-[#050814] text-yellow-400 border border-yellow-500/40 whitespace-nowrap";
@@ -1113,7 +1110,7 @@
                 renderHeatmap();
             } catch (err) {
                 console.warn("Supabase table query fallback active for " + cfg.tableName);
-                cachedDraws = generateMockData(1000, latestFetchedDraw);
+                cachedDraws = generateMockData(100, latestFetchedDraw);
                 renderHeatmap();
             }
         }
@@ -1266,10 +1263,21 @@
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `⚙️ ${cfg.name} Parameters`;
 
-            // Automatically set optimal lookback based on game selection
+            // Auto-adjust lookback dropdown options based on game selection
             const lookbackSelect = document.getElementById('lookback-draws');
-            if (lookbackSelect && cfg.optimalLookback) {
-                lookbackSelect.value = cfg.optimalLookback;
+            if (lookbackSelect) {
+                lookbackSelect.innerHTML = '';
+                if (gameKey === 'quickdraw') {
+                    lookbackSelect.innerHTML = `
+                        <option value="20">20 Draws (Ultra-Short)</option>
+                        <option value="50" selected>50 Draws (Quick Draw Optimal)</option>
+                    `;
+                } else {
+                    lookbackSelect.innerHTML = `
+                        <option value="50">50 Draws</option>
+                        <option value="100" selected>100 Draws (${cfg.name} Optimal)</option>
+                    `;
+                }
             }
 
             const drawBox = document.getElementById('header-draw-box');
@@ -1391,7 +1399,7 @@
                 }
                 if(clusterProBadge) {
                     clusterProBadge.innerText = "✨ Pro Unlocked";
-                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700 font-mono";
+                    clusterProBadge.className = "text-[8px] bg-emerald-950 text-emerald-400 px-2.5 py-0.5 rounded border border-emerald-700 font-mono";
                 }
 
                 if(heatmapLockedBanner) heatmapLockedBanner.style.display = 'none';
@@ -1486,7 +1494,6 @@
             });
             const percentage = ((hits / lookbackSize) * 100).toFixed(1);
             const markovProb = calculateMarkovProbability(num);
-            // Dynamic cycle interval calculation based on actual lookback hits
             const meanCycleInterval = hits > 0 ? (lookbackSize / hits).toFixed(1) : (lookbackSize).toFixed(1);
 
             document.getElementById('inspector-ball-badge').innerText = num < 10 ? '0' + num : num;
@@ -1626,7 +1633,7 @@
             let maxCount = Math.max(...counts, 1);
             let minCount = Math.min(...counts, 0);
             let thresholdRange = maxCount - minCount;
-            let scaleFactor = lookbackSize >= 500 ? 0.60 : (lookbackSize >= 100 ? 0.65 : 0.70);
+            let scaleFactor = lookbackSize >= 100 ? 0.65 : 0.70;
             let hotCutoff = minCount + (thresholdRange * scaleFactor);
             let medCutoff = minCount + (thresholdRange * (scaleFactor - 0.35));
 
