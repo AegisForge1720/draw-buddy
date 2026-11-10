@@ -137,10 +137,10 @@
             </div>
         </div>
 
-        <!-- ⚡ QUANTUM TACTICAL MATRIX / CONFIG -->
+        <!-- ⚡ CONFIG QUANTUM MATRIX -->
         <div class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center gap-2">
-                <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">⚡ QUANTUM TACTICAL MATRIX / CONFIG</h2>
+                <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">⚡ CONFIG QUANTUM MATRIX</h2>
                 <span id="roi-badge" class="text-[8px] bg-amber-500/10 text-yellow-400 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0">
                     ⚡ ROI: +14.5%
                 </span>
@@ -157,7 +157,6 @@
                 <button onclick="autoOptimizeByLiveCluster()" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white font-black py-2 px-3 rounded-lg text-xs shadow-md transition flex items-center justify-center space-x-1.5">
                     <span>⚡ Auto-Select Best Spot & Rules</span>
                 </button>
-                <!-- Secondary AI Optimizer based on Markov & Kelly risk balancing -->
                 <button onclick="autoOptimizeByMarkovKelly()" class="w-full bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-black py-2 px-3 rounded-lg text-xs shadow-md transition flex items-center justify-center space-x-1.5 mt-1">
                     <span>🧬 Markov & Kelly Risk-Balanced Auto-Sizer</span>
                 </button>
@@ -177,11 +176,11 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs text-blue-300 mb-1">Lookback Draws (Engine-Optimized)</label>
+                    <label class="block text-xs text-blue-300 mb-1">Lookback Engine</label>
                     <select id="lookback-draws" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-cyan-300 focus:outline-none focus:border-yellow-400">
-                        <option value="20">20 Draws (Ultra-Short)</option>
-                        <option value="50" selected>50 Draws (Quick Draw Optimal)</option>
-                        <option value="100">100 Draws (Jackpot Ceiling)</option>
+                        <option value="20">20 (Ultra-Short)</option>
+                        <option value="50" selected>50 (Optimal)</option>
+                        <option value="100">100 (Ceiling)</option>
                     </select>
                 </div>
             </div>
@@ -220,7 +219,7 @@
             </div>
 
             <button onclick="generateTicket()" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3 px-4 rounded-xl shadow-lg transition tracking-wide text-sm">
-                🚀 SYNTHESIZE TACTICAL TICKET SLIP
+                🚀 SYNTHESIZE NUMBERS
             </button>
         </div>
 
@@ -338,7 +337,7 @@
                 <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
             </div>
 
-            <!-- Integrated Inspector Card with Zero-State Handling & Visual Cards -->
+            <!-- Integrated Inspector Card with Zero-State Handling -->
             <div id="inspector-card" class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/50 space-y-3 mt-3 scroll-mt-20">
                 <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5">
                     <div class="flex items-center space-x-2">
@@ -699,9 +698,12 @@
             </div>
         </div>
 
-        <!-- ⚖️ Fine Print Disclaimer Footer -->
-        <footer class="text-center text-[10px] text-slate-500 px-2 py-4 space-y-1">
+        <!-- ⚖️ Fine Print Disclaimer Footer & Responsible Gaming Support -->
+        <footer class="text-center text-[10px] text-slate-500 px-2 py-4 space-y-2">
             <p><strong>Disclaimer:</strong> Draw Buddy is an analytical statistical modeling and entertainment tool designed for exploring probability distributions and mathematical probability sets. This app does not promote or endorse problem gambling. All odds, lookback weights, and simulation calculations are for mathematical entertainment and educational analysis only. Play responsibly.</p>
+            <div class="bg-[#050814] p-2.5 rounded-lg border border-yellow-500/30 text-[10px] text-yellow-300">
+                Need support with gambling concerns? Connect with <a href="https://www.gamblersanonymous.org" target="_blank" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a> for free, confidential resources.
+            </div>
             <p>© 2026 Draw Buddy Analytics. All rights reserved.</p>
         </footer>
 
@@ -1311,7 +1313,7 @@
             if(hmTitle) hmTitle.innerText = "🔥 Interactive Heatmap";
 
             const configTitle = document.getElementById('config-panel-title');
-            if(configTitle) configTitle.innerText = `⚡ QUANTUM TACTICAL MATRIX / CONFIG`;
+            if(configTitle) configTitle.innerText = `⚡ CONFIG QUANTUM MATRIX`;
 
             // Auto-adjust lookback dropdown options based on game selection and cap them correctly
             const lookbackSelect = document.getElementById('lookback-draws');
@@ -1319,13 +1321,13 @@
                 lookbackSelect.innerHTML = '';
                 if (gameKey === 'quickdraw') {
                     lookbackSelect.innerHTML = `
-                        <option value="20">20 Draws (Ultra-Short)</option>
-                        <option value="50" selected>50 Draws (Quick Draw Optimal)</option>
+                        <option value="20">20 (Ultra-Short)</option>
+                        <option value="50" selected>50 (Optimal)</option>
                     `;
                 } else {
                     lookbackSelect.innerHTML = `
-                        <option value="50">50 Draws</option>
-                        <option value="100" selected>100 Draws (${cfg.name} Optimal)</option>
+                        <option value="50">50</option>
+                        <option value="100" selected>100 (Ceiling)</option>
                     `;
                 }
             }
