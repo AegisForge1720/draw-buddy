@@ -45,6 +45,7 @@ export const DEMO_FLAGS = {
 };
 
 // Per game. False withholds every history-based stat for that game.
+// Staleness is a separate check in historyStatus.
 export const DATA_VERIFIED = {
     quickdraw: true,
     powerball: true,

@@ -209,7 +209,7 @@
             <section class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="heatmap-title">
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Frequency chart</h2>
-                    <div class="flex items-center space-x-2 text-[10px]">
+                    <div id="heatmap-legend" class="flex items-center space-x-2 text-[10px]">
                         <span class="text-blue-100 font-bold">High</span>
                         <span class="text-blue-300">Mid</span>
                         <span class="text-blue-400">Low</span>
@@ -222,10 +222,11 @@
                 <p id="quickdraw-daily-note" class="text-xs text-slate-200">Quick Draw results update once a day from New York State open data (data.ny.gov).</p>
                 <p id="history-unavailable" hidden class="text-xs text-amber-100">Data unavailable</p>
                 <p id="results-hidden-note" hidden class="text-xs text-amber-100">Draw results are hidden. These rows have no source time.</p>
+                <p id="heatmap-unverified-note" class="text-xs text-amber-100">Data unavailable</p>
                 <div id="heatmap-results">
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
                     <div class="text-xs font-bold text-yellow-200">Frequency chart detail is in the subscription</div>
-                    <p class="text-[11px] text-blue-100">The grid shows how often each number appeared in the loaded draws. Number detail unlocks with Monthly or Annual.</p>
+                    <p id="heatmap-locked-copy" class="text-[11px] text-blue-100">Data unavailable. Number detail unlocks with Monthly or Annual.</p>
                     <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
                 </div>
                 <div id="heatmap-grid-container">
@@ -253,7 +254,8 @@
                             <span id="stat-last-seen" class="font-bold text-cyan-200 text-xs">--</span>
                         </div>
                         <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                            <span class="text-blue-200 block text-[11px]">Repeat rate</span>
+                            <span class="text-blue-200 block text-[11px]">Repeat-rate check</span>
+                            <span class="text-blue-200 block text-[10px]">Observed vs Expected</span>
                             <span class="font-bold text-yellow-200 text-xs block">Observed <span id="stat-markov">n/a</span></span>
                             <span class="font-bold text-blue-100 text-xs block">Expected <span id="stat-expected">—</span></span>
                         </div>
@@ -270,6 +272,75 @@
                     <p class="bg-[#0b132b] p-2.5 rounded border border-cyan-500/40 text-[11px] text-slate-200">Repeat rate is the share of loaded draws that contained this number whose following loaded draw also contained it. It is not a prediction.</p>
                 </div>
                 <p id="results-source" hidden class="text-xs text-slate-200"></p>
+                </div>
+            </section>
+
+            <section id="models-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="models-heading">
+                <h2 id="models-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Kelly calculator, Monte Carlo simulator, repeat-rate check</h2>
+                <p id="models-independence" class="text-sm font-semibold text-white">Every draw is independent; picks don't improve your odds.</p>
+                <div id="models-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
+                    <div class="text-xs font-bold text-yellow-200">These calculators are in the subscription</div>
+                    <p class="text-[11px] text-blue-100">The Kelly calculator, Monte Carlo simulator, and repeat-rate check come with Monthly or Annual.</p>
+                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
+                </div>
+                <div id="models-body" hidden class="space-y-3">
+                    <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                        <h3 class="font-bold text-white text-xs">Kelly calculator</h3>
+                        <p id="kelly-inputs" class="text-[11px] text-slate-200">--</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Recommended stake</span>
+                                <span id="kelly-stake" class="font-bold text-yellow-300 text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">EV per $1</span>
+                                <span id="kelly-ev" class="font-bold text-white text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Win probability</span>
+                                <span id="kelly-win-prob" class="font-bold text-white text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Payout</span>
+                                <span id="kelly-payout" class="font-bold text-white text-xs">--</span>
+                            </div>
+                        </div>
+                        <p id="kelly-reason" class="text-[11px] text-slate-200">--</p>
+                        <p class="text-[11px] text-slate-300">Payout is the average official prize when a play earns a prize, per $1 staked. EV per $1 is the average prize on every play, per $1 staked, minus 1.</p>
+                    </div>
+                    <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                        <h3 class="font-bold text-white text-xs">Monte Carlo simulator</h3>
+                        <p class="text-sm font-semibold text-white">Simulation of random outcomes, not a prediction.</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Sessions</span>
+                                <span id="mc-sessions" class="font-bold text-white text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Win rate</span>
+                                <span id="mc-win-rate" class="font-bold text-white text-xs">--</span>
+                            </div>
+                        </div>
+                        <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                            <span class="text-blue-200 block text-[11px]">Simulated net result</span>
+                            <span id="mc-net" class="font-bold text-white text-xs">--</span>
+                        </div>
+                    </div>
+                    <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                        <h3 class="font-bold text-white text-xs">Repeat-rate check</h3>
+                        <p class="text-sm font-semibold text-white">Observed vs Expected</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Observed</span>
+                                <span id="markov-observed" class="font-bold text-yellow-200 text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Expected</span>
+                                <span id="markov-expected" class="font-bold text-white text-xs">--</span>
+                            </div>
+                        </div>
+                        <p id="markov-detail" class="text-[11px] text-slate-300">Expected is the share of the pool drawn each time. Observed uses loaded draws and is hidden while that history is unverified.</p>
+                    </div>
                 </div>
             </section>
 

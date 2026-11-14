@@ -34,6 +34,13 @@ import {
     quickDrawNumberLabel,
     upcomingWeeklyDraws
 } from "./schedule.js";
+import {
+    MONTE_CARLO_SEED,
+    MONTE_CARLO_SESSIONS,
+    historyStatLabel,
+    quickDrawKelly,
+    simulateQuickDraw
+} from "./models.js";
 
 const { PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
 
@@ -95,7 +102,8 @@ const state = {
     dataMode: "loading",
     fetchToken: 0,
     supabaseClient: null,
-    currentState: storageGet("draw_buddy_state") || "NY"
+    currentState: storageGet("draw_buddy_state") || "NY",
+    inspectedNumber: null
 };
 
 function storageGet(key) {
@@ -583,13 +591,147 @@ function handleOffline() {
 }
 
 function gradePendingTickets() {
-    if (!(state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.resultsLabeled)) return;
+    if (!(state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.historyAvailable)) return;
     const draws = state.cachedDraws.filter((draw) => draw && draw.created_at);
     const updated = gradeTickets(state.sessionTickets, draws);
     if (updated) {
         saveHistoryArchive();
         updateLedgerUI();
     }
+}
+
+function drawHistoryVerified() {
+    return state.historyAvailable === true;
+}
+
+function lookbackSlice() {
+    const requested = parseInt($("lookback-draws")?.value, 10) || 50;
+    const size = Math.min(requested, state.cachedDraws.length);
+    return { size, draws: state.cachedDraws.slice(0, size) };
+}
+
+function formatPercent(rate) {
+    if (!Number.isFinite(rate)) return "n/a";
+    const rounded = Math.round(rate * 10000) / 100;
+    if (Number.isInteger(rounded)) return `${rounded}%`;
+    return `${rounded.toFixed(2)}%`;
+}
+
+function formatDollars(amount) {
+    if (!Number.isFinite(amount)) return "n/a";
+    if (amount === 0) return "$0";
+    const sign = amount < 0 ? "-" : "";
+    const [whole, frac] = Math.abs(amount).toFixed(2).split(".");
+    const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return `${sign}$${grouped}.${frac}`;
+}
+
+function setText(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value;
+}
+
+function clearInspectorStats() {
+    state.inspectedNumber = null;
+    setText("inspector-ball-badge", "--");
+    setText("inspector-title", "Number detail appears here after you subscribe and choose a number");
+    const placeholder = drawHistoryVerified() ? "--" : "Data unavailable";
+    ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
+        setText(id, placeholder);
+    });
+}
+
+function renderRepeatRate() {
+    const cfg = GAME_CONFIGS[state.activeGameKey];
+    const expectedRate = expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers);
+    const expectedText = expectedRate === null
+        ? "n/a"
+        : `${formatPercent(expectedRate)} (${cfg.drawnCount} of ${cfg.totalNumbers})`;
+    let observedValue = null;
+    if (drawHistoryVerified() && state.inspectedNumber != null) {
+        const rate = oneStepRepeatRate(lookbackSlice().draws, state.inspectedNumber);
+        observedValue = rate === null ? null : formatPercent(rate);
+    }
+    const observedText = historyStatLabel(drawHistoryVerified(), observedValue);
+    setText("stat-markov", observedText);
+    setText("stat-markov-expected", `Expected ${expectedText}`);
+    setText("markov-observed", observedText);
+    setText("markov-expected", expectedText);
+    const detail = $("markov-detail");
+    if (detail) {
+        detail.textContent = drawHistoryVerified()
+            ? "Expected is the share of the pool drawn each time if draws are independent. Observed is the share of loaded draws that contained the selected number whose next loaded draw also contained it."
+            : "Expected is the share of the pool drawn each time. Observed uses loaded draws and is hidden while that history is unverified.";
+    }
+}
+
+function renderPaytableMath() {
+    const cfg = GAME_CONFIGS[state.activeGameKey];
+    const spots = parseInt($("spot-tier")?.value, 10);
+    const baseWager = parseFloat($("base-wager")?.value);
+    const extra = state.activeGameKey === "quickdraw" && parseInt($("extra-multiplier")?.value, 10) === 2;
+    const blank = ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net"];
+    if (state.activeGameKey !== "quickdraw") {
+        blank.forEach((id) => setText(id, "n/a"));
+        setText("kelly-inputs", `${cfg.shortName} has no fixed spot paytable in this calculator.`);
+        return;
+    }
+    const report = quickDrawKelly({ spots, baseWager, extra });
+    if (!report) {
+        blank.forEach((id) => setText(id, "n/a"));
+        return;
+    }
+    const extraNote = extra ? `Extra on, ${formatDollars(report.cost)} staked` : "Extra off";
+    setText("kelly-inputs", `${cfg.shortName}, ${spots}-spot, ${formatDollars(baseWager)} base, ${extraNote}.`);
+    setText("kelly-stake", report.stake === 0 ? "$0" : `${formatPercent(report.fraction)} of bankroll`);
+    setText("kelly-ev", formatDollars(report.evPer1));
+    setText("kelly-win-prob", formatPercent(report.winProbability));
+    setText("kelly-payout", `${formatDollars(report.payout)} per $1`);
+    setText("kelly-reason", report.reason || "n/a");
+    const sim = simulateQuickDraw({
+        spots,
+        baseWager,
+        extra,
+        sessions: MONTE_CARLO_SESSIONS,
+        seed: MONTE_CARLO_SEED
+    });
+    setText("mc-sessions", sim ? String(sim.sessions) : "n/a");
+    setText("mc-win-rate", sim ? formatPercent(sim.winRate) : "n/a");
+    setText("mc-net", sim
+        ? `${formatDollars(sim.netTotal)} over ${sim.sessions} sessions (${formatDollars(sim.meanNet)} per session)`
+        : "n/a");
+}
+
+function renderDrawMath() {
+    const subscribed = isSubscribed();
+    const locked = $("models-locked-banner");
+    const body = $("models-body");
+    if (locked) locked.hidden = subscribed;
+    if (body) body.hidden = !subscribed;
+    const note = $("heatmap-unverified-note");
+    if (note) note.hidden = drawHistoryVerified();
+    const legend = $("heatmap-legend");
+    if (legend) legend.hidden = !drawHistoryVerified();
+    const lockedCopy = $("heatmap-locked-copy");
+    if (lockedCopy) {
+        lockedCopy.textContent = drawHistoryVerified()
+            ? "The grid shows how often each number appeared in the loaded draws. Number detail unlocks with Monthly or Annual."
+            : "Data unavailable. Number detail unlocks with Monthly or Annual.";
+    }
+    if (!drawHistoryVerified()) {
+        ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
+            setText(id, "Data unavailable");
+        });
+    }
+    if (!subscribed) {
+        ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "markov-observed", "markov-expected", "stat-markov-expected"].forEach((id) => {
+            setText(id, "--");
+        });
+        setText("stat-markov", drawHistoryVerified() ? "--" : "Data unavailable");
+        return;
+    }
+    renderRepeatRate();
+    renderPaytableMath();
 }
 
 function inspectNumber(num) {
@@ -601,9 +743,19 @@ function inspectNumber(num) {
         showLocked("Frequency chart detail");
         return;
     }
+    state.inspectedNumber = num;
     const cfg = GAME_CONFIGS[state.activeGameKey];
-    const lookbackSize = Math.min(parseInt($("lookback-draws").value, 10) || 50, state.cachedDraws.length || 0);
-    const sliceData = state.cachedDraws.slice(0, lookbackSize);
+    $("inspector-ball-badge").textContent = num < 10 ? `0${num}` : String(num);
+    if (!drawHistoryVerified()) {
+        $("inspector-title").textContent = `Number ${num}`;
+        ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
+            $(id).textContent = "Data unavailable";
+        });
+        renderDrawMath();
+        $("inspector-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+    }
+    const { size: lookbackSize, draws: sliceData } = lookbackSlice();
     let hits = 0;
     let lastSeenDistance = null;
     sliceData.forEach((draw, index) => {
@@ -613,9 +765,7 @@ function inspectNumber(num) {
             if (lastSeenDistance === null) lastSeenDistance = index;
         }
     });
-    const denominator = lookbackSize || 1;
     const percentage = lookbackSize > 0 ? ((hits / lookbackSize) * 100).toFixed(1) : "0.0";
-    const repeat = oneStepRepeatRate(sliceData, num);
     const meanCycleInterval = hits > 0 ? (lookbackSize / hits).toFixed(1) : lookbackSize.toFixed(1);
     const expected = lookbackSize * (cfg.drawnCount / cfg.totalNumbers);
     const ratio = expected > 0 ? hits / expected : 0;
@@ -624,7 +774,6 @@ function inspectNumber(num) {
     else if (hits > 0 && ratio <= 0.75) density = "Below average count";
     else if (hits > 0) density = "Near average count";
 
-    $("inspector-ball-badge").textContent = num < 10 ? `0${num}` : String(num);
     $("inspector-title").textContent = lookbackSize > 0
         ? `Number ${num} in the last ${lookbackSize} loaded draws`
         : `Number ${num}`;
@@ -635,20 +784,39 @@ function inspectNumber(num) {
         : lastSeenDistance === 0
             ? "Newest loaded draw"
             : `${lastSeenDistance} draws before the newest`;
-    $("stat-markov").textContent = repeat === null ? "n/a" : formatRate(repeat);
-    const expectedEl = $("stat-expected");
-    if (expectedEl) expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
     $("stat-interval").textContent = `~${meanCycleInterval} draws`;
     $("stat-density").textContent = density;
+    renderDrawMath();
     $("inspector-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function renderNeutralHeatmap(cfg, grid) {
+    for (let i = 1; i <= cfg.totalNumbers; i += 1) {
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "heatmap-cell bg-blue-600 text-white font-semibold";
+        cell.addEventListener("click", () => inspectNumber(i));
+        cell.setAttribute("aria-label", `Number ${i}`);
+        const label = document.createElement("span");
+        label.className = "text-sm font-black";
+        label.textContent = i < 10 ? `0${i}` : String(i);
+        cell.append(label);
+        grid.appendChild(cell);
+    }
 }
 
 function renderHeatmap() {
     const cfg = GAME_CONFIGS[state.activeGameKey];
+    const grid = $("heatmap-grid");
+    if (!grid) {
+        renderDrawMath();
+        return;
+    }
+    grid.replaceChildren();
     if (!state.historyAvailable) {
-        const grid = $("heatmap-grid");
-        if (grid) grid.replaceChildren();
+        renderNeutralHeatmap(cfg, grid);
         setHistoryStatsUnavailable();
+        renderDrawMath();
         return;
     }
     const lookbackSize = parseInt($("lookback-draws")?.value, 10) || 50;
@@ -665,9 +833,6 @@ function renderHeatmap() {
     const maxCount = Math.max(...counts, 0);
     const minCount = Math.min(...counts, 0);
     const span = maxCount - minCount;
-    const grid = $("heatmap-grid");
-    if (!grid) return;
-    grid.replaceChildren();
     for (let i = 1; i <= cfg.totalNumbers; i++) {
         const count = freq[i] || 0;
         const cell = document.createElement("button");
@@ -688,6 +853,7 @@ function renderHeatmap() {
         cell.append(label, meta);
         grid.appendChild(cell);
     }
+    renderDrawMath();
 }
 
 function fillSelect(select, values, selected, labelFor) {
@@ -703,6 +869,7 @@ function fillSelect(select, values, selected, labelFor) {
 
 async function switchGameProfile(gameKey) {
     state.activeGameKey = gameKey;
+    clearInspectorStats();
     const cfg = GAME_CONFIGS[gameKey];
     ["quickdraw", "powerball", "megamillions"].forEach((key) => {
         const button = $(`game-btn-${key}`);
@@ -791,13 +958,6 @@ function generateTicket(customReason) {
     const sliceData = state.cachedDraws.slice(0, lookback);
     let ticket;
     if (!state.historyAvailable) {
-        ticket = [];
-        while (ticket.length < spotTier) {
-            const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
-            if (!ticket.includes(value)) ticket.push(value);
-        }
-        ticket.sort((a, b) => a - b);
-    } else if (!state.resultsLabeled) {
         ticket = [];
         while (ticket.length < spotTier) {
             const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
@@ -950,7 +1110,7 @@ function updateLedgerUI() {
         }
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
-        const progress = (state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.resultsLabeled)
+        const progress = (state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.historyAvailable)
             ? (ticket.hits || "Pending")
             : "Not graded";
         [drawLabel, `${ticket.spot}-Spot`, progress].forEach((text, idx) => {
@@ -1089,6 +1249,7 @@ function bindUi() {
     ["base-wager", "extra-multiplier", "game-block", "spot-tier"].forEach((id) => {
         $(id).addEventListener("change", () => {
             updateCostDisplay();
+            renderDrawMath();
         });
     });
     $("lookback-draws").addEventListener("change", () => {

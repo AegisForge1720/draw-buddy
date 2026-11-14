@@ -37,3 +37,14 @@ export function oneStepRepeatRate(draws, targetNum) {
     if (given === 0) return null;
     return hits / given;
 }
+
+// Chance a specific number is drawn again if each draw is an independent
+// sample of `drawnCount` numbers from `totalNumbers`.
+// Quick Draw draws 20 of 80, so this is 0.25. Powerball white balls are 5 of 69.
+// Mega Millions white balls are 5 of 70.
+export function expectedRepeatRate(drawnCount, totalNumbers) {
+    const drawn = Number(drawnCount);
+    const total = Number(totalNumbers);
+    if (!(total > 0) || !(drawn >= 0) || drawn > total) return null;
+    return drawn / total;
+}
