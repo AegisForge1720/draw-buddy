@@ -1,0 +1,214 @@
+:root {
+    color-scheme: dark;
+    --bg: #070b19;
+    --panel: #0b132b;
+    --inset: #050814;
+    --line: #1d4ed8;
+    --text: #f8fafc;
+    --muted: #cbd5e1;
+    --gold: #fde68a;
+    --amber: #fcd34d;
+}
+
+* { box-sizing: border-box; }
+
+html:not(.age-cleared) #app-shell {
+    display: none;
+}
+
+.site-footer {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 0 1rem 2rem;
+}
+
+.site-footer p, main ul {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+main ul { padding-left: 1.1rem; }
+
+html.age-cleared #age-gate {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+#age-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: var(--bg);
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+#age-gate .age-card {
+    width: min(100%, 28rem);
+    background: var(--panel);
+    border: 1px solid var(--amber);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+#age-gate h2 { font-size: 1.35rem; }
+
+#age-gate p { color: #e2e8f0; font-size: 0.92rem; line-height: 1.45; }
+
+.age-kicker {
+    color: var(--gold);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.age-dob { display: grid; grid-template-columns: 1.4fr 0.7fr 0.9fr; gap: 0.5rem; }
+
+#age-gate button,
+.age-dob select {
+    width: 100%;
+    min-height: 44px;
+    background: var(--inset);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    font: inherit;
+}
+
+#age-gate button {
+    background: var(--amber);
+    color: #0f172a;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+#age-gate button:disabled { opacity: 0.45; cursor: default; }
+
+main {
+    max-width: 28rem;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 3rem;
+}
+
+h1, h2, p { margin: 0; }
+
+header h1 {
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
+}
+
+header h1 span { color: var(--amber); }
+
+.lede, .note, footer p {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.stack { display: grid; gap: 0.85rem; margin-top: 1rem; }
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 0.85rem;
+    padding: 1rem;
+    display: grid;
+    gap: 0.75rem;
+}
+
+h2 {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+}
+
+label {
+    display: grid;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: #bfdbfe;
+}
+
+input {
+    width: 100%;
+    background: var(--inset);
+    color: var(--amber);
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    padding: 0.65rem 0.7rem;
+    font: inherit;
+    font-weight: 700;
+}
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+
+.stats, .totals { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+
+.stat, .total {
+    background: var(--inset);
+    border: 1px solid var(--line);
+    border-radius: 0.6rem;
+    padding: 0.55rem 0.65rem;
+}
+
+.stat span, .total span, th {
+    display: block;
+    color: #bfdbfe;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+
+.stat strong, .total strong {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.85rem;
+}
+
+.ev-line {
+    font-size: 0.78rem;
+    color: var(--text);
+    font-weight: 650;
+}
+
+button, .file-button {
+    font: inherit;
+    font-weight: 800;
+    border: 0;
+    border-radius: 0.65rem;
+    min-height: 44px;
+    padding: 0.55rem 0.8rem;
+    cursor: pointer;
+}
+
+.primary { background: var(--amber); color: #0f172a; }
+
+.secondary {
+    background: #111c38;
+    color: white;
+    border: 1px solid var(--line);
+}
+
+.actions, .log-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.status { min-height: 1.1rem; font-size: 0.78rem; color: #fde68a; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+
+th, td { text-align: left; padding: 0.4rem 0.2rem; border-bottom: 1px solid #1e293b; }
+
+footer { margin-top: 1.5rem; display: grid; gap: 0.55rem; }
+
+a { color: var(--amber); }
