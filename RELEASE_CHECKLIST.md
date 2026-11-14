@@ -8,7 +8,7 @@ Code-complete for a screen recording of this preview:
 
 - [x] B2: no sportsbook, Lotto.com, courier, affiliate, or `ref=` links, and no buy-tickets control. `DEMO_FLAGS.showAffiliateLinks` stays false.
 - [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is deleted. This app does not include instant-ticket odds, prizes remaining, or a scanner. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
-- [x] D1, D2, D4, and D5 are in the footer. D7 and the price line sit on the plans screen. There is no trial, so D9 is not sent. The annual price is shown as $17 per year, not as a monthly breakdown.
+- [x] D1, D2, D4, and D5 are in the footer. The plans screen shows preview pricing and coming-soon disclosure, not D7. D7 is kept in the repo (docs/legal/d7-app-store-disclosure.md and js/notices.js) for App Store / Google Play use and is not rendered. There is no trial, so D9 is not sent. The annual price is shown as $17 per year, not as a monthly breakdown.
 - [x] No leaderboard and no ticket purchase. Approved taglines on the page: “Track your play. Know your limits.” and “Lottery stats, not lottery tips.”
 
 Not code-complete (still needs a person, a lawyer, or a store/platform account):

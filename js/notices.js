@@ -31,6 +31,8 @@ export function d6Line(asOfEt) {
     return `Source: draw results stored by Draw Buddy, last updated ${asOfEt}. Not an official lottery feed. Always confirm results with the official lottery before claiming a prize.`;
 }
 
+// App Store / Google Play only. Do not render this on the web preview or reuse it for Stripe.
+// A separate web version under GBL §527-a will be written when billing goes live. See docs/legal/d7-app-store-disclosure.md.
 export const D7 = "Draw Buddy Premium: $1.99 per month or $17 per year. Your subscription renews automatically at the same price each month or year until you cancel. Payment is charged to your Apple ID or Google Play account. Cancel anytime, at least 24 hours before the end of the current period, in Settings > your name > Subscriptions or Google Play > Payments & subscriptions > Subscriptions, or from Draw Buddy's Account screen.";
 
 export const D9 = "Your Draw Buddy free trial ends on [date]. Unless you cancel before then, you'll be charged $[price] per [month/year] to your [Apple ID / Google Play] account, and it will renew automatically. To cancel: [steps / link].";
