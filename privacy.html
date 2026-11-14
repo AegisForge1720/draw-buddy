@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="format-detection" content="telephone=no">
+  <title>Privacy</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1020;
+      --fg: #f4f7fb;
+      --muted: #a8b3c7;
+      --accent: #8eb7ff;
+      --line: rgba(255, 255, 255, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { margin: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      color: var(--fg);
+      background:
+        radial-gradient(900px 420px at 50% -80px, #24345c 0%, transparent 70%),
+        var(--bg);
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 1.5rem;
+    }
+
+    main {
+      width: min(48rem, 100%);
+      margin: 0 auto;
+    }
+
+    .effective {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 7vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+    }
+
+    .operator {
+      margin: 0.6rem 0 1.5rem;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 650;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 1.75rem 0 0.75rem;
+      font-size: 1.15rem;
+      font-weight: 650;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 0 1.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    th, td {
+      padding: 0.7rem 0.75rem;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: var(--fg);
+      font-weight: 650;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    td { color: var(--muted); }
+
+    tr:last-child th, tr:last-child td { border-bottom: 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="effective">Effective November 14, 2026</p>
+    <h1>Privacy</h1>
+    <p class="operator">NAV Analytics LLC</p>
+    <p>Analytics. We count visits with GoatCounter, a privacy-focused analytics service hosted in the EU (Finland and Germany). It uses no cookies and does not store your IP address or full browser details. We see only aggregate counts, such as pages viewed, referring sites, browser type, screen size, and country. GitHub, which hosts this site, logs visitor IP addresses for security. We do not use advertising pixels or sell or share your data.</p>
+    <p>Browsers sending Global Privacy Control or Do Not Track are not counted.</p>
+    <h2>Cookies and tracking</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Provider</th>
+            <th>First/third party</th>
+            <th>Purpose</th>
+            <th>Cookies</th>
+            <th>Fires only after opt-in</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>GoatCounter count.js</td>
+            <td>GoatCounter (gc.zgo.at)</td>
+            <td>third party</td>
+            <td>analytics (aggregate pageviews)</td>
+            <td>No cookies</td>
+            <td>No (cookieless, aggregate; skipped under GPC/DNT)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p><a href="index.html">Home</a></p>
+  </main>
+</body>
+</html>
