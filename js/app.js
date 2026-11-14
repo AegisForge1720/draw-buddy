@@ -29,6 +29,7 @@ import {
     formatScheduledDraw,
     historyStatus,
     officialDrawInstant,
+    nextDrawForDisplay,
     projectNextDraw,
     quickDrawNumberLabel,
     upcomingWeeklyDraws
@@ -330,12 +331,12 @@ function lastUpdatedLine(draw) {
 }
 
 function projectActiveDraw(now = new Date()) {
-    return projectNextDraw({
+    return nextDrawForDisplay(projectNextDraw({
         game: state.activeGameKey,
         newest: state.cachedDraws[0] || null,
         previous: state.cachedDraws[1] || null,
         now
-    });
+    }), { available: state.historyAvailable === true });
 }
 
 function weeklyDrawLabel(draws) {
@@ -597,7 +598,7 @@ function inspectNumber(num) {
         return;
     }
     if (!isSubscribed()) {
-        showLocked("Heatmap detail");
+        showLocked("Frequency chart detail");
         return;
     }
     const cfg = GAME_CONFIGS[state.activeGameKey];

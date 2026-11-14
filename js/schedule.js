@@ -1,5 +1,5 @@
 // Next-draw projection from the official schedule and the newest stored row.
-// Quick Draw: every 4 minutes, with no draws from 3:25 AM until 4:00 AM ET.
+// Quick Draw: every 4 minutes, with no draws from 3:25 AM until 4:04 AM ET.
 // Powerball: Monday, Wednesday, and Saturday at 10:59 PM ET.
 // Mega Millions: Tuesday and Friday at 11:00 PM ET.
 //
@@ -26,7 +26,7 @@ const ET = "America/New_York";
 const BLOCK_MS = 4 * 60 * 1000;
 const SNAP_TOLERANCE_MS = 30 * 1000;
 const BREAK_START_MINUTES = 3 * 60 + 25;
-const BREAK_END_MINUTES = 4 * 60;
+const BREAK_END_MINUTES = 4 * 60 + 4;
 
 export const DATA_UNAVAILABLE = "Data unavailable";
 export const QUICK_DRAW_STALE_AFTER_MS = 49 * 60 * 60 * 1000;
@@ -299,6 +299,18 @@ export function officialDrawInstant(game, row) {
     const date = parseDateOnly(row.draw_date);
     if (!date) return null;
     return weeklyDrawInstant(game, date.year, date.month, date.day);
+}
+
+// A computed next-draw number is shown only while history is available.
+// Stale, unverified, and failed fetches keep the countdown and blank the number.
+export function nextDrawForDisplay(projection, history) {
+    if (history && history.available === true) return projection;
+    return {
+        ...projection,
+        visible: false,
+        showNumber: false,
+        nextDrawNumber: null
+    };
 }
 
 export function quickDrawNumberLabel(reason) {

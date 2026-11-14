@@ -14,13 +14,6 @@ export const RESULT_SOURCES = {
     megamillions: "Mega Millions"
 };
 
-export function officialResultsStamp(draw) {
-    if (!draw || typeof draw.created_at !== "string" || draw.created_at.length === 0) return null;
-    const date = new Date(draw.created_at);
-    if (Number.isNaN(date.getTime())) return null;
-    return date;
-}
-
 export function formatAsOfEt(date) {
     const formatted = new Intl.DateTimeFormat("en-US", {
         timeZone: "America/New_York",
