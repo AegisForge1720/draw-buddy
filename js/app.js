@@ -17,7 +17,6 @@ import {
     annualRenewalNoticeDue,
     d6Line,
     formatAsOfEt,
-    officialResultsStamp,
     trialEndingReminderDue
 } from "./notices.js";
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
@@ -26,10 +25,11 @@ import { expectedOneStepRepeatRate, oneStepRepeatRate } from "./odds.js";
 import {
     DATA_UNAVAILABLE,
     formatCountdown,
-    formatDrawDate,
     formatScheduledDraw,
     historyStatus,
+    officialDrawInstant,
     projectNextDraw,
+    quickDrawNumberLabel,
     upcomingWeeklyDraws
 } from "./schedule.js";
 
@@ -292,7 +292,7 @@ function setHistoryStatsUnavailable() {
 function updateResultsDisclosure() {
     refreshHistoryAvailability();
     const newest = state.cachedDraws[0];
-    const stamp = state.historyAvailable ? officialResultsStamp(newest) : null;
+    const stamp = state.historyAvailable ? officialDrawInstant(state.activeGameKey, newest) : null;
     const line = stamp ? d6Line(formatAsOfEt(stamp)) : "";
     ["results-source", "history-source"].forEach((id) => {
         const el = $(id);
@@ -323,11 +323,9 @@ function formatRate(rate) {
 }
 
 function lastUpdatedLine(draw) {
-    const instant = officialResultsStamp(draw);
-    if (instant) return `Last updated ${formatAsOfEt(instant)}`;
-    const dated = formatDrawDate(draw && draw.draw_date);
-    if (dated) return `Last updated ${dated}`;
-    return "Last updated —";
+    const instant = officialDrawInstant(state.activeGameKey, draw);
+    if (!instant) return "Last updated —";
+    return `Last updated ${formatAsOfEt(instant)}`;
 }
 
 function projectActiveDraw(now = new Date()) {
@@ -353,7 +351,9 @@ function renderDrawSchedule(now = new Date()) {
     const countdownKnown = typeof projection.countdownSeconds === "number";
     state.countdownSeconds = countdownKnown ? projection.countdownSeconds : null;
     const drawLabel = $("header-draw-label");
-    if (drawLabel) drawLabel.textContent = weekly ? "Next draw" : "Next draw #";
+    if (drawLabel) {
+        drawLabel.textContent = weekly ? "Next draw" : quickDrawNumberLabel(projection.reason);
+    }
     const numberEl = $("header-next-draw");
     if (numberEl) {
         if (weekly && projection.nextDrawTime) {
@@ -397,9 +397,12 @@ function renderDrawSchedule(now = new Date()) {
             const games = state.picksBlockSize;
             const end = start + games - 1;
             cardLabel.hidden = false;
-            cardLabel.textContent = games > 1
-                ? `Draws #${start} – #${end} (${games} games)`
-                : `Draw #${start}`;
+            const range = games > 1
+                ? `#${start} – #${end} (${games} games)`
+                : `#${start}`;
+            cardLabel.textContent = projection.reason === "projected"
+                ? `Next draw # (est.) ${range}`
+                : (games > 1 ? `Draws ${range}` : `Draw ${range}`);
         } else {
             cardLabel.hidden = true;
             cardLabel.textContent = "";

@@ -10,6 +10,8 @@ import {
     formatDrawDate,
     formatScheduledDraw,
     historyStatus,
+    officialDrawInstant,
+    quickDrawNumberLabel,
     isQuickDrawSlot,
     nextQuickDrawSlotAfter,
     projectNextDraw
@@ -42,8 +44,8 @@ test("Quick Draw skips the 3:25 AM break and resumes at 4:00 AM", () => {
 });
 
 test("a fresh Quick Draw row counts forward from its draw time", () => {
-    const newest = { draw_number: 3030357, created_at: "2026-11-14T03:08:02.746Z" };
-    const previous = { draw_number: 3030356, created_at: "2026-11-14T03:04:02.400Z" };
+    const newest = { draw_number: 3030357, draw_at: "2026-11-14T03:08:02.746Z", created_at: "2026-11-14T09:16:02.000Z" };
+    const previous = { draw_number: 3030356, draw_at: "2026-11-14T03:04:02.400Z", created_at: "2026-11-14T09:16:02.000Z" };
     const soon = projectNextDraw({
         game: "quickdraw",
         newest,
@@ -68,13 +70,15 @@ test("a fresh Quick Draw row counts forward from its draw time", () => {
 test("Quick Draw elapsed time includes the overnight break", () => {
     const projection = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 3030357, created_at: "2026-11-14T03:08:00.000Z" },
-        previous: { draw_number: 3030356, created_at: "2026-11-14T03:04:00.000Z" },
+        newest: { draw_number: 3030357, draw_at: "2026-11-14T03:08:00.000Z", created_at: "2026-11-14T09:16:02.000Z" },
+        previous: { draw_number: 3030356, draw_at: "2026-11-14T03:04:00.000Z", created_at: "2026-11-14T09:16:02.000Z" },
         now: at("2026-11-14T08:52:00.000Z")
     });
     assert.equal(projection.visible, true);
     assert.equal(projection.stale, true);
     assert.equal(projection.reason, "projected");
+    assert.equal(quickDrawNumberLabel(projection.reason), "Next draw # (est.)");
+    assert.equal(quickDrawNumberLabel("current"), "Next draw #");
     assert.equal(projection.nextDrawNumber, 3030437);
     assert.equal(projection.countdownSeconds, 8 * 60);
     assert.equal(formatCountdown(projection.countdownSeconds), "8:00");
@@ -83,8 +87,8 @@ test("Quick Draw elapsed time includes the overnight break", () => {
 test("a Quick Draw row one draw behind still projects across the break", () => {
     const projection = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 50, created_at: "2026-11-14T08:20:00.000Z" },
-        previous: { draw_number: 49, created_at: "2026-11-14T08:16:00.000Z" },
+        newest: { draw_number: 50, draw_at: "2026-11-14T08:20:00.000Z" },
+        previous: { draw_number: 49, draw_at: "2026-11-14T08:16:00.000Z" },
         now: at("2026-11-14T08:40:00.000Z")
     });
     assert.equal(projection.visible, true);
@@ -95,6 +99,15 @@ test("a Quick Draw row one draw behind still projects across the break", () => {
 
 test("unusable Quick Draw times hide the number and keep the scheduled countdown", () => {
     const now = at("2026-11-14T08:40:00.000Z");
+    const ingestOnly = projectNextDraw({
+        game: "quickdraw",
+        newest: { draw_number: 3030407, created_at: "2026-11-14T09:16:02.000Z" },
+        now
+    });
+    assert.equal(ingestOnly.reason, "no-timestamp");
+    assert.equal(ingestOnly.showNumber, false);
+    assert.equal(officialDrawInstant("quickdraw", ingestOnly && { created_at: "2026-11-14T09:16:02.000Z" }), null);
+
     const missing = projectNextDraw({
         game: "quickdraw",
         newest: { draw_number: 50 },
@@ -108,7 +121,7 @@ test("unusable Quick Draw times hide the number and keep the scheduled countdown
 
     const offSchedule = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 50, created_at: "2026-11-14T03:10:00.000Z" },
+        newest: { draw_number: 50, draw_at: "2026-11-14T03:10:00.000Z", created_at: now.toISOString() },
         now
     });
     assert.equal(offSchedule.visible, false);
@@ -118,8 +131,8 @@ test("unusable Quick Draw times hide the number and keep the scheduled countdown
 
     const contradicts = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 10, created_at: "2026-11-14T03:08:00.000Z" },
-        previous: { draw_number: 9, created_at: "2026-11-14T03:00:00.000Z" },
+        newest: { draw_number: 10, draw_at: "2026-11-14T03:08:00.000Z" },
+        previous: { draw_number: 9, draw_at: "2026-11-14T03:00:00.000Z" },
         now
     });
     assert.equal(contradicts.visible, false);
@@ -127,7 +140,7 @@ test("unusable Quick Draw times hide the number and keep the scheduled countdown
 
     const future = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 10, created_at: "2026-11-14T12:00:00.000Z" },
+        newest: { draw_number: 10, draw_at: "2026-11-14T12:00:00.000Z" },
         now
     });
     assert.equal(future.visible, false);
@@ -179,18 +192,37 @@ test("Powerball and Mega Millions use their weekly draw clock", () => {
     assert.equal(/#\d/.test(formatScheduledDraw(mega.nextDrawTime)), false);
 });
 
-test("a shared Quick Draw timestamp or a date-encoded id is not a reliable draw count", () => {
+test("a shared ingest time does not hide Quick Draw numbers that have distinct official times", () => {
+    const ingested = "2026-11-14T09:16:02.000Z";
     const bulk = projectNextDraw({
         game: "quickdraw",
-        newest: { draw_number: 3026442, created_at: "2026-11-14T09:12:01.967Z" },
-        previous: { draw_number: 3026441, created_at: "2026-11-14T09:12:01.967Z" },
-        now: at("2026-11-14T09:14:00.000Z")
+        newest: { draw_number: 3030407, created_at: ingested, draw_at: "2026-11-14T03:16:00.000Z" },
+        previous: { draw_number: 3030406, created_at: ingested, draw_at: "2026-11-14T03:12:00.000Z" },
+        now: at("2026-11-14T03:17:00.000Z")
     });
-    assert.equal(bulk.visible, false);
-    assert.equal(bulk.reason, "contradicts-previous");
-    assert.equal(bulk.showNumber, false);
-    assert.equal(bulk.nextDrawNumber, null);
-    assert.equal(bulk.countdownSeconds, 120);
+    assert.notEqual(bulk.reason, "contradicts-previous");
+    assert.equal(bulk.showNumber, true);
+    assert.equal(bulk.reason, "current");
+    assert.equal(bulk.nextDrawNumber, 3030408);
+
+    const fromWallClock = projectNextDraw({
+        game: "quickdraw",
+        newest: {
+            draw_number: 3030407,
+            created_at: ingested,
+            draw_date: "2026-11-13",
+            draw_time: "22:16:00"
+        },
+        previous: {
+            draw_number: 3030406,
+            created_at: ingested,
+            draw_date: "2026-11-13",
+            draw_time: "22:12:00"
+        },
+        now: at("2026-11-14T03:17:00.000Z")
+    });
+    assert.equal(fromWallClock.reason, "current");
+    assert.equal(fromWallClock.nextDrawNumber, 3030408);
 
     const dated = projectNextDraw({
         game: "powerball",
@@ -211,19 +243,19 @@ test("history is withheld when unverified, unread, or past the update window", (
     const fresh = new Date(now.getTime() - (25 * 60 * 60 * 1000)).toISOString();
     assert.equal(historyStatus({
         game: "quickdraw",
-        newest: { draw_number: 1, created_at: fresh },
+        newest: { draw_number: 1, draw_at: fresh, created_at: now.toISOString() },
         now,
         verified: true
     }).available, true);
     assert.equal(historyStatus({
         game: "quickdraw",
-        newest: { draw_number: 1, created_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS).toISOString() },
+        newest: { draw_number: 1, draw_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS).toISOString(), created_at: now.toISOString() },
         now,
         verified: true
     }).available, true);
     const quickStale = historyStatus({
         game: "quickdraw",
-        newest: { draw_number: 1, created_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS - 1).toISOString() },
+        newest: { draw_number: 1, draw_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS - 1).toISOString(), created_at: now.toISOString() },
         now,
         verified: true
     });
@@ -231,7 +263,7 @@ test("history is withheld when unverified, unread, or past the update window", (
     assert.equal(quickStale.reason, "stale");
     assert.equal(historyStatus({
         game: "quickdraw",
-        newest: { draw_number: 1, created_at: fresh },
+        newest: { draw_number: 1, draw_at: fresh, created_at: now.toISOString() },
         now,
         verified: false
     }).reason, "unverified");
@@ -270,6 +302,18 @@ test("history is withheld when unverified, unread, or past the update window", (
         now,
         verified: true
     }).reason, "off-schedule");
+    const ingestFresh = historyStatus({
+        game: "quickdraw",
+        newest: {
+            draw_number: 3030407,
+            created_at: now.toISOString(),
+            draw_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS - 60 * 1000).toISOString()
+        },
+        now,
+        verified: true
+    });
+    assert.equal(ingestFresh.available, false);
+    assert.equal(ingestFresh.reason, "stale");
     assert.equal(DATA_UNAVAILABLE, "Data unavailable");
 });
 

@@ -3,11 +3,11 @@
 // Powerball: Monday, Wednesday, and Saturday at 10:59 PM ET.
 // Mega Millions: Tuesday and Friday at 11:00 PM ET.
 //
-// Quick Draw draw numbers are shown only when the newest row's time is its own
-// draw time (it sits on the 4-minute grid and agrees with the previous row).
-// A daily open-data file shares one timestamp across many draws, which is
-// ambiguous, so the number stays blank and only the countdown to the next
-// scheduled draw is shown. Powerball and Mega Millions never use draw_number
+// Quick Draw draw numbers use draw_at (or draw_date plus draw_time in ET),
+// never created_at. The number is shown when that official time sits on the
+// 4-minute grid and agrees with the previous row. If the newest official time
+// is behind the latest scheduled slot, the label is "Next draw # (est.)".
+// With no official time, the number stays blank and only the countdown shows. Powerball and Mega Millions never use draw_number
 // as a display id. Their next draw is the next scheduled date and time.
 //
 // History is withheld ("Data unavailable") when a game is not verified, the
@@ -251,27 +251,56 @@ function drawNumberOf(row) {
     return number;
 }
 
+function parseTimeOfDay(value) {
+    if (typeof value !== "string") return null;
+    const match = /^(\d{2}):(\d{2})(?::(\d{2}))?/.exec(value.trim());
+    if (!match) return null;
+    const hour = Number(match[1]);
+    const minute = Number(match[2]);
+    const second = match[3] === undefined ? 0 : Number(match[3]);
+    if (hour > 23 || minute > 59 || second > 59) return null;
+    return { hour, minute, second };
+}
+
+// Official Quick Draw time is draw_at. If that is absent, combine draw_date
+// with draw_time as an America/New_York wall clock. created_at is ingest time
+// and is never an official draw instant.
+export function officialDrawInstant(game, row) {
+    if (!row) return null;
+    if (game === "quickdraw") {
+        const direct = parseInstant(row.draw_at);
+        if (direct) return direct;
+        const date = parseDateOnly(row.draw_date);
+        const clock = parseTimeOfDay(row.draw_time);
+        if (!date || !clock) return null;
+        return etInstant(date.year, date.month, date.day, clock.hour, clock.minute, clock.second);
+    }
+    const date = parseDateOnly(row.draw_date);
+    if (!date) return null;
+    return weeklyDrawInstant(game, date.year, date.month, date.day);
+}
+
+export function quickDrawNumberLabel(reason) {
+    return reason === "projected" ? "Next draw # (est.)" : "Next draw #";
+}
+
 function anchorFromRow(game, row) {
     const drawNumber = drawNumberOf(row);
     if (drawNumber === null) return null;
     if (game === "quickdraw") {
-        const stamp = parseInstant(row.created_at);
+        const stamp = officialDrawInstant(game, row);
         if (!stamp) return null;
         const snapped = snapQuickDraw(stamp);
         if (!snapped) return null;
         return { drawNumber, time: snapped };
     }
-    const date = parseDateOnly(row.draw_date);
-    if (!date) return null;
-    const instant = weeklyDrawInstant(game, date.year, date.month, date.day);
+    const instant = officialDrawInstant(game, row);
     if (!instant) return null;
     return { drawNumber, time: instant };
 }
 
 function rowHasTime(game, row) {
-    if (!row) return false;
-    if (game === "quickdraw") return parseInstant(row.created_at) !== null;
-    return parseDateOnly(row.draw_date) !== null;
+    return officialDrawInstant(game, row) !== null;
 }
 
 function clockFields(game, now) {
@@ -299,11 +328,7 @@ function projection(game, now, extra) {
 }
 
 function newestInstant(game, row) {
-    if (!row) return null;
-    if (game === "quickdraw") return parseInstant(row.created_at);
-    const date = parseDateOnly(row.draw_date);
-    if (!date) return null;
-    return weeklyDrawInstant(game, date.year, date.month, date.day);
+    return officialDrawInstant(game, row);
 }
 
 // verified: DATA_VERIFIED[game]. fetchFailed: the read threw, returned an error,
