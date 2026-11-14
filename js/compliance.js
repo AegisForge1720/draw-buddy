@@ -307,6 +307,11 @@ function showFail(gate, outcome) {
     }
     const card = gate.querySelector(".age-card") || gate;
     card.replaceChildren();
+    const logo = document.createElement("img");
+    logo.className = "age-logo";
+    logo.src = "./brand/draw-buddy-logo.svg";
+    logo.alt = "Draw Buddy. Insert Coin Industries.";
+    card.appendChild(logo);
     const title = document.createElement("h2");
     title.id = "age-gate-title";
     title.tabIndex = -1;
@@ -325,6 +330,7 @@ function renderAgeForm(gate, onPass) {
     const card = gate.querySelector(".age-card") || gate;
     card.replaceChildren();
     card.innerHTML = `
+        <img class="age-logo" src="./brand/draw-buddy-logo.svg" alt="Draw Buddy. Insert Coin Industries.">
         <p class="age-kicker">Age check</p>
         <h2 id="age-gate-title">Draw Buddy is for adults 18 and over</h2>
         <p id="age-gate-note">Draw Buddy is for adults 18 and over. You must be 21 or older to play Quick Draw where alcohol is served. Enter your date of birth to continue. We use your date of birth only to check your age and do not keep the date after that check.</p>

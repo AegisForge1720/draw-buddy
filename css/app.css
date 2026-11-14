@@ -133,6 +133,18 @@ html.age-cleared #age-gate {
     accent-color: #facc15;
 }
 
+.age-logo,
+.loading-logo {
+    width: min(100%, 16rem);
+    height: auto;
+    display: block;
+    margin-inline: auto;
+}
+
+.loading-logo {
+    width: min(100%, 12rem);
+}
+
 #age-gate .age-kicker {
     margin: 0;
     color: #fde68a;

@@ -228,6 +228,8 @@ function setDataBanner(message, tone) {
     const banner = $("data-banner");
     if (!banner) return;
     banner.textContent = message;
+    const loadingLogo = $("loading-logo");
+    if (loadingLogo) loadingLogo.hidden = message !== "Loading draws…";
     banner.className = tone === "calm"
         ? "rounded-lg border border-slate-600 bg-[#0b132b] p-3 text-xs text-slate-200"
         : "rounded-lg border border-amber-400/70 bg-amber-950 p-3 text-xs text-amber-50";

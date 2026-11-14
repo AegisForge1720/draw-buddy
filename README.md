@@ -75,4 +75,4 @@ npm run cap:ios     # first time: creates the Xcode project (do not commit ios/)
 npm run cap:android # first time: creates the Android project (do not commit android/)
 ```
 
-`capacitor.config.json` reads the staged site from `www/`. `npm run stage:www` only copies the web files. After the native project exists, open it with Xcode or Android Studio. Store billing, icons, and the legal pages still have to be finished before submission. See `RELEASE_CHECKLIST.md`.
+`capacitor.config.json` reads the staged site from `www/`. `npm run stage:www` only copies the web files. After the native project exists, open it with Xcode or Android Studio. Store billing and the legal pages still have to be finished before submission. Launcher icons are rendered from `brand/draw-buddy-icon.svg` with `python3 scripts/make-icons.py` (needs Chrome or Chromium). There is no Capacitor `resources` icon folder yet. See `RELEASE_CHECKLIST.md`.

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF007F"/>
+      <stop offset="50%" stop-color="#7B2CBF"/>
+      <stop offset="100%" stop-color="#00F0FF"/>
+    </linearGradient>
+    <radialGradient id="coinGold" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFEE55"/>
+      <stop offset="70%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#CC9900"/>
+    </radialGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="500" height="500" fill="#0A0A12"/>
+  <g transform="translate(250, 250) scale(2.05)">
+    <circle cx="0" cy="0" r="85" fill="url(#coinGold)" stroke="#FFF" stroke-width="3" filter="url(#glow)"/>
+    <circle cx="0" cy="0" r="70" fill="#111"/>
+    <circle cx="0" cy="0" r="62" fill="none" stroke="url(#neonGradient)" stroke-width="2" stroke-dasharray="8 4"/>
+    <path d="M-25,-15 L25,-15 L20,25 L-20,25 Z" fill="url(#neonGradient)" opacity="0.8"/>
+    <rect x="-15" y="-5" width="30" height="8" rx="4" fill="#FFFFFF"/>
+    <circle cx="-10" cy="12" r="4" fill="#00F0FF"/>
+    <circle cx="10" cy="12" r="4" fill="#FF007F"/>
+  </g>
+</svg>
