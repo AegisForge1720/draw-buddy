@@ -16,22 +16,18 @@
     <link rel="stylesheet" href="./css/app.css">
 </head>
 <body class="min-h-screen pb-16">
-    <div id="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title" aria-describedby="age-gate-note">
-        <div class="age-card space-y-4">
-            <p class="text-xs font-bold uppercase tracking-wider text-amber-200">Age confirmation</p>
-            <h2 id="age-gate-title" class="text-xl font-black text-white">Confirm your age to continue</h2>
-            <p id="age-gate-note" class="text-sm text-slate-200">Draw Buddy is a lottery statistics preview. This gate uses the <code>MINIMUM_AGE</code> setting. <strong>TODO: legal review.</strong> That number is not a legal determination.</p>
-            <label class="flex items-start gap-3 text-sm text-white" for="age-confirm-check">
-                <input id="age-confirm-check" type="checkbox">
-                <span>I am <span id="age-gate-years">18</span> or older.</span>
-            </label>
-            <button id="age-gate-continue" type="button" class="w-full min-h-[44px] rounded-lg bg-yellow-400 px-4 py-2 font-black text-slate-950 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-200" disabled>Continue</button>
-            <p class="text-sm text-slate-200">
-                <a class="underline font-semibold text-yellow-300" href="./terms.html" target="_blank" rel="noopener noreferrer">Terms of Service (draft)</a>
-                and
-                <a class="underline font-semibold text-yellow-300" href="./privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy (draft)</a>
-                are placeholders pending legal review.
-            </p>
+    <script>
+        try {
+            var agePass = JSON.parse(localStorage.getItem("draw_buddy_age_gate") || "null");
+            if (agePass && agePass.flag === "18plus" && !agePass.dob && !agePass.dateOfBirth && agePass.expiresAt > Date.now()) {
+                document.documentElement.classList.add("age-cleared");
+            }
+        } catch (error) {}
+    </script>
+    <div id="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <div class="age-card">
+            <h2 id="age-gate-title">Draw Buddy is for adults 18 and over</h2>
+            <p>Enter your date of birth to continue.</p>
         </div>
     </div>
 
@@ -165,7 +161,7 @@
                 </div>
 
                 <button type="button" id="synthesize-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-3 px-4 rounded-xl min-h-[44px] text-sm">Synthesize numbers</button>
-                <p class="text-xs text-slate-300">Suggestions are weighted counts from the draws loaded in the app. They are not predictions of winning numbers.</p>
+                <p class="text-xs text-slate-300">Suggestions are weighted counts from the draws loaded in the app. They are not predictions of future draws.</p>
             </section>
 
             <section id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 space-y-4 hidden" aria-labelledby="play-card-title">
@@ -179,14 +175,6 @@
                         <div class="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Total</div>
                         <div id="card-total-slip-cost" class="text-base font-mono font-black text-emerald-300">$10.00</div>
                     </div>
-                </div>
-
-                <div class="bg-[#052e1a] p-3 rounded-lg border border-emerald-500/60 flex items-center justify-between gap-3">
-                    <div>
-                        <div class="text-xs font-black text-emerald-200">Lotto.com is a separate site</div>
-                        <p class="text-[11px] text-slate-200">Draw Buddy does not sell or fulfill tickets.</p>
-                    </div>
-                    <a href="https://www.lotto.com/" target="_blank" rel="noopener noreferrer" class="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black px-3.5 py-2 rounded-lg text-xs shrink-0">Open Lotto.com</a>
                 </div>
 
                 <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
@@ -236,9 +224,9 @@
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Count heatmap</h2>
                     <div class="flex items-center space-x-2 text-[10px]">
-                        <span class="text-red-300 font-bold">Hot</span>
-                        <span class="text-yellow-300">Med</span>
-                        <span class="text-blue-200">Cold</span>
+                        <span class="text-red-300 font-bold">High</span>
+                        <span class="text-yellow-300">Mid</span>
+                        <span class="text-blue-200">Low</span>
                     </div>
                 </div>
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
@@ -444,31 +432,21 @@
                 </div>
             </section>
 
-            <section class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 space-y-3" aria-labelledby="external-heading">
-                <h2 id="external-heading" class="text-xs uppercase tracking-wider text-cyan-200 font-semibold">Other sites</h2>
-                <p class="text-[11px] text-slate-300">These links leave Draw Buddy. The app is not the seller, and it does not have a referral partnership with them.</p>
-                <div class="grid grid-cols-3 gap-2">
-                    <a href="https://www.lotto.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-emerald-300 border border-emerald-500/40 p-2.5 rounded-lg font-bold text-xs text-center">Lotto.com<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                    <a href="https://www.amientertainment.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-yellow-200 border border-yellow-500/30 p-2.5 rounded-lg font-bold text-xs text-center">AMI Play<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                    <a href="https://www.touchtunes.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-cyan-200 border border-cyan-500/30 p-2.5 rounded-lg font-bold text-xs text-center">TouchTunes<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                </div>
-                <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
-                    <a href="https://www.draftkings.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-amber-200 border border-amber-500/30 p-2 rounded-lg font-bold text-[11px] text-center">DraftKings<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                    <a href="https://www.fanduel.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-blue-200 border border-blue-500/30 p-2 rounded-lg font-bold text-[11px] text-center">FanDuel<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                    <a href="https://www.betmgm.com/" target="_blank" rel="noopener noreferrer" class="bg-[#050814] hover:bg-[#111c38] text-amber-200 border border-yellow-600/30 p-2 rounded-lg font-bold text-[11px] text-center">BetMGM<span class="block text-[10px] text-blue-200 font-normal mt-0.5">External site</span></a>
-                </div>
-            </section>
-
             <footer class="text-xs text-slate-300 px-2 py-4 space-y-3">
-                <p><strong>Disclaimer:</strong> Draw Buddy is a statistical entertainment tool for exploring counts and probability. It does not promote or endorse problem gambling, and it does not guarantee winnings. Odds, lookback weights, and simulations are for education and entertainment only. Play responsibly.</p>
-                <div class="bg-[#050814] p-2.5 rounded-lg border border-yellow-500/40 text-yellow-100">
-                    Need support with gambling concerns? Connect with <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-300">Gamblers Anonymous</a> for free, confidential resources.
-                </div>
-                <p class="flex flex-wrap justify-center gap-x-3 gap-y-1">
+                <p>Gambling can be addictive. If you or someone you know has a gambling problem, help is available. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369). <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-300">Gamblers Anonymous</a> also offers free, confidential resources.</p>
+                <p>18+ only. You must be 21+ to play Quick Draw where alcohol is served.</p>
+                <p>Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
+                <p>Draw Buddy is an independent app from <span data-legal-name>NAV Analytics LLC</span>. It is not affiliated with, endorsed by, or sponsored by the New York Lottery, the New York State Gaming Commission, Powerball, or Mega Millions. Game names are trademarks of their respective owners and are used only to identify the games.</p>
+                <p>Draw Buddy does not sell lottery tickets or accept wagers.</p>
+                <p id="privacy-choice-status" tabindex="-1" role="status"></p>
+                <p class="flex flex-wrap gap-x-3 gap-y-2">
+                    <a class="underline text-slate-200" href="./privacy.html">Privacy notice</a>
                     <a class="underline text-slate-200" href="./terms.html">Terms (draft)</a>
-                    <a class="underline text-slate-200" href="./privacy.html">Privacy (draft)</a>
+                    <a class="underline text-yellow-300" href="#privacy-choice-status" data-privacy-action="opt-out">Do Not Sell or Share / targeted ads opt-out</a>
+                    <button type="button" class="consent-text-button" data-privacy-action="choices">Your privacy choices</button>
+                    <button type="button" class="consent-text-button" data-privacy-action="reset-age">Reset age check</button>
                 </p>
-                <p class="text-center">© 2026 Draw Buddy Analytics. All rights reserved.</p>
+                <p>© 2026 <span data-legal-name>NAV Analytics LLC</span></p>
             </footer>
         </main>
     </div>

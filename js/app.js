@@ -4,6 +4,8 @@ import {
     formatPlanMoney,
     isBrowserSafeSupabaseKey
 } from "./config.js";
+import { readAgePass } from "./age.js";
+import { startSiteGate } from "./compliance.js";
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
 import { gradeTickets } from "./grading.js";
 import {
@@ -15,7 +17,7 @@ import {
     simulateQuickDraw
 } from "./odds.js";
 
-const { MINIMUM_AGE, PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
+const { PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
 
 const GAME_BUTTON_ON = "bg-cyan-600 text-white p-2 rounded-lg font-black text-xs shadow transition text-center";
 const GAME_BUTTON_OFF = "bg-[#111c38] text-slate-300 hover:text-white border border-slate-800 p-2 rounded-lg font-bold text-xs transition text-center";
@@ -175,7 +177,6 @@ function renderPlanCopy() {
     $("plan-monthly-price").textContent = `${formatPlanMoney(PLAN_MONTHLY_PRICE)} / mo`;
     $("plan-annual-price").textContent = `${formatPlanMoney(PLAN_ANNUAL_PRICE)} / yr`;
     $("plan-annual-savings").textContent = `Save ${formatPlanMoney(saved)} a year vs monthly (${pct}% off)`;
-    $("age-gate-years").textContent = String(MINIMUM_AGE);
 }
 
 function explainCheckout() {
@@ -376,6 +377,7 @@ async function getSupabaseClient() {
 }
 
 async function fetchGameHistoryFromSupabase() {
+    if (!readAgePass(localStorage)) return;
     const token = ++state.fetchToken;
     const gameKey = state.activeGameKey;
     const cfg = GAME_CONFIGS[gameKey];
@@ -1151,48 +1153,6 @@ function startTimers() {
     }, 1000);
 }
 
-function setupAgeGate() {
-    const gate = $("age-gate");
-    const shell = $("app-shell");
-    const confirmed = storageGet("draw_buddy_age_confirmed") === String(MINIMUM_AGE);
-    if (confirmed) {
-        gate.hidden = true;
-        shell.inert = false;
-        return;
-    }
-    gate.hidden = false;
-    shell.inert = true;
-    document.body.style.overflow = "hidden";
-    const check = $("age-confirm-check");
-    const go = $("age-gate-continue");
-    check.addEventListener("change", () => {
-        go.disabled = !check.checked;
-    });
-    go.addEventListener("click", () => {
-        if (!check.checked) return;
-        storageSet("draw_buddy_age_confirmed", String(MINIMUM_AGE));
-        gate.hidden = true;
-        shell.inert = false;
-        document.body.style.overflow = "";
-        $("game-btn-quickdraw").focus();
-    });
-    gate.addEventListener("keydown", (event) => {
-        if (event.key !== "Tab" || gate.hidden) return;
-        const focusables = [...gate.querySelectorAll("a, button, input")].filter((el) => !el.disabled || el === document.activeElement);
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
-    });
-    check.focus();
-}
-
 function bindUi() {
     $("game-btn-quickdraw").addEventListener("click", () => switchGameProfile("quickdraw"));
     $("game-btn-powerball").addEventListener("click", () => switchGameProfile("powerball"));
@@ -1241,9 +1201,7 @@ function registerServiceWorker() {
     });
 }
 
-async function init() {
-    renderPlanCopy();
-    setupAgeGate();
+function bootApp() {
     bindUi();
     applyEntitlements();
     setAppState(state.currentState);
@@ -1255,12 +1213,17 @@ async function init() {
     updateOptimizedRoiBadge();
     updateModelBars();
     updateHistoryNote();
-    await fetchGameHistoryFromSupabase();
+    fetchGameHistoryFromSupabase();
     registerServiceWorker();
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", () => {
         fetchGameHistoryFromSupabase();
     });
+}
+
+function init() {
+    renderPlanCopy();
+    startSiteGate({ onAccessGranted: bootApp });
 }
 
 init();

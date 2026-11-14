@@ -11,10 +11,67 @@ Draw Buddy is not ready for the App Store or Google Play. This is what still has
 
 ## Legal review
 
-- [ ] Counsel reviews `MINIMUM_AGE` in `js/config.js` (currently 18) and the age-gate copy. The constant is marked TODO.
-- [ ] Replace `terms.html` and `privacy.html`. Both are labeled **DRAFT / pending legal review** and are not terms or a privacy policy.
-- [ ] Confirm the responsible-play disclaimer and the Gamblers Anonymous link are the wording counsel wants.
-- [ ] Confirm the app’s store age rating and gambling classification.
+The site-privacy build below follows the November 13, 2026 requirements. It is not go-live approval. Terms are still a draft. The privacy notice is a working draft pending a licensed New York attorney.
+
+- [ ] Counsel reviews the age-gate copy, the privacy notice, and the banner. `LEGAL_ENTITY` in `js/config.js` is the operator name.
+- [ ] Confirm the app’s store age rating and gambling classification. The site gate is 18+. Marketing stays 21+.
+
+## Site privacy go-live (§5 of the legal spec)
+
+Status words: **code-complete** means this preview implements it. **Needs legal review** means a licensed New York attorney has not signed off. **Needs a person** means someone has to do it outside the repo (file, inbox, store console, or platform account). Nothing here is permission to go live.
+
+### 5.1 Preconditions
+
+- [ ] **Needs legal review.** Gate 0: Certificate of Publication for NAV Analytics LLC, or a NY attorney’s sign-off to proceed anyway.
+- [x] **Code-complete.** Seller name on the site is `LEGAL_ENTITY.name` (**NAV Analytics LLC**, 58 Owaissa Dr, Rochester, NY 14622). Do not rename it to Insert Coin Industries LLC until the DOS amendment is filed.
+- [x] **Code-complete on the site.** Lotto.com, DraftKings, FanDuel, and BetMGM links are removed. **Needs a person** to confirm the same for store listings and social profiles.
+- [x] **Code-complete for the live-odds claim.** Scratch-off figures stay labeled sample data. The count legend says High / Mid / Low. The footer uses the spec’s D1–D5 wording. **Needs legal review** before anyone calls the copy final.
+
+### 5.2 Privacy notice
+
+- [x] **Code-complete on the site and in the app footer.** `privacy.html` is linked from the footer, the cookie banner, and the age gate. **Needs a person** for store listings and a separate in-app settings screen (this preview’s footer is the in-app link).
+- [x] **Code-complete for the words.** Name, postal address, and draft email come from `LEGAL_ENTITY`. Effective date is November 14, 2026. **Needs a person:** the privacy inbox `privacy@insertcoinindustries.com` is a TODO and is not monitored.
+- [x] **Code-complete for current practice.** The notice covers host IP logs, client-side consent and GPC, no precise location, no session replay, and pixels that are not installed. **Needs legal review** so the sale/share wording matches counsel’s view.
+- [x] **Code-complete.** The cookie table says Meta and TikTok are not installed.
+- [x] **Code-complete.** D1 long form, D2, D3, D4, and D5 are in the footer and the notice.
+- [ ] **Needs a person.** Apple privacy labels and Google Data safety are not filed. They must match the notice before store submission. This preview does not collect precise location or advertising identifiers.
+- [ ] **Needs legal review.** A NY attorney has not reviewed the notice, and Andrew has not accepted the risk of publishing it.
+
+### 5.3 Age gate
+
+- [x] **Code-complete.** Neutral month/day/year entry, with an unchecked attestation only as a fallback. It runs before the app, the privacy notice, and the terms page.
+- [x] **Code-complete.** Under 13 and ages 13–17 store nothing, ask for no parent email, and load no trackers. The 18+ path stores only `flag: "18plus"` for 90 days.
+- [x] **Code-complete for this web preview.** The same gate wraps the preview before Supabase is requested. **Needs a person** for a native shell if it ever initializes a different SDK.
+- [ ] **Needs a person.** QA in a clean browser with tracker-blocking off, recorded against the network panel, before go-live. Automated checks in this repo see no Meta or TikTok requests. That is not a signed QA pass.
+
+### 5.4 Consent, GPC, and pixels
+
+- [x] **Code-complete.** Banner text and the three buttons match the spec. Reject stores an opt-out. Manage choices starts with optional boxes unchecked. Nothing optional is pre-checked.
+- [x] **Code-complete.** “Do Not Sell or Share / targeted ads opt-out” is in the footer and turns optional tracking off immediately.
+- [x] **Code-complete.** “Your privacy choices” reopens the choices. “Reset age check” clears the pass flag.
+- [x] **Code-complete in script.** `navigator.globalPrivacyControl === true` forces analytics and advertising off and blocks Accept. **Needs a person** to test with a GPC-enabled browser. GitHub Pages cannot read the `Sec-GPC` header.
+- [x] **Code-complete as a refusal.** Meta automatic advanced matching is hard-off, and the scaffold has no email or phone field. **Needs a person** to keep that toggle off in Events Manager if a real pixel is ever created.
+- [x] **Code-complete as a refusal.** TikTok’s scaffold string calls `holdConsent` before `load`, and it is not inserted while tracking is disabled. No identifiers are included.
+- [x] **Code-complete.** No session-replay or keystroke-capture script is installed.
+- [x] **Code-complete.** No page embeds video. The pixel plan refuses to run on a page that has a video element or a YouTube, TikTok, or Vimeo iframe.
+- [x] **Code-complete on the device only.** Choices are written to `localStorage` (timestamp, page, copy version, choices, GPC). **Needs a person / future host** for a 3-year server log. This static site cannot do that.
+- [x] **Code-complete as a disclosure.** The notice states the GitHub Pages limits. **Needs a person** to accept those limits or move the site to a first-party host before real tracking.
+- [x] **Code-complete.** Precise location is not requested, and the notice does not claim we collect it.
+
+### 5.5 Social accounts
+
+- [ ] **Needs a person.** Bios, age locks, platform re-reads, TikTok commercial disclosure, YouTube age restriction, LinkedIn staying corporate, Reddit affiliation, X policy re-read, and a 4-year post archive are account work, not this repo.
+- [x] **Code-complete helper only.** `withSocialUtm()` in `js/utm.js` can tag a future organic social URL. It is not wired to a sportsbook or courier.
+
+### 5.6 Paid ads stay off
+
+- [x] **Code-complete.** `TRACKING.enabled` is false and both pixel ids are empty. No campaign, custom audience, or lookalike is created from this site.
+- [x] **Code-complete reminder.** Retargeting stays off until platform approval, 21+ targeting, consent, GPC, and any future self-exclusion list. See §5.6 and §4.4 of the spec.
+
+### 5.7 Sign-off
+
+- [ ] **Needs legal review.** Ralph has not signed §5.7.
+- [ ] **Needs a person.** Andrew Mourgides has not approved go-live. This checklist does not authorize sending mail, paying invoices, or filing with the State.
 
 ## Store listing
 

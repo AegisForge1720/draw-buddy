@@ -6,11 +6,45 @@
 // previous branch hardcoded a service_role JWT. That value was removed. Rotate it,
 // because it is still in git history and bypasses Row Level Security.
 
+// One constant for the operator. A rename to Insert Coin Industries LLC waits on
+// the filed NY DOS Certificate of Amendment. Until that filing, every notice,
+// footer, and terms line reads this object. Do not list the new name as the
+// legal entity before then.
+export const LEGAL_ENTITY = {
+    name: "NAV Analytics LLC",
+    productName: "Draw Buddy",
+    postalAddress: "58 Owaissa Dr, Rochester, NY 14622",
+    // TODO: this mailbox does not exist yet. Do not treat the notice as ready
+    // to go live until someone monitors this inbox.
+    privacyEmail: "privacy@insertcoinindustries.com"
+};
+
+export const NOTICE_DATES = {
+    effective: "November 14, 2026",
+    lastUpdated: "November 14, 2026"
+};
+
+// Bump this when the banner or notice text changes so a prior choice expires.
+export const CONSENT_COPY_VERSION = "2026-11-14-1";
+
+// Pixel scaffolding is hard-off. Leave the ids empty. Do not set enabled to
+// true until the go-live checklist in RELEASE_CHECKLIST.md is signed.
+export const TRACKING = {
+    enabled: false,
+    metaPixelId: "",
+    tiktokPixelId: "",
+    metaAutomaticAdvancedMatching: false
+};
+
 export const DRAW_BUDDY_CONFIG = {
     SUPABASE_URL: "https://kcvtuzadkyripylluqlj.supabase.co",
     SUPABASE_PUBLISHABLE_KEY: "sb_publishable_540NEFDiVfOYxHeRyemjjg_Lrrce0PA",
-    // TODO(legal): confirm the age required for the store listing and for lottery-adjacent content.
+    // App and site access age. Marketing and ad targeting stay 21+.
     MINIMUM_AGE: 18,
+    CHILD_AGE: 13,
+    QUICK_DRAW_ALCOHOL_AGE: 21,
+    AGE_PASS_DAYS: 90,
+    CONSENT_CHOICE_DAYS: 90,
     PLAN_MONTHLY_PRICE: 1.99,
     PLAN_ANNUAL_PRICE: 17
 };

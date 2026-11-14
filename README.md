@@ -19,7 +19,7 @@ Store billing (App Store / Google Play, optionally through RevenueCat) should ca
 
 ## Play responsibly
 
-Draw Buddy is a statistical entertainment tool. It does not guarantee winnings. Odds, lookback weights, and simulations are for education and entertainment only. The age gate, the draft Terms page, and the draft Privacy page are placeholders pending legal review. The Gamblers Anonymous link in the footer stays in the app.
+Draw Buddy is a statistical entertainment tool from NAV Analytics LLC. It does not guarantee winnings. The site asks for a date of birth, stores only an 18+ pass flag, and then shows a tracking banner that defaults to off. Optional pixels are not installed. The privacy notice and terms are drafts pending a licensed New York attorney. The HOPEline and Gamblers Anonymous links stay in the footer.
 
 ## What is and is not live
 
@@ -40,7 +40,7 @@ npm install
 npm start
 ```
 
-Then open `http://localhost:4173`. The first screen is the age confirmation. Plans on the page are **$1.99 / mo** and **$17 / yr**.
+Then open `http://localhost:4173`. The first screen asks for a date of birth. Plans on the page are **$1.99 / mo** and **$17 / yr**. After a pass, the privacy banner appears. Reject leaves every optional pixel unloaded.
 
 `npm install` is only required for the build tools, tests, and the local server. The committed `css/tailwind.css` and `vendor/supabase.js` are what the static site loads.
 
