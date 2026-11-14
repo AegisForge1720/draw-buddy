@@ -25,6 +25,7 @@ import { expectedOneStepRepeatRate, oneStepRepeatRate } from "./odds.js";
 import {
     DATA_UNAVAILABLE,
     formatCountdown,
+    formatDrawListing,
     formatScheduledDraw,
     historyStatus,
     officialDrawInstant,
@@ -381,7 +382,10 @@ function renderDrawSchedule(now = new Date()) {
     if (expectedEl && cfg && state.historyAvailable) {
         expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
     }
-    const updated = lastUpdatedLine(state.cachedDraws[0]);
+    const newestDraw = state.cachedDraws[0];
+    const drawDayEl = $("newest-draw-day");
+    if (drawDayEl) drawDayEl.textContent = formatDrawListing(newestDraw, state.activeGameKey);
+    const updated = lastUpdatedLine(newestDraw);
     const picksUpdated = $("picks-last-updated");
     if (picksUpdated) picksUpdated.textContent = updated;
     const resultsUpdated = $("results-updated");

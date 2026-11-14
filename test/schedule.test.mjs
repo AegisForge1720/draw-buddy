@@ -8,6 +8,7 @@ import {
     WEEKLY_POSTING_GRACE_MS,
     formatCountdown,
     formatDrawDate,
+    formatDrawListing,
     formatScheduledDraw,
     historyStatus,
     officialDrawInstant,
@@ -205,24 +206,31 @@ test("a shared ingest time does not hide Quick Draw numbers that have distinct o
     assert.equal(bulk.reason, "current");
     assert.equal(bulk.nextDrawNumber, 3030408);
 
-    const fromWallClock = projectNextDraw({
+    const withoutInstant = projectNextDraw({
         game: "quickdraw",
         newest: {
             draw_number: 3030407,
             created_at: ingested,
             draw_date: "2026-11-13",
-            draw_time: "22:16:00"
+            draw_time: "03:24:00",
+            draw_time_source: "27:24"
         },
         previous: {
             draw_number: 3030406,
             created_at: ingested,
             draw_date: "2026-11-13",
-            draw_time: "22:12:00"
+            draw_time: "03:20:00",
+            draw_time_source: "27:20"
         },
-        now: at("2026-11-14T03:17:00.000Z")
+        now: at("2026-11-14T08:30:00.000Z")
     });
-    assert.equal(fromWallClock.reason, "current");
-    assert.equal(fromWallClock.nextDrawNumber, 3030408);
+    assert.equal(withoutInstant.reason, "no-timestamp");
+    assert.equal(withoutInstant.showNumber, false);
+    assert.equal(formatDrawListing(withoutInstant && {
+        draw_date: "2026-11-13",
+        draw_time: "03:24:00",
+        draw_time_source: "27:24"
+    }), "—");
 
     const dated = projectNextDraw({
         game: "powerball",
@@ -315,6 +323,31 @@ test("history is withheld when unverified, unread, or past the update window", (
     assert.equal(ingestFresh.available, false);
     assert.equal(ingestFresh.reason, "stale");
     assert.equal(DATA_UNAVAILABLE, "Data unavailable");
+});
+
+test("a listed draw uses the published draw day, and a missing instant is a dash", () => {
+    assert.equal(formatDrawListing({
+        draw_date: "2026-11-13",
+        draw_time: "03:24:00",
+        draw_time_source: "27:24",
+        draw_at: "2026-11-14T08:24:00.000Z"
+    }), "Nov 13 draw day (3:24 AM Nov 14 ET)");
+    assert.equal(formatDrawListing({
+        draw_date: "2026-11-13",
+        draw_time: "22:08:00",
+        draw_at: "2026-11-14T03:08:00.000Z"
+    }), "Nov 13, 2026");
+    assert.equal(formatDrawListing({
+        draw_date: "2026-11-13",
+        draw_time: "03:24:00",
+        draw_time_source: "27:24",
+        created_at: "2026-11-14T09:16:02.000Z"
+    }), "—");
+    assert.equal(officialDrawInstant("quickdraw", {
+        draw_date: "2026-11-13",
+        draw_time: "03:24:00",
+        created_at: "2026-11-14T09:16:02.000Z"
+    }), null);
 });
 
 test("countdown and date labels stay readable", () => {

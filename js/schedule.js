@@ -3,12 +3,16 @@
 // Powerball: Monday, Wednesday, and Saturday at 10:59 PM ET.
 // Mega Millions: Tuesday and Friday at 11:00 PM ET.
 //
-// Quick Draw draw numbers use draw_at (or draw_date plus draw_time in ET),
-// never created_at. The number is shown when that official time sits on the
-// 4-minute grid and agrees with the previous row. If the newest official time
-// is behind the latest scheduled slot, the label is "Next draw # (est.)".
-// With no official time, the number stays blank and only the countdown shows. Powerball and Mega Millions never use draw_number
-// as a display id. Their next draw is the next scheduled date and time.
+// Quick Draw draw numbers use draw_at only. created_at is ingest time.
+// draw_date is the NY Lottery draw day (after-midnight draws belong to the
+// previous day), so draw_date plus draw_time is not a safe instant. A missing
+// draw_at is no time: the number and Last updated stay a dash, and the
+// countdown remains. If the newest official time is behind the latest
+// scheduled slot, the label is "Next draw # (est.)". A listed draw uses
+// draw_date. When that day differs from the ET calendar date of draw_at, the
+// label adds the real time, as in "Nov 13 draw day (3:24 AM Nov 14 ET)".
+// Powerball and Mega Millions never use draw_number as a display id. Their
+// next draw is the next scheduled date and time.
 //
 // History is withheld ("Data unavailable") when a game is not verified, the
 // fetch fails, or the newest row is past its update window:
@@ -37,6 +41,8 @@ const MONTHS = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ];
+
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export function etParts(date) {
     const fmt = new Intl.DateTimeFormat("en-US", {
@@ -100,6 +106,39 @@ export function formatDrawDate(value) {
     const parsed = parseDateOnly(value);
     if (!parsed) return null;
     return `${MONTHS[parsed.month - 1]} ${parsed.day}, ${parsed.year}`;
+}
+
+function shortMonthDay(month, day) {
+    return `${SHORT_MONTHS[month - 1]} ${day}`;
+}
+
+function isoDateKey(year, month, day) {
+    return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+// Date label for a stored draw. Quick Draw without draw_at is "—".
+// A normal draw is just its draw day. An after-midnight draw, whose draw day
+// is the previous calendar day, includes the real ET clock time.
+export function formatDrawListing(row, game = "quickdraw") {
+    if (!row) return "—";
+    const drawDay = parseDateOnly(row.draw_date);
+    if (game !== "quickdraw") {
+        if (!drawDay) return "—";
+        return `${shortMonthDay(drawDay.month, drawDay.day)}, ${drawDay.year}`;
+    }
+    const instant = parseInstant(row.draw_at);
+    if (!instant || !drawDay) return "—";
+    const parts = etParts(instant);
+    if (isoDateKey(parts.year, parts.month, parts.day) === row.draw_date) {
+        return `${shortMonthDay(drawDay.month, drawDay.day)}, ${drawDay.year}`;
+    }
+    const clock = new Intl.DateTimeFormat("en-US", {
+        timeZone: ET,
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    }).format(instant);
+    return `${shortMonthDay(drawDay.month, drawDay.day)} draw day (${clock} ${shortMonthDay(parts.month, parts.day)} ET)`;
 }
 
 export function formatScheduledDraw(date) {
@@ -251,30 +290,12 @@ function drawNumberOf(row) {
     return number;
 }
 
-function parseTimeOfDay(value) {
-    if (typeof value !== "string") return null;
-    const match = /^(\d{2}):(\d{2})(?::(\d{2}))?/.exec(value.trim());
-    if (!match) return null;
-    const hour = Number(match[1]);
-    const minute = Number(match[2]);
-    const second = match[3] === undefined ? 0 : Number(match[3]);
-    if (hour > 23 || minute > 59 || second > 59) return null;
-    return { hour, minute, second };
-}
-
-// Official Quick Draw time is draw_at. If that is absent, combine draw_date
-// with draw_time as an America/New_York wall clock. created_at is ingest time
-// and is never an official draw instant.
+// Quick Draw timing is draw_at only. draw_date is the published draw day, not
+// the calendar date of an after-midnight draw, so it is not combined with
+// draw_time. created_at is ingest time and is never read here.
 export function officialDrawInstant(game, row) {
     if (!row) return null;
-    if (game === "quickdraw") {
-        const direct = parseInstant(row.draw_at);
-        if (direct) return direct;
-        const date = parseDateOnly(row.draw_date);
-        const clock = parseTimeOfDay(row.draw_time);
-        if (!date || !clock) return null;
-        return etInstant(date.year, date.month, date.day, clock.hour, clock.minute, clock.second);
-    }
+    if (game === "quickdraw") return parseInstant(row.draw_at);
     const date = parseDateOnly(row.draw_date);
     if (!date) return null;
     return weeklyDrawInstant(game, date.year, date.month, date.day);
