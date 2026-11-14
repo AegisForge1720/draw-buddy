@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { AFFILIATION, EV_COPY, LOG_MARKUP, PRIVACY_MARKUP, TERMS_MARKUP } from "../js/markup.js";
 import {
     DATA_UNAVAILABLE,
-    EV_LINE,
     expectedValuePerTicket,
     ledgerTotals,
     parseTicketEntry
@@ -52,11 +52,25 @@ test("a ticket needs a name, a price, and a payout", () => {
 });
 
 test("the scratch-off page does not ship invented prize figures or an edge claim", () => {
-    const page = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-    assert.equal(page.includes(DATA_UNAVAILABLE), true);
-    assert.equal(page.includes(EV_LINE), true);
-    ["mathematical edge", "+$2.15", "1 in 3.42", "+14.2%", "High Value", "advantage over"].forEach((phrase) => {
-        assert.equal(page.includes(phrase), false, phrase);
+    const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+    const privacy = readFileSync(new URL("../privacy.html", import.meta.url), "utf8");
+    const terms = readFileSync(new URL("../terms.html", import.meta.url), "utf8");
+    [html, privacy, terms].forEach((page) => {
+        assert.match(page, /noindex,nofollow/);
+        assert.match(page, /id="age-gate"/);
+        assert.match(page, /id="app-shell" inert/);
+        assert.equal(page.includes("Log this ticket"), false);
+        assert.equal(page.includes("Published game figures"), false);
+        assert.equal(page.includes(AFFILIATION), true);
+        assert.equal(page.includes("$1.99"), false);
     });
-    assert.match(page, /not a prediction or an advantage/);
+    assert.equal(LOG_MARKUP.includes("Published game figures"), true);
+    assert.equal(LOG_MARKUP.includes("Official game figures"), false);
+    assert.equal(LOG_MARKUP.includes(EV_COPY), true);
+    assert.equal(LOG_MARKUP.includes(DATA_UNAVAILABLE), true);
+    assert.equal(PRIVACY_MARKUP.includes(AFFILIATION), true);
+    assert.equal(TERMS_MARKUP.includes(AFFILIATION), true);
+    ["mathematical edge", "+$2.15", "1 in 3.42", "+14.2%", "High Value", "advantage over"].forEach((phrase) => {
+        assert.equal(LOG_MARKUP.includes(phrase), false, phrase);
+    });
 });
