@@ -14,6 +14,8 @@
 // Nothing here estimates or fills in a result. A draw that is not loaded stays
 // unchecked, and the slip stays Pending.
 
+import { rowFitsEra } from "./eras.js";
+
 const ANCHOR_TOLERANCE_MS = 30 * 1000;
 
 export const BONUS_SHORT = { powerball: "PB", megamillions: "MB" };
@@ -127,7 +129,7 @@ function gradeWeekly(ticket, draws) {
     }
     const byDate = new Map();
     draws.forEach((row) => {
-        if (row && typeof row.draw_date === "string") byDate.set(row.draw_date, row);
+        if (row && typeof row.draw_date === "string" && rowFitsEra(ticket.game, row)) byDate.set(row.draw_date, row);
     });
     if (!Array.isArray(ticket.gradedDates)) ticket.gradedDates = [];
     if (!Array.isArray(ticket.drawResults)) ticket.drawResults = [];

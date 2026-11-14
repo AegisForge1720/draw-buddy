@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { gradeTickets, resolveQuickDrawStart, ticketPending } from "../js/grading.js";
+import { megaMillionsEra, rowFitsEra } from "../js/eras.js";
 import {
+    MAX_CONSECUTIVE,
     checkPastDraws,
     parseEtLocal,
     planQuickDrawSlip,
@@ -102,8 +104,8 @@ test("own numbers are validated for count, range, duplicates, and the bonus ball
     assert.match(validateOwnNumbers("powerball", "1 2 3 4 70", "5").error, /from 1 to 69/);
     assert.match(validateOwnNumbers("powerball", "1 2 3 4 5", "").error, /one Powerball/);
     assert.match(validateOwnNumbers("powerball", "1 2 3 4 5", "27").error, /Powerball must be from 1 to 26/);
-    assert.equal(validateOwnNumbers("megamillions", "1 2 3 4 70", "25").ok, true);
-    assert.match(validateOwnNumbers("megamillions", "1 2 3 4 5", "26").error, /Mega Ball must be from 1 to 25/);
+    assert.equal(validateOwnNumbers("megamillions", "1 2 3 4 70", "24").ok, true);
+    assert.match(validateOwnNumbers("megamillions", "1 2 3 4 5", "25").error, /Mega Ball must be from 1 to 24/);
 });
 
 test("the past-draws check counts real matches only and reports the best and N-or-more counts", () => {
@@ -180,12 +182,110 @@ test("new copy tracks upcoming draws without prediction words, prizes, or a buy 
     assert.match(own, />Track for upcoming draws</);
     assert.match(own, />Check against past draws</);
     assert.match(own, /Past results don't predict future draws/);
-    assert.match(html, /Play this slip at a NY Lottery retailer\. Draw Buddy does not sell lottery tickets or accept wagers\./);
+    assert.equal(html.includes("Play this slip"), false);
+    assert.equal(html.includes("retailer"), false);
+    assert.match(html, /Draw Buddy doesn't sell lottery tickets or accept wagers\. Not affiliated with any lottery\./);
+    assert.match(own, /Check official NY Lottery results before claiming anything\./);
     assert.match(html, /id="start-mode"/);
-    const ownNoDisclaimer = own.replace(/Past results don't predict future draws/g, "");
+    const ownNoDisclaimer = own.replace(/Past results don't predict future draws/g, "").replace(/Call the NY HOPEline/g, "");
     assert.equal(/predict|\bcall/i.test(ownNoDisclaimer), false);
     assert.equal(/\b(buy|checkout|jackpot|prize amount)\b/i.test(own), false);
     assert.equal(/predict/i.test(tickets), false);
     assert.equal(/fetch\(|localStorage/.test(tickets), false);
     assert.match(app, /Not tracked \(no draw saved\)/);
+});
+
+test("Mega Millions rows are checked against the range of their own era", () => {
+    assert.equal(megaMillionsEra("2013-10-18"), null);
+    assert.equal(megaMillionsEra("2013-10-22").bonusMax, 15);
+    assert.equal(megaMillionsEra("2017-10-31").bonusMax, 25);
+    assert.equal(megaMillionsEra("2025-04-04").bonusMax, 25);
+    assert.equal(megaMillionsEra("2025-04-08").bonusMax, 24);
+    assert.equal(rowFitsEra("megamillions", { draw_date: "2024-01-02", winning_numbers: [1, 2, 3, 4, 70], bonus_number: 25 }), true);
+    assert.equal(rowFitsEra("megamillions", { draw_date: "2025-11-14", winning_numbers: [1, 2, 3, 4, 70], bonus_number: 25 }), false);
+    assert.equal(rowFitsEra("megamillions", { draw_date: "2015-01-02", winning_numbers: [1, 2, 3, 4, 75], bonus_number: 15 }), true);
+    assert.equal(rowFitsEra("megamillions", { draw_date: "2015-01-02", winning_numbers: [1, 2, 3, 4, 75], bonus_number: 16 }), false);
+    // Before the first confirmed era nothing is range-checked.
+    assert.equal(rowFitsEra("megamillions", { draw_date: "2004-01-02", winning_numbers: [1, 2, 3, 4, 52], bonus_number: 52 }), true);
+    const bad = { draw_number: 2, draw_date: "2026-11-13", winning_numbers: [1, 2, 3, 4, 5], bonus_number: 25 };
+    const good = { draw_number: 1, draw_date: "2026-11-10", winning_numbers: [1, 2, 3, 4, 5], bonus_number: 24 };
+    const report = checkPastDraws({ game: "megamillions", numbers: [1, 2, 3, 4, 5], bonus: 24, draws: [bad, good], lookback: 100 });
+    assert.equal(report.checked, 1);
+    assert.equal(report.best.label, "5 + MB");
+    const slip = [{ game: "megamillions", games: 1, numbers: [1, 2, 3, 4, 5], bonus: 24, drawDates: ["2026-11-13"], hits: "Pending" }];
+    gradeTickets(slip, [bad], "megamillions");
+    assert.equal(slip[0].hits, "Pending");
+});
+
+test("consecutive draws are capped at the lower of the official NY limit and 20", () => {
+    assert.deepEqual(MAX_CONSECUTIVE, { quickdraw: 20, powerball: 20, megamillions: 20 });
+    const now = new Date("2026-11-14T18:00:00Z");
+    assert.equal(planQuickDrawSlip({ now, games: 20 }).ok, true);
+    assert.match(planQuickDrawSlip({ now, games: 21 }).error, /1 to 20/);
+    assert.equal(planWeeklySlip({ game: "powerball", games: 21, now }).ok, false);
+    assert.equal(planWeeklySlip({ game: "megamillions", games: 20, now }).ok, true);
+});
+
+// New UI text only. The existing D1 disclaimer is removed before the scan.
+const BANNED = /\b(win|wins|winning|winner|winners|won|lucky|luck|due|hot|cold|streak|streaks|predict\w*|guarantee\w*|jackpot|sure thing)\b/i;
+const D1 = /Lottery drawings are random\. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning\. For entertainment and information only\.|Past results don't predict future draws\./g;
+
+function htmlText(fragment) {
+    return fragment.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+}
+
+function literals(source) {
+    const out = [];
+    const re = /"((?:[^"\\\n]|\\.)*)"|`((?:[^`\\]|\\.)*)`/g;
+    let match;
+    while ((match = re.exec(source))) out.push((match[1] ?? match[2] ?? "").replace(/\$\{[^}]*\}/g, " "));
+    return out.join(" | ");
+}
+
+function between(text, start, end) {
+    const a = text.indexOf(start);
+    const b = text.indexOf(end, a);
+    assert.ok(a >= 0 && b > a, `${start} .. ${end}`);
+    return text.slice(a, b);
+}
+
+test("new UI strings contain no banned words", () => {
+    const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+    const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+    const parts = [
+        htmlText(between(html, 'id="start-at-box"', 'id="picks-button"')),
+        htmlText(between(html, 'id="slip-plan"', 'id="ticket-import-box"')),
+        htmlText(between(html, 'id="own-numbers-section"', 'aria-labelledby="heatmap-title"')),
+        htmlText(between(html, 'id="quickdraw-ledger-section"', "</section>")),
+        literals(readFileSync(new URL("../js/tickets.js", import.meta.url), "utf8")),
+        literals(readFileSync(new URL("../js/grading.js", import.meta.url), "utf8")),
+        literals(between(app, "// Start at + Consecutive games", "function updateLedgerUI")),
+        literals(between(app, "function ticketPicksLabel", "function loadHistoryArchive"))
+    ];
+    parts.forEach((text, idx) => {
+        const scrubbed = text.replace(D1, " ");
+        const hit = scrubbed.match(BANNED);
+        assert.equal(hit, null, `part ${idx}: "${hit && hit[0]}"`);
+    });
+});
+
+test("every slip and results view shows the 18+ HOPEline line and the past-results line", () => {
+    const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+    const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+    const hope = /18\+ only\. Gambling problem\? Call the NY HOPEline at 1-877-8-HOPENY \(1-877-846-7369\) or text HOPENY \(467369\)\./;
+    [
+        between(html, 'id="slip-plan"', 'id="save-slip-button"'),
+        between(html, 'id="own-plan"', 'id="own-track-button"'),
+        between(html, 'id="own-results"', 'Results come only'),
+        between(html, 'id="quickdraw-ledger-section"', "</section>"),
+        between(html, 'id="cost-label"', 'id="picks-button"')
+    ].forEach((view) => assert.match(view, hope));
+    assert.match(between(html, 'id="own-results"', 'Results come only'), /Past results don't predict future draws\./);
+    assert.match(between(html, 'id="quickdraw-ledger-section"', "</section>"), /Past results don't predict future draws\./);
+    assert.match(app, /You logged spending \$/);
+    assert.equal(/logged cost|Logged cost/.test(html + app), false);
+    assert.equal(/\b(net|profit|ROI|P\/L)\b/.test(htmlText(between(html, 'id="own-numbers-section"', 'aria-labelledby="heatmap-title"'))), false);
+    assert.equal(/Try again|Track again|Play again/i.test(html + app), false);
+    // Saving a slip does not roll new picks on its own.
+    assert.equal(between(app, "function saveTicketLocally", "function readOwnNumbers").includes("generateTicket()"), false);
 });

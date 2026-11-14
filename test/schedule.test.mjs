@@ -92,7 +92,7 @@ test("Quick Draw elapsed time includes the overnight break", () => {
     assert.equal(projection.visible, true);
     assert.equal(projection.stale, true);
     assert.equal(projection.reason, "projected");
-    assert.equal(quickDrawNumberLabel(projection.reason), "Next draw # (est.)");
+    assert.equal(quickDrawNumberLabel(projection.reason), "Est. draw #");
     assert.equal(quickDrawNumberLabel("current"), "Next draw #");
     assert.equal(projection.nextDrawNumber, 3030437);
     assert.equal(projection.countdownSeconds, 12 * 60);

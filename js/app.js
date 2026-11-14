@@ -96,7 +96,7 @@ const GAME_CONFIGS = {
         shortName: "Mega Millions",
         totalNumbers: 70,
         drawnCount: 5,
-        bonusTotal: 25,
+        bonusTotal: 24, // Mega Ball 1-24 from the April 8, 2025 drawing (megamillions.com, nylottery.ny.gov, 9 NYCRR 5015.2).
         maxSpot: 5,
         hasBonus: true,
         bonusName: "Mega Ball",
@@ -400,7 +400,7 @@ function renderDrawSchedule(now = new Date()) {
                 ? `#${start} – #${end} (${games} games)`
                 : `#${start}`;
             cardLabel.textContent = projection.reason === "projected"
-                ? `Next draw # (est.) ${range}`
+                ? `Est. draw # ${range}`
                 : (games > 1 ? `Draws ${range}` : `Draw ${range}`);
         } else {
             cardLabel.hidden = !plan.ok;
@@ -1109,7 +1109,7 @@ function slipCostLine(games, spotCount) {
     const perGame = getGameCost();
     const total = perGame * games;
     const spot = state.activeGameKey === "quickdraw" && spotCount ? `${spotCount}-spot, ` : "";
-    return `${spot}$${perGame.toFixed(2)}/game × ${games} ${games === 1 ? "game" : "games"} = $${total.toFixed(2)} logged cost`;
+    return `You logged spending $${total.toFixed(2)} (${spot}$${perGame.toFixed(2)}/game × ${games} ${games === 1 ? "game" : "games"})`;
 }
 
 function renderSlipPlan(prefix, plan, spotCount) {
@@ -1258,7 +1258,6 @@ function saveTicketLocally() {
     });
     if (!ticket) return;
     storeTicket(ticket);
-    generateTicket();
 }
 
 function readOwnNumbers() {
@@ -1278,7 +1277,7 @@ function trackOwnNumbers() {
     });
     if (!ticket) return;
     storeTicket(ticket);
-    showDialog("Tracking on this device", `Your numbers are saved for ${ticket.games} ${ticket.games === 1 ? "draw" : "draws"} starting ${formatScheduledDraw(new Date(ticket.drawTime))}. They are checked when those draws are published. Play this slip at a NY Lottery retailer.`);
+    showDialog("Tracking on this device", `Your numbers are saved for ${ticket.games} ${ticket.games === 1 ? "draw" : "draws"} starting ${formatScheduledDraw(new Date(ticket.drawTime))}. They are checked when those draws are published.`);
     const history = $("quickdraw-ledger-section");
     if (history) history.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -1314,11 +1313,11 @@ function checkOwnNumbers() {
         setText("own-results-summary", DATA_UNAVAILABLE);
         return;
     }
-    const oldest = state.cachedDraws[report.checked - 1];
-    const newest = state.cachedDraws[0];
+    const oldest = report.rows[report.checked - 1];
+    const newest = report.rows[0];
     const shortNote = report.checked < lookback ? ` Only ${report.checked} draws are loaded.` : "";
     setText("own-results-summary", `Checked against the last ${report.checked} stored draws, ${formatDrawListing(oldest, state.activeGameKey)} to ${formatDrawListing(newest, state.activeGameKey)}.${shortNote}`);
-    const bestRow = state.cachedDraws.find((row) => row.draw_number === report.best.drawNumber);
+    const bestRow = report.rows.find((row) => row.draw_number === report.best.drawNumber);
     setText("own-results-best", `Best: ${report.best.label} matched, ${bestRow ? pastDrawLabel(bestRow) : "—"}.`);
     const parts = report.atLeast.map((entry) => `${entry.n}+ matched: ${entry.draws}`);
     if (report.bonusDraws !== null) parts.push(`${GAME_CONFIGS[state.activeGameKey].bonusName} matched: ${report.bonusDraws}`);
@@ -1327,7 +1326,7 @@ function checkOwnNumbers() {
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
         const numbersText = entry.matched.length ? entry.matched.join(", ") : "—";
-        [pastDrawLabel(state.cachedDraws[idx]), entry.label, numbersText + (entry.bonus ? ` + ${BONUS_SHORT[state.activeGameKey]}` : "")].forEach((text, cellIdx) => {
+        [pastDrawLabel(report.rows[idx]), entry.label, numbersText + (entry.bonus ? ` + ${BONUS_SHORT[state.activeGameKey]}` : "")].forEach((text, cellIdx) => {
             const cell = document.createElement("td");
             cell.className = cellIdx === 1 ? "py-1 text-cyan-200 font-mono" : "py-1 text-blue-100";
             cell.textContent = text;
@@ -1343,7 +1342,7 @@ function updateLedgerUI() {
         totalWager += parseFloat(ticket.wager) || 0;
     });
     const wagerEl = $("archive-total-wager");
-    if (wagerEl) wagerEl.textContent = `$${totalWager.toFixed(2)}`;
+    if (wagerEl) wagerEl.textContent = `You logged spending $${totalWager.toFixed(2)}`;
 
     const body = $("ledger-body");
     body.replaceChildren();

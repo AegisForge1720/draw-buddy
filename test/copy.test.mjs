@@ -15,7 +15,7 @@ test("picks card keeps both pick modes, the next-draw label, and the independenc
     assert.match(html, /id="picks-last-updated"/);
     assert.match(app, /projectNextDraw/);
     assert.match(app, /Draws \$\{range\}/);
-    assert.match(app, /Next draw # \(est\.\) \$\{range\}/);
+    assert.match(app, /Est\. draw # \$\{range\}/);
 });
 
 test("heatmap copy uses one scale and names observed and expected repeat rates", () => {
@@ -40,7 +40,7 @@ test("results show a last-updated line and the delay notice", () => {
     assert.match(html, /id="history-unavailable"[^>]*>Data unavailable/);
     assert.match(app, /Last updated /);
     assert.match(app, /officialDrawInstant/);
-    assert.match(app, /Next draw # \(est\.\)/);
+    assert.match(app, /Est\. draw #/);
     assert.match(app, /publicDrawTable/);
     assert.match(app, /\.schema\("public"\)/);
     assert.equal(app.includes("archive."), false);

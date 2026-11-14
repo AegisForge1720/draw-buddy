@@ -9,12 +9,31 @@ import {
     upcomingWeeklyDraws
 } from "./schedule.js";
 import { weeklyHitLabel } from "./grading.js";
+import { rowFitsEra } from "./eras.js";
 
+export { MEGA_MILLIONS_ERAS, megaMillionsEra, rowFitsEra } from "./eras.js";
+
+// Current-era number rules for entering your own numbers.
+// Sources: 9 NYCRR 5013.2, 5015.2, 5016.2 (gaming.ny.gov rules, updated 9/26) and
+// nylottery.ny.gov/draw-game?game=quickdraw|powerball|megamillions.
 export const NUMBER_RULES = {
     quickdraw: { min: 1, max: 80, minCount: 1, maxCount: 10, bonus: null },
     powerball: { min: 1, max: 69, minCount: 5, maxCount: 5, bonus: { min: 1, max: 26, name: "Powerball" } },
-    megamillions: { min: 1, max: 70, minCount: 5, maxCount: 5, bonus: { min: 1, max: 25, name: "Mega Ball" } }
+    megamillions: { min: 1, max: 70, minCount: 5, maxCount: 5, bonus: { min: 1, max: 24, name: "Mega Ball" } }
 };
+
+// Most consecutive draws on one slip: the lower of the official NY limit and 20.
+// Quick Draw 20, Powerball 39, Mega Millions 26 (nylottery.ny.gov/draw-game Multi-Draw).
+export const OFFICIAL_MAX_CONSECUTIVE = { quickdraw: 20, powerball: 39, megamillions: 26 };
+export const MAX_CONSECUTIVE = Object.fromEntries(
+    Object.entries(OFFICIAL_MAX_CONSECUTIVE).map(([game, max]) => [game, Math.min(max, 20)])
+);
+
+function gamesError(game, count) {
+    const cap = MAX_CONSECUTIVE[game];
+    if (!Number.isInteger(count) || count < 1 || count > cap) return `Pick 1 to ${cap} consecutive draws.`;
+    return null;
+}
 
 // How far ahead a slip can start.
 export const MAX_QUICK_DRAW_START_DAYS = 7;
@@ -97,7 +116,9 @@ function quickDrawSlots(first, count) {
 //      | { mode: "time", at: "YYYY-MM-DDTHH:MM" ET }
 // Quick Draw returns the scheduled slots. Draw numbers are not part of the plan.
 export function planQuickDrawSlip({ start = { mode: "next" }, games = 1, now = new Date() }) {
-    const count = Math.max(1, parseInt(games, 10) || 1);
+    const count = parseInt(games, 10) || 1;
+    const capError = gamesError("quickdraw", count);
+    if (capError) return { ok: false, error: capError };
     const next = nextQuickDrawSlotAfter(now);
     let first = next;
     let offsetFromNext = 0;
@@ -135,7 +156,9 @@ export function weeklyStartChoices(game, now = new Date(), count = WEEKLY_START_
 
 // startDate: ET YYYY-MM-DD of an upcoming draw, or empty for the next draw.
 export function planWeeklySlip({ game, startDate = "", games = 1, now = new Date() }) {
-    const count = Math.max(1, parseInt(games, 10) || 1);
+    const count = parseInt(games, 10) || 1;
+    const capError = gamesError(game, count);
+    if (capError) return { ok: false, error: capError };
     const choices = weeklyStartChoices(game, now);
     if (choices.length === 0) return { ok: false, error: "The draw schedule is unavailable." };
     let begin = choices[0];
@@ -160,8 +183,10 @@ export function planWeeklySlip({ game, startDate = "", games = 1, now = new Date
 // Matches entered numbers against loaded draws, newest first.
 export function checkPastDraws({ game, numbers, bonus = null, draws, lookback }) {
     if (!Array.isArray(draws) || draws.length === 0) return { ok: false, reason: "unavailable" };
-    const size = Math.min(Math.max(1, parseInt(lookback, 10) || draws.length), draws.length);
-    const slice = draws.slice(0, size);
+    const usable = draws.filter((row) => rowFitsEra(game, row));
+    if (usable.length === 0) return { ok: false, reason: "unavailable" };
+    const size = Math.min(Math.max(1, parseInt(lookback, 10) || usable.length), usable.length);
+    const slice = usable.slice(0, size);
     const played = numbers.map(Number);
     const weekly = game !== "quickdraw";
     const perDraw = slice.map((row) => {
@@ -188,6 +213,7 @@ export function checkPastDraws({ game, numbers, bonus = null, draws, lookback })
     }
     return {
         ok: true,
+        rows: slice,
         checked: perDraw.length,
         perDraw,
         best,
