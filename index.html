@@ -73,6 +73,11 @@
 
     footer p { margin: 0.35rem 0; }
 
+    footer a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
     .nowrap { white-space: nowrap; }
   </style>
 </head>
@@ -85,7 +90,24 @@
       <p>18+ only. Draw Buddy does not sell lottery tickets or accept wagers.</p>
       <p>Gambling problem? Call <span class="nowrap">1-877-8-HOPENY</span> <span class="nowrap">(1-877-846-7369)</span> or text HOPENY <span class="nowrap">(467369)</span>.</p>
       <p>© 2026 NAV Analytics LLC</p>
+      <p><a href="privacy.html">Privacy</a></p>
     </footer>
   </main>
+  <script>
+    window.goatcounter = {
+      path: function (p) {
+        return location.pathname;
+      }
+    };
+    (function () {
+      if (navigator.globalPrivacyControl === true) return;
+      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://gc.zgo.at/count.js';
+      script.setAttribute('data-goatcounter', 'https://drawbuddy.goatcounter.com/count');
+      document.head.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
