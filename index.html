@@ -157,6 +157,7 @@
                         <h2 id="play-card-title" class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">Random or stats-based number picks</h2>
                         <div id="card-draw-label" class="text-base font-black text-white mt-0.5">…</div>
                         <p id="picks-last-updated" class="text-[11px] text-slate-300 mt-1">Last updated —</p>
+                        <p id="picks-refresh-note" hidden class="text-[11px] text-slate-400 mt-1"></p>
                         <p id="picks-independence" class="text-[11px] text-slate-200 mt-1">Every draw is independent; picks don't improve your odds.</p>
                         <p id="card-algorithm-reason" class="text-[11px] text-cyan-200 font-medium mt-0.5">…</p>
                     </div>
@@ -217,6 +218,7 @@
                 </div>
                 <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
                 <p id="results-updated" class="text-xs text-slate-200">Last updated —</p>
+                <p id="results-refresh-note" hidden class="text-xs text-slate-400"></p>
                 <p id="newest-draw-day" class="text-xs text-slate-200">—</p>
                 <p id="results-delay" class="text-xs text-slate-200">Results may be delayed; check official sources.</p>
                 <p id="quickdraw-daily-note" class="text-xs text-slate-200">Quick Draw results update once a day from New York State open data (data.ny.gov).</p>
@@ -225,9 +227,9 @@
                 <p id="heatmap-unverified-note" class="text-xs text-amber-100">Data unavailable</p>
                 <div id="heatmap-results">
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
-                    <div class="text-xs font-bold text-yellow-200">Frequency chart detail is in the subscription</div>
-                    <p id="heatmap-locked-copy" class="text-[11px] text-blue-100">Data unavailable. Number detail unlocks with Monthly or Annual.</p>
-                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
+                    <div class="text-xs font-bold text-yellow-200">Frequency chart detail is coming soon with Draw Buddy Premium ($1.99/month or $17/year).</div>
+                    <p id="heatmap-locked-copy" class="text-[11px] text-blue-100">Data unavailable. Number detail is coming soon with Draw Buddy Premium ($1.99/month or $17/year).</p>
+                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">Coming soon</button>
                 </div>
                 <div id="heatmap-grid-container">
                     <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
@@ -237,7 +239,7 @@
                     <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5 gap-2">
                         <div class="flex items-center space-x-2">
                             <div id="inspector-ball-badge" class="w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-xs" aria-hidden="true">--</div>
-                            <h3 id="inspector-title" class="font-bold text-white text-xs">Number detail appears here after you subscribe and choose a number</h3>
+                            <h3 id="inspector-title" class="font-bold text-white text-xs">Pick a number to see its stats. Number detail is coming soon with Draw Buddy Premium ($1.99/month or $17/year).</h3>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 text-xs">
@@ -279,9 +281,9 @@
                 <h2 id="models-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Kelly calculator, Monte Carlo simulator, repeat-rate check</h2>
                 <p id="models-independence" class="text-sm font-semibold text-white">Every draw is independent; picks don't improve your odds.</p>
                 <div id="models-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
-                    <div class="text-xs font-bold text-yellow-200">These calculators are in the subscription</div>
-                    <p class="text-[11px] text-blue-100">The Kelly calculator, Monte Carlo simulator, and repeat-rate check come with Monthly or Annual.</p>
-                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
+                    <div class="text-xs font-bold text-yellow-200">These calculators are coming soon with Draw Buddy Premium ($1.99/month or $17/year).</div>
+                    <p class="text-[11px] text-blue-100">The Kelly calculator, Monte Carlo simulator, and repeat-rate check are coming soon with Draw Buddy Premium ($1.99/month or $17/year).</p>
+                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">Coming soon</button>
                 </div>
                 <div id="models-body" hidden class="space-y-3">
                     <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
@@ -356,7 +358,7 @@
             <section id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="plans-heading">
                 <div>
                     <h2 id="plans-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Draw Buddy plans</h2>
-                    <p class="text-[11px] text-blue-100 mt-1">Draw Buddy Premium is the paid version of this app. This preview does not take payment and does not sell tickets.</p>
+                    <p class="text-[11px] text-blue-100 mt-1">Draw Buddy Premium ($1.99/month or $17/year) is coming soon. This preview does not take payment and does not sell tickets.</p>
                     <p id="paywall-disclosure" class="text-xs text-slate-200"><span id="paywall-disclosure-text">Draw Buddy Premium: $1.99 per month or $17 per year. Your subscription renews automatically at the same price each month or year until you cancel. Payment is charged to your Apple ID or Google Play account. Cancel anytime, at least 24 hours before the end of the current period, in Settings &gt; your name &gt; Subscriptions or Google Play &gt; Payments &amp; subscriptions &gt; Subscriptions, or from Draw Buddy's Account screen.</span> <a class="underline text-yellow-300" href="./terms.html">Terms of Use</a> <a class="underline text-yellow-300" href="./privacy.html">Privacy Policy</a></p>
                     <label class="flex items-start gap-3 text-sm text-white" for="renewal-agree">
                         <input id="renewal-agree" type="checkbox">
@@ -369,19 +371,19 @@
                             <span class="font-bold text-white text-xs">Monthly</span>
                             <span id="plan-monthly-price" class="text-yellow-300 font-mono text-xs font-bold">$1.99 / month</span>
                         </div>
-                        <p class="text-[11px] text-blue-100">Billed every month. Cancel anytime.</p>
-                        <button type="button" id="checkout-monthly" disabled class="w-full text-center bg-[#111c38] hover:bg-[#1e293b] text-white font-black py-2 rounded-lg text-xs min-h-[44px] border border-[#1d4ed8] disabled:bg-slate-700 disabled:text-slate-200">Subscribe monthly</button>
+                        <p class="text-[11px] text-blue-100">Coming soon.</p>
+                        <button type="button" id="checkout-monthly" disabled class="w-full text-center bg-[#111c38] text-white font-black py-2 rounded-lg text-xs min-h-[44px] border border-[#1d4ed8] disabled:bg-slate-700 disabled:text-slate-200">Coming soon</button>
                     </div>
                     <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/50 space-y-2">
                         <div class="flex justify-between items-center gap-2">
                             <span class="font-bold text-white text-xs">Annual</span>
                             <span id="plan-annual-price" class="text-yellow-300 font-mono text-xs font-bold">$17 / year</span>
                         </div>
-                        <p id="plan-annual-savings" class="text-[11px] text-slate-200">Billed once a year.</p>
-                        <button type="button" id="checkout-annual" disabled class="w-full text-center bg-yellow-400 text-slate-950 font-black py-2 rounded-lg text-xs min-h-[44px] disabled:bg-slate-700 disabled:text-slate-200">Subscribe annually</button>
+                        <p id="plan-annual-savings" class="text-[11px] text-slate-200">Coming soon.</p>
+                        <button type="button" id="checkout-annual" disabled class="w-full text-center bg-yellow-400 text-slate-950 font-black py-2 rounded-lg text-xs min-h-[44px] disabled:bg-slate-700 disabled:text-slate-200">Coming soon</button>
                     </div>
                 </div>
-                <p id="checkout-note" tabindex="-1" class="text-[11px] text-slate-300 leading-snug">Checkout is not available until the agreement box is checked. This preview does not take payment and does not sell tickets.</p>
+                <p id="checkout-note" tabindex="-1" class="text-[11px] text-slate-300 leading-snug">Coming soon with Draw Buddy Premium ($1.99/month or $17/year). This preview does not take payment and does not sell tickets.</p>
             </section>
 
             <section id="account-screen" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="account-heading">
@@ -445,7 +447,7 @@
         <h2 id="info-dialog-title" class="text-base font-black text-white mb-2"></h2>
         <p id="info-dialog-body" class="mb-4"></p>
         <div class="flex gap-2 justify-end">
-            <button type="button" id="info-dialog-plans" class="bg-yellow-400 text-slate-950 font-black px-3 py-2 rounded-lg text-xs min-h-[44px]" hidden>See plans</button>
+            <button type="button" id="info-dialog-plans" class="bg-yellow-400 text-slate-950 font-black px-3 py-2 rounded-lg text-xs min-h-[44px]" hidden>Coming soon</button>
             <button type="button" id="info-dialog-close" class="bg-[#111c38] text-white border border-[#1d4ed8] font-bold px-3 py-2 rounded-lg text-xs min-h-[44px]">Close</button>
         </div>
     </dialog>

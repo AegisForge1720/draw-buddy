@@ -2,7 +2,14 @@ import { expectedOneStepRepeatRate } from "./odds.js";
 import { historyStatus } from "./schedule.js";
 
 export const PICK_NUMBER_LINE = "Pick a number to see its stats.";
-export const SUBSCRIPTION_DETAIL_NOTE = "Number detail is in the subscription.";
+export const PREMIUM_COMING_SOON = "Coming soon with Draw Buddy Premium ($1.99/month or $17/year).";
+export const SUBSCRIPTION_DETAIL_NOTE = `Number detail is ${PREMIUM_COMING_SOON.charAt(0).toLowerCase()}${PREMIUM_COMING_SOON.slice(1)}`;
+export const REFRESH_KEPT_NOTE = "Couldn't refresh, showing last loaded draws.";
+
+export function refreshKeptNote(settled) {
+    if (!settled || settled.keptPrevious !== true || settled.available !== true) return "";
+    return REFRESH_KEPT_NOTE;
+}
 
 export function inspectorIdle({ historyAvailable, subscribed }) {
     if (!historyAvailable) {

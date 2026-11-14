@@ -2,7 +2,6 @@ import {
     DATA_VERIFIED,
     DEMO_FLAGS,
     DRAW_BUDDY_CONFIG,
-    annualSavings,
     formatPlanMoney,
     isBrowserSafeSupabaseKey,
     publicDrawTable
@@ -35,9 +34,12 @@ import {
     upcomingWeeklyDraws
 } from "./schedule.js";
 import {
+    PREMIUM_COMING_SOON,
+    SUBSCRIPTION_DETAIL_NOTE,
     expectedRepeatText,
     inspectorIdle,
     numberWindowStats,
+    refreshKeptNote,
     settleHistoryFetch,
     stakePerPlay
 } from "./inspector.js";
@@ -176,12 +178,7 @@ function showDialog(title, body, options = {}) {
 }
 
 function showLocked(featureName) {
-    const saved = annualSavings();
-    showDialog(
-        "Subscription",
-        `${featureName} is included with Monthly (${formatPlanMoney(PLAN_MONTHLY_PRICE)}/mo) or Annual (${formatPlanMoney(PLAN_ANNUAL_PRICE)}/yr, save ${formatPlanMoney(saved)} vs paying monthly).\n\nBilling is not connected in this preview, so this screen cannot unlock it.`,
-        { plans: true }
-    );
+    showDialog("Coming soon", `${featureName} is ${PREMIUM_COMING_SOON.charAt(0).toLowerCase()}${PREMIUM_COMING_SOON.slice(1)}`);
 }
 
 function scrollToPlans() {
@@ -196,7 +193,7 @@ function renderPlanCopy() {
     $("plan-monthly-price").textContent = `${formatPlanMoney(PLAN_MONTHLY_PRICE)} / month`;
     $("plan-annual-price").textContent = `${formatPlanMoney(PLAN_ANNUAL_PRICE)} / year`;
     const savingsEl = $("plan-annual-savings");
-    if (savingsEl) savingsEl.textContent = "Billed once a year.";
+    if (savingsEl) savingsEl.textContent = "Coming soon.";
     const disclosure = $("paywall-disclosure");
     if (disclosure && !disclosure.dataset.filled) {
         disclosure.dataset.filled = "1";
@@ -209,23 +206,18 @@ function explainTicketImport() {
 }
 
 function explainCheckout() {
-    const agreed = $("renewal-agree") && $("renewal-agree").checked;
     const note = $("checkout-note");
-    if (!agreed) {
-        if (note) note.textContent = "Check the agreement box before subscribe. Nothing was charged.";
-        return;
-    }
-    if (note) {
-        note.textContent = "Nothing was charged. App Store and Google Play billing is not connected, so this preview cannot sell a subscription or unlock features.";
-        note.focus();
-    }
+    if (!note) return;
+    note.textContent = `${PREMIUM_COMING_SOON} Nothing was charged.`;
+    note.focus();
 }
 
 function syncSubscribeButtons() {
-    const agreed = Boolean($("renewal-agree") && $("renewal-agree").checked);
     ["checkout-monthly", "checkout-annual"].forEach((id) => {
         const button = $(id);
-        if (button) button.disabled = !agreed;
+        if (!button) return;
+        button.disabled = true;
+        button.textContent = "Coming soon";
     });
 }
 
@@ -528,6 +520,7 @@ function applyHistory(settled, { offline = false } = {}) {
         ? parseInt(settled.cachedDraws[0].draw_number, 10)
         : null;
     updateResultsDisclosure();
+    setRefreshNote(refreshKeptNote(settled));
     if (state.historyAvailable) {
         setSyncStatus(offline ? "Offline" : "Loaded", offline ? "offline" : "loaded");
         setDataBanner(
@@ -605,6 +598,15 @@ async function fetchGameHistoryFromSupabase() {
             verified: DATA_VERIFIED[gameKey] === true
         }));
     }
+}
+
+function setRefreshNote(text) {
+    ["results-refresh-note", "picks-refresh-note"].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.textContent = text;
+        el.hidden = text === "";
+    });
 }
 
 function handleOffline() {
@@ -769,8 +771,8 @@ function renderDrawMath() {
     const lockedCopy = $("heatmap-locked-copy");
     if (lockedCopy) {
         lockedCopy.textContent = drawHistoryVerified()
-            ? "The grid shows how often each number appeared in the loaded draws. Number detail unlocks with Monthly or Annual."
-            : "Data unavailable. Number detail unlocks with Monthly or Annual.";
+            ? `The grid shows how often each number appeared in the loaded draws. ${SUBSCRIPTION_DETAIL_NOTE}`
+            : `Data unavailable. ${SUBSCRIPTION_DETAIL_NOTE}`;
     }
     publishExpectedRepeat();
     if (!subscribed) {

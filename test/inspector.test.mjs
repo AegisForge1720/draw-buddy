@@ -41,8 +41,8 @@ test("a loaded history with no selected number is a prompt, not a failure", () =
     assert.equal(open.value, "--");
     assert.equal(open.value.includes("Data unavailable"), false);
     const locked = inspectorIdle({ historyAvailable: true, subscribed: false });
-    assert.match(locked.title, new RegExp(`^${PICK_NUMBER_LINE}`));
-    assert.match(locked.title, new RegExp(SUBSCRIPTION_DETAIL_NOTE));
+    assert.equal(locked.title.startsWith(PICK_NUMBER_LINE), true);
+    assert.equal(locked.title.includes(SUBSCRIPTION_DETAIL_NOTE), true);
     assert.equal(locked.value, "--");
     const failed = inspectorIdle({ historyAvailable: false, subscribed: true });
     assert.equal(failed.title, "Data unavailable");
