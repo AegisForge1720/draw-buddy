@@ -5,7 +5,7 @@ export function gradeTickets(tickets, draws) {
     }
     const drawMap = new Map();
     draws.forEach((draw) => {
-        if (!draw || !draw.created_at) return;
+        if (!draw || !draw.draw_at) return;
         drawMap.set(parseInt(draw.draw_number, 10), draw);
     });
 

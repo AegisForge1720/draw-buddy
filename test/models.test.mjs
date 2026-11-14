@@ -9,6 +9,8 @@ import {
     QUICK_DRAW_EXTRA,
     QUICK_DRAW_POOL,
     QUICK_DRAW_PRIZES,
+    PANEL_PLAYS,
+    displayedMonteCarlo,
     historyStatLabel,
     kellyFraction,
     quickDrawKelly,
@@ -133,6 +135,22 @@ test("expected repeat rate is 25% for Quick Draw and follows the other formats",
     assert.equal(expectedRepeatRate(5, 70), 5 / 70);
     assert.equal(expectedRepeatRate(0, 80), 0);
     assert.equal(expectedRepeatRate(21, 20), null);
+});
+
+test("the displayed Monte Carlo figures stay at a loss for every play", () => {
+    PANEL_PLAYS.forEach((play) => {
+        play.spots.forEach((spots) => {
+            play.wagers.forEach((baseWager) => {
+                play.extras.forEach((extra) => {
+                    const shown = displayedMonteCarlo({ game: play.game, spots, baseWager, extra });
+                    const label = `${play.game} ${spots}-spot $${baseWager} extra=${extra}`;
+                    assert.ok(shown);
+                    assert.ok(!(shown.mainNet > 0), `${label} main ${shown.mainNet}`);
+                    assert.ok(!(shown.medianNet > 0), `${label} median ${shown.medianNet}`);
+                });
+            });
+        });
+    });
 });
 
 test("verified games still label a withheld history read as Data unavailable", () => {

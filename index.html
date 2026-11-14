@@ -297,7 +297,7 @@
                                 <span id="kelly-ev" class="font-bold text-white text-xs">--</span>
                             </div>
                             <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                                <span class="text-blue-200 block text-[11px]">Win probability</span>
+                                <span class="text-blue-200 block text-[11px]">Chance of any prize</span>
                                 <span id="kelly-win-prob" class="font-bold text-white text-xs">--</span>
                             </div>
                             <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
@@ -311,19 +311,28 @@
                     <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                         <h3 class="font-bold text-white text-xs">Monte Carlo simulator</h3>
                         <p class="text-sm font-semibold text-white">Simulation of random outcomes, not a prediction.</p>
+                        <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                            <span class="text-blue-200 block text-[11px]">Expected net</span>
+                            <span id="mc-net" class="font-bold text-white text-xs">--</span>
+                        </div>
+                        <p class="text-[11px] text-slate-200">Rare large prizes can make a short simulation look positive; the expected result is a loss.</p>
                         <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Typical session</span>
+                                <span id="mc-median" class="font-bold text-white text-xs">--</span>
+                            </div>
+                            <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
+                                <span class="text-blue-200 block text-[11px]">Sessions ending ahead</span>
+                                <span id="mc-ahead" class="font-bold text-white text-xs">--</span>
+                            </div>
                             <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                                 <span class="text-blue-200 block text-[11px]">Sessions</span>
                                 <span id="mc-sessions" class="font-bold text-white text-xs">--</span>
                             </div>
                             <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                                <span class="text-blue-200 block text-[11px]">Win rate</span>
+                                <span class="text-blue-200 block text-[11px]">Share of plays with a prize</span>
                                 <span id="mc-win-rate" class="font-bold text-white text-xs">--</span>
                             </div>
-                        </div>
-                        <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                            <span class="text-blue-200 block text-[11px]">Simulated net result</span>
-                            <span id="mc-net" class="font-bold text-white text-xs">--</span>
                         </div>
                     </div>
                     <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">

@@ -178,19 +178,57 @@ export function simulateQuickDraw({ spots, baseWager, extra = false, sessions, s
     if (!table || !(wager > 0) || !(count > 0) || !Number.isFinite(Number(seed))) return null;
     const rng = createRng(seed);
     const cost = extra ? wager * 2 : wager;
+    const nets = new Float64Array(count);
     let netTotal = 0;
     let wins = 0;
+    let ahead = 0;
     for (let i = 0; i < count; i += 1) {
         const matches = drawMatchCount(spots, rng);
         let prize = (table[matches] || 0) * wager;
         if (extra) prize *= drawExtraMultiplier(rng);
+        const net = prize - cost;
+        nets[i] = net;
+        netTotal += net;
         if (prize > 0) wins += 1;
-        netTotal += prize - cost;
+        if (net > 0) ahead += 1;
     }
     return {
         sessions: count,
         netTotal,
         meanNet: netTotal / count,
+        medianNet: sessionMedian(nets),
+        aheadShare: ahead / count,
         winRate: wins / count
+    };
+}
+
+function sessionMedian(nets) {
+    const sorted = Float64Array.from(nets).sort();
+    const mid = Math.floor(sorted.length / 2);
+    if (sorted.length % 2 === 1) return sorted[mid];
+    return (sorted[mid - 1] + sorted[mid]) / 2;
+}
+
+// What the Monte Carlo panel shows. The main figure is the paytable's
+// expected net, not the sum of one short simulation.
+export const PANEL_PLAYS = [
+    { game: "quickdraw", spots: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], wagers: [1, 2, 3, 4, 5, 10], extras: [false, true] },
+    { game: "powerball", spots: [5], wagers: [2, 3, 5, 10, 25], extras: [false] },
+    { game: "megamillions", spots: [5], wagers: [5], extras: [false] }
+];
+
+export function displayedMonteCarlo({ game, spots, baseWager, extra = false, sessions = MONTE_CARLO_SESSIONS, seed = MONTE_CARLO_SEED }) {
+    if (game !== "quickdraw") {
+        return { mainNet: null, medianNet: null, aheadShare: null, prizeShare: null };
+    }
+    const analytic = quickDrawKelly({ spots, baseWager, extra });
+    const sim = simulateQuickDraw({ spots, baseWager, extra, sessions, seed });
+    if (!analytic || !sim) return null;
+    return {
+        mainNet: analytic.meanNet,
+        medianNet: sim.medianNet,
+        aheadShare: sim.aheadShare,
+        prizeShare: sim.winRate,
+        sessions: sim.sessions
     };
 }

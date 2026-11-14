@@ -17,7 +17,7 @@ test("a matching Quick Draw pick counts hits and does not store a payout", () =>
     }];
     const draws = [{
         draw_number: 10,
-        created_at: stamp,
+        draw_at: stamp,
         winning_numbers: [1, 2, 3, 4, 5],
         extra_multiplier: 3
     }];
@@ -40,7 +40,7 @@ test("draws outside the saved range do not change a pending pick", () => {
     }];
     assert.equal(gradeTickets(tickets, [{
         draw_number: 10,
-        created_at: stamp,
+        draw_at: stamp,
         winning_numbers: [7]
     }]), false);
     assert.equal(tickets[0].hits, "Pending");
@@ -57,6 +57,12 @@ test("a draw without a stored timestamp is not used to grade", () => {
         payout: 0,
         hits: "Pending"
     }];
+    assert.equal(gradeTickets(tickets, [{
+        draw_number: 3,
+        created_at: stamp,
+        winning_numbers: [1, 2, 3, 4],
+        extra_multiplier: 2
+    }]), false);
     assert.equal(gradeTickets(tickets, [{
         draw_number: 3,
         winning_numbers: [1, 2, 3, 4],
@@ -78,7 +84,7 @@ test("non-Quick Draw picks are not graded", () => {
     }];
     assert.equal(gradeTickets(tickets, [{
         draw_number: 8,
-        created_at: stamp,
+        draw_at: stamp,
         winning_numbers: [1, 2, 3, 4, 5]
     }]), true);
     assert.equal(tickets[0].payout, 0);
@@ -94,7 +100,7 @@ test("a block stays partial until each stored draw in the range is loaded", () =
         numbers: [7],
         payout: 0
     }];
-    gradeTickets(tickets, [{ draw_number: 20, created_at: stamp, winning_numbers: [7] }]);
+    gradeTickets(tickets, [{ draw_number: 20, draw_at: stamp, winning_numbers: [7] }]);
     assert.match(tickets[0].hits, /^Matched 1\/2 games/);
     assert.equal(tickets[0].payout, 0);
 });

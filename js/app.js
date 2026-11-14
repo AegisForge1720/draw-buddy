@@ -37,9 +37,9 @@ import {
 import {
     MONTE_CARLO_SEED,
     MONTE_CARLO_SESSIONS,
+    displayedMonteCarlo,
     historyStatLabel,
-    quickDrawKelly,
-    simulateQuickDraw
+    quickDrawKelly
 } from "./models.js";
 
 const { PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
@@ -592,7 +592,7 @@ function handleOffline() {
 
 function gradePendingTickets() {
     if (!(state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.historyAvailable)) return;
-    const draws = state.cachedDraws.filter((draw) => draw && draw.created_at);
+    const draws = state.cachedDraws.filter((draw) => draw && draw.draw_at);
     const updated = gradeTickets(state.sessionTickets, draws);
     if (updated) {
         saveHistoryArchive();
@@ -654,7 +654,7 @@ function renderRepeatRate() {
     }
     const observedText = historyStatLabel(drawHistoryVerified(), observedValue);
     setText("stat-markov", observedText);
-    setText("stat-markov-expected", `Expected ${expectedText}`);
+    setText("stat-expected", expectedText);
     setText("markov-observed", observedText);
     setText("markov-expected", expectedText);
     const detail = $("markov-detail");
@@ -670,7 +670,7 @@ function renderPaytableMath() {
     const spots = parseInt($("spot-tier")?.value, 10);
     const baseWager = parseFloat($("base-wager")?.value);
     const extra = state.activeGameKey === "quickdraw" && parseInt($("extra-multiplier")?.value, 10) === 2;
-    const blank = ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net"];
+    const blank = ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "mc-median", "mc-ahead"];
     if (state.activeGameKey !== "quickdraw") {
         blank.forEach((id) => setText(id, "n/a"));
         setText("kelly-inputs", `${cfg.shortName} has no fixed spot paytable in this calculator.`);
@@ -688,7 +688,8 @@ function renderPaytableMath() {
     setText("kelly-win-prob", formatPercent(report.winProbability));
     setText("kelly-payout", `${formatDollars(report.payout)} per $1`);
     setText("kelly-reason", report.reason || "n/a");
-    const sim = simulateQuickDraw({
+    const sim = displayedMonteCarlo({
+        game: "quickdraw",
         spots,
         baseWager,
         extra,
@@ -696,10 +697,10 @@ function renderPaytableMath() {
         seed: MONTE_CARLO_SEED
     });
     setText("mc-sessions", sim ? String(sim.sessions) : "n/a");
-    setText("mc-win-rate", sim ? formatPercent(sim.winRate) : "n/a");
-    setText("mc-net", sim
-        ? `${formatDollars(sim.netTotal)} over ${sim.sessions} sessions (${formatDollars(sim.meanNet)} per session)`
-        : "n/a");
+    setText("mc-win-rate", sim ? formatPercent(sim.prizeShare) : "n/a");
+    setText("mc-net", sim ? `${formatDollars(sim.mainNet)} per session` : "n/a");
+    setText("mc-median", sim ? formatDollars(sim.medianNet) : "n/a");
+    setText("mc-ahead", sim ? formatPercent(sim.aheadShare) : "n/a");
 }
 
 function renderDrawMath() {
@@ -724,7 +725,7 @@ function renderDrawMath() {
         });
     }
     if (!subscribed) {
-        ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "markov-observed", "markov-expected", "stat-markov-expected"].forEach((id) => {
+        ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "mc-median", "mc-ahead", "markov-observed", "markov-expected"].forEach((id) => {
             setText(id, "--");
         });
         setText("stat-markov", drawHistoryVerified() ? "--" : "Data unavailable");
