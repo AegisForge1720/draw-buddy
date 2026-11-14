@@ -56,7 +56,7 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 - [x] **Code-complete on the site and in the app footer.** `privacy.html` is linked from the footer, the cookie banner, and the age gate. **Needs a person** for store listings and a separate in-app settings screen (this preview’s footer is the in-app link).
 - [x] **Code-complete for the words.** Name, postal address, and draft email come from `LEGAL_ENTITY`. Effective date is November 14, 2026. **Needs a person:** the privacy inbox `privacy@insertcoinindustries.com` is a TODO and is not monitored.
 - [x] **Code-complete for current practice.** The notice covers host IP logs, client-side consent and GPC, no precise location, no session replay, and pixels that are not installed. **Needs legal review** so the sale/share wording matches counsel’s view.
-- [x] **Code-complete.** The cookie table says Meta and TikTok are not installed.
+- [x] **Code-complete.** The cookie table says advertising pixels are not installed. It does not name a platform that is not installed.
 - [x] **Code-complete.** D1 long form, D2, D3, D4, and D5 are in the footer and the notice.
 - [ ] **Needs a person.** Apple privacy labels and Google Data safety are not filed. They must match the notice before store submission. This preview does not collect precise location or advertising identifiers.
 - [ ] **Needs legal review.** A NY attorney has not reviewed the notice, and Andrew has not accepted the risk of publishing it.
@@ -107,10 +107,10 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 
 ## Data
 
-- [ ] Finish the ingest pipeline for NY Quick Draw, Powerball, and Mega Millions. The client only reads whatever is already in the database and labels it as such.
+- [ ] Finish the ingest pipeline for NY Quick Draw, Powerball, and Mega Millions. The client only reads whatever is already in the database. The on-screen line says those rows are stored by Draw Buddy and are not an official lottery feed. Do not call `created_at` the official draw time.
 - [ ] Check rows that do not look like published drawings before calling the feed reliable.
 - [ ] Verify `js/odds.js` against the current NY Quick Draw prize chart. The model excludes Extra.
-- [ ] Either feed scratch-off remaining prizes from a real source or keep the **sample data** label. Scanning and photo import stay **coming soon** until they actually read a ticket.
+- [x] Scratch-off sample odds, positive EV, and the scanner are deleted. Do not add them back without a real prize source. Ticket-photo import stays off until it actually reads a ticket.
 
 ## Supabase security
 

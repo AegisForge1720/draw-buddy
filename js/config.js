@@ -25,7 +25,7 @@ export const NOTICE_DATES = {
 };
 
 // Bump this when the banner or notice text changes so a prior choice expires.
-export const CONSENT_COPY_VERSION = "2026-11-14-1";
+export const CONSENT_COPY_VERSION = "2026-11-14-2";
 
 // Pixel scaffolding is hard-off. Leave the ids empty. Do not set enabled to
 // true until the go-live checklist in RELEASE_CHECKLIST.md is signed.
@@ -40,11 +40,7 @@ export const TRACKING = {
 // showAffiliateLinks must stay false: the growth memo (B2) bars sportsbook
 // and courier links. There is no UI for them in this build.
 export const DEMO_FLAGS = {
-    showScratchOff: false,
     showTicketPhotoImport: false,
-    showStakeModels: false,
-    showClusterHelper: false,
-    showModelEv: false,
     showAffiliateLinks: false
 };
 

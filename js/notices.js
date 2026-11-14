@@ -34,8 +34,8 @@ export function formatAsOfEt(date) {
     return `${formatted} ET`;
 }
 
-export function d6Line(source, asOfEt) {
-    return `Source: official ${source} results as of ${asOfEt}. Always confirm results with the official lottery before claiming a prize.`;
+export function d6Line(asOfEt) {
+    return `Source: draw results stored by Draw Buddy, last updated ${asOfEt}. Not an official lottery feed. Always confirm results with the official lottery before claiming a prize.`;
 }
 
 export const D7 = "Draw Buddy Premium: $1.99 per month or $17 per year. Your subscription renews automatically at the same price each month or year until you cancel. Payment is charged to your Apple ID or Google Play account. Cancel anytime, at least 24 hours before the end of the current period, in Settings > your name > Subscriptions or Google Play > Payments & subscriptions > Subscriptions, or from Draw Buddy's Account screen.";
@@ -63,10 +63,8 @@ export const BILLING_NOTICES = {
 };
 
 export const STORE_SUBSCRIPTION_URLS = {
-    // TODO: Apple subscription management deep link.
-    apple: "",
-    // TODO: Google Play subscription management deep link.
-    google: ""
+    apple: "https://apps.apple.com/account/subscriptions",
+    google: "https://play.google.com/store/account/subscriptions?package=app.drawbuddy.player"
 };
 
 export function trialEndingReminderDue(daysBeforeCharge, notice = BILLING_NOTICES.trialEndingReminder) {

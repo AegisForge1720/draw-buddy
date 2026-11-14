@@ -1,3 +1,3 @@
 import { startSiteGate } from "./compliance.js";
 
-startSiteGate();
+startSiteGate({ ungated: true });

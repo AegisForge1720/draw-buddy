@@ -23,13 +23,11 @@ Draw Buddy is a statistical entertainment tool from NAV Analytics LLC. It does n
 
 ## What is and is not live
 
-- Draw rows come from the configured Supabase project when the request succeeds. The screen says they are loaded from that database. It does not call them an official feed.
-- If the request fails or the device is offline before a load, the app shows **sample draws** generated on the device and says so. Grades against those draws are not official results.
-- Quick Draw base-game expected value, Kelly fraction, and Monte Carlo use the prize table in `js/odds.js`. That table is not an official quote, and Extra is not included. Powerball and Mega Millions do not get a made-up ROI.
-- The default build is a clean demo. `DEMO_FLAGS` in `js/config.js` hides scratch-off odds, ticket-photo import, stake models, the cluster helper, and the expected-value badge. Sportsbook and courier links are not in the page. Number picks use the label “random or stats-based number picks,” with the no-odds disclaimer beside them.
-- The Markov & Kelly button is **coming soon**. The cluster control is a count heuristic with fixed wager steps.
-- Slips are saved in `localStorage` on the device. Nothing is uploaded as a “cloud” ticket.
-- The countdown is a local timer, not the official draw clock.
+- Draw rows come from the configured Supabase project when the request succeeds. The screen says they are draw results stored by Draw Buddy, with a last-updated time. It does not call them an official lottery feed.
+- If the request fails, or the rows have no timestamp, the results stay hidden. Sample numbers generated on the device are not shown as results and are not used to grade saved picks.
+- Saved picks are stored in `localStorage` on the device. A match count is recorded only for live Quick Draw rows that have a timestamp. The history does not show a dollar return.
+- Ticket-photo import stays off. Sportsbook and courier links are not in the page. Number picks use the label “random or stats-based number picks,” with the no-odds disclaimer beside them and on the count heatmap.
+- There is no visible draw countdown. Quick Draw copy says draws are about every 4 minutes, and the page refreshes those rows in the background.
 
 ## Run
 
@@ -50,7 +48,7 @@ Then open `http://localhost:4173`. The first screen asks for a date of birth. Pl
 npm test
 ```
 
-That runs the Node test runner against the plan math, the entitlement gate, the Quick Draw odds model, ticket grading, and the billing-notice hooks. Browser checks that still need a person or a script: age gate, game switcher, number picks, history, both plan prices, the agreement checkbox, and the draft legal pages.
+That runs the Node test runner against the plan math, the entitlement gate, the Quick Draw odds model, saved-pick grading, and the billing-notice hooks. Browser checks that still need a person or a script: age gate, game switcher, number picks, history, both plan prices, the agreement checkbox, and the draft legal pages.
 
 ## Build
 

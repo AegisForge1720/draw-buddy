@@ -52,32 +52,6 @@ export function quickDrawPrizeRate(spot) {
     return quickDrawOutcomes(spot, 1).reduce((sum, outcome) => sum + (outcome.prize > 0 ? outcome.p : 0), 0);
 }
 
-// Fraction of bankroll. Zero when the ticket's expected prize is at or below its cost.
-export function kellyFractionForPrizes(cost, outcomes) {
-    if (!(cost > 0)) return 0;
-    const ev = outcomes.reduce((sum, outcome) => sum + outcome.p * outcome.prize, 0);
-    if (ev <= cost + 1e-9) return 0;
-    let bestF = 0;
-    let best = -Infinity;
-    for (let i = 0; i <= 200; i++) {
-        const f = i / 200;
-        let growth = 0;
-        for (const outcome of outcomes) {
-            const wealth = 1 - f + f * (outcome.prize / cost);
-            if (wealth <= 0) {
-                growth = -Infinity;
-                break;
-            }
-            growth += outcome.p * Math.log(wealth);
-        }
-        if (growth > best) {
-            best = growth;
-            bestF = f;
-        }
-    }
-    return bestF;
-}
-
 export function oneStepRepeatRate(draws, targetNum) {
     const wanted = Number(targetNum);
     let given = 0;
@@ -91,34 +65,4 @@ export function oneStepRepeatRate(draws, targetNum) {
     }
     if (given === 0) return null;
     return hits / given;
-}
-
-function hypergeometricSample(N, K, n, rng) {
-    const seen = new Set();
-    let hits = 0;
-    while (seen.size < n) {
-        const value = Math.floor(rng() * N) + 1;
-        if (seen.has(value)) continue;
-        seen.add(value);
-        if (value <= K) hits += 1;
-    }
-    return hits;
-}
-
-export function simulateQuickDraw(spot, sims, rng = Math.random) {
-    const table = QD_PAYOUT_TABLE[spot] || {};
-    let prizeDraws = 0;
-    let netSum = 0;
-    const runs = Math.max(0, sims);
-    for (let s = 0; s < runs; s++) {
-        const hits = hypergeometricSample(80, 20, spot, rng);
-        const prize = table[hits] || 0;
-        if (prize > 0) prizeDraws += 1;
-        netSum += prize - 1;
-    }
-    return {
-        sims: runs,
-        prizeDraws,
-        meanNet: runs > 0 ? netSum / runs : 0
-    };
 }

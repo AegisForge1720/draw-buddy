@@ -11,7 +11,6 @@ import {
     BILLING_NOTICES,
     D3,
     D7,
-    RESULT_SOURCES,
     STORE_SUBSCRIPTION_URLS,
     annualRenewalNoticeDue,
     d6Line,
@@ -21,14 +20,7 @@ import {
 } from "./notices.js";
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
 import { gradeTickets } from "./grading.js";
-import {
-    kellyFractionForPrizes,
-    oneStepRepeatRate,
-    quickDrawBaseEv,
-    quickDrawOutcomes,
-    quickDrawPrizeRate,
-    simulateQuickDraw
-} from "./odds.js";
+import { oneStepRepeatRate } from "./odds.js";
 
 const { PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
 
@@ -72,29 +64,16 @@ const GAME_CONFIGS = {
         maxSpot: 5,
         hasBonus: true,
         bonusName: "Mega Ball",
-        wagerOptions: [2, 3, 5, 10, 25],
-        defaultWager: 2,
+        wagerOptions: [5],
+        defaultWager: 5,
         defaultTime: 43200
     }
 };
-
-// Sample scratch-off figures. Not a live prize inventory.
-const SCRATCH_GAMES_DATABASE = {
-    "$50,000 Cashword": { cost: 5, topTotal: 5, topRemaining: 3, odds: "1 in 3.42", roi: "+14.2%", ev: "+$2.15" },
-    "$1,000,000 Black Titanium": { cost: 10, topTotal: 3, topRemaining: 2, odds: "1 in 3.12", roi: "+16.8%", ev: "+$4.50" },
-    "$5,000,000 Fortune": { cost: 20, topTotal: 4, topRemaining: 1, odds: "1 in 2.85", roi: "+18.5%", ev: "+$9.20" },
-    "$10,000,000 Loaded": { cost: 30, topTotal: 2, topRemaining: 2, odds: "1 in 2.64", roi: "+21.4%", ev: "+$14.80" },
-    "Set For Life": { cost: 10, topTotal: 6, topRemaining: 4, odds: "1 in 3.50", roi: "+12.1%", ev: "+$1.85" }
-};
-
-const scratchGameKeys = Object.keys(SCRATCH_GAMES_DATABASE);
 
 const state = {
     activeGameKey: "quickdraw",
     cachedDraws: [],
     sessionTickets: [],
-    scratchTickets: [],
-    scratchGameRotationIndex: 0,
     lastGeneratedNumbers: [],
     latestFetchedDraw: null,
     resultsLabeled: false,
@@ -196,6 +175,10 @@ function renderPlanCopy() {
     if ($("paywall-disclosure-text")) $("paywall-disclosure-text").textContent = D7;
 }
 
+function explainTicketImport() {
+    showDialog("Coming soon", "Photos are not read. Nothing is checked against a state database.");
+}
+
 function explainCheckout() {
     const agreed = $("renewal-agree") && $("renewal-agree").checked;
     const note = $("checkout-note");
@@ -218,14 +201,13 @@ function syncSubscribeButtons() {
 }
 
 function manageSubscription() {
-    const destination = STORE_SUBSCRIPTION_URLS.apple || STORE_SUBSCRIPTION_URLS.google;
-    if (destination) {
-        window.open(destination, "_blank", "noopener");
+    if (isSubscribed() && STORE_SUBSCRIPTION_URLS.apple) {
+        window.open(STORE_SUBSCRIPTION_URLS.apple, "_blank", "noopener");
         return;
     }
     showDialog(
         "Manage or cancel",
-        "Billing is not connected, so this Account screen cannot open a store subscription page. When a subscription exists, cancel it in Settings > your name > Subscriptions, or in Google Play > Payments & subscriptions > Subscriptions, or from Draw Buddy's Account screen."
+        "Billing is not connected, so this Account screen cannot open a store subscription page. When a subscription exists, cancel it in Settings > your name > Subscriptions, or in Google Play > Payments & subscriptions > Subscriptions."
     );
 }
 
@@ -259,9 +241,8 @@ function updateHistoryNote() {
 function updateResultsDisclosure() {
     const newest = state.cachedDraws[0];
     const stamp = state.dataMode === "live" ? officialResultsStamp(newest) : null;
-    const source = RESULT_SOURCES[state.activeGameKey];
-    state.resultsLabeled = Boolean(stamp && source);
-    const line = state.resultsLabeled ? d6Line(source, formatAsOfEt(stamp)) : "";
+    state.resultsLabeled = Boolean(stamp);
+    const line = state.resultsLabeled ? d6Line(formatAsOfEt(stamp)) : "";
     ["results-source", "history-source"].forEach((id) => {
         const el = $(id);
         if (!el) return;
@@ -290,12 +271,7 @@ function updateNextDrawLabel() {
         return;
     }
     el.textContent = `#${state.latestFetchedDraw + 1}`;
-    el.title = "One higher than the newest loaded row.";
-}
-
-function formatSignedMoney(amount) {
-    const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
-    return `${sign}$${Math.abs(amount).toFixed(2)}`;
+        el.title = "One higher than the newest loaded draw.";
 }
 
 function getGameCost() {
@@ -311,46 +287,8 @@ function updateCostDisplay() {
 }
 
 function applyDemoFlags() {
-    const show = (id, on) => {
-        const el = document.getElementById(id);
-        if (el) el.hidden = !on;
-    };
-    show("roi-badge", DEMO_FLAGS.showModelEv);
-    show("pro-cluster-box", DEMO_FLAGS.showClusterHelper);
-    show("ticket-import-box", DEMO_FLAGS.showTicketPhotoImport);
-    show("stake-model-row", DEMO_FLAGS.showStakeModels);
-    show("scratch-section", DEMO_FLAGS.showScratchOff);
-}
-
-function updateOptimizedRoiBadge() {
-    const badge = $("roi-badge");
-    const slip = $("slip-roi-box");
-    if (!DEMO_FLAGS.showModelEv) {
-        if (badge) {
-            badge.hidden = true;
-            badge.textContent = "";
-        }
-        if (slip) slip.textContent = "";
-        return;
-    }
-    if (state.activeGameKey !== "quickdraw") {
-        if (badge) {
-            badge.textContent = "Model EV: not estimated";
-            badge.title = "This game has no prize table in the app, so expected value is not estimated.";
-        }
-        if (slip) slip.textContent = "n/a";
-        return;
-    }
-    const spot = parseInt($("spot-tier")?.value, 10) || 4;
-    const wager = parseFloat($("base-wager")?.value) || 1;
-    const ev = quickDrawBaseEv(spot, wager);
-    const roi = ((ev - wager) / wager) * 100;
-    const label = `${roi >= 0 ? "+" : ""}${roi.toFixed(1)}%`;
-    if (badge) {
-        badge.textContent = `Base model EV: ${label}`;
-        badge.title = "Expected return of a base-game Quick Draw ticket from the in-app prize table. Extra is not included. Not an official quote and not a guarantee.";
-    }
-    if (slip) slip.textContent = label;
+    const photo = document.getElementById("ticket-import-box");
+    if (photo) photo.hidden = !DEMO_FLAGS.showTicketPhotoImport;
 }
 
 function applyEntitlements() {
@@ -362,10 +300,6 @@ function applyEntitlements() {
     if (switcher && debug) switcher.value = storageGet("draw_buddy_active_tier") || "free";
 
     const subCard = $("subscription-card");
-    const scratchLocked = $("scratch-locked-overlay");
-    const scratchForm = $("scratch-active-form");
-    const scratchBadge = $("scratch-pro-badge");
-    const clusterProBadge = $("cluster-pro-badge");
     const heatmapLockedBanner = $("heatmap-locked-banner");
     const heatmapGridContainer = $("heatmap-grid-container");
 
@@ -374,10 +308,6 @@ function applyEntitlements() {
             subCard.hidden = false;
             subCard.style.display = "block";
         }
-        if (scratchLocked) scratchLocked.style.display = "block";
-        if (scratchForm) scratchForm.style.display = "none";
-        if (scratchBadge) scratchBadge.textContent = "Subscription";
-        if (clusterProBadge) clusterProBadge.textContent = "Subscription";
         if (heatmapLockedBanner) heatmapLockedBanner.style.display = "block";
         if (heatmapGridContainer) {
             heatmapGridContainer.style.filter = "blur(6px)";
@@ -388,10 +318,6 @@ function applyEntitlements() {
             subCard.hidden = true;
             subCard.style.display = "none";
         }
-        if (scratchLocked) scratchLocked.style.display = "none";
-        if (scratchForm) scratchForm.style.display = "block";
-        if (scratchBadge) scratchBadge.textContent = debug ? "Debug: subscribed" : "Subscribed";
-        if (clusterProBadge) clusterProBadge.textContent = debug ? "Debug: subscribed" : "Subscribed";
         if (heatmapLockedBanner) heatmapLockedBanner.style.display = "none";
         if (heatmapGridContainer) {
             heatmapGridContainer.style.filter = "none";
@@ -438,15 +364,12 @@ function generateMockData(count, startDraw) {
 function useSampleDraws(mode, message) {
     const anchor = state.latestFetchedDraw || 3028800;
     state.cachedDraws = generateMockData(100, anchor);
-    state.latestFetchedDraw = anchor;
     state.dataMode = mode;
     setSyncStatus(mode === "offline" ? "Offline" : "Sample", mode);
     setDataBanner(message, "warn");
-    gradePendingTickets();
     renderHeatmap();
     updateResultsDisclosure();
     updateHistoryNote();
-    updateOptimizedRoiBadge();
 }
 
 async function getSupabaseClient() {
@@ -512,12 +435,11 @@ async function fetchGameHistoryFromSupabase() {
         updateResultsDisclosure();
         setDataBanner(
             state.resultsLabeled
-                ? "Draw results are labeled with their source and time."
+                ? "Draw results are labeled as stored by Draw Buddy, with a last-updated time."
                 : "Draw results are hidden. These rows have no source time.",
             state.resultsLabeled ? "calm" : "warn"
         );
         updateHistoryNote();
-        updateOptimizedRoiBadge();
     } catch {
         if (token !== state.fetchToken) return;
         state.supabaseClient = null;
@@ -540,279 +462,13 @@ function handleOffline() {
 }
 
 function gradePendingTickets() {
-    const updated = gradeTickets(state.sessionTickets, state.cachedDraws);
+    if (!(state.dataMode === "live" && state.activeGameKey === "quickdraw" && state.resultsLabeled)) return;
+    const draws = state.cachedDraws.filter((draw) => draw && draw.created_at);
+    const updated = gradeTickets(state.sessionTickets, draws);
     if (updated) {
         saveHistoryArchive();
         updateLedgerUI();
     }
-}
-
-function selectScratchGame(gameName) {
-    const data = SCRATCH_GAMES_DATABASE[gameName];
-    if (!data) return;
-    $("scratch-game-title-display").textContent = `Sample: ${gameName}`;
-    $("scratch-ev-badge").textContent = `Sample EV: ${data.ev}`;
-    $("stat-top-prizes").textContent = `${data.topRemaining} / ${data.topTotal}`;
-    $("stat-odds").textContent = data.odds;
-    $("stat-roi").textContent = data.roi;
-    $("scratch-cost").value = data.cost;
-    $("scratch-game-selector").value = gameName;
-}
-
-function rotateScratchGame() {
-    state.scratchGameRotationIndex = (state.scratchGameRotationIndex + 1) % scratchGameKeys.length;
-    selectScratchGame(scratchGameKeys[state.scratchGameRotationIndex]);
-}
-
-function explainScratchScan() {
-    if (!isSubscribed()) {
-        showLocked("Scratch-off scan");
-        return;
-    }
-    showDialog(
-        "Coming soon",
-        "Scanning does not read a barcode, does not choose a game, and does not check any state database. The figures above are sample data."
-    );
-}
-
-function explainTicketImport() {
-    showDialog(
-        "Coming soon",
-        "Ticket photos are not read. No numbers are imported, and nothing is checked against a state database."
-    );
-}
-
-function logScratchTicket() {
-    if (!isSubscribed()) {
-        showLocked("Scratch-off log");
-        return;
-    }
-    const gameName = $("scratch-game-selector").value || "Scratch-off";
-    const cost = parseFloat($("scratch-cost").value) || 0;
-    const payout = parseFloat($("scratch-payout").value) || 0;
-    state.scratchTickets.unshift({
-        game: gameName,
-        cost,
-        payout,
-        timestamp: new Date().toISOString()
-    });
-    if (!saveScratchArchive()) {
-        showDialog("Saved in this tab only", "This browser did not keep the scratch-off log in local storage.");
-    }
-    updateScratchLedgerUI();
-    showDialog("Saved on this device", `${gameName} was added to the scratch-off totals on this device. It was not sent to a server.`);
-}
-
-function loadScratchArchive() {
-    const saved = storageGet("draw_buddy_scratch_archive");
-    if (saved) {
-        try {
-            state.scratchTickets = JSON.parse(saved);
-        } catch {
-            state.scratchTickets = [];
-        }
-    }
-    updateScratchLedgerUI();
-}
-
-function saveScratchArchive() {
-    return storageSet("draw_buddy_scratch_archive", JSON.stringify(state.scratchTickets));
-}
-
-function updateScratchLedgerUI() {
-    let totalSpent = 0;
-    let totalWon = 0;
-    state.scratchTickets.forEach((ticket) => {
-        totalSpent += Number(ticket.cost) || 0;
-        totalWon += Number(ticket.payout) || 0;
-    });
-    const net = totalWon - totalSpent;
-    const spentEl = $("scratch-total-spent");
-    const wonEl = $("scratch-total-won");
-    const netEl = $("scratch-net-pnl");
-    if (spentEl) spentEl.textContent = `$${totalSpent.toFixed(2)}`;
-    if (wonEl) wonEl.textContent = `$${totalWon.toFixed(2)}`;
-    if (netEl) {
-        netEl.textContent = formatSignedMoney(net);
-        netEl.className = `font-mono font-bold text-xs ${net >= 0 ? "text-yellow-300" : "text-rose-300"}`;
-    }
-}
-
-function autoOptimizeByLiveCluster() {
-    if (!isSubscribed()) {
-        showLocked("Cluster spot heuristic");
-        return;
-    }
-    if (state.activeGameKey !== "quickdraw") return;
-    if (state.cachedDraws.length === 0) {
-        showDialog("Draws are not loaded", "The cluster heuristic needs the draws loaded in the app.");
-        return;
-    }
-
-    const sampleSize = Math.min(state.cachedDraws.length, 50);
-    const recent20 = state.cachedDraws.slice(0, 20);
-    const recent50 = state.cachedDraws.slice(0, sampleSize);
-    const freq20 = {};
-    const freq50 = {};
-    for (let i = 1; i <= 80; i++) {
-        freq20[i] = 0;
-        freq50[i] = 0;
-    }
-    recent20.forEach((draw) => {
-        (draw.winning_numbers || []).forEach((number) => {
-            if (freq20[number] !== undefined) freq20[number] += 1;
-        });
-    });
-    recent50.forEach((draw) => {
-        (draw.winning_numbers || []).forEach((number) => {
-            if (freq50[number] !== undefined) freq50[number] += 1;
-        });
-    });
-
-    const sorted20 = Object.values(freq20).sort((a, b) => b - a);
-    const sorted50 = Object.values(freq50).sort((a, b) => b - a);
-    const top3Avg20 = (sorted20[0] + sorted20[1] + sorted20[2]) / 3;
-    const top4Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3]) / 4;
-    const top5Avg50 = (sorted50[0] + sorted50[1] + sorted50[2] + sorted50[3] + sorted50[4]) / 5;
-    const top10Spread = sorted50[0] - sorted50[9];
-    const sampleNote = state.dataMode === "live" ? "" : " Counts are from sample draws.";
-
-    let bestSpot = "4";
-    let bestLookback = "50";
-    let bestWager = "1";
-    let bestExtra = "2";
-    let bestBlock = "5";
-    let diagSummary = "";
-
-    if (top3Avg20 >= 9.0) {
-        bestSpot = "3";
-        bestLookback = "20";
-        bestWager = "2";
-        bestExtra = "2";
-        bestBlock = "5";
-        diagSummary = `Heuristic. Tight 3-number surge (${(top3Avg20 / 20 * 100).toFixed(0)}% of the last 20 loaded draws). Suggested 3-spot. Wager steps are fixed rules, not a Kelly stake.${sampleNote}`;
-    } else if (top4Avg50 >= 18.0) {
-        bestSpot = "4";
-        bestLookback = "50";
-        bestWager = "1";
-        bestExtra = "2";
-        bestBlock = "5";
-        diagSummary = `Heuristic. High 4-number count (${top4Avg50.toFixed(1)} average in the loaded window). Suggested 4-spot. Wager steps are fixed rules, not a Kelly stake.${sampleNote}`;
-    } else if (top5Avg50 >= 17.0 && top10Spread <= 3) {
-        bestSpot = "5";
-        bestLookback = "50";
-        bestWager = "1";
-        bestExtra = "2";
-        bestBlock = "5";
-        diagSummary = `Heuristic. Even 5-number counts (${top5Avg50.toFixed(1)} average in the loaded window). Suggested 5-spot. Wager steps are fixed rules, not a Kelly stake.${sampleNote}`;
-    } else {
-        bestSpot = "10";
-        bestLookback = "100";
-        bestWager = "2";
-        bestExtra = "2";
-        bestBlock = "5";
-        diagSummary = `Heuristic. Wide spread (${top10Spread} between the 1st and 10th count). Suggested 10-spot. Wager steps are fixed rules, not a Kelly stake.${sampleNote}`;
-    }
-
-    $("spot-tier").value = bestSpot;
-    if ([...$("lookback-draws").options].some((option) => option.value === bestLookback)) {
-        $("lookback-draws").value = bestLookback;
-    }
-    $("base-wager").value = bestWager;
-    $("extra-multiplier").value = bestExtra;
-    $("game-block").value = bestBlock;
-
-    const diagEl = $("cluster-diagnostic-text");
-    if (diagEl) {
-        diagEl.textContent = diagSummary;
-        diagEl.className = "text-[11px] text-emerald-300 font-mono text-center pt-1";
-    }
-    renderHeatmap();
-    updateCostDisplay();
-    updateOptimizedRoiBadge();
-    generateTicket(diagSummary);
-}
-
-function autoOptimizeByMarkovKelly() {
-    if (!isSubscribed()) {
-        showLocked("Markov and Kelly model");
-        return;
-    }
-    const diagEl = $("cluster-diagnostic-text");
-    if (diagEl) {
-        diagEl.textContent = "Coming soon. This button does not run a Markov or Kelly model and does not change your settings.";
-        diagEl.className = "text-[11px] text-amber-200 font-mono text-center pt-1";
-    }
-    showDialog(
-        "Coming soon",
-        "The Markov and Kelly button does not fit a model and does not change spot, wager, or games. Kelly for Quick Draw is available from the Kelly card, and it uses the in-app prize table."
-    );
-}
-
-function updateModelBars() {
-    const kellyText = $("kelly-text-sub");
-    const mcText = $("mc-text-sub");
-    const kellyFill = $("kelly-fill-bar");
-    const mcFill = $("mc-fill-bar");
-    if (state.activeGameKey !== "quickdraw") {
-        if (kellyFill) kellyFill.style.width = "0%";
-        if (mcFill) mcFill.style.width = "0%";
-        if (kellyText) kellyText.textContent = "Not estimated for this game";
-        if (mcText) mcText.textContent = "Not estimated for this game";
-        return;
-    }
-    const spot = parseInt($("spot-tier")?.value, 10) || 4;
-    const ev = quickDrawBaseEv(spot, 1);
-    const rate = quickDrawPrizeRate(spot);
-    const kelly = kellyFractionForPrizes(1, quickDrawOutcomes(spot, 1));
-    if (kellyFill) kellyFill.style.width = `${Math.min(100, kelly * 100)}%`;
-    if (mcFill) mcFill.style.width = `${Math.min(100, rate * 100)}%`;
-    if (kellyText) {
-        kellyText.textContent = kelly <= 0
-            ? `${spot}-spot Kelly fraction 0 (model EV $${ev.toFixed(2)})`
-            : `${spot}-spot Kelly fraction ${(kelly * 100).toFixed(1)}% of bankroll`;
-    }
-    if (mcText) mcText.textContent = `${spot}-spot prize rate ${(rate * 100).toFixed(1)}%`;
-}
-
-function runKellyOptimizerModal() {
-    if (!isSubscribed()) {
-        showLocked("Kelly sizing");
-        return;
-    }
-    updateModelBars();
-    if (state.activeGameKey !== "quickdraw") {
-        showDialog("Kelly sizing", "Coming soon for this game. The app does not have a prize table for it, so it does not suggest a stake.");
-        return;
-    }
-    const spot = parseInt($("spot-tier").value, 10) || 4;
-    const ev = quickDrawBaseEv(spot, 1);
-    const roi = (ev - 1) * 100;
-    const kelly = kellyFractionForPrizes(1, quickDrawOutcomes(spot, 1));
-    showDialog(
-        "Kelly sizing",
-        `Base-game model for a ${spot}-spot $1 Quick Draw ticket. Extra is not included.\n\nExpected prize $${ev.toFixed(2)} (${roi >= 0 ? "+" : ""}${roi.toFixed(1)}% versus the $1 cost).\nKelly fraction of bankroll: ${kelly.toFixed(2)}.\n\nA fraction of 0 means the model’s expected prize is below the cost, so it does not suggest a wager. This is not a betting recommendation and not an official prize quote.`
-    );
-}
-
-function runMonteCarloModal() {
-    if (!isSubscribed()) {
-        showLocked("Monte Carlo");
-        return;
-    }
-    updateModelBars();
-    if (state.activeGameKey !== "quickdraw") {
-        showDialog("Monte Carlo", "Coming soon for this game. The app does not have a prize table or a jackpot for it, so it does not run a simulation.");
-        return;
-    }
-    const spot = parseInt($("spot-tier").value, 10) || 4;
-    const result = simulateQuickDraw(spot, 10000);
-    const exact = quickDrawPrizeRate(spot);
-    const simulated = result.sims > 0 ? (result.prizeDraws / result.sims) * 100 : 0;
-    showDialog(
-        "Monte Carlo",
-        `${result.sims.toLocaleString()} simulated $1 base-game tickets, ${spot}-spot. Extra is not included.\n\nSimulated prize rate ${simulated.toFixed(1)}%.\nExact prize rate from the same model ${(exact * 100).toFixed(1)}%.\nMean net per ticket ${formatSignedMoney(result.meanNet)}.\n\nThis uses the in-app prize table. It is not an official quote, and it does not estimate risk of ruin.`
-    );
 }
 
 function inspectNumber(num) {
@@ -857,7 +513,6 @@ function inspectNumber(num) {
     $("stat-markov").textContent = repeat === null ? "n/a" : `${(repeat * 100).toFixed(1)}%`;
     $("stat-interval").textContent = `~${meanCycleInterval} draws`;
     $("stat-density").textContent = density;
-    updateModelBars();
     $("inspector-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
@@ -930,25 +585,31 @@ async function switchGameProfile(gameKey) {
     if (engineModeEl) engineModeEl.textContent = cfg.shortName;
     const drawLabel = $("header-draw-label");
     const drawBox = $("header-draw-box");
-    const proClusterBox = $("pro-cluster-box");
-    if (gameKey === "quickdraw") {
-        if (drawBox) drawBox.style.display = "block";
-        if (drawLabel) drawLabel.textContent = "Draw counter";
-        if (proClusterBox) proClusterBox.style.display = "block";
-        state.countdownSeconds = 240;
-    } else {
-        if (drawBox) drawBox.style.display = "none";
-        if (proClusterBox) proClusterBox.style.display = "none";
-        state.countdownSeconds = cfg.defaultTime;
+    const extraBox = $("multiplier-container");
+    if (drawBox) drawBox.style.display = "block";
+    if (drawLabel) drawLabel.textContent = "Next draw #";
+    const cadence = $("header-cadence");
+    if (cadence) {
+        cadence.textContent = gameKey === "quickdraw"
+            ? "Quick Draw draws about every 4 minutes."
+            : "No countdown for this game.";
     }
+    state.countdownSeconds = gameKey === "quickdraw" ? 240 : cfg.defaultTime;
 
     const lookbackSelect = $("lookback-draws");
     if (gameKey === "quickdraw") {
         fillSelect(lookbackSelect, [{ value: 20 }, { value: 50 }, { value: 100 }], 50, (item) => String(item.value));
         $("multiplier-label").textContent = "Extra";
+        if (extraBox) extraBox.hidden = false;
+    } else if (gameKey === "powerball") {
+        fillSelect(lookbackSelect, [{ value: 50 }, { value: 100 }], 100, (item) => String(item.value));
+        $("multiplier-label").textContent = "Power Play";
+        if (extraBox) extraBox.hidden = false;
     } else {
         fillSelect(lookbackSelect, [{ value: 50 }, { value: 100 }], 100, (item) => String(item.value));
-        $("multiplier-label").textContent = "Power Play / Megaplier";
+        if (extraBox) extraBox.hidden = true;
+        const extra = $("extra-multiplier");
+        if (extra) extra.value = "1";
     }
 
     const spotSelect = $("spot-tier");
@@ -974,8 +635,6 @@ async function switchGameProfile(gameKey) {
     startTimers();
     await fetchGameHistoryFromSupabase();
     updateCostDisplay();
-    updateOptimizedRoiBadge();
-    updateModelBars();
     applyDemoFlags();
 }
 
@@ -1046,7 +705,6 @@ function generateTicket(customReason) {
     $("slip-wager-box").textContent = `$${baseWager}`;
     $("slip-extra-box").textContent = hasExtra ? "YES" : "NO";
     $("slip-games-box").textContent = `${totalBlockSize}`;
-    updateOptimizedRoiBadge();
     $("card-total-slip-cost").textContent = `$${totalSlipCost.toFixed(2)}`;
     $("card-cost-label").textContent = `$${costPerGame.toFixed(2)}/gm × ${totalBlockSize} ${totalBlockSize === 1 ? "gm" : "gms"} = $${totalSlipCost.toFixed(2)}`;
 
@@ -1095,43 +753,36 @@ function saveTicketLocally() {
         gradedDraws: [],
         bestHits: 0,
         winningGamesCount: 0,
-        hits: numGames > 1 ? `Pending (0/${numGames} gms)` : "Pending",
+        hits: "Pending",
         payout: 0,
         timestamp: new Date().toISOString()
     });
     const saved = saveHistoryArchive();
     gradePendingTickets();
     updateLedgerUI();
-    state.latestFetchedDraw = endDrawNum;
     updateNextDrawLabel();
     if (!saved) {
-        showDialog("Saved in this tab only", "This browser did not keep the slip in local storage.");
+        showDialog("Saved in this tab only", "This browser did not keep these picks in local storage.");
     }
     generateTicket();
 }
 
 function updateLedgerUI() {
     let totalWager = 0;
-    let totalPayout = 0;
     state.sessionTickets.forEach((ticket) => {
         totalWager += parseFloat(ticket.wager) || 0;
-        totalPayout += parseFloat(ticket.payout) || 0;
     });
-    const net = totalPayout - totalWager;
-    $("archive-total-wager").textContent = `$${totalWager.toFixed(2)}`;
-    $("archive-total-payout").textContent = state.resultsLabeled ? `$${totalPayout.toFixed(2)}` : "—";
-    const netEl = $("archive-net-pnl");
-    netEl.textContent = state.resultsLabeled ? formatSignedMoney(net) : "—";
-    netEl.className = `font-mono font-bold text-xs ${state.resultsLabeled && net >= 0 ? "text-cyan-300" : "text-slate-200"}`;
+    const wagerEl = $("archive-total-wager");
+    if (wagerEl) wagerEl.textContent = `$${totalWager.toFixed(2)}`;
 
     const body = $("ledger-body");
     body.replaceChildren();
     if (state.sessionTickets.length === 0) {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
-        cell.colSpan = 4;
+        cell.colSpan = 3;
         cell.className = "text-center text-blue-200 py-3";
-        cell.textContent = "No slips saved on this device yet.";
+        cell.textContent = "No saved picks on this device yet.";
         row.appendChild(cell);
         body.appendChild(row);
         return;
@@ -1140,16 +791,14 @@ function updateLedgerUI() {
         const games = ticket.games || 1;
         const endDraw = ticket.endDraw || ticket.draw;
         const drawLabel = games > 1 ? `#${ticket.draw}–#${endDraw}` : `#${ticket.draw}`;
-        const ticketNet = (parseFloat(ticket.payout) || 0) - (parseFloat(ticket.wager) || 0);
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
-        const progress = state.resultsLabeled ? (ticket.hits || "Pending") : "Hidden";
-        const difference = state.resultsLabeled ? formatSignedMoney(ticketNet) : "—";
-        [drawLabel, `${ticket.spot}-Spot`, progress, difference].forEach((text, idx) => {
+        const progress = (state.dataMode === "live" && state.activeGameKey === "quickdraw" && state.resultsLabeled)
+            ? (ticket.hits || "Pending")
+            : "Not graded";
+        [drawLabel, `${ticket.spot}-Spot`, progress].forEach((text, idx) => {
             const cell = document.createElement("td");
-            cell.className = idx === 3
-                ? `py-2 text-right font-mono ${ticketNet >= 0 ? "text-emerald-300" : "text-rose-300"}`
-                : idx === 2 ? "py-2 text-cyan-200" : "py-2 text-blue-100";
+            cell.className = idx === 2 ? "py-2 text-cyan-200" : "py-2 text-blue-100";
             cell.textContent = text;
             row.appendChild(cell);
         });
@@ -1174,26 +823,24 @@ function saveHistoryArchive() {
 }
 
 function clearHistoryArchive() {
-    if (!confirm("Clear the slips saved on this device?")) return;
+    if (!confirm("Clear the picks saved on this device?")) return;
     state.sessionTickets = [];
     storageRemove("draw_buddy_pl_archive");
     updateLedgerUI();
 }
 
 function exportHistoryCsv() {
-    if (state.sessionTickets.length === 0 && state.scratchTickets.length === 0) {
-        showDialog("Nothing to export", "No slips or scratch-off rows are saved on this device yet.");
+    if (state.sessionTickets.length === 0) {
+        showDialog("Nothing to export", "No saved picks on this device yet.");
         return;
     }
     const nowISO = new Date().toISOString();
     const dateOnly = nowISO.split("T")[0];
     const csvRows = [[
-        "Timestamp_ISO", "Date", "Game_Engine", "Draw_Range", "Spot_or_Type", "Games_Count", "Wager_Cost", "Payout", "Net_PnL", "Hit_Status"
+        "Timestamp_ISO", "Date", "Game_Engine", "Draw_Range", "Spot_or_Type", "Games_Count", "Logged_Cost", "Difference", "Hit_Status"
     ].join(",")];
     state.sessionTickets.forEach((ticket) => {
-        const wager = parseFloat(ticket.wager || 0).toFixed(2);
-        const payout = parseFloat(ticket.payout || 0).toFixed(2);
-        const net = (payout - wager).toFixed(2);
+        const cost = parseFloat(ticket.wager || 0).toFixed(2);
         const gamesCount = ticket.games || 1;
         const endDraw = ticket.endDraw || (ticket.draw + gamesCount - 1);
         const rangeLabel = gamesCount > 1 ? `#${ticket.draw}-#${endDraw}` : `#${ticket.draw}`;
@@ -1205,27 +852,9 @@ function exportHistoryCsv() {
             `"${rangeLabel}"`,
             `"${ticket.spot}-Spot"`,
             gamesCount,
-            wager,
-            payout,
-            net,
-            `"${ticket.hits}"`
-        ].join(","));
-    });
-    state.scratchTickets.forEach((ticket) => {
-        const cost = parseFloat(ticket.cost || 0).toFixed(2);
-        const payout = parseFloat(ticket.payout || 0).toFixed(2);
-        const net = (payout - cost).toFixed(2);
-        csvRows.push([
-            ticket.timestamp || nowISO,
-            (ticket.timestamp || nowISO).split("T")[0],
-            "\"NY Scratch-Off\"",
-            `"${(ticket.game || "Scratch-Off").replace(/"/g, "\"\"")}"`,
-            "\"Instant Ticket\"",
-            1,
             cost,
-            payout,
-            net,
-            payout > 0 ? "\"Returned\"" : "\"None\""
+            "",
+            `"${ticket.hits || ""}"`
         ].join(","));
     });
     const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -1243,19 +872,10 @@ function startTimers() {
     if (window.drawBuddyTimer) clearInterval(window.drawBuddyTimer);
     window.drawBuddyTimer = setInterval(async () => {
         state.countdownSeconds -= 1;
-        if (state.countdownSeconds <= 0) {
-            state.countdownSeconds = state.activeGameKey === "quickdraw" ? 240 : GAME_CONFIGS[state.activeGameKey].defaultTime;
-            if (state.activeGameKey === "quickdraw") await fetchGameHistoryFromSupabase();
-            else renderHeatmap();
-        }
-        const hrs = Math.floor(state.countdownSeconds / 3600);
-        const mins = Math.floor((state.countdownSeconds % 3600) / 60);
-        const secs = state.countdownSeconds % 60;
-        const cdEl = $("header-countdown");
-        if (!cdEl) return;
-        cdEl.textContent = hrs > 0
-            ? `${hrs}h ${mins.toString().padStart(2, "0")}m`
-            : `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+        if (state.countdownSeconds > 0) return;
+        state.countdownSeconds = state.activeGameKey === "quickdraw" ? 240 : GAME_CONFIGS[state.activeGameKey].defaultTime;
+        if (state.activeGameKey === "quickdraw") await fetchGameHistoryFromSupabase();
+        else renderHeatmap();
     }, 1000);
 }
 
@@ -1264,8 +884,6 @@ function bindUi() {
     $("game-btn-powerball").addEventListener("click", () => switchGameProfile("powerball"));
     $("game-btn-megamillions").addEventListener("click", () => switchGameProfile("megamillions"));
     $("dev-tier-switcher").addEventListener("change", (event) => switchTestTier(event.target.value));
-    $("cluster-button").addEventListener("click", autoOptimizeByLiveCluster);
-    $("markov-button").addEventListener("click", autoOptimizeByMarkovKelly);
     $("picks-button").addEventListener("click", () => generateTicket());
     const agreement = $("renewal-agree");
     if (agreement) agreement.addEventListener("change", syncSubscribeButtons);
@@ -1281,15 +899,10 @@ function bindUi() {
             : "Trial-ending and annual renewal notices are not sent. Billing is not connected.";
     }
     $("save-slip-button").addEventListener("click", saveTicketLocally);
-    $("ticket-import-button").addEventListener("click", explainTicketImport);
-    $("scratch-rotate").addEventListener("click", rotateScratchGame);
-    $("scratch-game-selector").addEventListener("change", (event) => selectScratchGame(event.target.value));
-    $("scratch-log-button").addEventListener("click", logScratchTicket);
-    $("scratch-scan-button").addEventListener("click", explainScratchScan);
+    const ticketImport = $("ticket-import-button");
+    if (ticketImport) ticketImport.addEventListener("click", explainTicketImport);
     $("export-button").addEventListener("click", exportHistoryCsv);
     $("clear-history-button").addEventListener("click", clearHistoryArchive);
-    $("kelly-card").addEventListener("click", runKellyOptimizerModal);
-    $("monte-carlo-card").addEventListener("click", runMonteCarloModal);
     $("checkout-monthly").addEventListener("click", explainCheckout);
     $("checkout-annual").addEventListener("click", explainCheckout);
     document.querySelectorAll("[data-scroll-plans]").forEach((button) => {
@@ -1298,13 +911,10 @@ function bindUi() {
     ["base-wager", "extra-multiplier", "game-block", "spot-tier"].forEach((id) => {
         $(id).addEventListener("change", () => {
             updateCostDisplay();
-            updateOptimizedRoiBadge();
-            updateModelBars();
         });
     });
     $("lookback-draws").addEventListener("change", () => {
         renderHeatmap();
-        updateOptimizedRoiBadge();
     });
     $("info-dialog-close").addEventListener("click", () => $("info-dialog").close());
     $("info-dialog-plans").addEventListener("click", () => {
@@ -1325,13 +935,9 @@ function bootApp() {
     bindUi();
     applyEntitlements();
     setAppState(state.currentState);
-    loadScratchArchive();
     loadHistoryArchive();
-    selectScratchGame(scratchGameKeys[0]);
     startTimers();
     updateCostDisplay();
-    updateOptimizedRoiBadge();
-    updateModelBars();
     updateHistoryNote();
     fetchGameHistoryFromSupabase();
     registerServiceWorker();

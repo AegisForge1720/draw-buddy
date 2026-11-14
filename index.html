@@ -63,12 +63,11 @@
             <div class="bg-[#050814] border-t border-[#1d4ed8] px-4 py-2 text-xs">
                 <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
                     <div id="header-draw-box" class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
-                        <div id="header-draw-label" class="text-blue-200 uppercase tracking-wider text-[10px]">Next slip</div>
-                        <div id="header-next-draw" class="font-bold text-yellow-300 text-sm" title="Where the next saved slip would start. Not an official draw schedule.">…</div>
+                        <div id="header-draw-label" class="text-blue-200 uppercase tracking-wider text-[10px]">Next draw #</div>
+                        <div id="header-next-draw" class="font-bold text-yellow-300 text-sm" title="One higher than the newest loaded draw.">…</div>
                     </div>
                     <div class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
-                        <div class="text-blue-200 uppercase tracking-wider text-[10px]" title="Placeholder countdown. Not the official draw clock.">Local timer</div>
-                        <div id="header-countdown" class="font-bold text-cyan-300 text-sm" aria-label="Local placeholder timer">04:00</div>
+                        <div id="header-cadence" class="text-blue-200 text-[11px] leading-snug">Quick Draw draws about every 4 minutes.</div>
                     </div>
                     <div class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
                         <div class="text-blue-200 uppercase tracking-wider text-[10px]">Game</div>
@@ -98,17 +97,6 @@
             <section class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="config-panel-title">
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-300 font-semibold truncate">Number settings</h2>
-                    <span id="roi-badge" hidden class="text-[10px] bg-amber-500/10 text-yellow-200 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0"></span>
-                </div>
-
-                <div id="pro-cluster-box" hidden class="bg-[#050814] p-2.5 rounded-lg border border-cyan-500/50 space-y-1.5">
-                    <div class="flex justify-between items-center gap-2">
-                        <span class="text-[10px] uppercase tracking-wider text-cyan-200 font-black">Cluster spot heuristic</span>
-                        <span id="cluster-pro-badge" class="text-[10px] bg-yellow-950 text-yellow-200 px-2 py-0.5 rounded border border-yellow-600 font-mono">Subscription</span>
-                    </div>
-                    <button type="button" id="cluster-button" class="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 px-3 rounded-lg text-xs min-h-[44px]">Suggest a spot from loaded counts</button>
-                    <button type="button" id="markov-button" class="w-full bg-[#111c38] hover:bg-[#1e293b] text-amber-100 border border-amber-500/40 font-bold py-2 px-3 rounded-lg text-xs min-h-[44px]">Markov and Kelly model (coming soon)</button>
-                    <p id="cluster-diagnostic-text" class="text-[11px] text-slate-300 font-mono text-center pt-1">Uses counts from the draws loaded in the app. Not a prediction. Wager steps are fixed rules.</p>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
@@ -153,7 +141,6 @@
                         <select id="game-block" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-yellow-200">
                             <option value="1">1</option><option value="2">2</option><option value="3">3</option>
                             <option value="4">4</option><option value="5" selected>5</option><option value="10">10</option>
-                            <option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="200">200</option>
                         </select>
                     </div>
                     <div>
@@ -228,6 +215,7 @@
                         <span class="text-blue-200">Low</span>
                     </div>
                 </div>
+                <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
                 <p id="results-hidden-note" hidden class="text-xs text-amber-100">Draw results are hidden. These rows have no source time.</p>
                 <div id="heatmap-results">
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
@@ -239,6 +227,7 @@
                     <div id="heatmap-grid" class="grid grid-cols-10 gap-1.5 py-1"></div>
                 </div>
                 <div id="inspector-card" class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/50 space-y-3 mt-3 scroll-mt-20">
+                    <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
                     <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-1.5 gap-2">
                         <div class="flex items-center space-x-2">
                             <div id="inspector-ball-badge" class="w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-xs" aria-hidden="true">--</div>
@@ -272,100 +261,8 @@
                         </div>
                     </div>
                     <p class="bg-[#0b132b] p-2.5 rounded border border-cyan-500/40 text-[11px] text-slate-200">Repeat rate is the share of loaded draws that contained this number whose following loaded draw also contained it. It is not a prediction.</p>
-                    <div id="stake-model-row" hidden class="grid grid-cols-2 gap-2">
-                        <button type="button" id="kelly-card" class="text-left bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-yellow-500/45 space-y-1">
-                            <span class="block text-[11px] font-bold text-yellow-200">Kelly sizing</span>
-                            <span id="visual-kelly-bar" class="block w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-yellow-500/30" aria-hidden="true">
-                                <span id="kelly-fill-bar" class="block bg-yellow-400 h-full w-0"></span>
-                            </span>
-                            <span id="kelly-text-sub" class="block text-[10px] text-blue-100">Base-game model</span>
-                        </button>
-                        <button type="button" id="monte-carlo-card" class="text-left bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-cyan-500/45 space-y-1">
-                            <span class="block text-[11px] font-bold text-cyan-200">Monte Carlo</span>
-                            <span id="visual-mc-bar" class="block w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-cyan-500/30" aria-hidden="true">
-                                <span id="mc-fill-bar" class="block bg-cyan-400 h-full w-0"></span>
-                            </span>
-                            <span id="mc-text-sub" class="block text-[10px] text-blue-100">10,000 base-game sims</span>
-                        </button>
-                    </div>
                 </div>
                 <p id="results-source" hidden class="text-xs text-slate-200"></p>
-                </div>
-            </section>
-
-            <section id="scratch-section" hidden class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 space-y-3" aria-labelledby="scratch-heading">
-                <div class="flex justify-between items-center gap-2">
-                    <h2 id="scratch-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Scratch-off log</h2>
-                    <span id="scratch-pro-badge" class="text-[10px] bg-yellow-950 text-yellow-200 px-2.5 py-0.5 rounded border border-yellow-600 font-mono">Subscription</span>
-                </div>
-                <p class="text-[11px] text-blue-100">A manual scratch-off log is included with a subscription. Listed odds and EV are sample figures, not a live prize inventory. Scanning is not available.</p>
-                <div id="scratch-locked-overlay" class="bg-[#050814] p-4 rounded-lg border border-yellow-500/40 text-center space-y-2">
-                    <div class="text-xs font-bold text-yellow-200">Included with a subscription</div>
-                    <p class="text-[11px] text-blue-100">The scratch-off log comes with Monthly or Annual. Billing is not connected in this preview.</p>
-                    <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-4 rounded text-xs min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
-                </div>
-                <div id="scratch-active-form" class="space-y-3" style="display: none;">
-                    <div class="bg-amber-950 border border-amber-400/70 rounded-lg p-2.5 text-[11px] text-amber-50">Hidden unless the scratch-off flag is on. These figures are not a live inventory.</div>
-                    <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
-                        <div class="flex justify-between items-center text-xs gap-2">
-                            <label for="scratch-game-selector" class="text-[10px] uppercase tracking-wider text-cyan-200 font-bold">Sample game</label>
-                            <button type="button" id="scratch-rotate" class="text-[11px] bg-cyan-950 hover:bg-cyan-900 text-cyan-100 border border-cyan-500/50 px-2 py-1 rounded font-bold">Next sample</button>
-                        </div>
-                        <select id="scratch-game-selector" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-yellow-300">
-                            <option value="$50,000 Cashword">$50,000 Cashword ($5)</option>
-                            <option value="$1,000,000 Black Titanium">$1,000,000 Black Titanium ($10)</option>
-                            <option value="$5,000,000 Fortune">$5,000,000 Fortune ($20)</option>
-                            <option value="$10,000,000 Loaded">$10,000,000 Loaded ($30)</option>
-                            <option value="Set For Life">Set For Life ($10)</option>
-                        </select>
-                        <div class="flex justify-between items-center text-xs pt-1 border-t border-slate-700 gap-2">
-                            <span id="scratch-game-title-display" class="font-bold text-white text-xs">Sample: $50,000 Cashword</span>
-                            <span id="scratch-ev-badge" class="text-[11px] text-emerald-300 font-mono font-bold">Sample EV: +$2.15</span>
-                        </div>
-                        <p class="text-[11px] text-slate-300 bg-[#0b132b] p-1.5 rounded border border-slate-700">Sample figures only. They are not a live inventory.</p>
-                        <div class="grid grid-cols-3 gap-2 text-center text-[11px] pt-1">
-                            <div class="bg-[#111c38] p-1.5 rounded">
-                                <span class="text-blue-200 block">Sample top prizes</span>
-                                <span id="stat-top-prizes" class="font-bold text-yellow-300">3 / 5</span>
-                            </div>
-                            <div class="bg-[#111c38] p-1.5 rounded">
-                                <span class="text-blue-200 block">Sample odds</span>
-                                <span id="stat-odds" class="font-bold text-cyan-200">1 in 3.42</span>
-                            </div>
-                            <div class="bg-[#111c38] p-1.5 rounded">
-                                <span class="text-blue-200 block">Sample figure</span>
-                                <span id="stat-roi" class="font-bold text-emerald-300">+14.2%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label for="scratch-cost" class="block text-[11px] text-blue-200 mb-1">Ticket cost ($)</label>
-                            <input id="scratch-cost" type="number" inputmode="decimal" min="0" value="5" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-yellow-300">
-                        </div>
-                        <div>
-                            <label for="scratch-payout" class="block text-[11px] text-blue-200 mb-1">Payout won ($)</label>
-                            <input id="scratch-payout" type="number" inputmode="decimal" min="0" value="0" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-emerald-300">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button type="button" id="scratch-log-button" class="flex-1 bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-3 rounded-lg text-xs min-h-[44px]">Save scratch-off on this device</button>
-                        <button type="button" id="scratch-scan-button" class="bg-[#111c38] text-cyan-100 border border-cyan-500/40 font-bold py-2.5 px-3 rounded-lg text-xs min-h-[44px]">Scan (coming soon)</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
-                        <div>
-                            <div class="text-[10px] uppercase text-blue-200">Total spent</div>
-                            <div id="scratch-total-spent" class="font-mono font-bold text-white text-xs">$0.00</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] uppercase text-blue-200">Total won</div>
-                            <div id="scratch-total-won" class="font-mono font-bold text-yellow-300 text-xs">$0.00</div>
-                        </div>
-                        <div>
-                            <div class="text-[10px] uppercase text-blue-200">Net</div>
-                            <div id="scratch-net-pnl" class="font-mono font-bold text-cyan-200 text-xs">$0.00</div>
-                        </div>
-                    </div>
                 </div>
             </section>
 
@@ -417,19 +314,9 @@
                 </div>
                 <p id="history-data-note" class="text-xs text-slate-300">This is your own saved list. It is not a leaderboard.</p>
                 <p id="history-source" hidden class="text-xs text-slate-200"></p>
-                <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
-                    <div>
-                        <div class="text-[10px] uppercase text-blue-200">Logged cost</div>
-                        <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] uppercase text-blue-200">Recorded return</div>
-                        <div id="archive-total-payout" class="font-mono font-bold text-yellow-300 text-xs">$0.00</div>
-                    </div>
-                    <div>
-                        <div class="text-[10px] uppercase text-blue-200">Difference</div>
-                        <div id="archive-net-pnl" class="font-mono font-bold text-cyan-200 text-xs">$0.00</div>
-                    </div>
+                <div class="bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] text-center">
+                    <div class="text-[10px] uppercase text-blue-200">Logged cost</div>
+                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
                 </div>
                 <div class="overflow-x-auto max-h-60 overflow-y-auto">
                     <table class="w-full text-left text-xs">
@@ -438,11 +325,10 @@
                                 <th scope="col" class="pb-2 font-semibold">Draws</th>
                                 <th scope="col" class="pb-2 font-semibold">Picks</th>
                                 <th scope="col" class="pb-2 font-semibold">Progress</th>
-                                <th scope="col" class="pb-2 text-right font-semibold">Difference</th>
-                            </tr>
+                                                            </tr>
                         </thead>
                         <tbody id="ledger-body">
-                            <tr><td colspan="4" class="text-center text-blue-200 py-3">No slips saved on this device yet.</td></tr>
+                            <tr><td colspan="3" class="text-center text-blue-200 py-3">No saved picks on this device yet.</td></tr>
                         </tbody>
                     </table>
                 </div>

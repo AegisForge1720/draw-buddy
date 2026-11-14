@@ -18,12 +18,7 @@
             }
         } catch (error) {}
     </script>
-    <div id="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
-        <div class="age-card">
-            <h2 id="age-gate-title">Draw Buddy is for adults 18 and over</h2>
-        </div>
-    </div>
-    <main id="legal-main" class="max-w-md mx-auto px-4 py-8 space-y-4" hidden>
+    <main id="legal-main" class="max-w-md mx-auto px-4 py-8 space-y-4">
         <p class="rounded-lg border border-amber-400/70 bg-amber-950 p-3 text-sm font-bold text-amber-50">Draft privacy notice. Pending review by a licensed New York attorney. Not approved for go-live. It describes this preview as built, not a future product.</p>
         <h1 class="text-2xl font-black text-white">Privacy notice</h1>
         <p class="text-sm text-slate-200">Effective <span data-notice-effective>November 14, 2026</span>. Last updated <span data-notice-updated>November 14, 2026</span>.</p>
@@ -36,20 +31,20 @@
 
         <h2 class="text-lg font-black text-white">What this preview collects</h2>
         <ul class="list-disc pl-5 text-sm text-slate-200 space-y-2">
-            <li>Age check. If the date of birth is under 18, we keep nothing from that visit. If it is 18 or older, we store only an <code>18plus</code> pass flag on this device for up to 90 days. We do not keep the date of birth. An unchecked attestation is a fallback and is treated as under 18.</li>
+            <li>Age check. If the date of birth is under 18, we keep nothing from that visit. If it is 18 or older, we store only an <code>18plus</code> pass flag on this device for up to 90 days. We do not keep the date of birth. This web preview does not offer an attestation checkbox.</li>
             <li>Privacy choices and the Global Privacy Control signal, stored on this device. These records do not include a date of birth.</li>
             <li>Play history you choose to save, stored in this browser only. There is no account.</li>
             <li>Draw rows requested from our configured database after the age check. That request is how the statistics load. It is not an advertising pixel.</li>
             <li>We do not collect email, phone, name, payment card numbers, or precise location. Subscription billing is not connected. If Apple or Google later bill a subscription, they handle the card, not us.</li>
             <li>We do not use session replay or keystroke capture.</li>
-            <li>Host logs. GitHub Pages logs visitor IP addresses for security. GitHub may collect those addresses under <a class="underline text-yellow-300" href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages">GitHub’s own Pages statement</a>. We cannot turn that host log off from this static site.</li>
+            <li>Host logs. GitHub Pages and Supabase receive the visitor’s IP address and browser/device information with each request. GitHub may collect those addresses under <a class="underline text-yellow-300" href="https://docs.github.com/en/pages/getting-started-with-github-pages/about-github-pages">GitHub’s own Pages statement</a>. We cannot turn that host log off from this static site.</li>
         </ul>
 
         <h2 class="text-lg font-black text-white">Why</h2>
         <p class="text-sm text-slate-200">We use the age flag to keep the preview 18+. We use saved choices to keep optional tracking off unless you opt in. We read draw rows to show the statistics. We do not use precise location for advertising, and we do not collect it. We do not sell precise geolocation. We do not collect personal information from children under 13. Marketing, when it exists, is meant for adults 21 and over. This preview does not send email or SMS.</p>
 
         <h2 class="text-lg font-black text-white">Sharing, sale, and targeted ads</h2>
-        <p class="text-sm text-slate-200">Recipients today are the host (GitHub Pages) and the database host (Supabase) for draw rows after the age check. We do not share data with sportsbooks or lottery couriers. Advertising platforms (Meta and TikTok) are named because the code has a disabled pixel scaffold. No pixel id is configured, the scaffold cannot load a network tag, and automatic advanced matching is off. We do not send email or phone, hashed or not.</p>
+        <p class="text-sm text-slate-200">Recipients today are the host (GitHub Pages) and the database host (Supabase). Both receive the visitor’s IP address and browser/device information with each request. Draw rows are requested from Supabase after the age check. We do not share data with sportsbooks or lottery couriers. We do not use optional analytics or advertising tools right now. If we add any, such as advertising pixels from our marketing partners, they will not load until you choose. No advertising pixel is installed, no pixel id is configured, and we do not send email or phone, hashed or not.</p>
         <p class="text-sm text-slate-200">If a pixel is turned on later, loading it can be treated in some states as a “sale” or “share” for cross-context advertising even when no money is paid. The conservative position we are building is: that happens only after opt-in, and an opt-out or Global Privacy Control turns it off. Today we do not sell or share personal information that way, because the pixels do not run.</p>
         <p class="text-sm text-slate-200"><a href="#privacy-choice-status" data-privacy-action="opt-out" class="underline text-yellow-300">Do Not Sell or Share / targeted ads opt-out</a></p>
 
@@ -57,13 +52,20 @@
         <ul class="list-disc pl-5 text-sm text-slate-200 space-y-2">
             <li>Age pass flag: up to 90 days on this device, or until you use Reset age check.</li>
             <li>Privacy choice: the current choice is kept on this device for up to 90 days. A short on-device log of choices is kept in this browser. GitHub Pages cannot store a server copy for 3 years. A future first-party host would need to do that.</li>
-            <li>Saved slips: they stay in this browser until you clear them or clear site data. There is no account to delete.</li>
+            <li>Saved picks: they stay in this browser until you clear them or clear site data. There is no account to delete.</li>
             <li>We do not hold support-mail archives, SMS consent records, or ad-buy records, because this preview does not collect those.</li>
             <li>Draw rows live in the configured database under that system’s own retention. They are not your account data.</li>
         </ul>
 
-        <h2 class="text-lg font-black text-white">Your choices</h2>
-        <p class="text-sm text-slate-200">You can reject optional tracking, change the choice, or use the opt-out link. No account is required. Global Privacy Control is honored as an opt-out of analytics and advertising tags for every visitor. We will not charge a different price for using these controls. The on-device opt-out takes effect immediately in this browser. It cannot recall data that was already sent. Because the privacy mailbox is not monitored yet, we cannot promise a 45-day email response until that inbox exists. Where a privacy law’s threshold is not met, a requested right may not apply; the on-device deletion of saved slips and the tracking opt-out still work here.</p>
+        <h2 class="text-lg font-black text-white">Your choices and requests</h2>
+        <p class="text-sm text-slate-200">You can reject optional tracking, change the choice, or use the opt-out link. No account is required. Global Privacy Control is honored as an opt-out of analytics and advertising tags for every visitor. We will not charge a different price for using these controls. The on-device opt-out takes effect immediately in this browser. It cannot recall data that was already sent. Because the privacy mailbox is not monitored yet, we cannot promise a 45-day email response until that inbox exists. Where a privacy law’s threshold is not met, a requested right may not apply. The on-device controls below still work here.</p>
+        <ul class="list-disc pl-5 text-sm text-slate-200 space-y-2">
+            <li>Access. Saved picks and privacy choices are on this device. Open History on this device, or this browser’s site data for Draw Buddy. Mail the postal address to ask what this notice says we keep. The inbox is not monitored yet.</li>
+            <li>Correction. Saved picks are the numbers you chose to store. Clear them and save a new set. We do not keep a date of birth to correct.</li>
+            <li>Deletion. Use Clear on History on this device, Reset age check, or this browser’s “clear site data” control. That removes the age pass, privacy choice, consent log, and saved picks from this browser.</li>
+            <li>Portability. Use Export CSV on History on this device. The file lists the saved picks and the logged cost. It does not include a payout.</li>
+            <li>Withdrawal of consent. Use Reject, Do Not Sell or Share / targeted ads opt-out, or Your privacy choices. Optional analytics and advertising stay off. Global Privacy Control does the same and cannot be overridden on this device.</li>
+        </ul>
         <p class="text-sm text-slate-200">Parents who believe we have information from a child under 13 can write to the privacy address once it is monitored, or mail the postal address. The age check is built so an under-13 date of birth stores nothing and does not ask for a parent’s email.</p>
         <p class="text-sm text-slate-200"><button type="button" class="consent-text-button" data-privacy-action="choices">Your privacy choices</button></p>
 
@@ -84,11 +86,14 @@
                 <tr><th>Tool</th><th>Who</th><th>Purpose</th><th>When it runs</th></tr>
             </thead>
             <tbody>
-                <tr><td>Age pass flag</td><td>First party, on this device</td><td>Strictly necessary. Remembers an 18+ pass.</td><td>Only after a pass. Not a tracker.</td></tr>
-                <tr><td>Privacy choice</td><td>First party, on this device</td><td>Strictly necessary. Remembers accept, reject, or opt-out.</td><td>After you choose, or when Global Privacy Control is on.</td></tr>
-                <tr><td>Supabase draw request</td><td>Database host</td><td>Loads draw rows for the statistics.</td><td>After the age check. Not optional advertising.</td></tr>
-                <tr><td>Meta Pixel</td><td>Meta</td><td>Would measure visits and ads only if installed.</td><td>Not installed. No pixel id. Automatic advanced matching is off. No email or phone.</td></tr>
-                <tr><td>TikTok Pixel</td><td>TikTok</td><td>Would measure visits and ads only if installed.</td><td>Not installed. The scaffold calls holdConsent before load, and grantConsent only after opt-in. It does not run.</td></tr>
+                <tr><td><code>draw_buddy_age_gate</code></td><td>First party, on this device</td><td>Strictly necessary. Remembers an 18+ pass. No date of birth.</td><td>Only after a pass. Not a tracker.</td></tr>
+                <tr><td><code>draw_buddy_consent</code> and <code>draw_buddy_consent_log</code></td><td>First party, on this device</td><td>Strictly necessary. Remembers accept, reject, or opt-out, and a short log of those choices.</td><td>After you choose, or when Global Privacy Control is on.</td></tr>
+                <tr><td><code>draw_buddy_state</code></td><td>First party, on this device</td><td>Functional. Remembers the selected state label. Written on this device before a privacy choice.</td><td>After the age check, when the app starts.</td></tr>
+                <tr><td><code>draw_buddy_pl_archive</code></td><td>First party, on this device</td><td>Functional. Saved picks you choose to keep.</td><td>Only when you save or clear picks.</td></tr>
+                <tr><td><code>draw_buddy_scratch_archive</code></td><td>First party, on this device</td><td>Not written by this version. An older preview may have left it behind. Clear site data to remove it.</td><td>Not used.</td></tr>
+                <tr><td>Service worker cache <code>draw-buddy-shell-v7</code></td><td>First party, on this device</td><td>Functional. Stores the app shell so a later visit can open offline. It does not store draw rows.</td><td>After the age check, when the app registers the worker.</td></tr>
+                <tr><td>Supabase draw request</td><td>Database host</td><td>Loads draw rows for the statistics. The request includes IP address and browser/device information.</td><td>After the age check. Not optional advertising.</td></tr>
+                <tr><td>Advertising pixels</td><td>None installed</td><td>We do not use optional analytics or advertising tools right now.</td><td>Not installed. No pixel id. They will not load unless you later agree.</td></tr>
                 <tr><td>Session replay, keystroke capture, precise location</td><td>None</td><td>Not used.</td><td>Not installed.</td></tr>
             </tbody>
         </table>

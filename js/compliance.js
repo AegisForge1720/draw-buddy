@@ -1,7 +1,6 @@
 import { LEGAL_ENTITY, NOTICE_DATES } from "./config.js";
 import {
     AGE_PASS_KEY,
-    classifyAttestation,
     classifyDob,
     clearAgePass,
     readAgePass,
@@ -27,7 +26,7 @@ const FAIL_COPY = {
     under18: "Sorry — Draw Buddy is for adults 18 and over."
 };
 
-const BANNER_TEXT = "We use cookies and similar tools. Some are necessary to run this site and remember your age and privacy choices. Optional tools, including pixels from Meta and TikTok, help us measure visits and — only if you agree — show you relevant ads on those platforms. We do not load optional tools until you choose. We honor Global Privacy Control (GPC). See our Privacy Policy and Do Not Sell or Share / targeted ads opt-out.";
+const BANNER_TEXT = "We use cookies and similar tools. Some are necessary to run this site and remember your age and privacy choices. We do not use optional analytics or advertising tools right now. If we add any, such as advertising pixels from our marketing partners, they will not load until you choose, and they will be used to show you relevant ads only if you agree. We honor Global Privacy Control (GPC). See our Privacy Policy and Do Not Sell or Share / targeted ads opt-out.";
 
 function memoryStorage() {
     const data = new Map();
@@ -269,6 +268,11 @@ function wireFooter() {
 }
 
 function showFail(gate, outcome) {
+    try {
+        sessionStorage.setItem("draw_buddy_age_block", "1");
+    } catch {
+        /* Private mode can block session storage. The fail screen still shows. */
+    }
     const card = gate.querySelector(".age-card") || gate;
     card.replaceChildren();
     const title = document.createElement("h2");
@@ -306,12 +310,6 @@ function renderAgeForm(gate, onPass) {
         </div>
         <button type="button" id="age-dob-continue" disabled>Continue</button>
         <p id="age-date-error" role="status"></p>
-        <details>
-            <summary>Attestation fallback</summary>
-            <p>Date of birth is the default. This box is unchecked. It is only a fallback, and it is not consent to tracking.</p>
-            <label class="age-attest-label"><input id="age-attest" type="checkbox"> I confirm I am 18 years of age or older</label>
-            <button type="button" id="age-attest-continue">Continue with attestation</button>
-        </details>
         <p class="age-links"><a href="./privacy.html">Privacy notice (draft)</a> · <a href="./terms.html">Terms (draft)</a></p>
     `;
     const month = card.querySelector("#age-month");
@@ -357,15 +355,10 @@ function renderAgeForm(gate, onPass) {
             showFail(gate, decision.outcome);
             return;
         }
-        writeAgePass(browserStorage());
-        onPass();
-    });
-    card.querySelector("#age-attest-continue").addEventListener("click", () => {
-        const checked = card.querySelector("#age-attest").checked === true;
-        const decision = classifyAttestation(checked);
-        if (!decision.persist) {
-            showFail(gate, decision.outcome);
-            return;
+        try {
+            sessionStorage.removeItem("draw_buddy_age_block");
+        } catch {
+            /* Ignore. */
         }
         writeAgePass(browserStorage());
         onPass();
@@ -380,7 +373,7 @@ function maybeRecordGpc() {
     saveChoice(blankChoices(), "gpc");
 }
 
-export function startSiteGate({ onAccessGranted } = {}) {
+export function startSiteGate({ onAccessGranted, ungated = false } = {}) {
     fillLegalEntity(document);
     wireFooter();
     const gate = document.getElementById("age-gate");
@@ -408,6 +401,35 @@ export function startSiteGate({ onAccessGranted } = {}) {
             if (footerStatus) footerStatus.textContent = statusMessage(active);
         }
         if (typeof onAccessGranted === "function") onAccessGranted();
+    }
+
+    if (ungated) {
+        if (gate) gate.hidden = true;
+        if (legal) legal.hidden = false;
+        document.documentElement.classList.add("age-cleared");
+        maybeRecordGpc();
+        applyPixels();
+        const active = readActiveConsent(browserStorage());
+        if (!active) showBanner();
+        else if (readGpc()) {
+            const footerStatus = document.getElementById("privacy-choice-status");
+            if (footerStatus) footerStatus.textContent = statusMessage(active);
+        }
+        return;
+    }
+
+    let sessionBlocked = false;
+    try {
+        sessionBlocked = sessionStorage.getItem("draw_buddy_age_block") === "1";
+    } catch {
+        sessionBlocked = false;
+    }
+    if (sessionBlocked) {
+        if (shell) shell.inert = true;
+        if (legal) legal.hidden = true;
+        document.documentElement.classList.remove("age-cleared");
+        if (gate) showFail(gate, "under18");
+        return;
     }
 
     if (readAgePass(browserStorage())) {

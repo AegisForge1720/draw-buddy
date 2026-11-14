@@ -23,13 +23,13 @@ function memory() {
 
 const today = new Date(2026, 10, 14);
 
-test("demo flags keep affiliate links, scratch-off odds, and model EV off", () => {
+test("demo flags keep affiliate links and ticket-photo import off", () => {
     assert.equal(DEMO_FLAGS.showAffiliateLinks, false);
-    assert.equal(DEMO_FLAGS.showScratchOff, false);
     assert.equal(DEMO_FLAGS.showTicketPhotoImport, false);
-    assert.equal(DEMO_FLAGS.showStakeModels, false);
-    assert.equal(DEMO_FLAGS.showClusterHelper, false);
-    assert.equal(DEMO_FLAGS.showModelEv, false);
+    assert.equal("showScratchOff" in DEMO_FLAGS, false);
+    assert.equal("showStakeModels" in DEMO_FLAGS, false);
+    assert.equal("showClusterHelper" in DEMO_FLAGS, false);
+    assert.equal("showModelEv" in DEMO_FLAGS, false);
 });
 
 test("legal entity is NAV Analytics LLC at the Rochester address", () => {
