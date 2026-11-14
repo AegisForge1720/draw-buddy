@@ -7,7 +7,7 @@ Draw Buddy is not ready for the App Store or Google Play. This is what still has
 Code-complete for a screen recording of this preview:
 
 - [x] B2: no sportsbook, Lotto.com, courier, affiliate, or `ref=` links, and no buy-tickets control. `DEMO_FLAGS.showAffiliateLinks` stays false.
-- [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is off. Scratch-off odds, prizes-remaining, and the scanner are hidden. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
+- [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is deleted. Scratch-off odds, prizes-remaining, and the scanner are deleted. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
 - [x] D1, D2, D4, and D5 are in the footer. D7 and the price line sit on the plans screen. There is no trial, so D9 is not sent. The annual price is shown as $17 per year, not as a monthly breakdown.
 - [x] No leaderboard and no ticket purchase. Approved taglines on the page: “Track your play. Know your limits.” and “Lottery stats, not lottery tips.”
 
@@ -49,7 +49,7 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 - [ ] **Needs legal review.** Gate 0: Certificate of Publication for NAV Analytics LLC, or a NY attorney’s sign-off to proceed anyway.
 - [x] **Code-complete.** Seller name on the site is `LEGAL_ENTITY.name` (**NAV Analytics LLC**, 58 Owaissa Dr, Rochester, NY 14622). Do not rename it to Insert Coin Industries LLC until the DOS amendment is filed.
 - [x] **Code-complete on the site.** Lotto.com, DraftKings, FanDuel, and BetMGM links are removed. **Needs a person** to confirm the same for store listings and social profiles.
-- [x] **Code-complete for the live-odds claim.** Scratch-off figures stay labeled sample data. The count legend says High / Mid / Low. The footer uses the spec’s D1–D5 wording. **Needs legal review** before anyone calls the copy final.
+- [x] **Code-complete for the live-odds claim.** Scratch-off figures are deleted. The count legend says High / Mid / Low. The footer uses the spec’s D1–D5 wording. **Needs legal review** before anyone calls the copy final.
 
 ### 5.2 Privacy notice
 

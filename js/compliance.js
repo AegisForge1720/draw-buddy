@@ -245,16 +245,48 @@ function openChoices() {
     showBanner({ manage: true, reopen: true });
 }
 
+const PRE_AGE_TRACKING_NOTE = "Optional tracking is off. Nothing optional loads before the age check.";
+
+function sessionAgeBlocked() {
+    try {
+        return sessionStorage.getItem("draw_buddy_age_block") === "1";
+    } catch {
+        return false;
+    }
+}
+
+function optionalTrackingAllowed() {
+    return Boolean(readAgePass(browserStorage())) && !sessionAgeBlocked();
+}
+
+function showPreAgeTrackingNote() {
+    const footerStatus = document.getElementById("privacy-choice-status");
+    if (footerStatus) footerStatus.textContent = PRE_AGE_TRACKING_NOTE;
+    document.querySelectorAll("[data-privacy-action='opt-out'], [data-privacy-action='choices']").forEach((node) => {
+        node.textContent = PRE_AGE_TRACKING_NOTE;
+    });
+    const banner = document.getElementById("consent-banner");
+    if (banner) banner.hidden = true;
+}
+
 function wireFooter() {
     document.querySelectorAll("[data-privacy-action='opt-out']").forEach((node) => {
         node.addEventListener("click", (event) => {
             event.preventDefault();
+            if (!optionalTrackingAllowed()) {
+                showPreAgeTrackingNote();
+                return;
+            }
             optOutNow();
         });
     });
     document.querySelectorAll("[data-privacy-action='choices']").forEach((node) => {
         node.addEventListener("click", (event) => {
             event.preventDefault();
+            if (!optionalTrackingAllowed()) {
+                showPreAgeTrackingNote();
+                return;
+            }
             openChoices();
         });
     });
@@ -407,24 +439,22 @@ export function startSiteGate({ onAccessGranted, ungated = false } = {}) {
         if (gate) gate.hidden = true;
         if (legal) legal.hidden = false;
         document.documentElement.classList.add("age-cleared");
-        maybeRecordGpc();
-        applyPixels();
-        const active = readActiveConsent(browserStorage());
-        if (!active) showBanner();
-        else if (readGpc()) {
-            const footerStatus = document.getElementById("privacy-choice-status");
-            if (footerStatus) footerStatus.textContent = statusMessage(active);
+        if (optionalTrackingAllowed()) {
+            maybeRecordGpc();
+            applyPixels();
+            const active = readActiveConsent(browserStorage());
+            if (!active) showBanner();
+            else if (readGpc()) {
+                const footerStatus = document.getElementById("privacy-choice-status");
+                if (footerStatus) footerStatus.textContent = statusMessage(active);
+            }
+        } else {
+            showPreAgeTrackingNote();
         }
         return;
     }
 
-    let sessionBlocked = false;
-    try {
-        sessionBlocked = sessionStorage.getItem("draw_buddy_age_block") === "1";
-    } catch {
-        sessionBlocked = false;
-    }
-    if (sessionBlocked) {
+    if (sessionAgeBlocked()) {
         if (shell) shell.inert = true;
         if (legal) legal.hidden = true;
         document.documentElement.classList.remove("age-cleared");

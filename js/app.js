@@ -201,6 +201,7 @@ function syncSubscribeButtons() {
 }
 
 function manageSubscription() {
+    // TODO: The cancel link must be chosen by platform once billing is connected.
     if (isSubscribed() && STORE_SUBSCRIPTION_URLS.apple) {
         window.open(STORE_SUBSCRIPTION_URLS.apple, "_blank", "noopener");
         return;
@@ -837,7 +838,7 @@ function exportHistoryCsv() {
     const nowISO = new Date().toISOString();
     const dateOnly = nowISO.split("T")[0];
     const csvRows = [[
-        "Timestamp_ISO", "Date", "Game_Engine", "Draw_Range", "Spot_or_Type", "Games_Count", "Logged_Cost", "Difference", "Hit_Status"
+        "Timestamp_ISO", "Date", "Game_Engine", "Draw_Range", "Spot_or_Type", "Games_Count", "Logged_Cost", "Hit_Status"
     ].join(",")];
     state.sessionTickets.forEach((ticket) => {
         const cost = parseFloat(ticket.wager || 0).toFixed(2);
@@ -853,7 +854,6 @@ function exportHistoryCsv() {
             `"${ticket.spot}-Spot"`,
             gamesCount,
             cost,
-            "",
             `"${ticket.hits || ""}"`
         ].join(","));
     });
