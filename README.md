@@ -1,6 +1,6 @@
 # Draw Buddy
 
-Draw Buddy is a downloadable consumer app for exploring lottery draw statistics. It covers NY Quick Draw, Powerball, and Mega Millions, with number synthesis, a count heatmap, a manual scratch-off log, and a personal play history stored on the device.
+Draw Buddy is a downloadable consumer app for exploring lottery draw statistics. It covers NY Quick Draw, Powerball, and Mega Millions, with random or stats-based number picks, a count heatmap when a source time is available, and a personal play history stored on the device.
 
 The preview is a static site (`index.html`, vanilla JavaScript modules, a built Tailwind stylesheet, and Supabase reads). GitHub Pages can publish this folder as-is. A Capacitor config is included so the same files can later be wrapped for iOS and Android.
 
@@ -50,7 +50,7 @@ Then open `http://localhost:4173`. The first screen asks for a date of birth. Pl
 npm test
 ```
 
-That runs the Node test runner against the plan math, the entitlement gate, the Quick Draw odds model, and ticket grading. Browser checks that still need a person or a script: age gate, game switcher, number synthesis, history, a graded slip, both plan prices, the hidden debug switch, and the draft legal pages.
+That runs the Node test runner against the plan math, the entitlement gate, the Quick Draw odds model, ticket grading, and the billing-notice hooks. Browser checks that still need a person or a script: age gate, game switcher, number picks, history, both plan prices, the agreement checkbox, and the draft legal pages.
 
 ## Build
 

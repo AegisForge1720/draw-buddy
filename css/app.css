@@ -196,7 +196,9 @@ html.age-cleared #age-gate {
     border-radius: 0.5rem;
 }
 
-#age-dob-continue:disabled {
+#age-dob-continue:disabled,
+#checkout-monthly:disabled,
+#checkout-annual:disabled {
     background: #334155;
     color: #e2e8f0;
 }

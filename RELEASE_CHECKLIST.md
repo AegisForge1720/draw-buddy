@@ -101,7 +101,7 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 
 - [ ] Write the store title, subtitle, description, and keywords without claiming official lottery results, guaranteed returns, or a state-database check.
 - [ ] Replace `icons/` (these are placeholders) and capture phone screenshots on iOS and Android.
-- [ ] Decide whether the outbound links (Lotto.com, jukeboxes, sportsbooks) are allowed in the store listing. They are labeled as external sites and are not a partnership.
+- [x] Store-listing text in this repo does not include DraftKings, FanDuel, BetMGM, or Lotto.com links or promo codes. Keep them out of the live listing too.
 - [ ] Fill in privacy nutrition labels. The preview stores the age confirmation and play history in `localStorage`. It does not create an account.
 - [ ] There is no account yet, so account deletion does not apply. Revisit this if accounts are added.
 

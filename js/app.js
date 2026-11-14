@@ -7,6 +7,18 @@ import {
 } from "./config.js";
 import { readAgePass } from "./age.js";
 import { startSiteGate } from "./compliance.js";
+import {
+    BILLING_NOTICES,
+    D3,
+    D7,
+    RESULT_SOURCES,
+    STORE_SUBSCRIPTION_URLS,
+    annualRenewalNoticeDue,
+    d6Line,
+    formatAsOfEt,
+    officialResultsStamp,
+    trialEndingReminderDue
+} from "./notices.js";
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
 import { gradeTickets } from "./grading.js";
 import {
@@ -85,6 +97,7 @@ const state = {
     scratchGameRotationIndex: 0,
     lastGeneratedNumbers: [],
     latestFetchedDraw: null,
+    resultsLabeled: false,
     countdownSeconds: 240,
     dataMode: "loading",
     fetchToken: 0,
@@ -172,18 +185,48 @@ function scrollToPlans() {
 }
 
 function renderPlanCopy() {
-    const saved = annualSavings();
-    const monthlyYear = PLAN_MONTHLY_PRICE * 12;
-    const pct = monthlyYear > 0 ? Math.round((saved / monthlyYear) * 100) : 0;
-    $("plan-monthly-price").textContent = `${formatPlanMoney(PLAN_MONTHLY_PRICE)} / mo`;
-    $("plan-annual-price").textContent = `${formatPlanMoney(PLAN_ANNUAL_PRICE)} / yr`;
-    $("plan-annual-savings").textContent = `Save ${formatPlanMoney(saved)} a year vs monthly (${pct}% off)`;
+    $("plan-monthly-price").textContent = `${formatPlanMoney(PLAN_MONTHLY_PRICE)} / month`;
+    $("plan-annual-price").textContent = `${formatPlanMoney(PLAN_ANNUAL_PRICE)} / year`;
+    const savingsEl = $("plan-annual-savings");
+    if (savingsEl) savingsEl.textContent = "Billed once a year.";
+    const disclosure = $("paywall-disclosure");
+    if (disclosure && !disclosure.dataset.filled) {
+        disclosure.dataset.filled = "1";
+    }
+    if ($("paywall-disclosure-text")) $("paywall-disclosure-text").textContent = D7;
 }
 
 function explainCheckout() {
+    const agreed = $("renewal-agree") && $("renewal-agree").checked;
     const note = $("checkout-note");
-    note.textContent = "Nothing was charged. App Store and Google Play billing is not connected, so this preview cannot sell a subscription or unlock features.";
-    note.focus();
+    if (!agreed) {
+        if (note) note.textContent = "Check the agreement box before subscribe. Nothing was charged.";
+        return;
+    }
+    if (note) {
+        note.textContent = "Nothing was charged. App Store and Google Play billing is not connected, so this preview cannot sell a subscription or unlock features.";
+        note.focus();
+    }
+}
+
+function syncSubscribeButtons() {
+    const agreed = Boolean($("renewal-agree") && $("renewal-agree").checked);
+    ["checkout-monthly", "checkout-annual"].forEach((id) => {
+        const button = $(id);
+        if (button) button.disabled = !agreed;
+    });
+}
+
+function manageSubscription() {
+    const destination = STORE_SUBSCRIPTION_URLS.apple || STORE_SUBSCRIPTION_URLS.google;
+    if (destination) {
+        window.open(destination, "_blank", "noopener");
+        return;
+    }
+    showDialog(
+        "Manage or cancel",
+        "Billing is not connected, so this Account screen cannot open a store subscription page. When a subscription exists, cancel it in Settings > your name > Subscriptions, or in Google Play > Payments & subscriptions > Subscriptions, or from Draw Buddy's Account screen."
+    );
 }
 
 function setSyncStatus(label, mode) {
@@ -210,23 +253,44 @@ function setDataBanner(message, tone) {
 function updateHistoryNote() {
     const note = $("history-data-note");
     if (!note) return;
-    const source = state.dataMode === "live"
-        ? "Loaded draws come from the configured database and are not marked as an official feed."
-        : "The draws in use are sample draws generated on this device.";
-    note.textContent = `This is your own saved list. It is not a leaderboard. ${source}`;
+    note.textContent = "This is your own saved list. It is not a leaderboard.";
+}
+
+function updateResultsDisclosure() {
+    const newest = state.cachedDraws[0];
+    const stamp = state.dataMode === "live" ? officialResultsStamp(newest) : null;
+    const source = RESULT_SOURCES[state.activeGameKey];
+    state.resultsLabeled = Boolean(stamp && source);
+    const line = state.resultsLabeled ? d6Line(source, formatAsOfEt(stamp)) : "";
+    ["results-source", "history-source"].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.hidden = !state.resultsLabeled;
+        el.textContent = line;
+    });
+    const results = $("heatmap-results");
+    const hiddenNote = $("results-hidden-note");
+    if (results) results.hidden = !state.resultsLabeled;
+    if (hiddenNote) {
+        hiddenNote.hidden = state.resultsLabeled;
+        hiddenNote.textContent = state.resultsLabeled
+            ? ""
+            : "Draw results are hidden. These rows have no source time.";
+    }
+    updateNextDrawLabel();
+    updateLedgerUI();
 }
 
 function updateNextDrawLabel() {
     const el = $("header-next-draw");
-    if (!el || !state.latestFetchedDraw) return;
-    const next = state.latestFetchedDraw + 1;
-    if (state.dataMode === "live") {
-        el.textContent = `#${next}`;
-        el.title = "One higher than the newest loaded row. Not an official draw schedule.";
-    } else {
-        el.textContent = `#${next} sample`;
-        el.title = "Sample counter. Not an official draw number.";
+    if (!el) return;
+    if (!state.resultsLabeled || !state.latestFetchedDraw) {
+        el.textContent = "Hidden";
+        el.title = "Hidden until the loaded rows have a source and an as-of time.";
+        return;
     }
+    el.textContent = `#${state.latestFetchedDraw + 1}`;
+    el.title = "One higher than the newest loaded row.";
 }
 
 function formatSignedMoney(amount) {
@@ -378,9 +442,9 @@ function useSampleDraws(mode, message) {
     state.dataMode = mode;
     setSyncStatus(mode === "offline" ? "Offline" : "Sample", mode);
     setDataBanner(message, "warn");
-    updateNextDrawLabel();
     gradePendingTickets();
     renderHeatmap();
+    updateResultsDisclosure();
     updateHistoryNote();
     updateOptimizedRoiBadge();
 }
@@ -408,17 +472,19 @@ async function fetchGameHistoryFromSupabase() {
             handleOffline();
             return;
         }
-        useSampleDraws("offline", "You are offline. Showing sample draws generated on this device, not results from the database.");
+        useSampleDraws("offline", "You are offline. Draw results are hidden because these rows have no source time.");
         return;
     }
 
     state.cachedDraws = [];
     state.dataMode = "loading";
+    state.resultsLabeled = false;
     setSyncStatus("Loading", "loading");
     setDataBanner("Loading draws…", "calm");
     renderHeatmap();
+    updateResultsDisclosure();
     if (!isBrowserSafeSupabaseKey(SUPABASE_PUBLISHABLE_KEY)) {
-        useSampleDraws("error", "The database key in the config is missing or is not a publishable key. Showing sample draws.");
+        useSampleDraws("error", "The database key is not configured for the browser. Draw results are hidden.");
         return;
     }
 
@@ -432,8 +498,8 @@ async function fetchGameHistoryFromSupabase() {
         if (token !== state.fetchToken || gameKey !== state.activeGameKey) return;
         if (error || !data || data.length === 0) {
             const reason = error
-                ? "Draw history did not load. Showing sample draws generated on this device."
-                : "No rows came back for this game. Showing sample draws generated on this device.";
+                ? "Draw history did not load. Draw results are hidden."
+                : "No rows came back for this game. Draw results are hidden.";
             useSampleDraws("error", reason);
             return;
         }
@@ -441,16 +507,21 @@ async function fetchGameHistoryFromSupabase() {
         state.dataMode = "live";
         state.latestFetchedDraw = parseInt(data[0].draw_number, 10);
         setSyncStatus("Loaded", "live");
-        setDataBanner("Draws loaded from the configured database. They are not marked as an official feed.", "calm");
-        updateNextDrawLabel();
         gradePendingTickets();
         renderHeatmap();
+        updateResultsDisclosure();
+        setDataBanner(
+            state.resultsLabeled
+                ? "Draw results are labeled with their source and time."
+                : "Draw results are hidden. These rows have no source time.",
+            state.resultsLabeled ? "calm" : "warn"
+        );
         updateHistoryNote();
         updateOptimizedRoiBadge();
     } catch {
         if (token !== state.fetchToken) return;
         state.supabaseClient = null;
-        useSampleDraws("error", "Draw history did not load. Showing sample draws generated on this device.");
+        useSampleDraws("error", "Draw history did not load. Draw results are hidden.");
     }
 }
 
@@ -923,20 +994,30 @@ function generateTicket(customReason) {
     const costPerGame = getGameCost();
     const totalSlipCost = costPerGame * totalBlockSize;
     const sliceData = state.cachedDraws.slice(0, lookback);
-    const scores = {};
-    for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
-    sliceData.forEach((draw, idx) => {
-        const recencyWeight = 1 + ((lookback - idx) / lookback) * 0.35;
-        (draw.winning_numbers || []).forEach((number) => {
-            const value = Number(number);
-            if (scores[value] !== undefined) scores[value] += recencyWeight;
+    let ticket;
+    if (!state.resultsLabeled) {
+        ticket = [];
+        while (ticket.length < spotTier) {
+            const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
+            if (!ticket.includes(value)) ticket.push(value);
+        }
+        ticket.sort((a, b) => a - b);
+    } else {
+        const scores = {};
+        for (let i = 1; i <= cfg.totalNumbers; i++) scores[i] = 0;
+        sliceData.forEach((draw, idx) => {
+            const recencyWeight = 1 + ((lookback - idx) / lookback) * 0.35;
+            (draw.winning_numbers || []).forEach((number) => {
+                const value = Number(number);
+                if (scores[value] !== undefined) scores[value] += recencyWeight;
+            });
         });
-    });
-    const ticket = Object.keys(scores)
-        .sort((a, b) => scores[b] - scores[a])
-        .map(Number)
-        .slice(0, spotTier)
-        .sort((a, b) => a - b);
+        ticket = Object.keys(scores)
+            .sort((a, b) => scores[b] - scores[a])
+            .map(Number)
+            .slice(0, spotTier)
+            .sort((a, b) => a - b);
+    }
     state.lastGeneratedNumbers = [...ticket];
 
     let bonusBall = null;
@@ -946,18 +1027,19 @@ function generateTicket(customReason) {
     const endDraw = startDraw + totalBlockSize - 1;
     const drawLabel = $("card-draw-label");
     if (drawLabel) {
-        const prefix = state.dataMode === "live" ? "" : "Sample ";
-        drawLabel.textContent = totalBlockSize > 1
-            ? `${prefix}draws #${startDraw} – #${endDraw} (${totalBlockSize} games)`
-            : `${prefix}target draw #${startDraw}`;
+        drawLabel.textContent = state.resultsLabeled
+            ? (totalBlockSize > 1
+                ? `Draws #${startDraw} – #${endDraw} (${totalBlockSize} games)`
+                : `Draw #${startDraw}`)
+            : "Not tied to a published draw";
     }
     const reasonEl = $("card-algorithm-reason");
     if (reasonEl) {
-        const bonusNote = cfg.hasBonus ? ` ${cfg.bonusName} is random, not modeled.` : "";
-        const sourceNote = state.dataMode === "live" ? "" : " Built from sample draws.";
-        reasonEl.textContent = customReason
-            ? `${customReason}${bonusNote}`
-            : `Stats-based pick from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}${sourceNote}`;
+        const bonusNote = cfg.hasBonus ? ` ${cfg.bonusName} is chosen at random.` : "";
+        reasonEl.textContent = state.resultsLabeled
+            ? `Stats-based number picks from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}`
+            : `Random number picks.${bonusNote}`;
+        if (customReason && state.resultsLabeled) reasonEl.textContent = `${customReason}${bonusNote}`;
     }
 
     $("slip-spot-box").textContent = `${spotTier}-SPOT`;
@@ -1037,10 +1119,10 @@ function updateLedgerUI() {
     });
     const net = totalPayout - totalWager;
     $("archive-total-wager").textContent = `$${totalWager.toFixed(2)}`;
-    $("archive-total-payout").textContent = `$${totalPayout.toFixed(2)}`;
+    $("archive-total-payout").textContent = state.resultsLabeled ? `$${totalPayout.toFixed(2)}` : "—";
     const netEl = $("archive-net-pnl");
-    netEl.textContent = formatSignedMoney(net);
-    netEl.className = `font-mono font-bold text-xs ${net >= 0 ? "text-cyan-300" : "text-rose-300"}`;
+    netEl.textContent = state.resultsLabeled ? formatSignedMoney(net) : "—";
+    netEl.className = `font-mono font-bold text-xs ${state.resultsLabeled && net >= 0 ? "text-cyan-300" : "text-slate-200"}`;
 
     const body = $("ledger-body");
     body.replaceChildren();
@@ -1061,7 +1143,9 @@ function updateLedgerUI() {
         const ticketNet = (parseFloat(ticket.payout) || 0) - (parseFloat(ticket.wager) || 0);
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
-        [drawLabel, `${ticket.spot}-Spot`, ticket.hits || "Pending", formatSignedMoney(ticketNet)].forEach((text, idx) => {
+        const progress = state.resultsLabeled ? (ticket.hits || "Pending") : "Hidden";
+        const difference = state.resultsLabeled ? formatSignedMoney(ticketNet) : "—";
+        [drawLabel, `${ticket.spot}-Spot`, progress, difference].forEach((text, idx) => {
             const cell = document.createElement("td");
             cell.className = idx === 3
                 ? `py-2 text-right font-mono ${ticketNet >= 0 ? "text-emerald-300" : "text-rose-300"}`
@@ -1182,7 +1266,20 @@ function bindUi() {
     $("dev-tier-switcher").addEventListener("change", (event) => switchTestTier(event.target.value));
     $("cluster-button").addEventListener("click", autoOptimizeByLiveCluster);
     $("markov-button").addEventListener("click", autoOptimizeByMarkovKelly);
-    $("synthesize-button").addEventListener("click", () => generateTicket());
+    $("picks-button").addEventListener("click", () => generateTicket());
+    const agreement = $("renewal-agree");
+    if (agreement) agreement.addEventListener("change", syncSubscribeButtons);
+    syncSubscribeButtons();
+    const manage = $("manage-subscription");
+    if (manage) manage.addEventListener("click", manageSubscription);
+    const noticeStatus = $("notice-hooks");
+    if (noticeStatus) {
+        const trialDue = trialEndingReminderDue(7);
+        const annualDue = annualRenewalNoticeDue(30);
+        noticeStatus.textContent = trialDue || annualDue
+            ? "A billing notice is due."
+            : "Trial-ending and annual renewal notices are not sent. Billing is not connected.";
+    }
     $("save-slip-button").addEventListener("click", saveTicketLocally);
     $("ticket-import-button").addEventListener("click", explainTicketImport);
     $("scratch-rotate").addEventListener("click", rotateScratchGame);
