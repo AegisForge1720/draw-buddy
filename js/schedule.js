@@ -8,7 +8,7 @@
 // previous day), so draw_date plus draw_time is not a safe instant. A missing
 // draw_at is no time: the number and Last updated stay a dash, and the
 // countdown remains. If the newest official time is behind the latest
-// scheduled slot, the label is "Next draw # (est.)". A listed draw uses
+// scheduled slot, the label is "Est. draw #". A listed draw uses
 // draw_date. When that day differs from the ET calendar date of draw_at, the
 // label adds the real time, as in "Nov 13 draw day (3:24 AM Nov 14 ET)".
 // Powerball and Mega Millions never use draw_number as a display id. Their
@@ -314,7 +314,7 @@ export function nextDrawForDisplay(projection, history) {
 }
 
 export function quickDrawNumberLabel(reason) {
-    return reason === "projected" ? "Next draw # (est.)" : "Next draw #";
+    return reason === "projected" ? "Est. draw #" : "Next draw #";
 }
 
 function anchorFromRow(game, row) {

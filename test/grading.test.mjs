@@ -23,7 +23,7 @@ test("a matching Quick Draw pick counts hits and does not store a payout", () =>
     }];
     assert.equal(gradeTickets(tickets, draws), true);
     assert.equal(tickets[0].payout, 0);
-    assert.equal(tickets[0].hits, "Matched 4/4");
+    assert.equal(tickets[0].hits, "Done · Matched 4/4");
     assert.equal(gradeTickets(tickets, draws), false);
 });
 
@@ -72,7 +72,7 @@ test("a draw without a stored timestamp is not used to grade", () => {
     assert.equal(tickets[0].hits, "Pending");
 });
 
-test("non-Quick Draw picks are not graded", () => {
+test("Powerball picks without saved draw dates are not tracked and get no payout", () => {
     const tickets = [{
         draw: 8,
         games: 1,
@@ -84,11 +84,11 @@ test("non-Quick Draw picks are not graded", () => {
     }];
     assert.equal(gradeTickets(tickets, [{
         draw_number: 8,
-        draw_at: stamp,
+        draw_date: "2026-11-11",
         winning_numbers: [1, 2, 3, 4, 5]
-    }]), true);
+    }], "powerball"), true);
     assert.equal(tickets[0].payout, 0);
-    assert.equal(tickets[0].hits, "Not graded");
+    assert.equal(tickets[0].hits, "Not tracked (no draw dates saved)");
 });
 
 test("a block stays partial until each stored draw in the range is loaded", () => {
@@ -101,6 +101,6 @@ test("a block stays partial until each stored draw in the range is loaded", () =
         payout: 0
     }];
     gradeTickets(tickets, [{ draw_number: 20, draw_at: stamp, winning_numbers: [7] }]);
-    assert.match(tickets[0].hits, /^Matched 1\/2 games/);
+    assert.match(tickets[0].hits, /^1 of 2 draws checked · Best 1\/1/);
     assert.equal(tickets[0].payout, 0);
 });

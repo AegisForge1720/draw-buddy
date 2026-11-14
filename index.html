@@ -132,13 +132,41 @@
                         <label for="game-block" class="block text-xs text-blue-200 mb-1">Consecutive games</label>
                         <select id="game-block" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-yellow-200">
                             <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-                            <option value="4">4</option><option value="5" selected>5</option><option value="10">10</option>
+                            <option value="4">4</option><option value="5" selected>5</option><option value="10">10</option><option value="20">20</option>
                         </select>
                     </div>
                     <div>
-                        <span id="cost-label" class="block text-xs text-blue-200 mb-1">Logged cost</span>
+                        <span id="cost-label" class="block text-xs text-blue-200 mb-1">You logged spending</span>
                         <div id="calc-cost-display" aria-labelledby="cost-label" aria-live="polite" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-emerald-300 flex items-center justify-center font-mono min-h-[42px]">$5.00</div>
                     </div>
+                </div>
+
+                <p class="text-[11px] text-slate-200 responsible-line">18+ only. Gambling problem? Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+
+                <div id="start-at-box" class="space-y-2">
+                    <div id="start-qd-box" class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="start-mode" class="block text-xs text-blue-200 mb-1">Start at</label>
+                            <select id="start-mode" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                                <option value="next" selected>Next draw</option>
+                                <option value="offset">A later draw</option>
+                                <option value="time">A set time (ET)</option>
+                            </select>
+                        </div>
+                        <div id="start-offset-box" hidden>
+                            <label for="start-offset" class="block text-xs text-blue-200 mb-1">Upcoming draw (1 = next)</label>
+                            <input id="start-offset" type="number" inputmode="numeric" min="1" max="2500" step="1" value="10" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                        </div>
+                        <div id="start-time-box" hidden>
+                            <label for="start-time" class="block text-xs text-blue-200 mb-1">Start time (ET)</label>
+                            <input id="start-time" type="datetime-local" step="240" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                        </div>
+                    </div>
+                    <div id="start-weekly-box" hidden>
+                        <label for="start-date" class="block text-xs text-blue-200 mb-1">Start at</label>
+                        <select id="start-date" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200"></select>
+                    </div>
+                    <p id="start-at-note" class="text-[11px] text-slate-300">Start times use the official draw schedule. Quick Draw runs every 4 minutes, with no draws from 3:25 AM to 4:04 AM ET.</p>
                 </div>
 
                 <button type="button" id="picks-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-3 px-4 rounded-xl min-h-[44px] text-sm">Make random or stats-based number picks</button>
@@ -156,7 +184,7 @@
                         <p id="card-algorithm-reason" class="text-[11px] text-cyan-200 font-medium mt-0.5">…</p>
                     </div>
                     <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
-                        <div class="text-[10px] uppercase tracking-wider text-blue-200 font-bold">Total</div>
+                        <div class="text-[10px] uppercase tracking-wider text-blue-200 font-bold">You logged spending</div>
                         <div id="card-total-slip-cost" class="text-base font-mono font-black text-emerald-300">$5.00</div>
                     </div>
                 </div>
@@ -188,7 +216,16 @@
                     <div id="number-grid" class="flex flex-wrap gap-2.5 py-1"></div>
                 </div>
 
-                <button type="button" id="save-slip-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-4 rounded-lg min-h-[44px] text-xs">Save these picks on this device</button>
+                <div id="slip-plan" class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-1 text-xs text-blue-100">
+                    <div class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">Planned slip</div>
+                    <p id="slip-plan-start">Starts —</p>
+                    <p id="slip-plan-end">Ends —</p>
+                    <p id="slip-plan-cost" class="font-mono text-emerald-300">—</p>
+                    <p class="text-[11px] text-slate-200">Draw Buddy doesn't sell lottery tickets or accept wagers. Not affiliated with any lottery.</p>
+                    <p class="text-[11px] text-slate-200 responsible-line">18+ only. Gambling problem? Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+                </div>
+
+                <button type="button" id="save-slip-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-4 rounded-lg min-h-[44px] text-xs">Save and track these draws on this device</button>
                 <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
 
                 <div id="ticket-import-box" hidden class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
@@ -199,6 +236,65 @@
                     <button type="button" id="ticket-import-button" class="w-full bg-cyan-800 text-white font-bold py-2 px-3 rounded text-xs min-h-[44px]">Import a ticket photo</button>
                     <p class="text-[11px] text-slate-300 text-center">Photos are not read. Nothing is checked against a state database.</p>
                 </div>
+            </section>
+
+            <section id="own-numbers-section" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="own-numbers-heading">
+                <h2 id="own-numbers-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Check my own numbers</h2>
+                <p id="own-rules" class="text-xs text-slate-200">Enter 1 to 10 numbers from 1 to 80.</p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="own-numbers" class="block text-xs text-blue-200 mb-1">Your numbers</label>
+                        <input id="own-numbers" type="text" inputmode="numeric" autocomplete="off" placeholder="e.g. 5 12 33 41" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                    </div>
+                    <div id="own-bonus-box" hidden>
+                        <label id="own-bonus-label" for="own-bonus" class="block text-xs text-blue-200 mb-1">Powerball</label>
+                        <input id="own-bonus" type="text" inputmode="numeric" autocomplete="off" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                    </div>
+                </div>
+                <p id="own-error" role="alert" hidden class="text-xs text-rose-200"></p>
+                <p class="text-[11px] text-slate-300">Tracking uses the Start at and Consecutive games settings above.</p>
+                <div id="own-plan" class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-1 text-xs text-blue-100">
+                    <p id="own-plan-start">Starts —</p>
+                    <p id="own-plan-end">Ends —</p>
+                    <p id="own-plan-cost" class="font-mono text-emerald-300">—</p>
+                    <p class="text-[11px] text-slate-200">Draw Buddy doesn't sell lottery tickets or accept wagers. Not affiliated with any lottery.</p>
+                    <p class="text-[11px] text-slate-200 responsible-line">18+ only. Gambling problem? Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+                </div>
+                <button type="button" id="own-track-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-4 rounded-lg min-h-[44px] text-xs">Track for upcoming draws</button>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="own-lookback" class="block text-xs text-blue-200 mb-1">Past draws to check</label>
+                        <select id="own-lookback" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-base font-bold text-cyan-200">
+                            <option value="20">20</option>
+                            <option value="50" selected>50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center pt-1">
+                        <button type="button" id="own-check-button" class="w-full bg-cyan-800 text-white font-bold py-2 px-3 rounded-lg text-xs min-h-[44px]">Check against past draws</button>
+                    </div>
+                </div>
+                <div id="own-results" hidden class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2 text-xs text-blue-100">
+                    <p class="text-[11px] text-slate-200">Past results don't predict future draws.</p>
+                    <p id="own-results-summary"></p>
+                    <p id="own-results-best" class="text-cyan-200"></p>
+                    <p id="own-results-atleast"></p>
+                    <div class="overflow-x-auto max-h-60 overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="sticky top-0 bg-[#050814]">
+                                <tr class="text-blue-200 border-b border-[#1d4ed8]">
+                                    <th scope="col" class="pb-2 font-semibold">Draw</th>
+                                    <th scope="col" class="pb-2 font-semibold">Matched</th>
+                                    <th scope="col" class="pb-2 font-semibold">Numbers</th>
+                                </tr>
+                            </thead>
+                            <tbody id="own-results-body"></tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-slate-200 responsible-line">18+ only. Gambling problem? Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+                </div>
+                <p class="text-xs text-slate-200">Results come only from the stored draws loaded on this page. Draw Buddy shows match counts, not prizes. Check official NY Lottery results before claiming anything.</p>
+                <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
             </section>
 
             <section class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="heatmap-title">
@@ -395,9 +491,10 @@
                 <p id="history-data-note" class="text-xs text-slate-300">This is your own saved list. It is not a leaderboard.</p>
                 <p id="history-source" hidden class="text-xs text-slate-200"></p>
                 <div class="bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8] text-center">
-                    <div class="text-[10px] uppercase text-blue-200">Logged cost</div>
-                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
+                    <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">You logged spending $0.00</div>
+                    <p class="text-[11px] text-slate-200 responsible-line">18+ only. Gambling problem? Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
                 </div>
+                <p class="text-[11px] text-slate-200">Past results don't predict future draws.</p>
                 <div class="overflow-x-auto max-h-60 overflow-y-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="sticky top-0 bg-[#0b132b]">

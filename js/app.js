@@ -18,7 +18,18 @@ import {
     trialEndingReminderDue
 } from "./notices.js";
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
-import { gradeTickets } from "./grading.js";
+import { BONUS_SHORT, gradeTickets, ticketAnchorMs, ticketPending } from "./grading.js";
+import {
+    NUMBER_RULES,
+    MAX_QUICK_DRAW_START_DAYS,
+    checkPastDraws,
+    etDateKey,
+    etLocalValue,
+    planQuickDrawSlip,
+    planWeeklySlip,
+    validateOwnNumbers,
+    weeklyStartChoices
+} from "./tickets.js";
 import { expectedOneStepRepeatRate, oneStepRepeatRate } from "./odds.js";
 import {
     DATA_UNAVAILABLE,
@@ -26,11 +37,11 @@ import {
     formatDrawListing,
     formatScheduledDraw,
     historyStatus,
+    nextQuickDrawSlotAfter,
     officialDrawInstant,
     nextDrawForDisplay,
     projectNextDraw,
-    quickDrawNumberLabel,
-    upcomingWeeklyDraws
+    quickDrawNumberLabel
 } from "./schedule.js";
 import {
     PREMIUM_COMING_SOON,
@@ -85,7 +96,7 @@ const GAME_CONFIGS = {
         shortName: "Mega Millions",
         totalNumbers: 70,
         drawnCount: 5,
-        bonusTotal: 25,
+        bonusTotal: 24, // Mega Ball 1-24 from the April 8, 2025 drawing (megamillions.com, nylottery.ny.gov, 9 NYCRR 5015.2).
         maxSpot: 5,
         hasBonus: true,
         bonusName: "Mega Ball",
@@ -100,6 +111,8 @@ const state = {
     cachedDraws: [],
     sessionTickets: [],
     lastGeneratedNumbers: [],
+    lastGeneratedBonus: null,
+    gradingFetchedAt: {},
     latestFetchedDraw: null,
     resultsLabeled: false,
     historyAvailable: false,
@@ -374,12 +387,12 @@ function renderDrawSchedule(now = new Date()) {
     if (resultsUpdated) resultsUpdated.textContent = updated;
     const cardLabel = $("card-draw-label");
     if (cardLabel && state.picksBlockSize && state.lastPicksGame === state.activeGameKey) {
-        if (weekly && projection.nextDrawTime) {
-            const draws = upcomingWeeklyDraws(state.activeGameKey, now, state.picksBlockSize);
+        const plan = currentSlipPlan(now);
+        if (weekly && plan.ok) {
             cardLabel.hidden = false;
-            cardLabel.textContent = weeklyDrawLabel(draws);
-        } else if (!weekly && projection.showNumber) {
-            const start = projection.nextDrawNumber;
+            cardLabel.textContent = weeklyDrawLabel(plan.slots);
+        } else if (!weekly && plan.ok && projection.showNumber) {
+            const start = projection.nextDrawNumber + plan.offsetFromNext;
             const games = state.picksBlockSize;
             const end = start + games - 1;
             cardLabel.hidden = false;
@@ -387,13 +400,16 @@ function renderDrawSchedule(now = new Date()) {
                 ? `#${start} – #${end} (${games} games)`
                 : `#${start}`;
             cardLabel.textContent = projection.reason === "projected"
-                ? `Next draw # (est.) ${range}`
+                ? `Est. draw # ${range}`
                 : (games > 1 ? `Draws ${range}` : `Draw ${range}`);
         } else {
-            cardLabel.hidden = true;
-            cardLabel.textContent = "";
+            cardLabel.hidden = !plan.ok;
+            cardLabel.textContent = plan.ok ? `Draws from ${formatScheduledDraw(plan.first)}` : "";
         }
     }
+    const slipPlan = currentSlipPlan(now);
+    renderSlipPlan("slip-plan", slipPlan, state.lastGeneratedNumbers.length || null);
+    renderSlipPlan("own-plan", slipPlan, ownSpotCount());
     return projection;
 }
 
@@ -593,13 +609,60 @@ function handleOffline() {
     }), { offline: true });
 }
 
-function gradePendingTickets() {
-    if (!(state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.historyAvailable)) return;
-    const draws = state.cachedDraws.filter((draw) => draw && draw.draw_at);
-    const updated = gradeTickets(state.sessionTickets, draws);
+function gradeWith(game, draws) {
+    if (!Array.isArray(draws) || draws.length === 0) return;
+    const updated = gradeTickets(state.sessionTickets, draws, game);
     if (updated) {
         saveHistoryArchive();
         updateLedgerUI();
+    }
+}
+
+function gradePendingTickets() {
+    if (state.dataMode !== "loaded" || state.fetchFailed) return;
+    if (DATA_VERIFIED[state.activeGameKey] !== true) return;
+    gradeWith(state.activeGameKey, state.cachedDraws);
+    refreshPendingGrades();
+}
+
+// Games with a saved slip whose first draw time has passed and is not fully checked.
+function gamesAwaitingResults(now = Date.now()) {
+    const games = new Set();
+    state.sessionTickets.forEach((ticket) => {
+        if (!ticketPending(ticket)) return;
+        const first = ticket.drawTime ? new Date(ticket.drawTime).getTime() : ticketAnchorMs(ticket);
+        if (first !== null && Number.isFinite(first) && first <= now) games.add(ticket.game || "quickdraw");
+    });
+    return [...games];
+}
+
+const GRADING_ROWS = { quickdraw: 1000, powerball: 100, megamillions: 100 };
+const GRADING_REFRESH_MS = 10 * 60 * 1000;
+
+// Reads the same public draw table as the page (no ticket data is sent) so a
+// saved slip is checked even when its draws are older than the 100 rows the
+// charts load. Quick Draw posts once a day, so a deeper read is needed.
+async function refreshPendingGrades() {
+    if (!readAgePass(localStorage) || !navigator.onLine) return;
+    if (!isBrowserSafeSupabaseKey(SUPABASE_PUBLISHABLE_KEY)) return;
+    const now = Date.now();
+    for (const game of gamesAwaitingResults(now)) {
+        if (DATA_VERIFIED[game] !== true) continue;
+        if (game !== "quickdraw" && game === state.activeGameKey) continue;
+        if (now - (state.gradingFetchedAt[game] || 0) < GRADING_REFRESH_MS) continue;
+        state.gradingFetchedAt[game] = now;
+        try {
+            const client = await getSupabaseClient();
+            const { data, error } = await client
+                .schema("public")
+                .from(publicDrawTable(game))
+                .select("*")
+                .order("draw_number", { ascending: false })
+                .limit(GRADING_ROWS[game]);
+            if (!error && Array.isArray(data)) gradeWith(game, data);
+        } catch {
+            /* Slips stay Pending until a later read works. */
+        }
     }
 }
 
@@ -920,8 +983,8 @@ async function switchGameProfile(gameKey) {
         (item) => `$${item.value}`
     );
 
-    const ledgerSec = $("quickdraw-ledger-section");
-    if (ledgerSec) ledgerSec.style.display = gameKey === "quickdraw" ? "block" : "none";
+    syncStartControls();
+    syncOwnNumberControls();
 
     startTimers();
     await fetchGameHistoryFromSupabase();
@@ -971,6 +1034,7 @@ function generateTicket(customReason) {
 
     let bonusBall = null;
     if (cfg.hasBonus) bonusBall = Math.floor(Math.random() * cfg.bonusTotal) + 1;
+    state.lastGeneratedBonus = bonusBall;
 
     state.picksBlockSize = totalBlockSize;
     state.lastPicksGame = state.activeGameKey;
@@ -1014,51 +1078,262 @@ function generateTicket(customReason) {
     $("play-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
-function saveTicketLocally() {
-    if (state.lastGeneratedNumbers.length === 0) {
-        showDialog("No picks yet", "Make number picks before saving them.");
+// Start at + Consecutive games, from the official schedule only.
+function readStartChoice() {
+    const mode = $("start-mode")?.value || "next";
+    if (mode === "offset") return { mode, offset: $("start-offset")?.value };
+    if (mode === "time") return { mode, at: $("start-time")?.value };
+    return { mode: "next" };
+}
+
+// The plan only changes when an input changes or the next draw slot moves,
+// so it is cached between the once-a-second header updates.
+let slipPlanCache = { key: "", plan: null };
+
+function currentSlipPlan(now = new Date()) {
+    const games = parseInt($("game-block")?.value, 10) || 1;
+    const start = readStartChoice();
+    const weekly = state.activeGameKey !== "quickdraw";
+    const startDate = weekly ? ($("start-date")?.value || "") : "";
+    const nextSlot = weekly ? "" : nextQuickDrawSlotAfter(now).getTime();
+    const key = JSON.stringify([state.activeGameKey, games, start, startDate, nextSlot, weekly ? Math.floor(now.getTime() / 60000) : 0]);
+    if (slipPlanCache.key === key) return slipPlanCache.plan;
+    const plan = weekly
+        ? planWeeklySlip({ game: state.activeGameKey, startDate, games, now })
+        : planQuickDrawSlip({ start, games, now });
+    slipPlanCache = { key, plan };
+    return plan;
+}
+
+function slipCostLine(games, spotCount) {
+    const perGame = getGameCost();
+    const total = perGame * games;
+    const spot = state.activeGameKey === "quickdraw" && spotCount ? `${spotCount}-spot, ` : "";
+    return `You logged spending $${total.toFixed(2)} (${spot}$${perGame.toFixed(2)}/game × ${games} ${games === 1 ? "game" : "games"})`;
+}
+
+function renderSlipPlan(prefix, plan, spotCount) {
+    const startEl = $(`${prefix}-start`);
+    const endEl = $(`${prefix}-end`);
+    const costEl = $(`${prefix}-cost`);
+    if (!startEl || !endEl || !costEl) return;
+    if (!plan.ok) {
+        startEl.textContent = plan.error;
+        endEl.textContent = "";
+        costEl.textContent = "";
         return;
     }
-    const projection = projectActiveDraw();
-    const weeklySave = state.activeGameKey !== "quickdraw";
-    const upcoming = weeklySave && projection.nextDrawTime
-        ? upcomingWeeklyDraws(state.activeGameKey, new Date(), parseInt($("game-block").value, 10) || 5)
-        : [];
-    const startDrawNum = !weeklySave && projection.showNumber ? projection.nextDrawNumber : null;
-    const spotTier = parseInt($("spot-tier").value, 10) || 4;
-    const baseWager = parseFloat($("base-wager").value) || 1;
-    const hasExtra = addOnSelected();
-    const numGames = parseInt($("game-block").value, 10) || 5;
-    const endDrawNum = startDrawNum === null ? null : startDrawNum + numGames - 1;
+    startEl.textContent = `Starts ${formatScheduledDraw(plan.first)}`;
+    endEl.textContent = plan.games > 1
+        ? `Ends ${formatScheduledDraw(plan.last)} (${plan.games} consecutive draws)`
+        : "1 draw";
+    costEl.textContent = slipCostLine(plan.games, spotCount);
+}
+
+function ownSpotCount() {
+    if (state.activeGameKey !== "quickdraw") return null;
+    const parsed = validateOwnNumbers("quickdraw", $("own-numbers")?.value || "");
+    return parsed.ok ? parsed.numbers.length : null;
+}
+
+function syncStartControls(now = new Date()) {
+    const weekly = state.activeGameKey !== "quickdraw";
+    const qdBox = $("start-qd-box");
+    const weeklyBox = $("start-weekly-box");
+    if (qdBox) qdBox.hidden = weekly;
+    if (weeklyBox) weeklyBox.hidden = !weekly;
+    const mode = $("start-mode")?.value || "next";
+    const offsetBox = $("start-offset-box");
+    const timeBox = $("start-time-box");
+    if (offsetBox) offsetBox.hidden = weekly || mode !== "offset";
+    if (timeBox) timeBox.hidden = weekly || mode !== "time";
+    const timeInput = $("start-time");
+    if (timeInput) {
+        timeInput.min = etLocalValue(now);
+        timeInput.max = etLocalValue(new Date(now.getTime() + MAX_QUICK_DRAW_START_DAYS * 86400000));
+        if (!timeInput.value) timeInput.value = etLocalValue(new Date(now.getTime() + 60 * 60 * 1000));
+    }
+    const dateSelect = $("start-date");
+    if (weekly && dateSelect) {
+        const selected = dateSelect.value;
+        const choices = weeklyStartChoices(state.activeGameKey, now).map((instant, idx) => ({
+            value: etDateKey(instant),
+            label: idx === 0 ? `Next draw: ${formatScheduledDraw(instant)}` : formatScheduledDraw(instant)
+        }));
+        fillSelect(dateSelect, choices, selected || (choices[0] && choices[0].value), (item) => item.label);
+    }
+}
+
+function syncOwnNumberControls() {
+    const rules = NUMBER_RULES[state.activeGameKey];
+    const bonusBox = $("own-bonus-box");
+    if (bonusBox) bonusBox.hidden = !rules.bonus;
+    if (rules.bonus) setText("own-bonus-label", `${rules.bonus.name} (${rules.bonus.min}–${rules.bonus.max})`);
+    setText("own-rules", rules.bonus
+        ? `Enter ${rules.minCount} numbers from ${rules.min} to ${rules.max}, plus your ${rules.bonus.name}.`
+        : `Enter ${rules.minCount} to ${rules.maxCount} numbers from ${rules.min} to ${rules.max}. The count is your spot.`);
+    const lookback = $("own-lookback");
+    if (lookback) {
+        const values = state.activeGameKey === "quickdraw" ? [20, 50, 100] : [50, 100];
+        fillSelect(lookback, values.map((value) => ({ value })), values.includes(Number(lookback.value)) ? lookback.value : values[values.length - 1], (item) => String(item.value));
+    }
+    const results = $("own-results");
+    if (results) results.hidden = true;
+    showOwnError("");
+}
+
+function showOwnError(message) {
+    const el = $("own-error");
+    if (!el) return;
+    el.textContent = message;
+    el.hidden = message === "";
+}
+
+// Builds a saved slip. Quick Draw stores the verified start number when the
+// header has one, and always stores anchorAt (first scheduled draw) so a slip
+// with no verified number is resolved from stored draw times later.
+function buildTicket({ numbers, bonus, spot, source }) {
+    const now = new Date();
+    const plan = currentSlipPlan(now);
+    if (!plan.ok) {
+        showDialog("Pick a start", plan.error);
+        return null;
+    }
+    const weekly = state.activeGameKey !== "quickdraw";
+    const projection = projectActiveDraw(now);
+    const numGames = plan.games;
+    let startDrawNum = null;
+    if (!weekly && projection.showNumber && projection.reason === "current") {
+        startDrawNum = projection.nextDrawNumber + plan.offsetFromNext;
+    }
     const costPerGame = getGameCost();
-    state.sessionTickets.unshift({
+    return {
         draw: startDrawNum,
-        endDraw: endDrawNum,
-        drawTime: upcoming[0] ? upcoming[0].toISOString() : null,
-        endDrawTime: upcoming.length ? upcoming[upcoming.length - 1].toISOString() : null,
-        spot: spotTier,
+        endDraw: startDrawNum === null ? null : startDrawNum + numGames - 1,
+        anchorAt: weekly ? null : plan.first.toISOString(),
+        drawTime: plan.first.toISOString(),
+        endDrawTime: plan.last.toISOString(),
+        drawDates: weekly ? plan.drawDates : undefined,
+        spot,
         games: numGames,
         game: state.activeGameKey,
+        source,
         wager: costPerGame * numGames,
         costPerGame,
-        baseWager,
-        hasExtra,
-        numbers: [...state.lastGeneratedNumbers],
+        baseWager: parseFloat($("base-wager").value) || 1,
+        hasExtra: addOnSelected(),
+        numbers: [...numbers],
+        bonus: weekly ? bonus : null,
         gradedDraws: [],
         bestHits: 0,
         winningGamesCount: 0,
         hits: "Pending",
         payout: 0,
-        timestamp: new Date().toISOString()
-    });
+        timestamp: now.toISOString()
+    };
+}
+
+function storeTicket(ticket) {
+    state.sessionTickets.unshift(ticket);
     const saved = saveHistoryArchive();
     gradePendingTickets();
     updateLedgerUI();
     renderDrawSchedule();
     if (!saved) {
-        showDialog("Saved in this tab only", "This browser did not keep these picks in local storage.");
+        showDialog("Saved in this tab only", "This browser did not keep this slip in local storage.");
     }
-    generateTicket();
+    return saved;
+}
+
+function saveTicketLocally() {
+    if (state.lastGeneratedNumbers.length === 0) {
+        showDialog("No picks yet", "Make number picks before saving them.");
+        return;
+    }
+    const ticket = buildTicket({
+        numbers: state.lastGeneratedNumbers,
+        bonus: state.lastGeneratedBonus,
+        spot: parseInt($("spot-tier").value, 10) || state.lastGeneratedNumbers.length,
+        source: "picks"
+    });
+    if (!ticket) return;
+    storeTicket(ticket);
+}
+
+function readOwnNumbers() {
+    const parsed = validateOwnNumbers(state.activeGameKey, $("own-numbers")?.value || "", $("own-bonus")?.value || "");
+    showOwnError(parsed.ok ? "" : parsed.error);
+    return parsed;
+}
+
+function trackOwnNumbers() {
+    const parsed = readOwnNumbers();
+    if (!parsed.ok) return;
+    const ticket = buildTicket({
+        numbers: parsed.numbers,
+        bonus: parsed.bonus,
+        spot: parsed.numbers.length,
+        source: "mine"
+    });
+    if (!ticket) return;
+    storeTicket(ticket);
+    showDialog("Tracking on this device", `Your numbers are saved for ${ticket.games} ${ticket.games === 1 ? "draw" : "draws"} starting ${formatScheduledDraw(new Date(ticket.drawTime))}. They are checked when those draws are published.`);
+    const history = $("quickdraw-ledger-section");
+    if (history) history.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function pastDrawLabel(row) {
+    const day = formatDrawListing(row, state.activeGameKey);
+    return state.activeGameKey === "quickdraw" ? `#${row.draw_number} · ${day}` : day;
+}
+
+function checkOwnNumbers() {
+    const parsed = readOwnNumbers();
+    if (!parsed.ok) return;
+    const results = $("own-results");
+    const body = $("own-results-body");
+    if (!results || !body) return;
+    results.hidden = false;
+    body.replaceChildren();
+    if (!state.historyAvailable || state.cachedDraws.length === 0) {
+        setText("own-results-summary", DATA_UNAVAILABLE);
+        setText("own-results-best", "");
+        setText("own-results-atleast", "");
+        return;
+    }
+    const lookback = parseInt($("own-lookback")?.value, 10) || 50;
+    const report = checkPastDraws({
+        game: state.activeGameKey,
+        numbers: parsed.numbers,
+        bonus: parsed.bonus,
+        draws: state.cachedDraws,
+        lookback
+    });
+    if (!report.ok) {
+        setText("own-results-summary", DATA_UNAVAILABLE);
+        return;
+    }
+    const oldest = report.rows[report.checked - 1];
+    const newest = report.rows[0];
+    const shortNote = report.checked < lookback ? ` Only ${report.checked} draws are loaded.` : "";
+    setText("own-results-summary", `Checked against the last ${report.checked} stored draws, ${formatDrawListing(oldest, state.activeGameKey)} to ${formatDrawListing(newest, state.activeGameKey)}.${shortNote}`);
+    const bestRow = report.rows.find((row) => row.draw_number === report.best.drawNumber);
+    setText("own-results-best", `Best: ${report.best.label} matched, ${bestRow ? pastDrawLabel(bestRow) : "—"}.`);
+    const parts = report.atLeast.map((entry) => `${entry.n}+ matched: ${entry.draws}`);
+    if (report.bonusDraws !== null) parts.push(`${GAME_CONFIGS[state.activeGameKey].bonusName} matched: ${report.bonusDraws}`);
+    setText("own-results-atleast", `Draws with ${parts.join(" · ")}`);
+    report.perDraw.forEach((entry, idx) => {
+        const row = document.createElement("tr");
+        row.className = "border-b border-slate-800";
+        const numbersText = entry.matched.length ? entry.matched.join(", ") : "—";
+        [pastDrawLabel(report.rows[idx]), entry.label, numbersText + (entry.bonus ? ` + ${BONUS_SHORT[state.activeGameKey]}` : "")].forEach((text, cellIdx) => {
+            const cell = document.createElement("td");
+            cell.className = cellIdx === 1 ? "py-1 text-cyan-200 font-mono" : "py-1 text-blue-100";
+            cell.textContent = text;
+            row.appendChild(cell);
+        });
+        body.appendChild(row);
+    });
 }
 
 function updateLedgerUI() {
@@ -1067,7 +1342,7 @@ function updateLedgerUI() {
         totalWager += parseFloat(ticket.wager) || 0;
     });
     const wagerEl = $("archive-total-wager");
-    if (wagerEl) wagerEl.textContent = `$${totalWager.toFixed(2)}`;
+    if (wagerEl) wagerEl.textContent = `You logged spending $${totalWager.toFixed(2)}`;
 
     const body = $("ledger-body");
     body.replaceChildren();
@@ -1084,7 +1359,7 @@ function updateLedgerUI() {
     state.sessionTickets.forEach((ticket) => {
         const games = ticket.games || 1;
         const endDraw = ticket.endDraw || ticket.draw;
-        const drawKnown = Number.isFinite(Number(ticket.draw));
+        const drawKnown = ticket.draw !== null && ticket.draw !== undefined && Number.isFinite(Number(ticket.draw));
         let drawLabel = "—";
         if (ticket.game && ticket.game !== "quickdraw") {
             if (ticket.drawTime) {
@@ -1094,13 +1369,14 @@ function updateLedgerUI() {
             }
         } else if (drawKnown) {
             drawLabel = games > 1 ? `#${ticket.draw}–#${endDraw}` : `#${ticket.draw}`;
+        } else if (ticketAnchorMs(ticket) !== null) {
+            const from = formatScheduledDraw(new Date(ticketAnchorMs(ticket)));
+            drawLabel = games > 1 ? `${games} draws from ${from}` : from;
         }
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
-        const progress = (state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.historyAvailable)
-            ? (ticket.hits || "Pending")
-            : "Not graded";
-        [drawLabel, `${ticket.spot}-Spot`, progress].forEach((text, idx) => {
+        const progress = ticketProgress(ticket);
+        [drawLabel, ticketPicksLabel(ticket), progress].forEach((text, idx) => {
             const cell = document.createElement("td");
             cell.className = idx === 2 ? "py-2 text-cyan-200" : "py-2 text-blue-100";
             cell.textContent = text;
@@ -1108,6 +1384,29 @@ function updateLedgerUI() {
         });
         body.appendChild(row);
     });
+}
+
+function ticketPicksLabel(ticket) {
+    const owner = ticket.source === "mine" ? "Yours: " : "";
+    const nums = (ticket.numbers || []).join(" ");
+    if (ticket.game && ticket.game !== "quickdraw") {
+        const bonus = ticket.bonus != null ? ` + ${BONUS_SHORT[ticket.game]} ${ticket.bonus}` : "";
+        return `${owner}${GAME_CONFIGS[ticket.game]?.shortName || ""} ${nums}${bonus}`.trim();
+    }
+    return `${owner}${ticket.spot}-Spot ${nums}`.trim();
+}
+
+function ticketProgress(ticket) {
+    const hits = ticket.hits || "Pending";
+    if ((ticket.game || "quickdraw") === "quickdraw" && ticket.draw == null && ticketAnchorMs(ticket) === null) {
+        return "Not tracked (no draw saved)";
+    }
+    if (hits === "Pending" || hits === "Not graded") {
+        const first = ticket.drawTime ? new Date(ticket.drawTime) : (ticketAnchorMs(ticket) !== null ? new Date(ticketAnchorMs(ticket)) : null);
+        if (first && first.getTime() > Date.now()) return "Pending · draws not held yet";
+        return "Pending · waiting for published results";
+    }
+    return hits;
 }
 
 function loadHistoryArchive() {
@@ -1147,7 +1446,7 @@ function exportHistoryCsv() {
         const cost = parseFloat(ticket.wager || 0).toFixed(2);
         const gamesCount = ticket.games || 1;
         const endDraw = ticket.endDraw || (Number(ticket.draw) + gamesCount - 1);
-        const drawKnown = Number.isFinite(Number(ticket.draw));
+        const drawKnown = ticket.draw !== null && ticket.draw !== undefined && Number.isFinite(Number(ticket.draw));
         let rangeLabel = "";
         if (ticket.game && ticket.game !== "quickdraw" && ticket.drawTime) {
             const startWhen = formatScheduledDraw(new Date(ticket.drawTime));
@@ -1200,6 +1499,7 @@ function startTimers() {
     // is computed from the clock, so this interval does not drive that number.
     window.drawBuddyRefreshTimer = setInterval(() => {
         if (state.activeGameKey === "quickdraw") fetchGameHistoryFromSupabase();
+        refreshPendingGrades();
     }, 4 * 60 * 1000);
     renderDrawSchedule();
 }
@@ -1223,6 +1523,17 @@ function bindUi() {
             : "Trial-ending and annual renewal notices are not sent. Billing is not connected.";
     }
     $("save-slip-button").addEventListener("click", saveTicketLocally);
+    $("own-track-button").addEventListener("click", trackOwnNumbers);
+    $("own-check-button").addEventListener("click", checkOwnNumbers);
+    $("own-numbers").addEventListener("input", () => renderDrawSchedule());
+    $("start-mode").addEventListener("change", () => {
+        syncStartControls();
+        renderDrawSchedule();
+    });
+    ["start-offset", "start-time", "start-date"].forEach((id) => {
+        $(id).addEventListener("change", () => renderDrawSchedule());
+        $(id).addEventListener("input", () => renderDrawSchedule());
+    });
     const ticketImport = $("ticket-import-button");
     if (ticketImport) ticketImport.addEventListener("click", explainTicketImport);
     $("export-button").addEventListener("click", exportHistoryCsv);
@@ -1261,6 +1572,8 @@ function bootApp() {
     applyEntitlements();
     setAppState(state.currentState);
     loadHistoryArchive();
+    syncStartControls();
+    syncOwnNumberControls();
     startTimers();
     updateCostDisplay();
     updateHistoryNote();
