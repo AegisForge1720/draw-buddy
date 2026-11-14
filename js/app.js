@@ -35,6 +35,13 @@ import {
     upcomingWeeklyDraws
 } from "./schedule.js";
 import {
+    expectedRepeatText,
+    inspectorIdle,
+    numberWindowStats,
+    settleHistoryFetch,
+    stakePerPlay
+} from "./inspector.js";
+import {
     MONTE_CARLO_SEED,
     MONTE_CARLO_SESSIONS,
     displayedMonteCarlo,
@@ -269,8 +276,7 @@ const HISTORY_STAT_IDS = [
     "stat-last-seen",
     "stat-markov",
     "stat-interval",
-    "stat-density",
-    "stat-expected"
+    "stat-density"
 ];
 
 function refreshHistoryAvailability(now = new Date()) {
@@ -291,12 +297,10 @@ function refreshHistoryAvailability(now = new Date()) {
 }
 
 function setHistoryStatsUnavailable() {
-    HISTORY_STAT_IDS.forEach((id) => {
-        const el = $(id);
-        if (el) el.textContent = DATA_UNAVAILABLE;
-    });
-    const title = $("inspector-title");
-    if (title) title.textContent = DATA_UNAVAILABLE;
+    const idle = inspectorIdle({ historyAvailable: false, subscribed: isSubscribed() });
+    HISTORY_STAT_IDS.forEach((id) => setText(id, idle.value));
+    setText("inspector-title", idle.title);
+    setText("inspector-ball-badge", "--");
 }
 
 function updateResultsDisclosure() {
@@ -325,11 +329,6 @@ function updateResultsDisclosure() {
     if (daily) daily.hidden = state.activeGameKey !== "quickdraw";
     renderDrawSchedule();
     updateLedgerUI();
-}
-
-function formatRate(rate) {
-    if (typeof rate !== "number" || !Number.isFinite(rate)) return "n/a";
-    return `${(rate * 100).toFixed(1)}%`;
 }
 
 function lastUpdatedLine(draw) {
@@ -386,11 +385,6 @@ function renderDrawSchedule(now = new Date()) {
     if (countdownEl) {
         countdownEl.textContent = countdownKnown ? formatCountdown(projection.countdownSeconds) : "—";
     }
-    const expectedEl = $("stat-expected");
-    const cfg = GAME_CONFIGS[state.activeGameKey];
-    if (expectedEl && cfg && state.historyAvailable) {
-        expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
-    }
     const newestDraw = state.cachedDraws[0];
     const drawDayEl = $("newest-draw-day");
     if (drawDayEl) drawDayEl.textContent = formatDrawListing(newestDraw, state.activeGameKey);
@@ -424,10 +418,19 @@ function renderDrawSchedule(now = new Date()) {
     return projection;
 }
 
+function addOnSelected() {
+    if (state.activeGameKey === "megamillions") return false;
+    return parseInt($("extra-multiplier")?.value, 10) === 2;
+}
+
+function resetAddOn() {
+    const extra = $("extra-multiplier");
+    if (extra) extra.value = "1";
+}
+
 function getGameCost() {
     const baseWager = parseFloat($("base-wager")?.value) || 1;
-    const extraVal = parseInt($("extra-multiplier")?.value, 10) || 1;
-    return baseWager * (extraVal === 2 ? 2 : 1);
+    return stakePerPlay(state.activeGameKey, baseWager, addOnSelected());
 }
 
 function updateCostDisplay() {
@@ -517,29 +520,58 @@ async function getSupabaseClient() {
     return state.supabaseClient;
 }
 
+function applyHistory(settled, { offline = false } = {}) {
+    state.cachedDraws = settled.cachedDraws;
+    state.fetchFailed = settled.fetchFailed;
+    state.dataMode = settled.cachedDraws.length ? "loaded" : (offline ? "offline" : "error");
+    state.latestFetchedDraw = settled.cachedDraws[0]
+        ? parseInt(settled.cachedDraws[0].draw_number, 10)
+        : null;
+    updateResultsDisclosure();
+    if (state.historyAvailable) {
+        setSyncStatus(offline ? "Offline" : "Loaded", offline ? "offline" : "loaded");
+        setDataBanner(
+            offline
+                ? "You are offline. Showing the last draws loaded in this session. They will not refresh."
+                : "Draw results are labeled as stored by Draw Buddy, with a last-updated time.",
+            offline ? "warn" : "calm"
+        );
+    } else {
+        setSyncStatus("Unavailable", "offline");
+        setDataBanner(DATA_UNAVAILABLE, "warn");
+    }
+    gradePendingTickets();
+    renderHeatmap();
+    updateHistoryNote();
+}
+
 async function fetchGameHistoryFromSupabase() {
     if (!readAgePass(localStorage)) return;
     const token = ++state.fetchToken;
     const gameKey = state.activeGameKey;
+    const previous = state.cachedDraws.slice();
+    const keepVisible = previous.length > 0 && state.dataMode === "loaded";
 
     if (!navigator.onLine) {
-        if (state.dataMode === "loaded" && state.cachedDraws.length > 0 && state.historyAvailable) {
-            handleOffline();
-            return;
-        }
-        showHistoryUnavailable("offline");
+        applyHistory(settleHistoryFetch({
+            previous,
+            failed: true,
+            game: gameKey,
+            verified: DATA_VERIFIED[gameKey] === true
+        }), { offline: true });
         return;
     }
 
-    state.cachedDraws = [];
-    state.dataMode = "loading";
-    state.fetchFailed = false;
-    state.resultsLabeled = false;
-    state.historyAvailable = false;
-    setSyncStatus("Loading", "loading");
-    setDataBanner("Loading draws…", "calm");
-    renderHeatmap();
-    updateResultsDisclosure();
+    if (!keepVisible) {
+        state.dataMode = "loading";
+        state.fetchFailed = false;
+        state.resultsLabeled = false;
+        state.historyAvailable = false;
+        setSyncStatus("Loading", "loading");
+        setDataBanner("Loading draws…", "calm");
+        renderHeatmap();
+        updateResultsDisclosure();
+    }
     if (!isBrowserSafeSupabaseKey(SUPABASE_PUBLISHABLE_KEY)) {
         showHistoryUnavailable("error");
         return;
@@ -555,39 +587,33 @@ async function fetchGameHistoryFromSupabase() {
             .order("draw_number", { ascending: false })
             .limit(100);
         if (token !== state.fetchToken || gameKey !== state.activeGameKey) return;
-        if (error || !data || data.length === 0) {
-            showHistoryUnavailable("error");
-            return;
-        }
-        state.cachedDraws = data;
-        state.fetchFailed = false;
-        state.dataMode = "loaded";
-        state.latestFetchedDraw = parseInt(data[0].draw_number, 10);
-        updateResultsDisclosure();
-        if (state.historyAvailable) {
-            setSyncStatus("Loaded", "loaded");
-            setDataBanner("Draw results are labeled as stored by Draw Buddy, with a last-updated time.", "calm");
-        } else {
-            setSyncStatus("Unavailable", "offline");
-            setDataBanner(DATA_UNAVAILABLE, "warn");
-        }
-        gradePendingTickets();
-        renderHeatmap();
-        updateHistoryNote();
+        const failed = Boolean(error) || !data || data.length === 0;
+        applyHistory(settleHistoryFetch({
+            previous: keepVisible ? previous : [],
+            rows: failed ? null : data,
+            failed,
+            game: gameKey,
+            verified: DATA_VERIFIED[gameKey] === true
+        }));
     } catch {
-        if (token !== state.fetchToken) return;
+        if (token !== state.fetchToken || gameKey !== state.activeGameKey) return;
         state.supabaseClient = null;
-        showHistoryUnavailable("error");
+        applyHistory(settleHistoryFetch({
+            previous: keepVisible ? previous : [],
+            failed: true,
+            game: gameKey,
+            verified: DATA_VERIFIED[gameKey] === true
+        }));
     }
 }
 
 function handleOffline() {
-    if (state.dataMode === "loaded" && state.historyAvailable) {
-        setSyncStatus("Offline", "offline");
-        setDataBanner("You are offline. Showing the last draws loaded in this session. They will not refresh.", "warn");
-        return;
-    }
-    showHistoryUnavailable("offline");
+    applyHistory(settleHistoryFetch({
+        previous: state.cachedDraws.slice(),
+        failed: true,
+        game: state.activeGameKey,
+        verified: DATA_VERIFIED[state.activeGameKey] === true
+    }), { offline: true });
 }
 
 function gradePendingTickets() {
@@ -631,30 +657,57 @@ function setText(id, value) {
     if (el) el.textContent = value;
 }
 
+function publishExpectedRepeat() {
+    const cfg = GAME_CONFIGS[state.activeGameKey];
+    const rate = expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers);
+    setText("stat-expected", rate === null ? "n/a" : expectedRepeatText(cfg.drawnCount, cfg.totalNumbers));
+}
+
+function syncInspector() {
+    if (state.historyAvailable && state.inspectedNumber != null && isSubscribed()) {
+        paintInspector(state.inspectedNumber);
+        return;
+    }
+    const idle = inspectorIdle({
+        historyAvailable: state.historyAvailable === true,
+        subscribed: isSubscribed()
+    });
+    setText("inspector-ball-badge", "--");
+    setText("inspector-title", idle.title);
+    ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
+        setText(id, idle.value);
+    });
+    setText("stat-markov", idle.value);
+}
+
+function paintInspector(num) {
+    const cfg = GAME_CONFIGS[state.activeGameKey];
+    const stats = numberWindowStats(lookbackSlice().draws, num, cfg);
+    setText("inspector-ball-badge", num < 10 ? `0${num}` : String(num));
+    setText("inspector-title", stats.title);
+    setText("stat-hits", stats.hits);
+    setText("stat-percentage", stats.percentage);
+    setText("stat-last-seen", stats.lastSeen);
+    setText("stat-interval", stats.interval);
+    setText("stat-density", stats.density);
+}
+
 function clearInspectorStats() {
     state.inspectedNumber = null;
-    setText("inspector-ball-badge", "--");
-    setText("inspector-title", "Number detail appears here after you subscribe and choose a number");
-    const placeholder = drawHistoryVerified() ? "--" : "Data unavailable";
-    ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
-        setText(id, placeholder);
-    });
+    syncInspector();
 }
 
 function renderRepeatRate() {
     const cfg = GAME_CONFIGS[state.activeGameKey];
-    const expectedRate = expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers);
-    const expectedText = expectedRate === null
-        ? "n/a"
-        : `${formatPercent(expectedRate)} (${cfg.drawnCount} of ${cfg.totalNumbers})`;
+    const expectedText = expectedRepeatText(cfg.drawnCount, cfg.totalNumbers);
     let observedValue = null;
     if (drawHistoryVerified() && state.inspectedNumber != null) {
         const rate = oneStepRepeatRate(lookbackSlice().draws, state.inspectedNumber);
         observedValue = rate === null ? null : formatPercent(rate);
     }
     const observedText = historyStatLabel(drawHistoryVerified(), observedValue);
-    setText("stat-markov", observedText);
-    setText("stat-expected", expectedText);
+    const inspectorObserved = drawHistoryVerified() && state.inspectedNumber == null ? "--" : observedText;
+    setText("stat-markov", inspectorObserved);
     setText("markov-observed", observedText);
     setText("markov-expected", expectedText);
     const detail = $("markov-detail");
@@ -669,7 +722,7 @@ function renderPaytableMath() {
     const cfg = GAME_CONFIGS[state.activeGameKey];
     const spots = parseInt($("spot-tier")?.value, 10);
     const baseWager = parseFloat($("base-wager")?.value);
-    const extra = state.activeGameKey === "quickdraw" && parseInt($("extra-multiplier")?.value, 10) === 2;
+    const extra = state.activeGameKey === "quickdraw" && addOnSelected();
     const blank = ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "mc-median", "mc-ahead"];
     if (state.activeGameKey !== "quickdraw") {
         blank.forEach((id) => setText(id, "n/a"));
@@ -719,11 +772,7 @@ function renderDrawMath() {
             ? "The grid shows how often each number appeared in the loaded draws. Number detail unlocks with Monthly or Annual."
             : "Data unavailable. Number detail unlocks with Monthly or Annual.";
     }
-    if (!drawHistoryVerified()) {
-        ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
-            setText(id, "Data unavailable");
-        });
-    }
+    publishExpectedRepeat();
     if (!subscribed) {
         ["kelly-inputs", "kelly-stake", "kelly-ev", "kelly-win-prob", "kelly-payout", "kelly-reason", "mc-sessions", "mc-win-rate", "mc-net", "mc-median", "mc-ahead", "markov-observed", "markov-expected"].forEach((id) => {
             setText(id, "--");
@@ -737,7 +786,8 @@ function renderDrawMath() {
 
 function inspectNumber(num) {
     if (!state.historyAvailable) {
-        setHistoryStatsUnavailable();
+        syncInspector();
+        renderDrawMath();
         return;
     }
     if (!isSubscribed()) {
@@ -745,50 +795,10 @@ function inspectNumber(num) {
         return;
     }
     state.inspectedNumber = num;
-    const cfg = GAME_CONFIGS[state.activeGameKey];
-    $("inspector-ball-badge").textContent = num < 10 ? `0${num}` : String(num);
-    if (!drawHistoryVerified()) {
-        $("inspector-title").textContent = `Number ${num}`;
-        ["stat-hits", "stat-percentage", "stat-last-seen", "stat-interval", "stat-density"].forEach((id) => {
-            $(id).textContent = "Data unavailable";
-        });
-        renderDrawMath();
-        $("inspector-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
-        return;
-    }
-    const { size: lookbackSize, draws: sliceData } = lookbackSlice();
-    let hits = 0;
-    let lastSeenDistance = null;
-    sliceData.forEach((draw, index) => {
-        const winning = (draw.winning_numbers || []).map(Number);
-        if (winning.includes(num)) {
-            hits += 1;
-            if (lastSeenDistance === null) lastSeenDistance = index;
-        }
-    });
-    const percentage = lookbackSize > 0 ? ((hits / lookbackSize) * 100).toFixed(1) : "0.0";
-    const meanCycleInterval = hits > 0 ? (lookbackSize / hits).toFixed(1) : lookbackSize.toFixed(1);
-    const expected = lookbackSize * (cfg.drawnCount / cfg.totalNumbers);
-    const ratio = expected > 0 ? hits / expected : 0;
-    let density = "No hits in this window";
-    if (hits > 0 && ratio >= 1.25) density = "Above average count";
-    else if (hits > 0 && ratio <= 0.75) density = "Below average count";
-    else if (hits > 0) density = "Near average count";
-
-    $("inspector-title").textContent = lookbackSize > 0
-        ? `Number ${num} in the last ${lookbackSize} loaded draws`
-        : `Number ${num}`;
-    $("stat-hits").textContent = `${hits} / ${lookbackSize} draws`;
-    $("stat-percentage").textContent = `${percentage}%`;
-    $("stat-last-seen").textContent = lastSeenDistance === null
-        ? "Not in this window"
-        : lastSeenDistance === 0
-            ? "Newest loaded draw"
-            : `${lastSeenDistance} draws before the newest`;
-    $("stat-interval").textContent = `~${meanCycleInterval} draws`;
-    $("stat-density").textContent = density;
+    syncInspector();
     renderDrawMath();
-    $("inspector-card").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    const card = $("inspector-card");
+    if (card) card.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function renderNeutralHeatmap(cfg, grid) {
@@ -816,7 +826,7 @@ function renderHeatmap() {
     grid.replaceChildren();
     if (!state.historyAvailable) {
         renderNeutralHeatmap(cfg, grid);
-        setHistoryStatsUnavailable();
+        syncInspector();
         renderDrawMath();
         return;
     }
@@ -854,6 +864,7 @@ function renderHeatmap() {
         cell.append(label, meta);
         grid.appendChild(cell);
     }
+    syncInspector();
     renderDrawMath();
 }
 
@@ -870,7 +881,7 @@ function fillSelect(select, values, selected, labelFor) {
 
 async function switchGameProfile(gameKey) {
     state.activeGameKey = gameKey;
-    clearInspectorStats();
+    state.inspectedNumber = null;
     const cfg = GAME_CONFIGS[gameKey];
     ["quickdraw", "powerball", "megamillions"].forEach((key) => {
         const button = $(`game-btn-${key}`);
@@ -887,8 +898,8 @@ async function switchGameProfile(gameKey) {
     const extraBox = $("multiplier-container");
     if (drawBox) drawBox.style.display = "block";
     if (drawLabel) drawLabel.textContent = "Next draw #";
-    const expectedEl = $("stat-expected");
-    if (expectedEl) expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
+    resetAddOn();
+    publishExpectedRepeat();
     const observedEl = $("stat-markov");
     if (observedEl) observedEl.textContent = "n/a";
     state.cachedDraws = [];
@@ -896,6 +907,7 @@ async function switchGameProfile(gameKey) {
     state.dataMode = "loading";
     state.fetchFailed = false;
     state.historyAvailable = false;
+    syncInspector();
     state.picksBlockSize = null;
     const playCard = $("play-card");
     if (playCard) playCard.classList.add("hidden");
@@ -912,8 +924,6 @@ async function switchGameProfile(gameKey) {
     } else {
         fillSelect(lookbackSelect, [{ value: 50 }, { value: 100 }], 100, (item) => String(item.value));
         if (extraBox) extraBox.hidden = true;
-        const extra = $("extra-multiplier");
-        if (extra) extra.value = "1";
     }
 
     const spotSelect = $("spot-tier");
@@ -951,8 +961,7 @@ function generateTicket(customReason) {
     const spotTier = parseInt($("spot-tier").value, 10) || cfg.maxSpot;
     const lookback = parseInt($("lookback-draws").value, 10) || 50;
     const baseWager = parseFloat($("base-wager").value) || 1;
-    const extraVal = parseInt($("extra-multiplier").value, 10) || 1;
-    const hasExtra = state.activeGameKey === "quickdraw" && extraVal === 2;
+    const hasExtra = addOnSelected();
     const totalBlockSize = parseInt($("game-block").value, 10) || 5;
     const costPerGame = getGameCost();
     const totalSlipCost = costPerGame * totalBlockSize;
@@ -1041,7 +1050,7 @@ function saveTicketLocally() {
     const startDrawNum = !weeklySave && projection.showNumber ? projection.nextDrawNumber : null;
     const spotTier = parseInt($("spot-tier").value, 10) || 4;
     const baseWager = parseFloat($("base-wager").value) || 1;
-    const hasExtra = (parseInt($("extra-multiplier").value, 10) || 1) === 2;
+    const hasExtra = addOnSelected();
     const numGames = parseInt($("game-block").value, 10) || 5;
     const endDrawNum = startDrawNum === null ? null : startDrawNum + numGames - 1;
     const costPerGame = getGameCost();
