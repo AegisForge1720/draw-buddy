@@ -141,5 +141,21 @@
     </div>
     <p><a href="index.html">Home</a></p>
   </main>
+  <script>
+    window.goatcounter = {
+      path: function (p) {
+        return location.pathname;
+      }
+    };
+    (function () {
+      if (navigator.globalPrivacyControl === true) return;
+      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+      var script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://gc.zgo.at/count.js';
+      script.setAttribute('data-goatcounter', 'https://drawbuddy.goatcounter.com/count');
+      document.head.appendChild(script);
+    })();
+  </script>
 </body>
 </html>
