@@ -45,6 +45,25 @@ test("paid plans read as coming soon and the buttons stay disabled", () => {
     assert.equal(functionBody(app, "syncSubscribeButtons").includes("!agreed"), false);
     assert.equal(app.includes("Check the agreement box before subscribe"), false);
     assert.equal(html.includes("id=\"paywall-disclosure-text\""), true);
+    const previewDisclosure = "Draw Buddy Premium is coming soon at $1.99 per month or $17 per year. This preview doesn't take payment, and nothing will be charged. Before any subscription starts, you'll see the full auto-renewal and cancellation terms and agree to them.";
+    const foundingLine = "Founding members: the first 2,000 annual subscribers keep $17 per year for as long as their subscription renews without a break, even if the price goes up later.";
+    assert.equal(html.includes(previewDisclosure), true);
+    assert.equal(html.includes(foundingLine), true);
+    assert.equal(html.includes("I agree to the auto-renewal terms above"), false);
+    assert.equal(html.includes("renewal-agree"), false);
+    assert.match(html, /id="paywall-disclosure"[\s\S]*href="\.\/terms.html">Terms of Use/);
+    assert.match(html, /id="paywall-disclosure"[\s\S]*href="\.\/privacy.html">Privacy Policy/);
+    assert.equal(app.includes("textContent = D7"), false);
+    const plansStart = html.indexOf('id="subscription-card"');
+    const plansEnd = html.indexOf("</section>", plansStart);
+    const foundingIdx = html.indexOf(foundingLine);
+    assert.ok(plansStart !== -1 && foundingIdx > plansStart && foundingIdx < plansEnd, "founding line stays on the plans card");
+    const beforePlans = html.slice(0, plansStart);
+    const afterPlans = html.slice(plansEnd);
+    assert.equal(beforePlans.includes(foundingLine), false);
+    assert.equal(afterPlans.includes(foundingLine), false);
+    assert.equal(/scratch[- ]off/i.test(html.slice(plansStart, plansEnd)), false);
+    assert.equal(/spots? left|countdown|reserve (a )?spot|sign up to (be|become) a founding/i.test(html.slice(plansStart, plansEnd)), false);
 });
 
 test("a failed refresh that keeps fresh rows shows a note and a success clears it", () => {

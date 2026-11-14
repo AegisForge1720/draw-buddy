@@ -11,7 +11,6 @@ import { startSiteGate } from "./compliance.js";
 import {
     BILLING_NOTICES,
     D3,
-    D7,
     STORE_SUBSCRIPTION_URLS,
     annualRenewalNoticeDue,
     d6Line,
@@ -186,11 +185,7 @@ function renderPlanCopy() {
     $("plan-annual-price").textContent = `${formatPlanMoney(PLAN_ANNUAL_PRICE)} / year`;
     const savingsEl = $("plan-annual-savings");
     if (savingsEl) savingsEl.textContent = "Coming soon.";
-    const disclosure = $("paywall-disclosure");
-    if (disclosure && !disclosure.dataset.filled) {
-        disclosure.dataset.filled = "1";
-    }
-    if ($("paywall-disclosure-text")) $("paywall-disclosure-text").textContent = D7;
+    // Preview disclosure copy stays in the HTML. Do not write D7 (App Store text) into the page.
 }
 
 function explainTicketImport() {
