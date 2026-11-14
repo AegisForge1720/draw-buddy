@@ -7,7 +7,7 @@ Draw Buddy is not ready for the App Store or Google Play. This is what still has
 Code-complete for a screen recording of this preview:
 
 - [x] B2: no sportsbook, Lotto.com, courier, affiliate, or `ref=` links, and no buy-tickets control. `DEMO_FLAGS.showAffiliateLinks` stays false.
-- [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is deleted. Scratch-off odds, prizes-remaining, and the scanner are deleted. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
+- [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is deleted. This app does not include instant-ticket odds, prizes remaining, or a scanner. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
 - [x] D1, D2, D4, and D5 are in the footer. D7 and the price line sit on the plans screen. There is no trial, so D9 is not sent. The annual price is shown as $17 per year, not as a monthly breakdown.
 - [x] No leaderboard and no ticket purchase. Approved taglines on the page: “Track your play. Know your limits.” and “Lottery stats, not lottery tips.”
 
@@ -20,7 +20,7 @@ Not code-complete (still needs a person, a lawyer, or a store/platform account):
 - [ ] B7 and 3.4 #2, #5, #6, #9: 21+ ad targeting, bios, video disclaimers, print, Search Ads, and creator agreements.
 - [ ] 3.4 #1: store name, subtitle, keywords, review notes, and screenshots. Game names stay out of the app name. **Needs a person.**
 - [ ] 3.4 #3 / D13 / D14: email and SMS are not sent from this preview.
-- [ ] 3.4 #7: the press release itself. The app no longer promises scratch-off scanning or a leaderboard.
+- [ ] 3.4 #7: the press release itself. This app does not promise a ticket scanner or a leaderboard.
 - [ ] 3.4 #8 and #10: Reddit affiliation process, ATT, and retargeting exclusions. Pixels stay off.
 - [ ] 3.7: a 4-year archive of ads. There are no ads in this repo.
 - [ ] 3.11 location: not collected here. Apple privacy labels still need a person.
@@ -49,7 +49,7 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 - [ ] **Needs legal review.** Gate 0: Certificate of Publication for NAV Analytics LLC, or a NY attorney’s sign-off to proceed anyway.
 - [x] **Code-complete.** Seller name on the site is `LEGAL_ENTITY.name` (**NAV Analytics LLC**, 58 Owaissa Dr, Rochester, NY 14622). Do not rename it to Insert Coin Industries LLC until the DOS amendment is filed.
 - [x] **Code-complete on the site.** Lotto.com, DraftKings, FanDuel, and BetMGM links are removed. **Needs a person** to confirm the same for store listings and social profiles.
-- [x] **Code-complete for the live-odds claim.** Scratch-off figures are deleted. The count legend says High / Mid / Low. The footer uses the spec’s D1–D5 wording. **Needs legal review** before anyone calls the copy final.
+- [x] **Code-complete for the live-odds claim.** Instant-ticket prize figures are not on this site. The count legend says High / Mid / Low. The footer uses the spec’s D1–D5 wording. **Needs legal review** before anyone calls the copy final.
 
 ### 5.2 Privacy notice
 
@@ -110,7 +110,7 @@ Status words: **code-complete** means this preview implements it. **Needs legal 
 - [ ] Finish the ingest pipeline for NY Quick Draw, Powerball, and Mega Millions. The client only reads whatever is already in the database. The on-screen line says those rows are stored by Draw Buddy and are not an official lottery feed. Do not call `created_at` the official draw time.
 - [ ] Check rows that do not look like published drawings before calling the feed reliable.
 - [ ] Verify `js/odds.js` against the current NY Quick Draw prize chart. The model excludes Extra.
-- [x] Scratch-off sample odds, positive EV, and the scanner are deleted. Do not add them back without a real prize source. Ticket-photo import stays off until it actually reads a ticket.
+- [x] Instant-ticket sample odds and a scanner are not part of this app. Ticket-photo import stays off until it actually reads a ticket.
 
 ## Supabase security
 

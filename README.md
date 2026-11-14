@@ -1,6 +1,6 @@
 # Draw Buddy
 
-Draw Buddy is a downloadable consumer app for exploring lottery draw statistics. It covers NY Quick Draw, Powerball, and Mega Millions, with random or stats-based number picks, a count heatmap when a source time is available, and a personal play history stored on the device.
+Draw Buddy is draw statistics only. It covers NY Quick Draw, Powerball, and Mega Millions, with random or stats-based number picks, a count heatmap when a source time is available, and a personal play history stored on the device. Instant-ticket games, their ledger, and their pricing are not part of this app.
 
 The preview is a static site (`index.html`, vanilla JavaScript modules, a built Tailwind stylesheet, and Supabase reads). GitHub Pages can publish this folder as-is. A Capacitor config is included so the same files can later be wrapped for iOS and Android.
 

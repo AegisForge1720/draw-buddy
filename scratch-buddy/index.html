@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Scratch Buddy — Scratch-off log</title>
+    <meta name="description" content="A personal scratch-off log. Official prize data is not loaded. Expected value is not a prediction or an advantage.">
+    <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+    <main>
+        <header class="stack">
+            <h1>SCRATCH <span>BUDDY</span></h1>
+            <p class="lede">A log of scratch-off tickets you enter yourself. This preview does not sell tickets.</p>
+        </header>
+
+        <section class="card" aria-labelledby="official-heading">
+            <h2 id="official-heading">Official game figures</h2>
+            <p id="ev-line" class="ev-line">Expected value is the average return per ticket from a published prize list, minus the ticket price. It is not a prediction or an advantage.</p>
+            <div class="stats">
+                <div class="stat">
+                    <span>Expected value</span>
+                    <strong id="stat-ev">Data unavailable</strong>
+                </div>
+                <div class="stat">
+                    <span>Top prizes left</span>
+                    <strong id="stat-prizes">Data unavailable</strong>
+                </div>
+                <div class="stat">
+                    <span>Odds</span>
+                    <strong id="stat-odds">Data unavailable</strong>
+                </div>
+            </div>
+            <p class="note">No official remaining-prize list is loaded, so these figures stay unavailable.</p>
+        </section>
+
+        <section class="card" aria-labelledby="log-heading">
+            <h2 id="log-heading">Your tickets</h2>
+            <form id="ticket-form" class="stack">
+                <label>Game name
+                    <input id="ticket-game" name="game" type="text" autocomplete="off" maxlength="80">
+                </label>
+                <div class="row">
+                    <label>Price you paid ($)
+                        <input id="ticket-cost" name="cost" type="number" inputmode="decimal" min="0" step="0.01">
+                    </label>
+                    <label>Amount paid to you ($)
+                        <input id="ticket-payout" name="payout" type="number" inputmode="decimal" min="0" step="0.01">
+                    </label>
+                </div>
+                <div class="actions">
+                    <button class="primary" type="submit">Log this ticket</button>
+                    <button class="secondary" id="photo-button" type="button">Photo</button>
+                </div>
+            </form>
+            <p id="log-status" class="status" role="status"></p>
+            <div class="totals">
+                <div class="total"><span>Tickets logged</span><strong id="log-count">0</strong></div>
+                <div class="total"><span>You paid</span><strong id="log-spent">$0.00</strong></div>
+                <div class="total"><span>Paid to you</span><strong id="log-won">$0.00</strong></div>
+                <div class="total"><span>Logged net</span><strong id="log-net">$0.00</strong></div>
+            </div>
+            <div class="log-actions">
+                <button class="secondary" id="export-log" type="button">Export CSV</button>
+                <button class="secondary" id="clear-log" type="button">Clear log</button>
+            </div>
+            <table>
+                <thead>
+                    <tr><th>Game</th><th>Price</th><th>Paid to you</th></tr>
+                </thead>
+                <tbody id="log-body">
+                    <tr><td colspan="3">No tickets logged on this device yet.</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <footer>
+            <p>18+ only. Gambling can be addictive. If you or someone you know has a gambling problem, help is available. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+            <p><a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer">Gamblers Anonymous</a> also offers free, confidential resources.</p>
+            <p>Scratch Buddy does not sell lottery tickets. The log stays on this device.</p>
+        </footer>
+    </main>
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
