@@ -32,10 +32,14 @@ test("verified games read only the three public draw tables", () => {
     assert.equal(Object.values(PUBLIC_DRAW_TABLES).some((name) => name.includes("archive")), false);
 });
 
+function subscribedForTest() {
+    return isSubscribed({ storeEntitlement: true });
+}
+
 test("production entitlement stays locked unless a store result says otherwise", () => {
-    assert.equal(isSubscribed({ debug: false, debugTier: "pro" }), false);
-    assert.equal(isSubscribed({ debug: true, debugTier: "free" }), false);
-    assert.equal(isSubscribed({ debug: true, debugTier: "pro" }), true);
-    assert.equal(isSubscribed({ debug: true, debugTier: "pro", storeEntitlement: false }), false);
-    assert.equal(isSubscribed({ debug: false, storeEntitlement: true }), true);
+    assert.equal(isSubscribed(), false);
+    assert.equal(isSubscribed({ storeEntitlement: null }), false);
+    assert.equal(isSubscribed({ storeEntitlement: false }), false);
+    assert.equal(isSubscribed({ debug: true, debugTier: "pro" }), false);
+    assert.equal(subscribedForTest(), true);
 });

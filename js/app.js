@@ -140,10 +140,6 @@ function storageRemove(key) {
     }
 }
 
-function isDebugMode() {
-    return new URLSearchParams(location.search).get("debug") === "1";
-}
-
 // Plug-in point for App Store / Google Play / RevenueCat.
 // Return true or false once a store SDK is connected. null means "not connected".
 function readStoreEntitlement() {
@@ -151,11 +147,7 @@ function readStoreEntitlement() {
 }
 
 function isSubscribed() {
-    return entitlementIsSubscribed({
-        debug: isDebugMode(),
-        debugTier: storageGet("draw_buddy_active_tier") || "free",
-        storeEntitlement: readStoreEntitlement()
-    });
+    return entitlementIsSubscribed({ storeEntitlement: readStoreEntitlement() });
 }
 
 function $(id) {
@@ -438,12 +430,6 @@ function applyDemoFlags() {
 
 function applyEntitlements() {
     const subscribed = isSubscribed();
-    const debug = isDebugMode();
-    const switcher = $("dev-tier-switcher");
-    const switcherLabel = $("dev-tier-label");
-    if (switcherLabel) switcherLabel.hidden = !debug;
-    if (switcher && debug) switcher.value = storageGet("draw_buddy_active_tier") || "free";
-
     const subCard = $("subscription-card");
     const heatmapLockedBanner = $("heatmap-locked-banner");
     const heatmapGridContainer = $("heatmap-grid-container");
@@ -471,12 +457,6 @@ function applyEntitlements() {
     }
     renderHeatmap();
     applyDemoFlags();
-}
-
-function switchTestTier(tier) {
-    if (!isDebugMode()) return;
-    storageSet("draw_buddy_active_tier", tier);
-    applyEntitlements();
 }
 
 function setAppState(stateCode) {
@@ -1233,7 +1213,6 @@ function bindUi() {
     $("game-btn-quickdraw").addEventListener("click", () => switchGameProfile("quickdraw"));
     $("game-btn-powerball").addEventListener("click", () => switchGameProfile("powerball"));
     $("game-btn-megamillions").addEventListener("click", () => switchGameProfile("megamillions"));
-    $("dev-tier-switcher").addEventListener("change", (event) => switchTestTier(event.target.value));
     $("picks-button").addEventListener("click", () => generateTicket());
     const agreement = $("renewal-agree");
     if (agreement) agreement.addEventListener("change", syncSubscribeButtons);

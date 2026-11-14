@@ -30,7 +30,7 @@ Not code-complete (still needs a person, a lawyer, or a store/platform account):
 
 - [ ] Connect App Store and Google Play subscriptions at **$1.99 per month** and **$17 per year**.
 - [ ] Return that result from `readStoreEntitlement()` in `js/app.js` so `isSubscribed()` in `js/entitlement.js` is the only gate. RevenueCat is a reasonable plug-in. Do not unlock paid tools from `localStorage`.
-- [ ] Keep `?debug=1` out of store builds, or leave it as an obvious debug switch that cannot ship as the purchase path.
+- [x] The preview has no debug entitlement switch, URL flag, or saved tier. Do not add one as a purchase path.
 - [ ] Remove any leftover Stripe test Payment Link. This preview does not link to one.
 
 ## Legal review

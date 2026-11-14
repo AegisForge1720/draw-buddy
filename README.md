@@ -15,7 +15,7 @@ A player pays for Draw Buddy with one subscription. Both plans are meant to unlo
 
 Annual saves $6.88 versus paying monthly ($1.99 × 12 = $23.88), about 29% off.
 
-Store billing (App Store / Google Play, optionally through RevenueCat) should call `isSubscribed()` in `js/entitlement.js`. Until that returns a real entitlement, paid tools stay locked. Add `?debug=1` to the URL to show a local Locked / Subscribed preview. That switch does not bill anyone, and it is hidden without the flag.
+Store billing (App Store / Google Play, optionally through RevenueCat) should call `isSubscribed()` in `js/entitlement.js`. Until that returns a real entitlement, paid tools stay locked. The page has no control, URL, or saved flag that unlocks them.
 
 ## Play responsibly
 
