@@ -1,0 +1,6 @@
+# Documented from the live prediction_logs project (kcvtuzadkyripylluqlj).
+# ny-draws-ingest authenticates with the Vault-backed x-ingest-token header,
+# so JWT verification is off. Do not enable verify_jwt without changing the
+# pg_cron caller in supabase/cron/ny-draws-ingest.sql.
+[functions.ny-draws-ingest]
+verify_jwt = false
