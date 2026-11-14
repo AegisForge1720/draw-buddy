@@ -36,6 +36,18 @@ export const TRACKING = {
     metaAutomaticAdvancedMatching: false
 };
 
+// Clean demo is the default. Leave these false for a screen recording.
+// showAffiliateLinks must stay false: the growth memo (B2) bars sportsbook
+// and courier links. There is no UI for them in this build.
+export const DEMO_FLAGS = {
+    showScratchOff: false,
+    showTicketPhotoImport: false,
+    showStakeModels: false,
+    showClusterHelper: false,
+    showModelEv: false,
+    showAffiliateLinks: false
+};
+
 export const DRAW_BUDDY_CONFIG = {
     SUPABASE_URL: "https://kcvtuzadkyripylluqlj.supabase.co",
     SUPABASE_PUBLISHABLE_KEY: "sb_publishable_540NEFDiVfOYxHeRyemjjg_Lrrce0PA",

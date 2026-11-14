@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { LEGAL_ENTITY, TRACKING } from "../js/config.js";
+import { DEMO_FLAGS, LEGAL_ENTITY, TRACKING } from "../js/config.js";
 import { classifyAttestation, classifyDob, readAgePass, writeAgePass } from "../js/age.js";
 import {
     advertisingAllowed,
@@ -22,6 +22,15 @@ function memory() {
 }
 
 const today = new Date(2026, 10, 14);
+
+test("demo flags keep affiliate links, scratch-off odds, and model EV off", () => {
+    assert.equal(DEMO_FLAGS.showAffiliateLinks, false);
+    assert.equal(DEMO_FLAGS.showScratchOff, false);
+    assert.equal(DEMO_FLAGS.showTicketPhotoImport, false);
+    assert.equal(DEMO_FLAGS.showStakeModels, false);
+    assert.equal(DEMO_FLAGS.showClusterHelper, false);
+    assert.equal(DEMO_FLAGS.showModelEv, false);
+});
 
 test("legal entity is NAV Analytics LLC at the Rochester address", () => {
     assert.equal(LEGAL_ENTITY.name, "NAV Analytics LLC");

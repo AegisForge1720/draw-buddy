@@ -2,6 +2,30 @@
 
 Draw Buddy is not ready for the App Store or Google Play. This is what still has to happen before submission. Do not treat the draft legal pages or the plan buttons as finished.
 
+## Growth-plan memo (demo copy)
+
+Code-complete for a screen recording of this preview:
+
+- [x] B2: no sportsbook, Lotto.com, courier, affiliate, or `ref=` links, and no buy-tickets control. `DEMO_FLAGS.showAffiliateLinks` stays false.
+- [x] B3: picks are labeled “random or stats-based number picks,” with D3 beside them. The expected-value badge is off. Scratch-off odds, prizes-remaining, and the scanner are hidden. The page does not say hot, due, system, winning numbers, ROI, edge, or profit.
+- [x] D1, D2, D4, and D5 are in the footer. D7 and the price line sit on the plans screen. There is no trial, so D9 is not sent. The annual price is shown as $17 per year, not as a monthly breakdown.
+- [x] No leaderboard and no ticket purchase. Approved taglines on the page: “Track your play. Know your limits.” and “Lottery stats, not lottery tips.”
+
+Not code-complete (still needs a person, a lawyer, or a store/platform account):
+
+- [ ] B1: Certificate of Publication and the §206 suspension. **Needs legal review.**
+- [ ] B4 / D9 / D10: real App Store and Play billing, a trial-ending reminder, the 15–45 day annual renewal notice, a confirmation of the terms, and an in-app path that is as easy as sign-up. The D7 text is on screen; the buttons do not bill anyone.
+- [ ] B5: platform-policy table corrections and written ad-platform approval before any spend.
+- [ ] B6 / D11: referral program, offer codes, and share-sheet disclosure. Not built.
+- [ ] B7 and 3.4 #2, #5, #6, #9: 21+ ad targeting, bios, video disclaimers, print, Search Ads, and creator agreements.
+- [ ] 3.4 #1: store name, subtitle, keywords, review notes, and screenshots. Game names stay out of the app name. **Needs a person.**
+- [ ] 3.4 #3 / D13 / D14: email and SMS are not sent from this preview.
+- [ ] 3.4 #7: the press release itself. The app no longer promises scratch-off scanning or a leaderboard.
+- [ ] 3.4 #8 and #10: Reddit affiliation process, ATT, and retargeting exclusions. Pixels stay off.
+- [ ] 3.7: a 4-year archive of ads. There are no ads in this repo.
+- [ ] 3.11 location: not collected here. Apple privacy labels still need a person.
+- [ ] Trademark clearance for the game names. **Needs legal review.**
+
 ## Billing
 
 - [ ] Connect App Store and Google Play subscriptions at **$1.99 per month** and **$17 per year**.

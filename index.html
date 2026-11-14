@@ -80,6 +80,8 @@
 
         <main id="app-main" class="max-w-md mx-auto px-4 mt-4 space-y-4">
             <div id="data-banner" role="status" aria-live="polite" class="rounded-lg border border-slate-600 bg-[#0b132b] p-3 text-xs text-slate-200">Loading draws…</div>
+            <p class="text-sm font-semibold text-white">Track your play. Know your limits.</p>
+            <p class="text-xs text-slate-300">Lottery stats, not lottery tips. 18+ (21+ for Quick Draw where alcohol is served).</p>
 
             <section class="bg-[#0b132b] p-3.5 rounded-xl border border-yellow-500/60 space-y-2" aria-labelledby="game-heading">
                 <div class="flex justify-between items-center gap-2">
@@ -96,10 +98,10 @@
             <section class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="config-panel-title">
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-300 font-semibold truncate">Number settings</h2>
-                    <span id="roi-badge" class="text-[10px] bg-amber-500/10 text-yellow-200 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0" title="Expected return of a base-game Quick Draw ticket from the in-app prize table. Extra is not included. Not an official quote and not a guarantee.">Base model EV: …</span>
+                    <span id="roi-badge" hidden class="text-[10px] bg-amber-500/10 text-yellow-200 border border-yellow-500/40 px-2 py-0.5 rounded-full font-bold whitespace-nowrap shrink-0"></span>
                 </div>
 
-                <div id="pro-cluster-box" class="bg-[#050814] p-2.5 rounded-lg border border-cyan-500/50 space-y-1.5">
+                <div id="pro-cluster-box" hidden class="bg-[#050814] p-2.5 rounded-lg border border-cyan-500/50 space-y-1.5">
                     <div class="flex justify-between items-center gap-2">
                         <span class="text-[10px] uppercase tracking-wider text-cyan-200 font-black">Cluster spot heuristic</span>
                         <span id="cluster-pro-badge" class="text-[10px] bg-yellow-950 text-yellow-200 px-2 py-0.5 rounded border border-yellow-600 font-mono">Subscription</span>
@@ -131,7 +133,7 @@
 
                 <div class="grid grid-cols-2 gap-3 pt-1">
                     <div>
-                        <label for="base-wager" class="block text-xs text-yellow-200 mb-1">Base wager ($)</label>
+                        <label for="base-wager" class="block text-xs text-yellow-200 mb-1">Base amount ($)</label>
                         <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-base font-bold text-yellow-300">
                             <option value="1" selected>$1</option><option value="2">$2</option><option value="3">$3</option>
                             <option value="4">$4</option><option value="5">$5</option><option value="10">$10</option>
@@ -155,19 +157,19 @@
                         </select>
                     </div>
                     <div>
-                        <span id="cost-label" class="block text-xs text-blue-200 mb-1">Total slip cost</span>
+                        <span id="cost-label" class="block text-xs text-blue-200 mb-1">Logged cost</span>
                         <div id="calc-cost-display" aria-labelledby="cost-label" aria-live="polite" class="w-full bg-[#050814] border border-[#1d4ed8] rounded-lg p-2 text-sm font-bold text-emerald-300 flex items-center justify-center font-mono min-h-[42px]">$10.00</div>
                     </div>
                 </div>
 
-                <button type="button" id="synthesize-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-3 px-4 rounded-xl min-h-[44px] text-sm">Synthesize numbers</button>
-                <p class="text-xs text-slate-300">Suggestions are weighted counts from the draws loaded in the app. They are not predictions of future draws.</p>
+                <button type="button" id="synthesize-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-3 px-4 rounded-xl min-h-[44px] text-sm">Make random or stats-based number picks</button>
+                <p id="picks-disclaimer" class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
             </section>
 
             <section id="play-card" class="bg-[#0b132b] p-5 rounded-xl border-2 border-yellow-400 space-y-4 hidden" aria-labelledby="play-card-title">
                 <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3 gap-3">
                     <div>
-                        <h2 id="play-card-title" class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">Numbers synthesized</h2>
+                        <h2 id="play-card-title" class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">Random or stats-based number picks</h2>
                         <div id="card-draw-label" class="text-base font-black text-white mt-0.5">…</div>
                         <p id="card-algorithm-reason" class="text-[11px] text-cyan-200 font-medium mt-0.5">…</p>
                     </div>
@@ -177,7 +179,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-5 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
+                <div class="grid grid-cols-4 gap-1 text-center bg-[#050814] p-2 rounded-lg border border-[#1d4ed8]">
                     <div class="p-1 bg-[#0b132b] rounded border border-slate-700">
                         <span class="text-[10px] uppercase text-blue-200 block">Spot</span>
                         <span id="slip-spot-box" class="font-black text-yellow-300 text-[11px]">4-SPOT</span>
@@ -194,23 +196,20 @@
                         <span class="text-[10px] uppercase text-blue-200 block">Games</span>
                         <span id="slip-games-box" class="font-black text-emerald-300 text-[11px]">5</span>
                     </div>
-                    <div class="p-1 bg-[#0b132b] rounded border border-slate-700" title="Base-game model from the in-app Quick Draw table. Extra is not included.">
-                        <span class="text-[10px] uppercase text-amber-200 block">Base EV</span>
-                        <span id="slip-roi-box" class="font-black text-amber-200 text-[11px]">…</span>
-                    </div>
                 </div>
 
                 <div>
                     <div class="flex justify-between items-center mb-2 gap-2">
-                        <span class="text-xs text-blue-200 font-bold">Suggested numbers</span>
+                        <span class="text-xs text-blue-200 font-bold">Random or stats-based number picks</span>
                         <span id="card-cost-label" class="text-[11px] font-mono text-yellow-200 bg-yellow-950/60 px-2 py-0.5 rounded border border-yellow-700">$2.00/gm × 5 gms</span>
                     </div>
                     <div id="number-grid" class="flex flex-wrap gap-2.5 py-1"></div>
                 </div>
 
-                <button type="button" id="save-slip-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-4 rounded-lg min-h-[44px] text-xs">Save slip on this device and grade it</button>
+                <button type="button" id="save-slip-button" class="w-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black py-2.5 px-4 rounded-lg min-h-[44px] text-xs">Save these picks on this device</button>
+                <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
 
-                <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
+                <div id="ticket-import-box" hidden class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                     <div class="flex items-center justify-between gap-2">
                         <span class="text-[11px] uppercase tracking-wider text-cyan-200 font-bold">Ticket photo import</span>
                         <span class="text-[10px] text-amber-200 font-bold">Coming soon</span>
@@ -231,7 +230,7 @@
                 </div>
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
                     <div class="text-xs font-bold text-yellow-200">Heatmap detail is in the subscription</div>
-                    <p class="text-[11px] text-blue-100">The grid still shows counts from the loaded draws. Number detail, the repeat rate, Kelly, and Monte Carlo unlock with Monthly or Annual.</p>
+                    <p class="text-[11px] text-blue-100">The grid shows how often each number appeared in the loaded draws. Number detail unlocks with Monthly or Annual.</p>
                     <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-3 rounded text-[11px] min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
                 </div>
                 <div id="heatmap-grid-container">
@@ -271,7 +270,7 @@
                         </div>
                     </div>
                     <p class="bg-[#0b132b] p-2.5 rounded border border-cyan-500/40 text-[11px] text-slate-200">Repeat rate is the share of loaded draws that contained this number whose following loaded draw also contained it. It is not a prediction.</p>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div id="stake-model-row" hidden class="grid grid-cols-2 gap-2">
                         <button type="button" id="kelly-card" class="text-left bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-yellow-500/45 space-y-1">
                             <span class="block text-[11px] font-bold text-yellow-200">Kelly sizing</span>
                             <span id="visual-kelly-bar" class="block w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-yellow-500/30" aria-hidden="true">
@@ -290,7 +289,7 @@
                 </div>
             </section>
 
-            <section class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 space-y-3" aria-labelledby="scratch-heading">
+            <section id="scratch-section" hidden class="bg-[#0b132b] p-4 rounded-xl border border-yellow-500 space-y-3" aria-labelledby="scratch-heading">
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="scratch-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Scratch-off log</h2>
                     <span id="scratch-pro-badge" class="text-[10px] bg-yellow-950 text-yellow-200 px-2.5 py-0.5 rounded border border-yellow-600 font-mono">Subscription</span>
@@ -302,7 +301,7 @@
                     <button type="button" data-scroll-plans class="inline-block bg-yellow-400 text-slate-950 font-black py-1.5 px-4 rounded text-xs min-h-[36px]">See plans · $1.99/mo or $17/yr</button>
                 </div>
                 <div id="scratch-active-form" class="space-y-3" style="display: none;">
-                    <div class="bg-amber-950 border border-amber-400/70 rounded-lg p-2.5 text-[11px] text-amber-50">Sample data. These odds, remaining top prizes, EV, and ROI are placeholders. They are not official and they are not live.</div>
+                    <div class="bg-amber-950 border border-amber-400/70 rounded-lg p-2.5 text-[11px] text-amber-50">Hidden unless the scratch-off flag is on. These figures are not a live inventory.</div>
                     <div class="bg-[#050814] p-3 rounded-lg border border-[#1d4ed8] space-y-2">
                         <div class="flex justify-between items-center text-xs gap-2">
                             <label for="scratch-game-selector" class="text-[10px] uppercase tracking-wider text-cyan-200 font-bold">Sample game</label>
@@ -319,7 +318,7 @@
                             <span id="scratch-game-title-display" class="font-bold text-white text-xs">Sample: $50,000 Cashword</span>
                             <span id="scratch-ev-badge" class="text-[11px] text-emerald-300 font-mono font-bold">Sample EV: +$2.15</span>
                         </div>
-                        <p class="text-[11px] text-slate-300 bg-[#0b132b] p-1.5 rounded border border-slate-700">The numbers below are the sample card for the name you picked. A positive sample EV is not a claim that the ticket has an edge.</p>
+                        <p class="text-[11px] text-slate-300 bg-[#0b132b] p-1.5 rounded border border-slate-700">Sample figures only. They are not a live inventory.</p>
                         <div class="grid grid-cols-3 gap-2 text-center text-[11px] pt-1">
                             <div class="bg-[#111c38] p-1.5 rounded">
                                 <span class="text-blue-200 block">Sample top prizes</span>
@@ -330,7 +329,7 @@
                                 <span id="stat-odds" class="font-bold text-cyan-200">1 in 3.42</span>
                             </div>
                             <div class="bg-[#111c38] p-1.5 rounded">
-                                <span class="text-blue-200 block">Sample ROI</span>
+                                <span class="text-blue-200 block">Sample figure</span>
                                 <span id="stat-roi" class="font-bold text-emerald-300">+14.2%</span>
                             </div>
                         </div>
@@ -369,7 +368,9 @@
             <section id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] space-y-3" aria-labelledby="plans-heading">
                 <div>
                     <h2 id="plans-heading" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Draw Buddy plans</h2>
-                    <p class="text-[11px] text-blue-100 mt-1">One subscription is meant to unlock the same tools: the cluster heuristic, heatmap detail, Kelly sizing, Monte Carlo, and the scratch-off log. Billing is not connected yet, so the buttons below do not unlock them.</p>
+                    <p class="text-[11px] text-blue-100 mt-1">Draw Buddy Premium is the paid version of this app. This preview does not take payment and does not sell tickets.</p>
+                    <p id="paywall-disclosure" class="text-xs text-slate-200">Draw Buddy Premium: $1.99 per month or $17 per year. Your subscription renews automatically at the same price each month or year until you cancel. Payment is charged to your Apple ID or Google Play account. Cancel anytime, at least 24 hours before the end of the current period, in Settings &gt; your name &gt; Subscriptions or Google Play &gt; Payments &amp; subscriptions &gt; Subscriptions, or from Draw Buddy's Account screen. <a class="underline text-yellow-300" href="./terms.html">Terms of Use</a> <a class="underline text-yellow-300" href="./privacy.html">Privacy Policy</a></p>
+                    <p class="text-xs text-slate-200">$1.99/mo or $17/yr. Auto-renews until canceled. 18+.</p>
                 </div>
                 <div class="space-y-3">
                     <div class="bg-[#050814] p-3.5 rounded-lg border border-[#1d4ed8] space-y-2">
@@ -403,15 +404,15 @@
                 <p id="history-data-note" class="text-xs text-slate-300">Grades use the draws loaded in this session.</p>
                 <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
                     <div>
-                        <div class="text-[10px] uppercase text-blue-200">Total wagered</div>
+                        <div class="text-[10px] uppercase text-blue-200">Logged cost</div>
                         <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase text-blue-200">Total payout</div>
+                        <div class="text-[10px] uppercase text-blue-200">Recorded return</div>
                         <div id="archive-total-payout" class="font-mono font-bold text-yellow-300 text-xs">$0.00</div>
                     </div>
                     <div>
-                        <div class="text-[10px] uppercase text-blue-200">Net</div>
+                        <div class="text-[10px] uppercase text-blue-200">Difference</div>
                         <div id="archive-net-pnl" class="font-mono font-bold text-cyan-200 text-xs">$0.00</div>
                     </div>
                 </div>
@@ -420,9 +421,9 @@
                         <thead class="sticky top-0 bg-[#0b132b]">
                             <tr class="text-blue-200 border-b border-[#1d4ed8]">
                                 <th scope="col" class="pb-2 font-semibold">Draws</th>
-                                <th scope="col" class="pb-2 font-semibold">Slip</th>
+                                <th scope="col" class="pb-2 font-semibold">Picks</th>
                                 <th scope="col" class="pb-2 font-semibold">Progress</th>
-                                <th scope="col" class="pb-2 text-right font-semibold">Net</th>
+                                <th scope="col" class="pb-2 text-right font-semibold">Difference</th>
                             </tr>
                         </thead>
                         <tbody id="ledger-body">

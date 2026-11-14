@@ -1,6 +1,6 @@
 // App-shell cache only. Draw rows live on supabase.co and are never intercepted,
 // so a cached response cannot stand in for newer draw data.
-const CACHE = "draw-buddy-shell-v4";
+const CACHE = "draw-buddy-shell-v5";
 const SHELL = [
     "./index.html",
     "./terms.html",

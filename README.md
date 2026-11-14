@@ -26,7 +26,7 @@ Draw Buddy is a statistical entertainment tool from NAV Analytics LLC. It does n
 - Draw rows come from the configured Supabase project when the request succeeds. The screen says they are loaded from that database. It does not call them an official feed.
 - If the request fails or the device is offline before a load, the app shows **sample draws** generated on the device and says so. Grades against those draws are not official results.
 - Quick Draw base-game expected value, Kelly fraction, and Monte Carlo use the prize table in `js/odds.js`. That table is not an official quote, and Extra is not included. Powerball and Mega Millions do not get a made-up ROI.
-- Scratch-off odds, remaining prizes, and EV are **sample data**. Barcode scanning and ticket-photo import are **coming soon** and do not claim a state-database check.
+- The default build is a clean demo. `DEMO_FLAGS` in `js/config.js` hides scratch-off odds, ticket-photo import, stake models, the cluster helper, and the expected-value badge. Sportsbook and courier links are not in the page. Number picks use the label “random or stats-based number picks,” with the no-odds disclaimer beside them.
 - The Markov & Kelly button is **coming soon**. The cluster control is a count heuristic with fixed wager steps.
 - Slips are saved in `localStorage` on the device. Nothing is uploaded as a “cloud” ticket.
 - The countdown is a local timer, not the official draw clock.

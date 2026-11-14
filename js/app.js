@@ -1,4 +1,5 @@
 import {
+    DEMO_FLAGS,
     DRAW_BUDDY_CONFIG,
     annualSavings,
     formatPlanMoney,
@@ -209,11 +210,10 @@ function setDataBanner(message, tone) {
 function updateHistoryNote() {
     const note = $("history-data-note");
     if (!note) return;
-    if (state.dataMode === "live") {
-        note.textContent = "Grades compare saved numbers with draws loaded from the configured database. Quick Draw payouts use the in-app prize table, which is not an official quote. Other games are not priced with that table.";
-        return;
-    }
-    note.textContent = "Grades compare saved numbers with sample draws generated on this device. Those results are not official. Quick Draw payouts use the in-app prize table.";
+    const source = state.dataMode === "live"
+        ? "Loaded draws come from the configured database and are not marked as an official feed."
+        : "The draws in use are sample draws generated on this device.";
+    note.textContent = `This is your own saved list. It is not a leaderboard. ${source}`;
 }
 
 function updateNextDrawLabel() {
@@ -246,9 +246,29 @@ function updateCostDisplay() {
     if (el) el.textContent = `$${(getGameCost() * games).toFixed(2)}`;
 }
 
+function applyDemoFlags() {
+    const show = (id, on) => {
+        const el = document.getElementById(id);
+        if (el) el.hidden = !on;
+    };
+    show("roi-badge", DEMO_FLAGS.showModelEv);
+    show("pro-cluster-box", DEMO_FLAGS.showClusterHelper);
+    show("ticket-import-box", DEMO_FLAGS.showTicketPhotoImport);
+    show("stake-model-row", DEMO_FLAGS.showStakeModels);
+    show("scratch-section", DEMO_FLAGS.showScratchOff);
+}
+
 function updateOptimizedRoiBadge() {
     const badge = $("roi-badge");
     const slip = $("slip-roi-box");
+    if (!DEMO_FLAGS.showModelEv) {
+        if (badge) {
+            badge.hidden = true;
+            badge.textContent = "";
+        }
+        if (slip) slip.textContent = "";
+        return;
+    }
     if (state.activeGameKey !== "quickdraw") {
         if (badge) {
             badge.textContent = "Model EV: not estimated";
@@ -315,6 +335,7 @@ function applyEntitlements() {
         }
     }
     renderHeatmap();
+    applyDemoFlags();
 }
 
 function switchTestTier(tier) {
@@ -884,12 +905,13 @@ async function switchGameProfile(gameKey) {
     updateCostDisplay();
     updateOptimizedRoiBadge();
     updateModelBars();
+    applyDemoFlags();
 }
 
 function generateTicket(customReason) {
     const cfg = GAME_CONFIGS[state.activeGameKey];
     if (state.cachedDraws.length === 0) {
-        showDialog("Draws are not loaded", "Number synthesis waits until draws have loaded, so it does not invent a weighted set from an empty list.");
+        showDialog("Draws are not loaded", "Number picks wait until draws have loaded.");
         return;
     }
     const spotTier = parseInt($("spot-tier").value, 10) || cfg.maxSpot;
@@ -935,7 +957,7 @@ function generateTicket(customReason) {
         const sourceNote = state.dataMode === "live" ? "" : " Built from sample draws.";
         reasonEl.textContent = customReason
             ? `${customReason}${bonusNote}`
-            : `White balls are weighted from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}${sourceNote}`;
+            : `Stats-based pick from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}${sourceNote}`;
     }
 
     $("slip-spot-box").textContent = `${spotTier}-SPOT`;
@@ -967,7 +989,7 @@ function generateTicket(customReason) {
 
 function saveTicketLocally() {
     if (state.lastGeneratedNumbers.length === 0) {
-        showDialog("No slip yet", "Synthesize numbers before saving a slip.");
+        showDialog("No picks yet", "Make number picks before saving them.");
         return;
     }
     const startDrawNum = (state.latestFetchedDraw || 0) + 1;
@@ -1119,7 +1141,7 @@ function exportHistoryCsv() {
             cost,
             payout,
             net,
-            payout > 0 ? "\"Winner\"" : "\"No Hit\""
+            payout > 0 ? "\"Returned\"" : "\"None\""
         ].join(","));
     });
     const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -1202,6 +1224,7 @@ function registerServiceWorker() {
 }
 
 function bootApp() {
+    applyDemoFlags();
     bindUi();
     applyEntitlements();
     setAppState(state.currentState);
