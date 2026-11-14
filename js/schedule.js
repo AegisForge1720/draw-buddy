@@ -2,14 +2,31 @@
 // Quick Draw: every 4 minutes, with no draws from 3:25 AM until 4:00 AM ET.
 // Powerball: Monday, Wednesday, and Saturday at 10:59 PM ET.
 // Mega Millions: Tuesday and Friday at 11:00 PM ET.
-// A number is shown only when the row time sits on that schedule. Otherwise the
-// draw number and countdown stay hidden.
+//
+// Quick Draw draw numbers are shown only when the newest row's time is its own
+// draw time (it sits on the 4-minute grid and agrees with the previous row).
+// A daily open-data file shares one timestamp across many draws, which is
+// ambiguous, so the number stays blank and only the countdown to the next
+// scheduled draw is shown. Powerball and Mega Millions never use draw_number
+// as a display id. Their next draw is the next scheduled date and time.
+//
+// History is withheld ("Data unavailable") when a game is not verified, the
+// fetch fails, or the newest row is past its update window:
+// - Quick Draw posts once a day around 3:35 AM ET, so a row is normally up to
+//   about 25 hours old. Older than 49 hours is stale.
+// - Powerball and Mega Millions are stale more than 24 hours after the
+//   scheduled time of the draw that follows the newest stored draw. That
+//   scheduled time is the expected posting.
 
 const ET = "America/New_York";
 const BLOCK_MS = 4 * 60 * 1000;
 const SNAP_TOLERANCE_MS = 30 * 1000;
 const BREAK_START_MINUTES = 3 * 60 + 25;
 const BREAK_END_MINUTES = 4 * 60;
+
+export const DATA_UNAVAILABLE = "Data unavailable";
+export const QUICK_DRAW_STALE_AFTER_MS = 49 * 60 * 60 * 1000;
+export const WEEKLY_POSTING_GRACE_MS = 24 * 60 * 60 * 1000;
 
 export const WEEKLY_DRAW_SCHEDULE = {
     powerball: { weekdays: ["Mon", "Wed", "Sat"], hour: 22, minute: 59 },
@@ -83,6 +100,20 @@ export function formatDrawDate(value) {
     const parsed = parseDateOnly(value);
     if (!parsed) return null;
     return `${MONTHS[parsed.month - 1]} ${parsed.day}, ${parsed.year}`;
+}
+
+export function formatScheduledDraw(date) {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return null;
+    const formatted = new Intl.DateTimeFormat("en-US", {
+        timeZone: ET,
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    }).format(date);
+    return `${formatted} ET`;
 }
 
 export function formatCountdown(seconds) {
@@ -177,6 +208,19 @@ export function nextWeeklyDrawAfter(game, date) {
     return null;
 }
 
+export function upcomingWeeklyDraws(game, now, count) {
+    const draws = [];
+    let cursor = now;
+    const total = Math.max(0, Number(count) || 0);
+    for (let i = 0; i < total; i++) {
+        const next = nextWeeklyDrawAfter(game, cursor);
+        if (!next) break;
+        draws.push(next);
+        cursor = next;
+    }
+    return draws;
+}
+
 export function latestWeeklyDraw(game, date) {
     const start = etParts(date);
     for (let i = 0; i <= 10; i++) {
@@ -197,20 +241,6 @@ function countQuickDrawSlots(after, through) {
         if (!next || next.getTime() <= cursor.getTime()) return null;
         cursor = next;
         if (count > 200000) return null;
-    }
-    return count;
-}
-
-function countWeeklySlots(game, after, through) {
-    let count = 0;
-    let cursor = nextWeeklyDrawAfter(game, after);
-    const end = through.getTime();
-    while (cursor && cursor.getTime() <= end) {
-        count += 1;
-        const next = nextWeeklyDrawAfter(game, cursor);
-        if (!next || next.getTime() <= cursor.getTime()) return null;
-        cursor = next;
-        if (count > 5000) return null;
     }
     return count;
 }
@@ -244,48 +274,96 @@ function rowHasTime(game, row) {
     return parseDateOnly(row.draw_date) !== null;
 }
 
-function hidden(reason, stale = true) {
+function clockFields(game, now) {
+    const nextDrawTime = game === "quickdraw"
+        ? nextQuickDrawSlotAfter(now)
+        : nextWeeklyDrawAfter(game, now);
     return {
-        visible: false,
-        stale,
-        reason,
-        nextDrawNumber: null,
-        countdownSeconds: null,
-        nextDrawTime: null
+        nextDrawTime,
+        countdownSeconds: nextDrawTime
+            ? Math.ceil((nextDrawTime.getTime() - now.getTime()) / 1000)
+            : null
     };
 }
 
+function projection(game, now, extra) {
+    return {
+        visible: false,
+        showNumber: false,
+        stale: true,
+        reason: "countdown-only",
+        nextDrawNumber: null,
+        ...clockFields(game, now),
+        ...extra
+    };
+}
+
+function newestInstant(game, row) {
+    if (!row) return null;
+    if (game === "quickdraw") return parseInstant(row.created_at);
+    const date = parseDateOnly(row.draw_date);
+    if (!date) return null;
+    return weeklyDrawInstant(game, date.year, date.month, date.day);
+}
+
+// verified: DATA_VERIFIED[game]. fetchFailed: the read threw, returned an error,
+// or came back empty. A weekly date that is not a draw day cannot be placed in
+// the posting window, so those rows are unavailable too.
+export function historyStatus({ game, newest = null, now = new Date(), verified = true, fetchFailed = false }) {
+    if (verified !== true) return { available: false, reason: "unverified" };
+    if (fetchFailed || !newest) return { available: false, reason: "fetch-failed" };
+    const rowTime = newestInstant(game, newest);
+    if (!rowTime) return { available: false, reason: game === "quickdraw" ? "no-timestamp" : "off-schedule" };
+    if (game === "quickdraw") {
+        const age = now.getTime() - rowTime.getTime();
+        if (age > QUICK_DRAW_STALE_AFTER_MS) return { available: false, reason: "stale" };
+        return { available: true, reason: "fresh" };
+    }
+    if (!WEEKLY_DRAW_SCHEDULE[game]) return { available: false, reason: "off-schedule" };
+    const nextPosting = nextWeeklyDrawAfter(game, rowTime);
+    if (!nextPosting) return { available: false, reason: "off-schedule" };
+    if (now.getTime() > nextPosting.getTime() + WEEKLY_POSTING_GRACE_MS) {
+        return { available: false, reason: "stale" };
+    }
+    return { available: true, reason: "fresh" };
+}
+
 export function projectNextDraw({ game, newest, previous = null, now = new Date() }) {
-    if (!WEEKLY_DRAW_SCHEDULE[game] && game !== "quickdraw") return hidden("off-schedule");
-    if (!rowHasTime(game, newest)) return hidden("no-timestamp");
+    if (!WEEKLY_DRAW_SCHEDULE[game] && game !== "quickdraw") {
+        return projection(game, now, { reason: "off-schedule", countdownSeconds: null, nextDrawTime: null });
+    }
+    if (WEEKLY_DRAW_SCHEDULE[game]) {
+        return projection(game, now, { stale: false, reason: "schedule-date" });
+    }
+
+    if (!rowHasTime(game, newest)) return projection(game, now, { reason: "no-timestamp" });
     const anchor = anchorFromRow(game, newest);
-    if (!anchor) return hidden("off-schedule");
-    if (anchor.time.getTime() > now.getTime() + SNAP_TOLERANCE_MS) return hidden("future", false);
+    if (!anchor) return projection(game, now, { reason: "off-schedule" });
+    if (anchor.time.getTime() > now.getTime() + SNAP_TOLERANCE_MS) {
+        return projection(game, now, { reason: "future", stale: false });
+    }
 
     if (previous) {
         const prevAnchor = anchorFromRow(game, previous);
         const delta = anchor.drawNumber - Number(previous.draw_number);
-        if (!prevAnchor || !Number.isInteger(delta) || delta <= 0) return hidden("contradicts-previous");
-        const between = game === "quickdraw"
-            ? countQuickDrawSlots(prevAnchor.time, anchor.time)
-            : countWeeklySlots(game, prevAnchor.time, anchor.time);
-        if (between !== delta) return hidden("contradicts-previous");
+        if (!prevAnchor || !Number.isInteger(delta) || delta <= 0) {
+            return projection(game, now, { reason: "contradicts-previous" });
+        }
+        const between = countQuickDrawSlots(prevAnchor.time, anchor.time);
+        if (between !== delta) return projection(game, now, { reason: "contradicts-previous" });
     }
 
-    const nextTime = game === "quickdraw" ? nextQuickDrawSlotAfter(now) : nextWeeklyDrawAfter(game, now);
-    const latest = game === "quickdraw" ? latestQuickDrawSlot(now) : latestWeeklyDraw(game, now);
-    if (!nextTime || !latest) return hidden("off-schedule");
-    const steps = game === "quickdraw"
-        ? countQuickDrawSlots(anchor.time, nextTime)
-        : countWeeklySlots(game, anchor.time, nextTime);
-    if (steps === null || steps < 1) return hidden("off-schedule");
+    const clock = clockFields(game, now);
+    const latest = latestQuickDrawSlot(now);
+    if (!clock.nextDrawTime || !latest) return projection(game, now, { reason: "off-schedule" });
+    const steps = countQuickDrawSlots(anchor.time, clock.nextDrawTime);
+    if (steps === null || steps < 1) return projection(game, now, { reason: "off-schedule" });
     const stale = anchor.time.getTime() < latest.getTime();
-    return {
+    return projection(game, now, {
         visible: true,
+        showNumber: true,
         stale,
         reason: stale ? "projected" : "current",
-        nextDrawNumber: anchor.drawNumber + steps,
-        countdownSeconds: Math.ceil((nextTime.getTime() - now.getTime()) / 1000),
-        nextDrawTime: nextTime
-    };
+        nextDrawNumber: anchor.drawNumber + steps
+    });
 }

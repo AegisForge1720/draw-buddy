@@ -44,6 +44,32 @@ export const DEMO_FLAGS = {
     showAffiliateLinks: false
 };
 
+// Per game. False withholds every history-based stat for that game.
+export const DATA_VERIFIED = {
+    quickdraw: true,
+    powerball: true,
+    megamillions: true
+};
+
+// Public draw tables only. Archived rows are stored in the archive schema and
+// are never queried from the client.
+export const PUBLIC_DRAW_TABLES = {
+    quickdraw: "quickdraw_history",
+    powerball: "powerball_history",
+    megamillions: "megamillions_history"
+};
+
+export function publicDrawTable(gameKey) {
+    const name = PUBLIC_DRAW_TABLES[gameKey];
+    if (typeof name !== "string" || name.length === 0) {
+        throw new Error("Unknown draw game");
+    }
+    if (name.includes(".") || name.toLowerCase().includes("archive")) {
+        throw new Error("Refusing a non-public draw table");
+    }
+    return name;
+}
+
 export const DRAW_BUDDY_CONFIG = {
     SUPABASE_URL: "https://kcvtuzadkyripylluqlj.supabase.co",
     SUPABASE_PUBLISHABLE_KEY: "sb_publishable_540NEFDiVfOYxHeRyemjjg_Lrrce0PA",

@@ -35,6 +35,16 @@ test("heatmap copy uses one scale and names observed and expected repeat rates",
 test("results show a last-updated line and the delay notice", () => {
     assert.match(html, /id="results-updated"/);
     assert.match(html, /Results may be delayed; check official sources\./);
+    assert.match(html, /Quick Draw results update once a day from New York State open data \(data\.ny\.gov\)\./);
+    assert.match(html, /id="history-unavailable"[^>]*>Data unavailable/);
     assert.match(app, /Last updated /);
     assert.match(app, /formatDrawDate/);
+    assert.match(app, /publicDrawTable/);
+    assert.match(app, /\.schema\("public"\)/);
+    assert.equal(app.includes("archive."), false);
+    assert.equal(app.includes("live feed"), false);
+    assert.equal(app.includes("Live data"), false);
+    assert.equal(app.includes('=== "live"'), false);
+    const visible = html.replace(/aria-live="[^"]*"/g, "");
+    assert.equal(/\blive\b/i.test(visible), false);
 });

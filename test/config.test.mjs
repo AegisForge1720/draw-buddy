@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { annualSavings, isBrowserSafeSupabaseKey } from "../js/config.js";
+import { DATA_VERIFIED, PUBLIC_DRAW_TABLES, annualSavings, isBrowserSafeSupabaseKey, publicDrawTable } from "../js/config.js";
 import { isSubscribed } from "../js/entitlement.js";
 
 test("annual plan savings stay $6.88 versus $1.99 monthly", () => {
@@ -16,6 +16,20 @@ test("browser key check rejects a service role JWT and accepts a publishable key
     assert.equal(isBrowserSafeSupabaseKey("sb_publishable_example"), true);
     assert.equal(isBrowserSafeSupabaseKey("sb_secret_example"), false);
     assert.equal(isBrowserSafeSupabaseKey(""), false);
+});
+
+test("verified games read only the three public draw tables", () => {
+    assert.deepEqual(DATA_VERIFIED, { quickdraw: true, powerball: true, megamillions: true });
+    assert.deepEqual(PUBLIC_DRAW_TABLES, {
+        quickdraw: "quickdraw_history",
+        powerball: "powerball_history",
+        megamillions: "megamillions_history"
+    });
+    assert.equal(publicDrawTable("quickdraw"), "quickdraw_history");
+    assert.equal(publicDrawTable("powerball"), "powerball_history");
+    assert.equal(publicDrawTable("megamillions"), "megamillions_history");
+    assert.throws(() => publicDrawTable("archive"));
+    assert.equal(Object.values(PUBLIC_DRAW_TABLES).some((name) => name.includes("archive")), false);
 });
 
 test("production entitlement stays locked unless a store result says otherwise", () => {

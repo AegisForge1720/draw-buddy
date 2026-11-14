@@ -25,7 +25,7 @@ Draw Buddy is a statistical entertainment tool from NAV Analytics LLC. It does n
 
 - Draw rows come from the configured Supabase project when the request succeeds. The screen says they are draw results stored by Draw Buddy, with a last-updated time. It does not call them an official lottery feed.
 - If the request fails, or the rows have no timestamp, the results stay hidden. Sample numbers generated on the device are not shown as results and are not used to grade saved picks.
-- Saved picks are stored in `localStorage` on the device. A match count is recorded only for live Quick Draw rows that have a timestamp. The history does not show a dollar return.
+- Saved picks are stored in `localStorage` on the device. A match count is recorded only for loaded Quick Draw rows that have a timestamp. The history does not show a dollar return.
 - Ticket-photo import stays off. Sportsbook and courier links are not in the page. Number picks use the label “random or stats-based number picks,” with the no-odds disclaimer beside them and on the count heatmap.
 - There is no visible draw countdown. Quick Draw copy says draws are about every 4 minutes, and the page refreshes those rows in the background.
 

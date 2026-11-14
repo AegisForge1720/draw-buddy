@@ -3,8 +3,13 @@ import test from "node:test";
 import {
     etInstant,
     etParts,
+    DATA_UNAVAILABLE,
+    QUICK_DRAW_STALE_AFTER_MS,
+    WEEKLY_POSTING_GRACE_MS,
     formatCountdown,
     formatDrawDate,
+    formatScheduledDraw,
+    historyStatus,
     isQuickDrawSlot,
     nextQuickDrawSlotAfter,
     projectNextDraw
@@ -88,7 +93,7 @@ test("a Quick Draw row one draw behind still projects across the break", () => {
     assert.equal(projection.countdownSeconds, 20 * 60);
 });
 
-test("stale or unusable draw times hide the next-draw number and countdown", () => {
+test("unusable Quick Draw times hide the number and keep the scheduled countdown", () => {
     const now = at("2026-11-14T08:40:00.000Z");
     const missing = projectNextDraw({
         game: "quickdraw",
@@ -96,8 +101,9 @@ test("stale or unusable draw times hide the next-draw number and countdown", () 
         now
     });
     assert.equal(missing.visible, false);
+    assert.equal(missing.showNumber, false);
     assert.equal(missing.nextDrawNumber, null);
-    assert.equal(missing.countdownSeconds, null);
+    assert.equal(typeof missing.countdownSeconds, "number");
     assert.equal(missing.reason, "no-timestamp");
 
     const offSchedule = projectNextDraw({
@@ -106,6 +112,8 @@ test("stale or unusable draw times hide the next-draw number and countdown", () 
         now
     });
     assert.equal(offSchedule.visible, false);
+    assert.equal(offSchedule.showNumber, false);
+    assert.equal(typeof offSchedule.countdownSeconds, "number");
     assert.equal(offSchedule.reason, "off-schedule");
 
     const contradicts = projectNextDraw({
@@ -131,16 +139,10 @@ test("stale or unusable draw times hide the next-draw number and countdown", () 
         previous: { draw_number: 2025999, draw_date: "2026-11-09" },
         now
     });
-    assert.equal(duplicatePowerball.visible, false);
-    assert.equal(duplicatePowerball.reason, "contradicts-previous");
-
-    const wrongDay = projectNextDraw({
-        game: "powerball",
-        newest: { draw_number: 80, draw_date: "2026-11-10" },
-        now
-    });
-    assert.equal(wrongDay.visible, false);
-    assert.equal(wrongDay.reason, "off-schedule");
+    assert.equal(duplicatePowerball.showNumber, false);
+    assert.equal(duplicatePowerball.nextDrawNumber, null);
+    assert.equal(duplicatePowerball.reason, "schedule-date");
+    assert.equal(duplicatePowerball.nextDrawTime.toISOString(), etInstant(2026, 11, 14, 22, 59, 0).toISOString());
 });
 
 test("Powerball and Mega Millions use their weekly draw clock", () => {
@@ -150,9 +152,9 @@ test("Powerball and Mega Millions use their weekly draw clock", () => {
         previous: { draw_number: 499, draw_date: "2026-11-07" },
         now: at("2026-11-11T20:00:00.000Z")
     });
-    assert.equal(powerball.visible, true);
-    assert.equal(powerball.stale, false);
-    assert.equal(powerball.nextDrawNumber, 501);
+    assert.equal(powerball.showNumber, false);
+    assert.equal(powerball.nextDrawNumber, null);
+    assert.equal(powerball.reason, "schedule-date");
     assert.equal(powerball.nextDrawTime.toISOString(), etInstant(2026, 11, 11, 22, 59, 0).toISOString());
 
     const afterMissed = projectNextDraw({
@@ -161,9 +163,8 @@ test("Powerball and Mega Millions use their weekly draw clock", () => {
         previous: { draw_number: 499, draw_date: "2026-11-07" },
         now: at("2026-11-12T21:00:00.000Z")
     });
-    assert.equal(afterMissed.visible, true);
-    assert.equal(afterMissed.stale, true);
-    assert.equal(afterMissed.nextDrawNumber, 502);
+    assert.equal(afterMissed.showNumber, false);
+    assert.equal(afterMissed.nextDrawNumber, null);
     assert.equal(afterMissed.nextDrawTime.toISOString(), etInstant(2026, 11, 14, 22, 59, 0).toISOString());
 
     const mega = projectNextDraw({
@@ -172,10 +173,10 @@ test("Powerball and Mega Millions use their weekly draw clock", () => {
         previous: { draw_number: 99, draw_date: "2026-11-03" },
         now: at("2026-11-14T08:52:00.000Z")
     });
-    assert.equal(mega.visible, true);
-    assert.equal(mega.stale, true);
-    assert.equal(mega.nextDrawNumber, 103);
+    assert.equal(mega.showNumber, false);
+    assert.equal(mega.nextDrawNumber, null);
     assert.equal(mega.nextDrawTime.toISOString(), etInstant(2026, 11, 17, 23, 0, 0).toISOString());
+    assert.equal(/#\d/.test(formatScheduledDraw(mega.nextDrawTime)), false);
 });
 
 test("a shared Quick Draw timestamp or a date-encoded id is not a reliable draw count", () => {
@@ -187,8 +188,9 @@ test("a shared Quick Draw timestamp or a date-encoded id is not a reliable draw 
     });
     assert.equal(bulk.visible, false);
     assert.equal(bulk.reason, "contradicts-previous");
+    assert.equal(bulk.showNumber, false);
     assert.equal(bulk.nextDrawNumber, null);
-    assert.equal(bulk.countdownSeconds, null);
+    assert.equal(bulk.countdownSeconds, 120);
 
     const dated = projectNextDraw({
         game: "powerball",
@@ -196,8 +198,79 @@ test("a shared Quick Draw timestamp or a date-encoded id is not a reliable draw 
         previous: { draw_number: 20261109, draw_date: "2026-11-09" },
         now: at("2026-11-14T09:14:00.000Z")
     });
-    assert.equal(dated.visible, false);
-    assert.equal(dated.reason, "contradicts-previous");
+    assert.equal(dated.showNumber, false);
+    assert.equal(dated.nextDrawNumber, null);
+    assert.equal(dated.reason, "schedule-date");
+    assert.equal(dated.nextDrawTime.toISOString(), etInstant(2026, 11, 14, 22, 59, 0).toISOString());
+    assert.match(formatScheduledDraw(dated.nextDrawTime), /Nov 14, 2026/);
+    assert.match(formatScheduledDraw(dated.nextDrawTime), /10:59 PM ET/);
+});
+
+test("history is withheld when unverified, unread, or past the update window", () => {
+    const now = at("2026-11-14T12:00:00.000Z");
+    const fresh = new Date(now.getTime() - (25 * 60 * 60 * 1000)).toISOString();
+    assert.equal(historyStatus({
+        game: "quickdraw",
+        newest: { draw_number: 1, created_at: fresh },
+        now,
+        verified: true
+    }).available, true);
+    assert.equal(historyStatus({
+        game: "quickdraw",
+        newest: { draw_number: 1, created_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS).toISOString() },
+        now,
+        verified: true
+    }).available, true);
+    const quickStale = historyStatus({
+        game: "quickdraw",
+        newest: { draw_number: 1, created_at: new Date(now.getTime() - QUICK_DRAW_STALE_AFTER_MS - 1).toISOString() },
+        now,
+        verified: true
+    });
+    assert.equal(quickStale.available, false);
+    assert.equal(quickStale.reason, "stale");
+    assert.equal(historyStatus({
+        game: "quickdraw",
+        newest: { draw_number: 1, created_at: fresh },
+        now,
+        verified: false
+    }).reason, "unverified");
+    assert.equal(historyStatus({
+        game: "quickdraw",
+        newest: null,
+        now,
+        verified: true,
+        fetchFailed: true
+    }).reason, "fetch-failed");
+
+    const posting = etInstant(2026, 11, 14, 22, 59, 0);
+    assert.equal(historyStatus({
+        game: "powerball",
+        newest: { draw_number: 20261111, draw_date: "2026-11-11" },
+        now: new Date(posting.getTime() + WEEKLY_POSTING_GRACE_MS),
+        verified: true
+    }).available, true);
+    const weeklyStale = historyStatus({
+        game: "powerball",
+        newest: { draw_number: 20261111, draw_date: "2026-11-11" },
+        now: new Date(posting.getTime() + WEEKLY_POSTING_GRACE_MS + 1),
+        verified: true
+    });
+    assert.equal(weeklyStale.available, false);
+    assert.equal(weeklyStale.reason, "stale");
+    assert.equal(historyStatus({
+        game: "megamillions",
+        newest: { draw_number: 20261113, draw_date: "2026-11-13" },
+        now: at("2026-11-14T15:00:00.000Z"),
+        verified: true
+    }).available, true);
+    assert.equal(historyStatus({
+        game: "powerball",
+        newest: { draw_number: 80, draw_date: "2026-11-10" },
+        now,
+        verified: true
+    }).reason, "off-schedule");
+    assert.equal(DATA_UNAVAILABLE, "Data unavailable");
 });
 
 test("countdown and date labels stay readable", () => {

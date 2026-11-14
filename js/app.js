@@ -1,9 +1,11 @@
 import {
+    DATA_VERIFIED,
     DEMO_FLAGS,
     DRAW_BUDDY_CONFIG,
     annualSavings,
     formatPlanMoney,
-    isBrowserSafeSupabaseKey
+    isBrowserSafeSupabaseKey,
+    publicDrawTable
 } from "./config.js";
 import { readAgePass } from "./age.js";
 import { startSiteGate } from "./compliance.js";
@@ -21,7 +23,15 @@ import {
 import { isSubscribed as entitlementIsSubscribed } from "./entitlement.js";
 import { gradeTickets } from "./grading.js";
 import { expectedOneStepRepeatRate, oneStepRepeatRate } from "./odds.js";
-import { formatCountdown, formatDrawDate, projectNextDraw } from "./schedule.js";
+import {
+    DATA_UNAVAILABLE,
+    formatCountdown,
+    formatDrawDate,
+    formatScheduledDraw,
+    historyStatus,
+    projectNextDraw,
+    upcomingWeeklyDraws
+} from "./schedule.js";
 
 const { PLAN_MONTHLY_PRICE, PLAN_ANNUAL_PRICE, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } = DRAW_BUDDY_CONFIG;
 
@@ -34,7 +44,6 @@ const GAME_CONFIGS = {
         shortName: "Quick Draw",
         totalNumbers: 80,
         drawnCount: 20,
-        tableName: "quickdraw_history",
         maxSpot: 4,
         hasBonus: false,
         wagerOptions: [1, 2, 3, 4, 5, 10],
@@ -46,7 +55,6 @@ const GAME_CONFIGS = {
         shortName: "Powerball",
         totalNumbers: 69,
         drawnCount: 5,
-        tableName: "powerball_history",
         bonusTotal: 26,
         maxSpot: 5,
         hasBonus: true,
@@ -60,7 +68,6 @@ const GAME_CONFIGS = {
         shortName: "Mega Millions",
         totalNumbers: 70,
         drawnCount: 5,
-        tableName: "megamillions_history",
         bonusTotal: 25,
         maxSpot: 5,
         hasBonus: true,
@@ -78,6 +85,8 @@ const state = {
     lastGeneratedNumbers: [],
     latestFetchedDraw: null,
     resultsLabeled: false,
+    historyAvailable: false,
+    fetchFailed: false,
     countdownSeconds: null,
     picksBlockSize: null,
     lastPicksGame: null,
@@ -219,7 +228,7 @@ function setSyncStatus(label, mode) {
     const statusEl = $("sync-status");
     if (!statusEl) return;
     statusEl.textContent = label;
-    const tone = mode === "live"
+    const tone = mode === "loaded"
         ? "text-emerald-300 border-emerald-500/50"
         : mode === "loading"
             ? "text-yellow-300 border-yellow-500/40"
@@ -244,26 +253,66 @@ function updateHistoryNote() {
     note.textContent = "This is your own saved list. It is not a leaderboard.";
 }
 
+const HISTORY_STAT_IDS = [
+    "stat-hits",
+    "stat-percentage",
+    "stat-last-seen",
+    "stat-markov",
+    "stat-interval",
+    "stat-density",
+    "stat-expected"
+];
+
+function refreshHistoryAvailability(now = new Date()) {
+    if (state.dataMode === "loading") {
+        state.historyAvailable = false;
+        state.resultsLabeled = false;
+        return;
+    }
+    const status = historyStatus({
+        game: state.activeGameKey,
+        newest: state.fetchFailed ? null : (state.cachedDraws[0] || null),
+        now,
+        verified: DATA_VERIFIED[state.activeGameKey] === true,
+        fetchFailed: state.fetchFailed || !state.cachedDraws[0]
+    });
+    state.historyAvailable = status.available;
+    state.resultsLabeled = status.available;
+}
+
+function setHistoryStatsUnavailable() {
+    HISTORY_STAT_IDS.forEach((id) => {
+        const el = $(id);
+        if (el) el.textContent = DATA_UNAVAILABLE;
+    });
+    const title = $("inspector-title");
+    if (title) title.textContent = DATA_UNAVAILABLE;
+}
+
 function updateResultsDisclosure() {
+    refreshHistoryAvailability();
     const newest = state.cachedDraws[0];
-    const stamp = state.dataMode === "live" ? officialResultsStamp(newest) : null;
-    state.resultsLabeled = Boolean(stamp);
-    const line = state.resultsLabeled ? d6Line(formatAsOfEt(stamp)) : "";
+    const stamp = state.historyAvailable ? officialResultsStamp(newest) : null;
+    const line = stamp ? d6Line(formatAsOfEt(stamp)) : "";
     ["results-source", "history-source"].forEach((id) => {
         const el = $(id);
         if (!el) return;
-        el.hidden = !state.resultsLabeled;
+        el.hidden = !stamp;
         el.textContent = line;
     });
     const results = $("heatmap-results");
     const hiddenNote = $("results-hidden-note");
-    if (results) results.hidden = !state.resultsLabeled;
+    const unavailable = $("history-unavailable");
+    const showStats = state.historyAvailable;
+    if (results) results.hidden = !showStats;
+    if (unavailable) unavailable.hidden = state.dataMode === "loading" || showStats;
     if (hiddenNote) {
-        hiddenNote.hidden = state.resultsLabeled;
-        hiddenNote.textContent = state.resultsLabeled
-            ? ""
-            : "Draw results are hidden. These rows have no source time.";
+        hiddenNote.hidden = true;
+        hiddenNote.textContent = "";
     }
+    if (!showStats && state.dataMode !== "loading") setHistoryStatsUnavailable();
+    const daily = $("quickdraw-daily-note");
+    if (daily) daily.hidden = state.activeGameKey !== "quickdraw";
     renderDrawSchedule();
     updateLedgerUI();
 }
@@ -290,23 +339,48 @@ function projectActiveDraw(now = new Date()) {
     });
 }
 
+function weeklyDrawLabel(draws) {
+    if (!draws || draws.length === 0) return "";
+    const first = formatScheduledDraw(draws[0]);
+    if (draws.length === 1) return first;
+    const last = formatScheduledDraw(draws[draws.length - 1]);
+    return `${first} – ${last} (${draws.length} games)`;
+}
+
 function renderDrawSchedule(now = new Date()) {
+    const weekly = state.activeGameKey !== "quickdraw";
     const projection = projectActiveDraw(now);
-    state.countdownSeconds = projection.visible ? projection.countdownSeconds : null;
+    const countdownKnown = typeof projection.countdownSeconds === "number";
+    state.countdownSeconds = countdownKnown ? projection.countdownSeconds : null;
+    const drawLabel = $("header-draw-label");
+    if (drawLabel) drawLabel.textContent = weekly ? "Next draw" : "Next draw #";
     const numberEl = $("header-next-draw");
     if (numberEl) {
-        numberEl.textContent = projection.visible ? `#${projection.nextDrawNumber}` : "—";
-        numberEl.title = projection.visible
-            ? "Next draw from the schedule and the newest loaded draw."
-            : "Hidden until the newest loaded draw matches the schedule.";
+        if (weekly && projection.nextDrawTime) {
+            numberEl.textContent = formatScheduledDraw(projection.nextDrawTime);
+            numberEl.title = "Next scheduled draw.";
+        } else if (!weekly && projection.showNumber) {
+            numberEl.textContent = `#${projection.nextDrawNumber}`;
+            numberEl.title = "Next Quick Draw number from the schedule and the newest loaded draw.";
+        } else {
+            numberEl.textContent = "—";
+            numberEl.title = weekly
+                ? "Next draw time is unavailable."
+                : "Draw number is hidden. The countdown is the next scheduled draw.";
+        }
+        numberEl.className = weekly
+            ? "font-bold text-yellow-300 text-[10px] leading-tight"
+            : "font-bold text-yellow-300 text-sm";
     }
     const countdownEl = $("header-countdown");
     if (countdownEl) {
-        countdownEl.textContent = projection.visible ? formatCountdown(projection.countdownSeconds) : "—";
+        countdownEl.textContent = countdownKnown ? formatCountdown(projection.countdownSeconds) : "—";
     }
     const expectedEl = $("stat-expected");
     const cfg = GAME_CONFIGS[state.activeGameKey];
-    if (expectedEl && cfg) expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
+    if (expectedEl && cfg && state.historyAvailable) {
+        expectedEl.textContent = formatRate(expectedOneStepRepeatRate(cfg.drawnCount, cfg.totalNumbers));
+    }
     const updated = lastUpdatedLine(state.cachedDraws[0]);
     const picksUpdated = $("picks-last-updated");
     if (picksUpdated) picksUpdated.textContent = updated;
@@ -314,10 +388,11 @@ function renderDrawSchedule(now = new Date()) {
     if (resultsUpdated) resultsUpdated.textContent = updated;
     const cardLabel = $("card-draw-label");
     if (cardLabel && state.picksBlockSize && state.lastPicksGame === state.activeGameKey) {
-        if (!projection.visible) {
-            cardLabel.hidden = true;
-            cardLabel.textContent = "";
-        } else {
+        if (weekly && projection.nextDrawTime) {
+            const draws = upcomingWeeklyDraws(state.activeGameKey, now, state.picksBlockSize);
+            cardLabel.hidden = false;
+            cardLabel.textContent = weeklyDrawLabel(draws);
+        } else if (!weekly && projection.showNumber) {
             const start = projection.nextDrawNumber;
             const games = state.picksBlockSize;
             const end = start + games - 1;
@@ -325,6 +400,9 @@ function renderDrawSchedule(now = new Date()) {
             cardLabel.textContent = games > 1
                 ? `Draws #${start} – #${end} (${games} games)`
                 : `Draw #${start}`;
+        } else {
+            cardLabel.hidden = true;
+            cardLabel.textContent = "";
         }
     }
     return projection;
@@ -397,32 +475,15 @@ function setAppState(stateCode) {
     if (badge) badge.textContent = stateCode;
 }
 
-function generateMockData(count, startDraw) {
-    const cfg = GAME_CONFIGS[state.activeGameKey];
-    const mock = [];
-    for (let i = 0; i < count; i++) {
-        const nums = [];
-        const pickCount = cfg.drawnCount;
-        while (nums.length < pickCount) {
-            const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
-            if (!nums.includes(value)) nums.push(value);
-        }
-        const entry = {
-            draw_number: startDraw - i,
-            winning_numbers: nums.sort((a, b) => a - b)
-        };
-        if (cfg.hasBonus) entry.bonus_number = Math.floor(Math.random() * cfg.bonusTotal) + 1;
-        mock.push(entry);
-    }
-    return mock;
-}
-
-function useSampleDraws(mode, message) {
-    const anchor = state.latestFetchedDraw || 3028800;
-    state.cachedDraws = generateMockData(100, anchor);
+function showHistoryUnavailable(mode) {
+    state.cachedDraws = [];
     state.dataMode = mode;
-    setSyncStatus(mode === "offline" ? "Offline" : "Sample", mode);
-    setDataBanner(message, "warn");
+    state.fetchFailed = true;
+    state.historyAvailable = false;
+    state.resultsLabeled = false;
+    state.latestFetchedDraw = null;
+    setSyncStatus("Unavailable", "offline");
+    setDataBanner(DATA_UNAVAILABLE, "warn");
     renderHeatmap();
     updateResultsDisclosure();
     updateHistoryNote();
@@ -444,81 +505,77 @@ async function fetchGameHistoryFromSupabase() {
     if (!readAgePass(localStorage)) return;
     const token = ++state.fetchToken;
     const gameKey = state.activeGameKey;
-    const cfg = GAME_CONFIGS[gameKey];
 
     if (!navigator.onLine) {
-        if (state.dataMode === "live" && state.cachedDraws.length > 0) {
+        if (state.dataMode === "loaded" && state.cachedDraws.length > 0 && state.historyAvailable) {
             handleOffline();
             return;
         }
-        useSampleDraws("offline", "You are offline. Draw results are hidden because these rows have no source time.");
+        showHistoryUnavailable("offline");
         return;
     }
 
     state.cachedDraws = [];
     state.dataMode = "loading";
+    state.fetchFailed = false;
     state.resultsLabeled = false;
+    state.historyAvailable = false;
     setSyncStatus("Loading", "loading");
     setDataBanner("Loading draws…", "calm");
     renderHeatmap();
     updateResultsDisclosure();
     if (!isBrowserSafeSupabaseKey(SUPABASE_PUBLISHABLE_KEY)) {
-        useSampleDraws("error", "The database key is not configured for the browser. Draw results are hidden.");
+        showHistoryUnavailable("error");
         return;
     }
 
     try {
         const client = await getSupabaseClient();
+        const table = publicDrawTable(gameKey);
         const { data, error } = await client
-            .from(cfg.tableName)
+            .schema("public")
+            .from(table)
             .select("*")
             .order("draw_number", { ascending: false })
             .limit(100);
         if (token !== state.fetchToken || gameKey !== state.activeGameKey) return;
         if (error || !data || data.length === 0) {
-            const reason = error
-                ? "Draw history did not load. Draw results are hidden."
-                : "No rows came back for this game. Draw results are hidden.";
-            useSampleDraws("error", reason);
+            showHistoryUnavailable("error");
             return;
         }
         state.cachedDraws = data;
-        state.dataMode = "live";
+        state.fetchFailed = false;
+        state.dataMode = "loaded";
         state.latestFetchedDraw = parseInt(data[0].draw_number, 10);
-        setSyncStatus("Loaded", "live");
+        updateResultsDisclosure();
+        if (state.historyAvailable) {
+            setSyncStatus("Loaded", "loaded");
+            setDataBanner("Draw results are labeled as stored by Draw Buddy, with a last-updated time.", "calm");
+        } else {
+            setSyncStatus("Unavailable", "offline");
+            setDataBanner(DATA_UNAVAILABLE, "warn");
+        }
         gradePendingTickets();
         renderHeatmap();
-        updateResultsDisclosure();
-        setDataBanner(
-            state.resultsLabeled
-                ? "Draw results are labeled as stored by Draw Buddy, with a last-updated time."
-                : "Draw results are hidden. These rows have no source time.",
-            state.resultsLabeled ? "calm" : "warn"
-        );
         updateHistoryNote();
     } catch {
         if (token !== state.fetchToken) return;
         state.supabaseClient = null;
-        useSampleDraws("error", "Draw history did not load. Draw results are hidden.");
+        showHistoryUnavailable("error");
     }
 }
 
 function handleOffline() {
-    if (state.dataMode === "live") {
+    if (state.dataMode === "loaded" && state.historyAvailable) {
         setSyncStatus("Offline", "offline");
-        setDataBanner("You are offline. Showing the last draws loaded in this session. They will not refresh, and they are not a live feed.", "warn");
+        setDataBanner("You are offline. Showing the last draws loaded in this session. They will not refresh.", "warn");
         return;
     }
-    if (state.cachedDraws.length === 0) {
-        useSampleDraws("offline", "You are offline. Showing sample draws generated on this device.");
-    } else {
-        setSyncStatus("Offline", "offline");
-        setDataBanner("You are offline. Showing sample draws generated on this device.", "warn");
-    }
+    showHistoryUnavailable("offline");
 }
 
 function gradePendingTickets() {
-    if (!(state.dataMode === "live" && state.activeGameKey === "quickdraw" && state.resultsLabeled)) return;
+    if (!(state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.resultsLabeled)) return;
     const draws = state.cachedDraws.filter((draw) => draw && draw.created_at);
     const updated = gradeTickets(state.sessionTickets, draws);
     if (updated) {
@@ -528,6 +585,10 @@ function gradePendingTickets() {
 }
 
 function inspectNumber(num) {
+    if (!state.historyAvailable) {
+        setHistoryStatsUnavailable();
+        return;
+    }
     if (!isSubscribed()) {
         showLocked("Heatmap detail");
         return;
@@ -576,6 +637,12 @@ function inspectNumber(num) {
 
 function renderHeatmap() {
     const cfg = GAME_CONFIGS[state.activeGameKey];
+    if (!state.historyAvailable) {
+        const grid = $("heatmap-grid");
+        if (grid) grid.replaceChildren();
+        setHistoryStatsUnavailable();
+        return;
+    }
     const lookbackSize = parseInt($("lookback-draws")?.value, 10) || 50;
     const sliceData = state.cachedDraws.slice(0, lookbackSize);
     const freq = {};
@@ -650,6 +717,9 @@ async function switchGameProfile(gameKey) {
     if (observedEl) observedEl.textContent = "n/a";
     state.cachedDraws = [];
     state.latestFetchedDraw = null;
+    state.dataMode = "loading";
+    state.fetchFailed = false;
+    state.historyAvailable = false;
     state.picksBlockSize = null;
     const playCard = $("play-card");
     if (playCard) playCard.classList.add("hidden");
@@ -712,7 +782,14 @@ function generateTicket(customReason) {
     const totalSlipCost = costPerGame * totalBlockSize;
     const sliceData = state.cachedDraws.slice(0, lookback);
     let ticket;
-    if (!state.resultsLabeled) {
+    if (!state.historyAvailable) {
+        ticket = [];
+        while (ticket.length < spotTier) {
+            const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
+            if (!ticket.includes(value)) ticket.push(value);
+        }
+        ticket.sort((a, b) => a - b);
+    } else if (!state.resultsLabeled) {
         ticket = [];
         while (ticket.length < spotTier) {
             const value = Math.floor(Math.random() * cfg.totalNumbers) + 1;
@@ -746,10 +823,14 @@ function generateTicket(customReason) {
     const reasonEl = $("card-algorithm-reason");
     if (reasonEl) {
         const bonusNote = cfg.hasBonus ? ` ${cfg.bonusName} is chosen at random.` : "";
-        reasonEl.textContent = state.resultsLabeled
-            ? `Stats-based number picks from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}`
-            : `Random number picks.${bonusNote}`;
-        if (customReason && state.resultsLabeled) reasonEl.textContent = `${customReason}${bonusNote}`;
+        if (!state.historyAvailable) {
+            reasonEl.textContent = DATA_UNAVAILABLE;
+        } else {
+            reasonEl.textContent = state.resultsLabeled
+                ? `Stats-based number picks from the last ${Math.min(lookback, sliceData.length)} loaded draws.${bonusNote}`
+                : `Random number picks.${bonusNote}`;
+            if (customReason && state.resultsLabeled) reasonEl.textContent = `${customReason}${bonusNote}`;
+        }
     }
 
     $("slip-spot-box").textContent = `${spotTier}-SPOT`;
@@ -784,7 +865,11 @@ function saveTicketLocally() {
         return;
     }
     const projection = projectActiveDraw();
-    const startDrawNum = projection.visible ? projection.nextDrawNumber : null;
+    const weeklySave = state.activeGameKey !== "quickdraw";
+    const upcoming = weeklySave && projection.nextDrawTime
+        ? upcomingWeeklyDraws(state.activeGameKey, new Date(), parseInt($("game-block").value, 10) || 5)
+        : [];
+    const startDrawNum = !weeklySave && projection.showNumber ? projection.nextDrawNumber : null;
     const spotTier = parseInt($("spot-tier").value, 10) || 4;
     const baseWager = parseFloat($("base-wager").value) || 1;
     const hasExtra = (parseInt($("extra-multiplier").value, 10) || 1) === 2;
@@ -794,6 +879,8 @@ function saveTicketLocally() {
     state.sessionTickets.unshift({
         draw: startDrawNum,
         endDraw: endDrawNum,
+        drawTime: upcoming[0] ? upcoming[0].toISOString() : null,
+        endDrawTime: upcoming.length ? upcoming[upcoming.length - 1].toISOString() : null,
         spot: spotTier,
         games: numGames,
         game: state.activeGameKey,
@@ -843,12 +930,19 @@ function updateLedgerUI() {
         const games = ticket.games || 1;
         const endDraw = ticket.endDraw || ticket.draw;
         const drawKnown = Number.isFinite(Number(ticket.draw));
-        const drawLabel = !drawKnown
-            ? "—"
-            : (games > 1 ? `#${ticket.draw}–#${endDraw}` : `#${ticket.draw}`);
+        let drawLabel = "—";
+        if (ticket.game && ticket.game !== "quickdraw") {
+            if (ticket.drawTime) {
+                const startWhen = formatScheduledDraw(new Date(ticket.drawTime));
+                const endWhen = ticket.endDrawTime ? formatScheduledDraw(new Date(ticket.endDrawTime)) : startWhen;
+                drawLabel = games > 1 && endWhen !== startWhen ? `${startWhen} – ${endWhen}` : startWhen;
+            }
+        } else if (drawKnown) {
+            drawLabel = games > 1 ? `#${ticket.draw}–#${endDraw}` : `#${ticket.draw}`;
+        }
         const row = document.createElement("tr");
         row.className = "border-b border-slate-800";
-        const progress = (state.dataMode === "live" && state.activeGameKey === "quickdraw" && state.resultsLabeled)
+        const progress = (state.dataMode === "loaded" && state.activeGameKey === "quickdraw" && state.resultsLabeled)
             ? (ticket.hits || "Pending")
             : "Not graded";
         [drawLabel, `${ticket.spot}-Spot`, progress].forEach((text, idx) => {
@@ -899,9 +993,14 @@ function exportHistoryCsv() {
         const gamesCount = ticket.games || 1;
         const endDraw = ticket.endDraw || (Number(ticket.draw) + gamesCount - 1);
         const drawKnown = Number.isFinite(Number(ticket.draw));
-        const rangeLabel = !drawKnown
-            ? ""
-            : (gamesCount > 1 ? `#${ticket.draw}-#${endDraw}` : `#${ticket.draw}`);
+        let rangeLabel = "";
+        if (ticket.game && ticket.game !== "quickdraw" && ticket.drawTime) {
+            const startWhen = formatScheduledDraw(new Date(ticket.drawTime));
+            const endWhen = ticket.endDrawTime ? formatScheduledDraw(new Date(ticket.endDrawTime)) : startWhen;
+            rangeLabel = gamesCount > 1 && endWhen !== startWhen ? `${startWhen} – ${endWhen}` : startWhen;
+        } else if (drawKnown) {
+            rangeLabel = gamesCount > 1 ? `#${ticket.draw}-#${endDraw}` : `#${ticket.draw}`;
+        }
         const gameName = GAME_CONFIGS[ticket.game] ? GAME_CONFIGS[ticket.game].name : GAME_CONFIGS[state.activeGameKey].name;
         csvRows.push([
             ticket.timestamp || nowISO,
@@ -929,6 +1028,17 @@ function startTimers() {
     if (window.drawBuddyTimer) clearInterval(window.drawBuddyTimer);
     if (window.drawBuddyRefreshTimer) clearInterval(window.drawBuddyRefreshTimer);
     window.drawBuddyTimer = setInterval(() => {
+        const before = state.historyAvailable;
+        refreshHistoryAvailability();
+        if (state.dataMode !== "loading" && before !== state.historyAvailable) {
+            updateResultsDisclosure();
+            if (!state.historyAvailable) {
+                setSyncStatus("Unavailable", "offline");
+                setDataBanner(DATA_UNAVAILABLE, "warn");
+                renderHeatmap();
+            }
+            return;
+        }
         renderDrawSchedule();
     }, 1000);
     // Background refresh stays on the Quick Draw cadence. The visible countdown
