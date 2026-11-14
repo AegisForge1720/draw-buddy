@@ -9,7 +9,10 @@ const DRAW_BUDDY_FILES = [
     "js/app.js",
     "js/config.js",
     "js/notices.js",
-    "README.md"
+    "README.md",
+    "sw.js",
+    "manifest.webmanifest",
+    "robots.txt"
 ];
 
 test("Draw Buddy pages do not mention scratch-off tools or link to the other app", () => {
