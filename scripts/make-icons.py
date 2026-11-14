@@ -6,10 +6,11 @@ Run from the repo root:
     python3 scripts/make-icons.py
 
 Requires Google Chrome or Chromium. The script opens the icon SVG in a
-borderless page at each target size and saves a screenshot. The coin artwork
-already sits inside the maskable safe zone, so icon-512.png and
-icon-maskable-512.png are the same drawing. There is no Capacitor resources
-directory in this repo, so a 1024 source is not written.
+borderless page at each target size and saves a screenshot. The coin is drawn
+at scale 2.05 inside the 500 view box, which keeps it inside the maskable
+80 percent safe zone, so icon-512.png and icon-maskable-512.png are the same
+drawing. The marquee logo is used as SVG and is not rasterized here. There is
+no Capacitor resources directory in this repo, so a 1024 source is not written.
 """
 
 import shutil
