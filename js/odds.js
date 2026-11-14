@@ -15,6 +15,14 @@ export function hypergeometric(N, K, n, k) {
     return (combination(K, k) * combination(N - K, n - k)) / denom;
 }
 
+// Each number's chance on an independent draw. Quick Draw is 20/80.
+export function expectedOneStepRepeatRate(drawnCount, totalNumbers) {
+    const drawn = Number(drawnCount);
+    const total = Number(totalNumbers);
+    if (!Number.isFinite(drawn) || !Number.isFinite(total) || total <= 0 || drawn < 0 || drawn > total) return null;
+    return drawn / total;
+}
+
 export function oneStepRepeatRate(draws, targetNum) {
     const wanted = Number(targetNum);
     let given = 0;

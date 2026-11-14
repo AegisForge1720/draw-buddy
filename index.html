@@ -62,8 +62,9 @@
                         <div id="header-draw-label" class="text-blue-200 uppercase tracking-wider text-[10px]">Next draw #</div>
                         <div id="header-next-draw" class="font-bold text-yellow-300 text-sm" title="One higher than the newest loaded draw.">…</div>
                     </div>
-                    <div class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
-                        <div id="header-cadence" class="text-blue-200 text-[11px] leading-snug">Quick Draw draws about every 4 minutes.</div>
+                    <div id="header-countdown-box" class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
+                        <div id="header-countdown-label" class="text-blue-200 uppercase tracking-wider text-[10px]">Countdown</div>
+                        <div id="header-countdown" role="timer" aria-live="off" class="font-bold text-yellow-300 text-sm">—</div>
                     </div>
                     <div class="bg-[#0b132b] p-1.5 rounded border border-[#1e3a8a]">
                         <div class="text-blue-200 uppercase tracking-wider text-[10px]">Game</div>
@@ -155,6 +156,8 @@
                     <div>
                         <h2 id="play-card-title" class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">Random or stats-based number picks</h2>
                         <div id="card-draw-label" class="text-base font-black text-white mt-0.5">…</div>
+                        <p id="picks-last-updated" class="text-[11px] text-slate-300 mt-1">Last updated —</p>
+                        <p id="picks-independence" class="text-[11px] text-slate-200 mt-1">Every draw is independent; picks don't improve your odds.</p>
                         <p id="card-algorithm-reason" class="text-[11px] text-cyan-200 font-medium mt-0.5">…</p>
                     </div>
                     <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
@@ -207,12 +210,14 @@
                 <div class="flex justify-between items-center gap-2">
                     <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-300 font-semibold">Count heatmap</h2>
                     <div class="flex items-center space-x-2 text-[10px]">
-                        <span class="text-red-300 font-bold">High</span>
-                        <span class="text-yellow-300">Mid</span>
-                        <span class="text-blue-200">Low</span>
+                        <span class="text-blue-100 font-bold">High</span>
+                        <span class="text-blue-300">Mid</span>
+                        <span class="text-blue-400">Low</span>
                     </div>
                 </div>
                 <p class="text-xs text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
+                <p id="results-updated" class="text-xs text-slate-200">Last updated —</p>
+                <p id="results-delay" class="text-xs text-slate-200">Results may be delayed; check official sources.</p>
                 <p id="results-hidden-note" hidden class="text-xs text-amber-100">Draw results are hidden. These rows have no source time.</p>
                 <div id="heatmap-results">
                 <div id="heatmap-locked-banner" class="bg-amber-950 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5">
@@ -246,7 +251,8 @@
                         </div>
                         <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                             <span class="text-blue-200 block text-[11px]">Repeat rate</span>
-                            <span id="stat-markov" class="font-bold text-yellow-200 text-xs">--%</span>
+                            <span class="font-bold text-yellow-200 text-xs block">Observed <span id="stat-markov">n/a</span></span>
+                            <span class="font-bold text-blue-100 text-xs block">Expected <span id="stat-expected">—</span></span>
                         </div>
                         <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
                             <span class="text-blue-200 block text-[11px]">Mean gap</span>
@@ -257,6 +263,7 @@
                             <span id="stat-density" class="font-bold text-emerald-300 text-xs">--</span>
                         </div>
                     </div>
+                    <p id="gap-note" class="text-[11px] text-slate-200">Gaps don't make a number due.</p>
                     <p class="bg-[#0b132b] p-2.5 rounded border border-cyan-500/40 text-[11px] text-slate-200">Repeat rate is the share of loaded draws that contained this number whose following loaded draw also contained it. It is not a prediction.</p>
                 </div>
                 <p id="results-source" hidden class="text-xs text-slate-200"></p>
