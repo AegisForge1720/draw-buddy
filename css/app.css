@@ -1,0 +1,143 @@
+body {
+    background-color: #070b19;
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+:focus {
+    outline: none;
+}
+
+:focus-visible {
+    outline: 2px solid #e0f2fe;
+    outline-offset: 2px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.skip-link {
+    position: absolute;
+    left: 0.75rem;
+    top: -4rem;
+    z-index: 90;
+    background: #facc15;
+    color: #070b19;
+    font-weight: 800;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.skip-link:focus {
+    top: 0.75rem;
+}
+
+.number-ball {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    font-weight: 800;
+    font-size: 1.1rem;
+}
+
+.ball-active {
+    background: #facc15;
+    color: #070b19;
+    border: 1px solid #fef08a;
+}
+
+.ball-bonus {
+    background: #ef4444;
+    color: white;
+    border: 1px solid #fca5a5;
+}
+
+.ball-inactive {
+    background: #111c38;
+    color: #93c5fd;
+    border: 1px solid #1d4ed8;
+}
+
+.heatmap-cell {
+    appearance: none;
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    border: 1px solid #1d4ed8;
+    padding: 0;
+    cursor: pointer;
+}
+
+.heatmap-cell:hover {
+    border-color: #facc15;
+}
+
+.heatmap-hot {
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+}
+
+#subscription-card,
+#play-card,
+#inspector-card {
+    scroll-margin-top: 8.5rem;
+}
+
+#age-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: #070b19;
+    color: #f8fafc;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+#age-gate .age-card {
+    width: min(100%, 28rem);
+    background: #0b132b;
+    border: 1px solid #facc15;
+    border-radius: 1rem;
+    padding: 1.25rem;
+}
+
+#age-gate input[type="checkbox"] {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: #facc15;
+}
+
+#info-dialog {
+    background: #0b132b;
+    color: #f8fafc;
+    border: 1px solid #1d4ed8;
+    border-radius: 12px;
+    max-width: 24rem;
+    width: calc(100% - 2rem);
+    padding: 1rem 1.1rem;
+}
+
+#info-dialog::backdrop {
+    background: rgba(2, 6, 23, 0.78);
+}
+
+#info-dialog p {
+    white-space: pre-wrap;
+    color: #e2e8f0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+}
+
+input, select, button {
+    accent-color: #facc15;
+}
