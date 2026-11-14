@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms (draft) — Draw Buddy</title>
+    <meta name="theme-color" content="#0b132b">
+    <link rel="icon" href="./icons/icon-192.png">
+    <link rel="stylesheet" href="./css/tailwind.css">
+    <link rel="stylesheet" href="./css/app.css">
+</head>
+<body class="min-h-screen">
+    <script>
+        try {
+            var agePass = JSON.parse(localStorage.getItem("draw_buddy_age_gate") || "null");
+            if (agePass && agePass.flag === "18plus" && !agePass.dob && !agePass.dateOfBirth && agePass.expiresAt > Date.now()) {
+                document.documentElement.classList.add("age-cleared");
+            }
+        } catch (error) {}
+    </script>
+    <main id="legal-main" class="max-w-md mx-auto px-4 py-8 space-y-4">
+        <p class="rounded-lg border border-amber-400/70 bg-amber-950 p-3 text-sm font-bold text-amber-50">DRAFT — pending legal review. This is not a terms of service. Do not rely on it. Not approved for go-live.</p>
+        <h1 class="text-2xl font-black text-white">Terms of Service</h1>
+        <p class="text-sm text-slate-200"><span data-legal-name>NAV Analytics LLC</span>, <span data-legal-address>58 Owaissa Dr, Rochester, NY 14622</span>, offers the Draw Buddy preview. A licensed New York attorney still has to write the terms. Billing is not connected, and this page does not create a subscription.</p>
+        <p class="text-sm text-slate-200">Draw Buddy is an independent app from <span data-legal-name>NAV Analytics LLC</span>. It is not affiliated with, endorsed by, or sponsored by the New York Lottery, the New York State Gaming Commission, Powerball, or Mega Millions. Game names are trademarks of their respective owners and are used only to identify the games.</p>
+        <p class="text-sm text-slate-200">Draw Buddy does not sell lottery tickets or accept wagers.</p>
+        <p class="text-sm text-slate-200">18+ only. You must be 21+ to play Quick Draw where alcohol is served. The age check is not consent to tracking. Read the <a class="underline text-yellow-300" href="./privacy.html">privacy notice</a>.</p>
+        <p class="text-sm text-slate-200">Lottery drawings are random. Past results don't predict future draws, and Draw Buddy does not improve your chances of winning. For entertainment and information only.</p>
+        <p class="text-sm text-slate-200">Gambling can be addictive. If you or someone you know has a gambling problem, help is available. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+        <p id="privacy-choice-status" tabindex="-1" role="status" class="text-sm text-amber-100"></p>
+        <p class="text-sm text-slate-200">
+            <a class="underline text-yellow-300" href="#privacy-choice-status" data-privacy-action="opt-out">Do Not Sell or Share / targeted ads opt-out</a>
+            · <button type="button" class="consent-text-button" data-privacy-action="choices">Your privacy choices</button>
+            · <button type="button" class="consent-text-button" data-privacy-action="reset-age">Reset age check</button>
+        </p>
+        <p class="text-sm text-slate-200"><a class="underline text-cyan-200" href="./index.html">Back to Draw Buddy</a></p>
+    </main>
+    <script type="module" src="./js/legal-page.js"></script>
+</body>
+</html>
