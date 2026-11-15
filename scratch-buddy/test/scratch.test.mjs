@@ -78,6 +78,11 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /Bought at a venue/);
     assert.match(SHELL_MARKUP, /Optional GPS check-in/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
+    assert.match(SHELL_MARKUP, /id="payout-heat-map"/);
+    assert.match(SHELL_MARKUP, /No payout data yet/);
+    assert.match(SHELL_MARKUP, /No sample points are included/);
+    assert.match(SHELL_MARKUP, /Optional: center on my location/);
+    assert.equal(SHELL_MARKUP.includes("scratch_buddy_prize_logs"), false);
     assert.match(SHELL_MARKUP, /barcodes or serial numbers/);
     assert.equal(SHELL_MARKUP.includes("will arrive in a later step"), false);
     assert.match(html, /leaflet@1\.9\.4/);
@@ -89,6 +94,11 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.equal(mapSource.includes("googletagmanager"), false);
     assert.match(SHELL_MARKUP, /No payout data yet/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
+    assert.match(SHELL_MARKUP, /id="payout-heat-map"/);
+    assert.match(SHELL_MARKUP, /No payout data yet/);
+    assert.match(SHELL_MARKUP, /No sample points are included/);
+    assert.match(SHELL_MARKUP, /Optional: center on my location/);
+    assert.equal(SHELL_MARKUP.includes("scratch_buddy_prize_logs"), false);
     assert.match(SHELL_MARKUP, /© 2026 NAV Analytics LLC/);
     assert.equal(SHELL_MARKUP.includes(AFFILIATION), true);
     assert.equal(PRIVACY_MARKUP.includes(AFFILIATION), true);

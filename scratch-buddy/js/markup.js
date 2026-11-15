@@ -32,7 +32,7 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">Prize log preview. Logs stay on this device in a local stub store. A shared sign-in and database are not connected. The payout heat map is not connected yet and stays empty until real logs can be shared.</p>
+        <p class="preview-banner">Payout heat map preview. Circles come only from prize logs on this device. The map stays empty until you log a prize. No sample points are included. A shared database is not connected.</p>
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
@@ -171,9 +171,24 @@ export const SHELL_MARKUP = `
 
         <section id="panel-heat" class="panel space-y-3" role="tabpanel" aria-labelledby="heat-heading" hidden>
             <h2 id="heat-heading" class="section-title">Payout Heat Map</h2>
-            <div class="map-frame">
-                <p class="empty-note">No payout data yet. The heat map stays empty until people log real prizes. No sample points are shown.</p>
+            <p class="source-note">This map is built only from prize logs on this device. It does not include official payout records or invented points. Circle size follows verification weight: unverified 1, location-confirmed or photo-attached 2, both 3.</p>
+            <ul class="heat-legend" aria-label="Verification colors">
+                <li><span class="heat-swatch heat-swatch-unverified"></span> Unverified</li>
+                <li><span class="heat-swatch heat-swatch-location"></span> Location-confirmed</li>
+                <li><span class="heat-swatch heat-swatch-photo"></span> Photo-attached</li>
+                <li><span class="heat-swatch heat-swatch-both"></span> Location-confirmed and photo-attached</li>
+            </ul>
+            <button type="button" class="btn-secondary w-full" id="heat-locate">Optional: center on my location</button>
+            <div id="heat-location-prompt" class="location-prompt" hidden>
+                <p class="location-prompt-title">Use your location?</p>
+                <p>Scratch Buddy can use your device location to center this payout map. In this preview, that position stays on this device, is not saved, and is not used to invent payouts. Location is optional and off until you agree.</p>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-primary flex-1" id="heat-locate-allow">Use my location</button>
+                    <button type="button" class="btn-secondary flex-1" id="heat-locate-deny">Not now</button>
+                </div>
             </div>
+            <div id="payout-heat-map" class="retailer-map" role="application" aria-label="Payout heat map of prize logs on this device"></div>
+            <p id="heat-status" class="empty-note" role="status">No payout data yet. Prize logs from this device will appear here after you add them. Nothing has been logged.</p>
         </section>
 
         <footer class="text-center text-[10px] text-slate-500 px-1 py-3 space-y-2">
@@ -193,7 +208,7 @@ export const PRIVACY_MARKUP = `
     <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, and a prize log that stays on this device. The map uses OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and a payout heat map built only from those logs. The maps use OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>
@@ -204,6 +219,7 @@ export const PRIVACY_MARKUP = `
         <li>Optional Near me uses your device location only to sort nearby retailers in this browser session. The position is not saved unless you later add a GPS check-in to a prize log, and it is not used until you agree on a prompt in the app and in the browser.</li>
         <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
         <li>Prize logs you choose to save, including an optional GPS check-in and an optional ticket photo, stay in this browser (localStorage and IndexedDB). Ticket photos can show barcodes or serial numbers. Nothing is uploaded, and no Supabase table or photo bucket has been created.</li>
+        <li>The payout heat map reads only those local prize logs. Optional location on that map is used only to center the view and is not saved.</li>
     </ul>
     <h2 class="section-title">Responsible play</h2>
     <p class="empty-note">18+ only. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>

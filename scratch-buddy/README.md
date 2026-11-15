@@ -32,7 +32,7 @@ The Map tab shows the same official cache on an interactive map:
 - Search and Near me results can be shown on the map (gold markers). Each search row has a Show on map button that opens that location's details.
 - Tap a cluster to zoom in, or tap a marker for the name, address, and Quick Draw flag when the official list has one
 
-Prize logging and the payout heat map are not connected yet. The map does not invent locations or payouts.
+The retailer map does not invent locations or payouts.
 
 
 ## Prize log
@@ -48,7 +48,16 @@ The Prize Log tab is a local stub only:
 - Draft SQL and RLS live in `supabase/migrations/0001_prize_logs.sql`. The statements are commented out. Do not apply them. A new Supabase project, table, or photo bucket needs Andrew's explicit OK. The recommendation is a separate Scratch Buddy project, not Draw Buddy's project.
 - Questions for Ralph are in `COMPLIANCE.md`.
 
-The payout heat map is not connected yet and stays empty until shared logs exist.
+## Payout heat map
+
+The Heat Map tab plots prize logs from this device only:
+
+- No official payout feed and no shipped sample points
+- The map stays empty until a prize is logged on that device
+- Circle size follows verification weight (unverified 1, location-confirmed or photo-attached 2, both 3)
+- Colors match those levels. Tap a circle for the logged totals
+- Optional "center on my location" is opt-in and does not invent payouts or save the position
+
 
 ## Age check
 

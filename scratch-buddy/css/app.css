@@ -613,3 +613,31 @@ a { color: #facc15; }
     border: 1px solid #1d4ed8;
     background: #050814;
 }
+
+.heat-legend {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem 0.7rem;
+    color: #cbd5e1;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+.heat-legend li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.heat-swatch {
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 9999px;
+    border: 1px solid #0b132b;
+    flex-shrink: 0;
+}
+.heat-swatch-unverified { background: #64748b; }
+.heat-swatch-location { background: #22d3ee; }
+.heat-swatch-photo { background: #f59e0b; }
+.heat-swatch-both { background: #facc15; }

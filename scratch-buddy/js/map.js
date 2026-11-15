@@ -211,3 +211,114 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
         invalidate
     };
 }
+
+
+export function createPayoutHeatMap({ container, formatAddress, formatDollars, groupStyle }) {
+    const L = window.L;
+    const map = L.map(container, {
+        minZoom: 5,
+        maxZoom: 18,
+        zoomControl: false,
+        attributionControl: true
+    });
+    L.control.zoom({ position: "topright" }).addTo(map);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a>',
+        maxZoom: 18
+    }).addTo(map);
+
+    const layer = L.layerGroup().addTo(map);
+    let userMarker = null;
+    let groups = [];
+
+    function popupFor(group, style) {
+        const wrap = document.createElement("div");
+        wrap.className = "sb-popup";
+        const title = document.createElement("h3");
+        title.textContent = group.retailerName || "Unnamed retailer";
+        wrap.appendChild(title);
+        const address = document.createElement("p");
+        address.textContent = formatAddress({
+            street: group.street,
+            city: group.city,
+            state: "NY",
+            zip: group.zip
+        }) || "Address not in the source data.";
+        wrap.appendChild(address);
+        const summary = document.createElement("p");
+        const count = group.count;
+        summary.textContent = `Logged on this device: ${formatDollars(group.prizeTotal)} across ${count} prize log${count === 1 ? "" : "s"}. Weight ${style.weight}.`;
+        wrap.appendChild(summary);
+        const breakdown = document.createElement("p");
+        breakdown.textContent = `Unverified: ${group.unverified}. Location-confirmed: ${group.locationConfirmed}. Photo-attached: ${group.photoAttached}. Location-confirmed and photo-attached: ${group.both}.`;
+        wrap.appendChild(breakdown);
+        return wrap;
+    }
+
+    function setPayouts(nextGroups) {
+        layer.clearLayers();
+        groups = Array.isArray(nextGroups) ? nextGroups : [];
+        for (const group of groups) {
+            if (!Number.isFinite(group.lat) || !Number.isFinite(group.lng)) continue;
+            const style = groupStyle(group);
+            const marker = L.circleMarker([group.lat, group.lng], {
+                radius: style.radius,
+                color: "#0b132b",
+                weight: 1,
+                fillColor: style.color,
+                fillOpacity: 0.75
+            });
+            marker.bindPopup(() => popupFor(group, style), { maxWidth: 260, className: "sb-popup-shell" });
+            layer.addLayer(marker);
+        }
+        return groups.length;
+    }
+
+    function fitPayouts() {
+        const pts = groups.filter((group) => Number.isFinite(group.lat) && Number.isFinite(group.lng));
+        if (!pts.length) {
+            map.fitBounds(NY_BOUNDS, { padding: [12, 12] });
+            return;
+        }
+        if (pts.length === 1) {
+            map.setView([pts[0].lat, pts[0].lng], 13);
+            return;
+        }
+        map.fitBounds(pts.map((group) => [group.lat, group.lng]), { padding: [28, 28], maxZoom: 14 });
+    }
+
+    function fitNewYork() {
+        map.fitBounds(NY_BOUNDS, { padding: [12, 12] });
+    }
+
+    function setUserPosition(position) {
+        if (userMarker) {
+            map.removeLayer(userMarker);
+            userMarker = null;
+        }
+        if (!position || !Number.isFinite(position.lat) || !Number.isFinite(position.lng)) return;
+        userMarker = L.circleMarker([position.lat, position.lng], {
+            radius: 7,
+            color: "#f8fafc",
+            weight: 2,
+            fillColor: "#22d3ee",
+            fillOpacity: 1
+        }).addTo(map);
+        userMarker.bindPopup("Your position (this session only, not saved)");
+        map.setView([position.lat, position.lng], 13);
+    }
+
+    function invalidate() {
+        map.invalidateSize();
+    }
+
+    return {
+        map,
+        setPayouts,
+        fitPayouts,
+        fitNewYork,
+        setUserPosition,
+        invalidate,
+        count: () => groups.length
+    };
+}

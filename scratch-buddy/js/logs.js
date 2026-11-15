@@ -179,7 +179,28 @@ export function aggregatePayouts(logs) {
     return [...groups.values()];
 }
 
+export function heatGroupStyle(group) {
+    const flags = [];
+    if ((group && group.both > 0) || (group && group.locationConfirmed > 0 && group.photoAttached > 0)) {
+        flags.push("location-confirmed", "photo-attached");
+    } else if (group && group.locationConfirmed > 0) {
+        flags.push("location-confirmed");
+    } else if (group && group.photoAttached > 0) {
+        flags.push("photo-attached");
+    } else {
+        flags.push("unverified");
+    }
+    const weight = Number(group && group.weight) || 1;
+    return {
+        flags,
+        color: heatColor(flags),
+        weight,
+        radius: 10 + Math.min(weight, 10) * 3
+    };
+}
+
 export function formatDollars(amount) {
+
     if (!Number.isFinite(amount)) return "Data unavailable";
     const sign = amount < 0 ? "-" : "";
     const [whole, frac] = Math.abs(amount).toFixed(2).split(".");

@@ -7,7 +7,9 @@ import {
     todayInNewYork,
     verificationFlags,
     verificationLabel,
-    heatWeight
+    heatWeight,
+    heatGroupStyle,
+    aggregatePayouts
 } from "../js/logs.js";
 
 const base = {
@@ -84,4 +86,25 @@ test("the draft SQL is not an applied migration and includes RLS", () => {
         if (!trimmed || trimmed.startsWith("--")) continue;
         assert.fail(`Uncommented SQL: ${trimmed}`);
     }
+});
+
+test("the heat map has no points until real logs exist, and weights follow verification", () => {
+    assert.deepEqual(aggregatePayouts([]), []);
+    assert.deepEqual(aggregatePayouts(null), []);
+    const groups = aggregatePayouts([
+        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 50, verification: ["unverified"] },
+        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 25, verification: ["photo-attached"] },
+        { retailerId: "2", retailerName: "B", retailerLat: 43.21, retailerLng: -77.56, prizeAmount: 10, verification: ["location-confirmed", "photo-attached"] }
+    ]);
+    const first = groups.find((group) => group.retailerId === "1");
+    const second = groups.find((group) => group.retailerId === "2");
+    assert.equal(first.count, 2);
+    assert.equal(first.prizeTotal, 75);
+    assert.equal(first.weight, 3);
+    assert.equal(first.unverified, 1);
+    assert.equal(first.photoAttached, 1);
+    assert.equal(heatGroupStyle(first).color, "#f59e0b");
+    assert.equal(second.weight, 3);
+    assert.equal(heatGroupStyle(second).color, "#facc15");
+    assert.deepEqual(aggregatePayouts([{ retailerId: "x", prizeAmount: 5 }]), []);
 });

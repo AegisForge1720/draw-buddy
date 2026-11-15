@@ -1,14 +1,16 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
 import { evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
 import {
+    aggregatePayouts,
     formatDollars,
+    heatGroupStyle,
     loadLogs,
     parsePrizeLog,
     saveLogs,
     todayInNewYork,
     verificationLabel
 } from "./logs.js";
-import { createRetailerMap, waitForLeaflet } from "./map.js";
+import { createPayoutHeatMap, createRetailerMap, waitForLeaflet } from "./map.js";
 import { SHELL_MARKUP } from "./markup.js";
 import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
 import {
@@ -80,6 +82,11 @@ const logState = {
     logs: []
 };
 
+const heatState = {
+    api: null,
+    promise: null
+};
+
 function showTab(name) {
     const tabs = document.querySelectorAll('[role="tab"]');
     const panels = {
@@ -98,6 +105,11 @@ function showTab(name) {
     });
     if (name === "map") {
         ensureMap().then((api) => {
+            if (api) api.invalidate();
+        });
+    }
+    if (name === "heat") {
+        ensureHeatMap().then((api) => {
             if (api) api.invalidate();
         });
     }
@@ -704,6 +716,7 @@ async function removeLog(id) {
         try { await deletePhoto(entry.photoId); } catch { /* local stub */ }
     }
     await renderLogList();
+    refreshHeatMap();
 }
 
 function hideCheckinPrompt() {
@@ -805,6 +818,7 @@ async function submitPrizeLog(event) {
         const checkStatus = $("log-checkin-status");
         if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
         await renderLogList();
+        refreshHeatMap();
     } catch (error) {
         if (status) status.textContent = error && error.message ? error.message : "The prize log could not be saved on this device.";
     }
@@ -888,6 +902,118 @@ function bindPrizeLog() {
     renderLogList();
 }
 
+
+function describeHeatStatus(groups, locateNote) {
+    const status = $("heat-status");
+    if (!status) return;
+    if (!groups.length) {
+        status.textContent = "No payout data yet. Prize logs from this device will appear here after you add them. Nothing has been logged.";
+        return;
+    }
+    const logs = groups.reduce((sum, group) => sum + group.count, 0);
+    const base = `${formatCount(groups.length)} establishment${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Circle size follows verification weight. Tiles are from OpenStreetMap. Tap a circle for the logged totals.`;
+    status.textContent = locateNote ? `${base} ${locateNote}` : base;
+}
+
+function refreshHeatMap() {
+    if (!heatState.api) return;
+    const groups = aggregatePayouts(loadLogs());
+    heatState.api.setPayouts(groups);
+    heatState.api.fitPayouts();
+    describeHeatStatus(groups);
+    return groups;
+}
+
+async function ensureHeatMap() {
+    if (heatState.api) {
+        refreshHeatMap();
+        heatState.api.invalidate();
+        return heatState.api;
+    }
+    if (heatState.promise) return heatState.promise;
+    const status = $("heat-status");
+    heatState.promise = (async () => {
+        try {
+            await waitForLeaflet();
+            const container = $("payout-heat-map");
+            if (!container) throw new Error("The heat map container is missing.");
+            const api = createPayoutHeatMap({
+                container,
+                formatAddress: formatRetailerAddress,
+                formatDollars,
+                groupStyle: heatGroupStyle
+            });
+            const groups = aggregatePayouts(loadLogs());
+            api.setPayouts(groups);
+            api.fitPayouts();
+            heatState.api = api;
+            requestAnimationFrame(() => api.invalidate());
+            describeHeatStatus(groups);
+            container.dataset.ready = "true";
+            return api;
+        } catch (error) {
+            const message = error && error.message
+                ? error.message
+                : "The heat map could not be loaded. No payouts are shown.";
+            if (status) status.textContent = message;
+            heatState.promise = null;
+            return null;
+        }
+    })();
+    return heatState.promise;
+}
+
+async function runHeatLocate() {
+    const api = await ensureHeatMap();
+    if (!api) return;
+    const status = $("heat-status");
+    try {
+        const position = await requestDevicePosition();
+        api.setUserPosition(position);
+        const groups = aggregatePayouts(loadLogs());
+        const nearby = groups.filter((group) => {
+            const distance = haversineMeters(position.lat, position.lng, group.lat, group.lng);
+            return Number.isFinite(distance) && distance <= 25000;
+        });
+        const note = groups.length
+            ? `${nearby.length} logged establishment${nearby.length === 1 ? "" : "s"} ${nearby.length === 1 ? "is" : "are"} within 25 km of that position. The position was used only to center the map and was not saved.`
+            : "No prize logs are on this device, so no payout circles were added. The position was used only to center the map and was not saved.";
+        describeHeatStatus(groups, note);
+    } catch (error) {
+        if (status) {
+            const prefix = status.textContent || "No payout data yet.";
+            const reason = error && error.message ? error.message : "The device position was not available.";
+            status.textContent = `${prefix} ${reason}`;
+        }
+    }
+}
+
+function bindHeatMap() {
+    const locate = $("heat-locate");
+    const prompt = $("heat-location-prompt");
+    const allow = $("heat-locate-allow");
+    const deny = $("heat-locate-deny");
+    if (locate) {
+        locate.addEventListener("click", () => {
+            if (prompt) {
+                prompt.hidden = false;
+                prompt.scrollIntoView({ block: "nearest" });
+            }
+        });
+    }
+    if (allow) {
+        allow.addEventListener("click", () => {
+            if (prompt) prompt.hidden = true;
+            runHeatLocate();
+        });
+    }
+    if (deny) {
+        deny.addEventListener("click", () => {
+            if (prompt) prompt.hidden = true;
+        });
+    }
+}
+
 function bindShell() {
     document.querySelectorAll('[role="tab"]').forEach((tab) => {
         tab.addEventListener("click", () => showTab(tab.dataset.tab));
@@ -896,6 +1022,7 @@ function bindShell() {
     bindFind();
     bindMap();
     bindPrizeLog();
+    bindHeatMap();
     loadFind();
 }
 
