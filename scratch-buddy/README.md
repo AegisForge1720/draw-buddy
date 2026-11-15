@@ -2,29 +2,42 @@ NOT FOR DEPLOYMENT. Pending legal review.
 
 # Scratch Buddy
 
-Scratch Buddy is a separate static app for a personal scratch-off log. It is not part of Draw Buddy and does not read Draw Buddy pages.
+Scratch Buddy is a separate static app and a sibling to Draw Buddy. It is a fun, social companion for scratch-off tickets, not a tool for placing wagers. It is not part of Draw Buddy's published pages, and this branch is not for deployment.
 
-Official remaining prizes, odds, and expected value are not loaded. Those fields stay **Data unavailable**. Expected value, when a complete published prize list is supplied to `expectedValuePerTicket` in `js/scratch.js`, is the average prize minus the ticket price. The page says that figure is not a prediction or an advantage.
+## Retailer list
 
-The log stores only tickets you type in: game name, price you paid, and amount paid to you. Totals are the sum of that log. Photos are not read, and nothing is checked against a state database. There is no network call.
+Search uses a local cache of the official **NYS Lottery Retailers** dataset from NY Open Data (dataset [`2vvn-pdyi`](https://data.ny.gov/Government-Finance/NYS-Lottery-Retailers/2vvn-pdyi)), published by the New York State Gaming Commission.
 
-An 18+ age check runs before the log, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept. There is no price and no subscription screen.
+- Source API: https://data.ny.gov/resource/2vvn-pdyi.json
+- Local cache: `data/retailers.json`
+- Retrieved at: November 15, 2026 at 6:07 PM ET (`2026-11-15T18:07:43-05:00`)
+- Official rows last updated: November 15, 2026, 2:02 AM ET
+- Count in this cache: 13,129 licensed retailer locations (6,182 marked Quick Draw)
+- Every cached row has published latitude and longitude
 
-`privacy.html` and `terms.html` are drafts adapted from Draw Buddy's drafts and are marked pending legal review. They are not a finished privacy notice or terms of service.
+The official dataset lists licensed retailer locations that sell New York Lottery products. It does not identify individual ticket machines, and it does not flag which locations sell scratch-off tickets separately from other lottery products. `quickDraw` is true when the official Quick Draw field is `Y`.
 
-If the repository root is published, `/scratch-buddy/` is a public URL. The age check is not a server wall. The HTML files do not include the log or the legal text; those strings are inserted only after the script accepts an 18+ pass. A `noindex,nofollow` meta tag is on each page. Someone can still open the script files directly. That is not a substitute for a host-level age wall.
+The app searches that cache by name, address, city, or ZIP. Near me is opt-in: the in-app prompt runs first, then the browser location prompt. The device position is used only to sort nearby retailers in that browser session and is not saved.
 
-The log key is `scratch_buddy_log` in `localStorage`. This app does not read `draw_buddy_scratch_archive`.
+No payout or prize-log data is shown yet. Empty lists stay empty. Nothing in the cache was invented or generated.
+
+## Age check
+
+An 18+ age check runs before the app, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept.
+
+`privacy.html` and `terms.html` are drafts and are marked pending legal review.
+
+If the repository root is published, `/scratch-buddy/` is a public URL. The age check is not a server wall. A `noindex,nofollow` meta tag is on each page. That is not a substitute for a host-level age wall.
 
 ## Run
 
-From this folder:
+This preview is served privately on port 8876 with basic auth (user `andrew`, password in `~/.secrets/scratch_preview_pass`). Do not print that password.
+
+From this folder, for a local unauthenticated check:
 
 ```bash
 python3 -m http.server 4180
 ```
-
-Open `http://127.0.0.1:4180`. The page is `index.html`, `css/app.css`, and `js/`. It does not use Draw Buddy's stylesheet, Supabase client, or subscription screen.
 
 ## Test
 
@@ -34,4 +47,4 @@ From the repository root:
 npm test
 ```
 
-Scratch Buddy cases live in `scratch-buddy/test/scratch.test.mjs`.
+Scratch Buddy cases live in `scratch-buddy/test/`.

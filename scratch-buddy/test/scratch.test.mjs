@@ -65,7 +65,11 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     });
     assert.match(SHELL_MARKUP, /Scratch Buddy/);
     assert.match(SHELL_MARKUP, /Find a Machine or Venue/);
-    assert.match(SHELL_MARKUP, /No retailer list is loaded in this step yet/);
+    assert.match(SHELL_MARKUP, /Search by name, address, city, or ZIP/);
+    assert.match(SHELL_MARKUP, /id="retailer-source"/);
+    assert.match(SHELL_MARKUP, /Use your location\?/);
+    assert.match(SHELL_MARKUP, /The full official list is not shown all at once/);
+    assert.match(SHELL_MARKUP, /id="retailer-near"/);
     assert.match(SHELL_MARKUP, /No payout data yet/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
     assert.match(SHELL_MARKUP, /© 2026 NAV Analytics LLC/);

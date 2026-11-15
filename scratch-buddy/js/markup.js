@@ -32,7 +32,7 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">Styled shell preview. Fonts, colors, buttons, and layout are lined up with Draw Buddy. Search, the map, prize logging, and the heat map are not connected yet. No retailer or payout data is shown.</p>
+        <p class="preview-banner">Retailer search preview. Search uses a local cache of the official New York State lottery retailer listing. The map, prize logging, and the heat map are not connected yet. No payout data is shown.</p>
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
@@ -43,15 +43,31 @@ export const SHELL_MARKUP = `
 
         <section id="panel-find" class="panel space-y-3" role="tabpanel" aria-labelledby="find-heading">
             <h2 id="find-heading" class="section-title">Find a Machine or Venue</h2>
-            <label class="block">
-                <span class="sr-only">Search for a machine or venue</span>
-                <input class="input-shell" type="search" placeholder="Search by name, address, city, or ZIP" disabled aria-disabled="true">
-            </label>
-            <div class="flex gap-2">
-                <button type="button" class="btn-primary flex-1" disabled>Search</button>
-                <button type="button" class="btn-secondary flex-1" disabled>Near me</button>
+            <p id="retailer-source" class="source-note">Loading the official retailer list…</p>
+            <form id="retailer-search-form" class="space-y-3">
+                <label class="block">
+                    <span class="sr-only">Search for a machine or venue</span>
+                    <input id="retailer-query" class="input-shell" type="search" name="q" placeholder="Search by name, address, city, or ZIP" autocomplete="off" enterkeyhint="search">
+                </label>
+                <label class="check-row">
+                    <input id="retailer-qd-only" type="checkbox">
+                    <span>Quick Draw venues only</span>
+                </label>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn-primary flex-1" id="retailer-search">Search</button>
+                    <button type="button" class="btn-secondary flex-1" id="retailer-near">Near me</button>
+                </div>
+            </form>
+            <div id="location-prompt" class="location-prompt" hidden>
+                <p class="location-prompt-title">Use your location?</p>
+                <p>Scratch Buddy can use your device location to list nearby licensed retailers. In this preview, that position stays on this device and is used only to sort this list. Location is optional and off until you agree.</p>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-primary flex-1" id="location-allow">Use my location</button>
+                    <button type="button" class="btn-secondary flex-1" id="location-deny">Not now</button>
+                </div>
             </div>
-            <p class="empty-note">No retailer list is loaded in this step yet. Search will use the official New York State lottery retailer listing in the next step.</p>
+            <p id="retailer-status" class="empty-note" role="status">Enter a name, address, city, or ZIP, or use Near me. The full official list is not shown all at once.</p>
+            <ul id="retailer-results" class="retailer-list"></ul>
         </section>
 
         <section id="panel-map" class="panel space-y-3" role="tabpanel" aria-labelledby="map-heading" hidden>
@@ -90,7 +106,7 @@ export const PRIVACY_MARKUP = `
     <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check and a styled shell. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check and a retailer search. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>
@@ -98,7 +114,8 @@ export const PRIVACY_MARKUP = `
     <h2 class="section-title">What this preview stores</h2>
     <ul class="empty-note list-disc pl-4 space-y-1">
         <li>Age check. Under 18, nothing is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
-        <li>Later steps may store a prize log, an optional device location check-in, and an optional ticket photo on this device only. Those features are not connected yet.</li>
+        <li>Optional Near me uses your device location only to sort nearby retailers in this browser session. The position is not saved, and it is not used until you agree on a prompt in the app and in the browser.</li>
+        <li>Later steps may store a prize log, an optional location check-in, and an optional ticket photo on this device only. Those features are not connected yet.</li>
     </ul>
     <h2 class="section-title">Responsible play</h2>
     <p class="empty-note">18+ only. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
