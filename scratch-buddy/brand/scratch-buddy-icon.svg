@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Scratch Buddy">
+  <defs>
+    <radialGradient id="coinGold" cx="50%" cy="38%" r="60%">
+      <stop offset="0%" stop-color="#FFEE55"/>
+      <stop offset="70%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#CC9900"/>
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="url(#coinGold)" stroke="#FFF8DC" stroke-width="4"/>
+  <circle cx="64" cy="64" r="48" fill="none" stroke="#A16207" stroke-width="2" stroke-dasharray="4 3"/>
+  <rect x="40" y="44" width="48" height="40" rx="4" fill="#111827" stroke="#FDE047" stroke-width="2"/>
+  <path d="M48 56h32M48 64h24M48 72h16" stroke="#FACC15" stroke-width="3" stroke-linecap="round"/>
+</svg>

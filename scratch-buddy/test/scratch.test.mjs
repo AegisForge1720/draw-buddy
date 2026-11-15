@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { AFFILIATION, EV_COPY, LOG_MARKUP, PRIVACY_MARKUP, TERMS_MARKUP } from "../js/markup.js";
+import { AFFILIATION, SHELL_MARKUP, PRIVACY_MARKUP, TERMS_MARKUP } from "../js/markup.js";
 import {
     DATA_UNAVAILABLE,
     expectedValuePerTicket,
@@ -51,7 +51,7 @@ test("a ticket needs a name, a price, and a payout", () => {
     assert.deepEqual(parsed.ticket, { game: "Weekday", cost: 5, payout: 0 });
 });
 
-test("the scratch-off page does not ship invented prize figures or an edge claim", () => {
+test("the shell stays behind an age gate and ships no invented data or banned phrases", () => {
     const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
     const privacy = readFileSync(new URL("../privacy.html", import.meta.url), "utf8");
     const terms = readFileSync(new URL("../terms.html", import.meta.url), "utf8");
@@ -59,18 +59,22 @@ test("the scratch-off page does not ship invented prize figures or an edge claim
         assert.match(page, /noindex,nofollow/);
         assert.match(page, /id="age-gate"/);
         assert.match(page, /id="app-shell" inert/);
-        assert.equal(page.includes("Log this ticket"), false);
-        assert.equal(page.includes("Published game figures"), false);
         assert.equal(page.includes(AFFILIATION), true);
         assert.equal(page.includes("$1.99"), false);
+        assert.equal(page.includes("Subscribe"), false);
     });
-    assert.equal(LOG_MARKUP.includes("Published game figures"), true);
-    assert.equal(LOG_MARKUP.includes("Official game figures"), false);
-    assert.equal(LOG_MARKUP.includes(EV_COPY), true);
-    assert.equal(LOG_MARKUP.includes(DATA_UNAVAILABLE), true);
+    assert.match(SHELL_MARKUP, /Scratch Buddy/);
+    assert.match(SHELL_MARKUP, /Find a Machine or Venue/);
+    assert.match(SHELL_MARKUP, /No retailer list is loaded in this step yet/);
+    assert.match(SHELL_MARKUP, /No payout data yet/);
+    assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
+    assert.match(SHELL_MARKUP, /© 2026 NAV Analytics LLC/);
+    assert.equal(SHELL_MARKUP.includes(AFFILIATION), true);
     assert.equal(PRIVACY_MARKUP.includes(AFFILIATION), true);
     assert.equal(TERMS_MARKUP.includes(AFFILIATION), true);
-    ["mathematical edge", "+$2.15", "1 in 3.42", "+14.2%", "High Value", "advantage over"].forEach((phrase) => {
-        assert.equal(LOG_MARKUP.includes(phrase), false, phrase);
+    ["live", "real-time", "play along", "mathematical edge", "+$2.15", "1 in 3.42", "+14.2%", "High Value", "advantage over", "jackpot"].forEach((phrase) => {
+        const hay = (SHELL_MARKUP + PRIVACY_MARKUP + TERMS_MARKUP + html).toLowerCase();
+        assert.equal(hay.includes(phrase.toLowerCase()), false, phrase);
     });
+    assert.equal(typeof DATA_UNAVAILABLE, "string");
 });
