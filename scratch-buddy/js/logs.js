@@ -59,22 +59,6 @@ export function sanitizeCheckin(checkin) {
     };
 }
 
-// Heat-map weight: unverified 1, either confirmation 2, both 3 (1+2, or 2+2 capped conceptually as both=3).
-export function heatWeight(flags) {
-    const set = new Set(flags || []);
-    if (set.has("location-confirmed") && set.has("photo-attached")) return 3;
-    if (set.has("location-confirmed") || set.has("photo-attached")) return 2;
-    return 1;
-}
-
-export function heatColor(flags) {
-    const set = new Set(flags || []);
-    if (set.has("location-confirmed") && set.has("photo-attached")) return "#facc15";
-    if (set.has("location-confirmed")) return "#22d3ee";
-    if (set.has("photo-attached")) return "#f59e0b";
-    return "#64748b";
-}
-
 function readMoney(value) {
     if (typeof value === "number") return value;
     const text = String(value ?? "").trim().replace(/^[$\s]+/, "");
@@ -179,11 +163,12 @@ export function saveLogs(logs, storage = localStorage) {
     storage.setItem(LOG_KEY, JSON.stringify(logs));
 }
 
-export function aggregatePayouts(logs) {
+// Group this device's prize logs by retailer for My Log Map.
+// Stores are not ranked, weighted, or totaled.
+export function groupLogsByRetailer(logs) {
     const groups = new Map();
     for (const log of logs || []) {
         if (!log || !Number.isFinite(log.retailerLat) || !Number.isFinite(log.retailerLng)) continue;
-        if (!Number.isFinite(log.prizeAmount) || log.prizeAmount <= 0) continue;
         const key = log.retailerId || `${log.retailerLat},${log.retailerLng}`;
         let group = groups.get(key);
         if (!group) {
@@ -195,49 +180,13 @@ export function aggregatePayouts(logs) {
                 zip: log.retailerZip || "",
                 lat: log.retailerLat,
                 lng: log.retailerLng,
-                count: 0,
-                prizeTotal: 0,
-                weight: 0,
-                unverified: 0,
-                locationConfirmed: 0,
-                photoAttached: 0,
-                both: 0
+                entries: []
             };
             groups.set(key, group);
         }
-        const flags = Array.isArray(log.verification)
-            ? log.verification
-            : verificationFlags(log);
-        group.count += 1;
-        group.prizeTotal += log.prizeAmount;
-        group.weight += heatWeight(flags);
-        const set = new Set(flags);
-        if (set.has("location-confirmed") && set.has("photo-attached")) group.both += 1;
-        else if (set.has("location-confirmed")) group.locationConfirmed += 1;
-        else if (set.has("photo-attached")) group.photoAttached += 1;
-        else group.unverified += 1;
+        group.entries.push(log);
     }
     return [...groups.values()];
-}
-
-export function heatGroupStyle(group) {
-    const flags = [];
-    if ((group && group.both > 0) || (group && group.locationConfirmed > 0 && group.photoAttached > 0)) {
-        flags.push("location-confirmed", "photo-attached");
-    } else if (group && group.locationConfirmed > 0) {
-        flags.push("location-confirmed");
-    } else if (group && group.photoAttached > 0) {
-        flags.push("photo-attached");
-    } else {
-        flags.push("unverified");
-    }
-    const weight = Number(group && group.weight) || 1;
-    return {
-        flags,
-        color: heatColor(flags),
-        weight,
-        radius: 10 + Math.min(weight, 10) * 3
-    };
 }
 
 export function formatDollars(amount) {

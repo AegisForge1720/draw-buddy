@@ -213,7 +213,7 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
 }
 
 
-export function createPayoutHeatMap({ container, formatAddress, formatDollars, groupStyle }) {
+export function createLogMap({ container, formatAddress, formatEntry }) {
     const L = window.L;
     const map = L.map(container, {
         minZoom: 5,
@@ -230,8 +230,15 @@ export function createPayoutHeatMap({ container, formatAddress, formatDollars, g
     const layer = L.layerGroup().addTo(map);
     let userMarker = null;
     let groups = [];
+    const markerStyle = {
+        radius: 10,
+        color: "#0b132b",
+        weight: 1,
+        fillColor: "#22d3ee",
+        fillOpacity: 0.85
+    };
 
-    function popupFor(group, style) {
+    function popupFor(group) {
         const wrap = document.createElement("div");
         wrap.className = "sb-popup";
         const title = document.createElement("h3");
@@ -245,36 +252,39 @@ export function createPayoutHeatMap({ container, formatAddress, formatDollars, g
             zip: group.zip
         }) || "Address not in the source data.";
         wrap.appendChild(address);
-        const summary = document.createElement("p");
-        const count = group.count;
-        summary.textContent = `Logged on this device: ${formatDollars(group.prizeTotal)} across ${count} prize log${count === 1 ? "" : "s"}. Weight ${style.weight}.`;
-        wrap.appendChild(summary);
-        const breakdown = document.createElement("p");
-        breakdown.textContent = `Self-reported: ${group.unverified}. GPS check-in near store: ${group.locationConfirmed}. Photo on this device: ${group.photoAttached}. GPS check-in near store and photo on this device: ${group.both}.`;
-        wrap.appendChild(breakdown);
+        const intro = document.createElement("p");
+        intro.textContent = "Your prize logs at this store, on this device only:";
+        wrap.appendChild(intro);
+        const list = document.createElement("ul");
+        const entries = Array.isArray(group.entries) ? group.entries : [];
+        if (!entries.length) {
+            const empty = document.createElement("p");
+            empty.textContent = "No prize logs for this store are on this device.";
+            wrap.appendChild(empty);
+            return wrap;
+        }
+        for (const entry of entries) {
+            const item = document.createElement("li");
+            item.textContent = formatEntry ? formatEntry(entry) : (entry.game || "Prize log");
+            list.appendChild(item);
+        }
+        wrap.appendChild(list);
         return wrap;
     }
 
-    function setPayouts(nextGroups) {
+    function setLogs(nextGroups) {
         layer.clearLayers();
         groups = Array.isArray(nextGroups) ? nextGroups : [];
         for (const group of groups) {
             if (!Number.isFinite(group.lat) || !Number.isFinite(group.lng)) continue;
-            const style = groupStyle(group);
-            const marker = L.circleMarker([group.lat, group.lng], {
-                radius: style.radius,
-                color: "#0b132b",
-                weight: 1,
-                fillColor: style.color,
-                fillOpacity: 0.75
-            });
-            marker.bindPopup(() => popupFor(group, style), { maxWidth: 260, className: "sb-popup-shell" });
+            const marker = L.circleMarker([group.lat, group.lng], markerStyle);
+            marker.bindPopup(() => popupFor(group), { maxWidth: 260, className: "sb-popup-shell" });
             layer.addLayer(marker);
         }
         return groups.length;
     }
 
-    function fitPayouts() {
+    function fitLogs() {
         const pts = groups.filter((group) => Number.isFinite(group.lat) && Number.isFinite(group.lng));
         if (!pts.length) {
             map.fitBounds(NY_BOUNDS, { padding: [12, 12] });
@@ -314,8 +324,8 @@ export function createPayoutHeatMap({ container, formatAddress, formatDollars, g
 
     return {
         map,
-        setPayouts,
-        fitPayouts,
+        setLogs,
+        fitLogs,
         fitNewYork,
         setUserPosition,
         invalidate,

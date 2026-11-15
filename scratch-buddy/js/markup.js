@@ -47,13 +47,13 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">Payout heat map preview. Circles come only from prize logs on this device. The map stays empty until you log a prize. No sample points are included. A shared database is not connected.</p>
+        <p class="preview-banner">My Log Map preview. Markers come only from prize logs on this device. The map stays empty until you log a prize. No sample points are included. A shared database is not connected.</p>
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
             <button type="button" class="tab-btn" id="tab-map" role="tab" aria-controls="panel-map" aria-selected="false" data-tab="map">Map</button>
             <button type="button" class="tab-btn" id="tab-log" role="tab" aria-controls="panel-log" aria-selected="false" data-tab="log">Prize Log</button>
-            <button type="button" class="tab-btn" id="tab-heat" role="tab" aria-controls="panel-heat" aria-selected="false" data-tab="heat">Heat Map</button>
+            <button type="button" class="tab-btn" id="tab-logs-map" role="tab" aria-controls="panel-logs-map" aria-selected="false" data-tab="logs-map">My Log Map</button>
         </div>
 
         <section id="panel-find" class="panel space-y-3" role="tabpanel" aria-labelledby="find-heading">
@@ -212,27 +212,21 @@ export const SHELL_MARKUP = `
             <p id="delete-all-status" class="empty-note" role="status"></p>
         </section>
 
-        <section id="panel-heat" class="panel space-y-3" role="tabpanel" aria-labelledby="heat-heading" hidden>
-            <h2 id="heat-heading" class="section-title">Payout Heat Map</h2>
-            <p class="source-note">This map is built only from prize logs on this device. It does not include official payout records or invented points. Circle size follows check-in and photo marks: self-reported 1, GPS check-in near store or photo on this device 2, both 3.</p>
+        <section id="panel-logs-map" class="panel space-y-3" role="tabpanel" aria-labelledby="logs-map-heading" hidden>
+            <h2 id="logs-map-heading" class="section-title">My Log Map</h2>
+            <p class="source-note">This map is built only from prize logs on this device. It does not include official prize records or invented points. Every store marker looks the same. The map does not rank stores.</p>
             <p class="source-note">${LOG_DISCLOSURE}</p>
-            <ul class="heat-legend" aria-label="Prize log marks">
-                <li><span class="heat-swatch heat-swatch-unverified"></span> Self-reported</li>
-                <li><span class="heat-swatch heat-swatch-location"></span> GPS check-in near store</li>
-                <li><span class="heat-swatch heat-swatch-photo"></span> Photo on this device</li>
-                <li><span class="heat-swatch heat-swatch-both"></span> GPS check-in near store and photo on this device</li>
-            </ul>
-            <button type="button" class="btn-secondary w-full" id="heat-locate">Optional: center on my location</button>
-            <div id="heat-location-prompt" class="location-prompt" hidden>
+            <button type="button" class="btn-secondary w-full" id="logs-map-locate">Optional: center on my location</button>
+            <div id="logs-map-location-prompt" class="location-prompt" hidden>
                 <p class="location-prompt-title">Use your location?</p>
-                <p>Scratch Buddy can use your device location to center this payout map. The position is used only to center the map, is not saved, and is not used to invent payouts. Map tiles still go to the tile provider and can show the area you view. Location is optional and off until you agree.</p>
+                <p>Scratch Buddy can use your device location to center this map. The position is used only to center the map, is not saved, and is not used to add prize logs. Map tiles still go to the tile provider and can show the area you view. Location is optional and off until you agree.</p>
                 <div class="flex gap-2">
-                    <button type="button" class="btn-primary flex-1" id="heat-locate-allow">Use my location</button>
-                    <button type="button" class="btn-secondary flex-1" id="heat-locate-deny">Not now</button>
+                    <button type="button" class="btn-primary flex-1" id="logs-map-locate-allow">Use my location</button>
+                    <button type="button" class="btn-secondary flex-1" id="logs-map-locate-deny">Not now</button>
                 </div>
             </div>
-            <div id="payout-heat-map" class="retailer-map" role="application" aria-label="Payout heat map of prize logs on this device"></div>
-            <p id="heat-status" class="empty-note" role="status">No payout data yet. Prize logs from this device will appear here after you add them. Nothing has been logged.</p>
+            <div id="my-log-map" class="retailer-map" role="application" aria-label="Map of prize logs on this device"></div>
+            <p id="logs-map-status" class="empty-note" role="status">No prize logs on this map yet. Prize logs from this device will appear here after you add them. Nothing has been logged.</p>
             <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
         </section>
 
@@ -255,7 +249,7 @@ export const PRIVACY_MARKUP = `
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
     <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and a payout heat map built only from those logs. Leaflet and the page styles are self-hosted. Passing the age check is not consent to tracking. Scratch Buddy does not install advertising pixels or other trackers.</p>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and My Log Map, which shows only those logs. Leaflet and the page styles are self-hosted. Passing the age check is not consent to tracking. Scratch Buddy does not install advertising pixels or other trackers.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>
@@ -269,7 +263,7 @@ export const PRIVACY_MARKUP = `
         <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
         <li>Prize logs you choose to save stay in this browser (localStorage and IndexedDB) until you delete them. There is no server copy in this preview.</li>
         <li>A ticket photo is optional. A photo is stored only if you first cover the barcode, validation number, and PIN, or you crop those details out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device. No photo bucket has been created.</li>
-        <li>The payout heat map reads only those local prize logs.</li>
+        <li>My Log Map reads only those local prize logs. It does not rank stores.</li>
     </ul>
     <h2 class="section-title">Network requests this preview makes</h2>
     <p class="empty-note">Map tiles are fetched from OpenStreetMap (tile.openstreetmap.org) at the area you view. That tile host receives your IP address and the approximate map area and zoom. Leaflet and Tailwind are self-hosted in this preview, so those libraries are not requested from a third-party CDN. The official retailer list is read from a file served with this preview. There are no advertising or analytics pixels.</p>

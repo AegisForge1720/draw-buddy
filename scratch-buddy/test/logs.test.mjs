@@ -7,9 +7,7 @@ import {
     todayInNewYork,
     verificationFlags,
     verificationLabel,
-    heatWeight,
-    heatGroupStyle,
-    aggregatePayouts,
+    groupLogsByRetailer,
     sanitizeCheckin,
     LABEL_SELF_REPORTED,
     LABEL_GPS_CHECKIN,
@@ -66,7 +64,7 @@ test("the venue path needs a Quick Draw retailer, and a ticket photo is optional
     assert.deepEqual(parsed.log.verification, ["photo-attached"]);
 });
 
-test("verification flags and heat weights match the three levels", () => {
+test("badge labels match the three self-report marks", () => {
     assert.deepEqual(verificationFlags({ locationConfirmed: false, photoAttached: false }), ["unverified"]);
     assert.deepEqual(verificationFlags({ locationConfirmed: true, photoAttached: false }), ["location-confirmed"]);
     assert.deepEqual(verificationFlags({ locationConfirmed: false, photoAttached: true }), ["photo-attached"]);
@@ -75,10 +73,6 @@ test("verification flags and heat weights match the three levels", () => {
     assert.equal(verificationLabel(["location-confirmed"]), LABEL_GPS_CHECKIN);
     assert.equal(verificationLabel(["photo-attached"]), LABEL_PHOTO);
     assert.equal(verificationLabel(["location-confirmed", "photo-attached"]), "GPS check-in near store and photo on this device");
-    assert.equal(heatWeight(["unverified"]), 1);
-    assert.equal(heatWeight(["location-confirmed"]), 2);
-    assert.equal(heatWeight(["photo-attached"]), 2);
-    assert.equal(heatWeight(["location-confirmed", "photo-attached"]), 3);
 });
 
 test("the draft SQL is not an applied migration and includes RLS", () => {
@@ -101,25 +95,27 @@ test("the draft SQL is not an applied migration and includes RLS", () => {
     }
 });
 
-test("the heat map has no points until real logs exist, and weights follow verification", () => {
-    assert.deepEqual(aggregatePayouts([]), []);
-    assert.deepEqual(aggregatePayouts(null), []);
-    const groups = aggregatePayouts([
-        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 50, verification: ["unverified"] },
-        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 25, verification: ["photo-attached"] },
-        { retailerId: "2", retailerName: "B", retailerLat: 43.21, retailerLng: -77.56, prizeAmount: 10, verification: ["location-confirmed", "photo-attached"] }
+test("My Log Map has no points until real logs exist, and it does not rank or total stores", () => {
+    assert.deepEqual(groupLogsByRetailer([]), []);
+    assert.deepEqual(groupLogsByRetailer(null), []);
+    const groups = groupLogsByRetailer([
+        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 50, verification: ["unverified"], game: "One", occurredOn: "2026-11-15" },
+        { retailerId: "1", retailerName: "A", retailerLat: 43.2, retailerLng: -77.5, prizeAmount: 25, verification: ["photo-attached"], game: "Two", occurredOn: "2026-11-14" },
+        { retailerId: "2", retailerName: "B", retailerLat: 43.21, retailerLng: -77.56, prizeAmount: 10, verification: ["location-confirmed", "photo-attached"], game: "Three", occurredOn: "2026-11-13" }
     ]);
     const first = groups.find((group) => group.retailerId === "1");
     const second = groups.find((group) => group.retailerId === "2");
-    assert.equal(first.count, 2);
-    assert.equal(first.prizeTotal, 75);
-    assert.equal(first.weight, 3);
-    assert.equal(first.unverified, 1);
-    assert.equal(first.photoAttached, 1);
-    assert.equal(heatGroupStyle(first).color, "#f59e0b");
-    assert.equal(second.weight, 3);
-    assert.equal(heatGroupStyle(second).color, "#facc15");
-    assert.deepEqual(aggregatePayouts([{ retailerId: "x", prizeAmount: 5 }]), []);
+    assert.equal(first.entries.length, 2);
+    assert.equal(first.entries[0].game, "One");
+    assert.equal(first.entries[1].game, "Two");
+    assert.equal(Object.prototype.hasOwnProperty.call(first, "prizeTotal"), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(first, "weight"), false);
+    assert.equal(second.entries.length, 1);
+    assert.deepEqual(groupLogsByRetailer([{ retailerId: "x", prizeAmount: 5 }]), []);
+    const src = readFileSync(new URL("../js/logs.js", import.meta.url), "utf8");
+    assert.equal(src.includes("heatWeight"), false);
+    assert.equal(src.includes("aggregatePayouts"), false);
+    assert.equal(src.includes("heatGroupStyle"), false);
 });
 
 test("check-in records keep only pass/fail, a date, and a distance band", () => {

@@ -49,8 +49,14 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /Bought at a venue/);
     assert.match(SHELL_MARKUP, /Optional GPS check-in/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
-    assert.match(SHELL_MARKUP, /id="payout-heat-map"/);
-    assert.match(SHELL_MARKUP, /No payout data yet/);
+    assert.match(SHELL_MARKUP, /id="my-log-map"/);
+    assert.match(SHELL_MARKUP, /My Log Map/);
+    assert.match(SHELL_MARKUP, /No prize logs on this map yet/);
+    assert.match(SHELL_MARKUP, /Every store marker looks the same/);
+    assert.equal(SHELL_MARKUP.toLowerCase().includes("heat"), false);
+    assert.equal(SHELL_MARKUP.toLowerCase().includes("payout"), false);
+    assert.equal(PRIVACY_MARKUP.toLowerCase().includes("heat"), false);
+    assert.equal(PRIVACY_MARKUP.toLowerCase().includes("payout"), false);
     assert.match(SHELL_MARKUP, /No sample points are included/);
     assert.match(SHELL_MARKUP, /Optional: center on my location/);
     assert.match(SHELL_MARKUP, /id="delete-all-data"/);
@@ -78,6 +84,8 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.equal(TERMS_MARKUP.includes(AFFILIATION), true);
     assert.equal(PRIVACY_MARKUP.includes(PAST_RESULTS_LINE), true);
     assert.equal(TERMS_MARKUP.includes(PAST_RESULTS_LINE), true);
+    assert.equal(html.toLowerCase().includes("heat"), false);
+    assert.equal(html.toLowerCase().includes("payout"), false);
     ["live", "real-time", "play along", "mathematical edge", "+$2.15", "1 in 3.42", "+14.2%", "High Value", "advantage over", "jackpot"].forEach((phrase) => {
         const hay = (SHELL_MARKUP + PRIVACY_MARKUP + TERMS_MARKUP + html).toLowerCase();
         assert.equal(hay.includes(phrase.toLowerCase()), false, phrase);
@@ -96,6 +104,12 @@ test("the app self-hosts Leaflet and Tailwind and no longer ships scratch.js", (
     const html = readFileSync(new URL("index.html", root), "utf8");
     assert.equal(app.includes("./scratch.js"), false);
     assert.equal(html.includes("scratch.js"), false);
+    const mapSource = readFileSync(new URL("js/map.js", root), "utf8");
+    assert.match(mapSource, /function createLogMap/);
+    assert.equal(mapSource.includes("createPayoutHeatMap"), false);
+    assert.equal(mapSource.includes("prizeTotal"), false);
+    assert.equal(mapSource.includes("Weight "), false);
+    assert.match(mapSource, /Your prize logs at this store, on this device only/);
     const photos = readFileSync(new URL("js/photos.js", root), "utf8");
     assert.match(photos, /encodePhotoWithoutExif/);
     assert.match(photos, /createImageBitmap/);

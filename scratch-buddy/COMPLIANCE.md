@@ -14,4 +14,4 @@ Applied in this preview (Ralph's required product changes 2–8 as assigned; num
 7. The age gate stays 18+ and uses one failure message: "Sorry — Scratch Buddy is for adults 18 and over."
 8. The privacy notice discloses OpenStreetMap tile requests (IP and the area viewed). Leaflet and Tailwind are self-hosted. "Delete all my data" clears the on-device store. Retention: kept until the user deletes them; a future server, if approved, would also drop logs after 24 months of inactivity and would never keep raw location.
 
-Not applied, pending Andrew: Ralph's request to drop or rename the payout heat map, the weights, and the per-store totals (memo §4 item 2). The heat map is unchanged in concept; only the badge labels and disclosure were updated to match item 4.
+Applied after Andrew's approval (Ralph memo §4 item 2 / assigned change 1): the tab and view are "My Log Map." Markers are uniform. heatWeight and aggregatePayouts were removed. Popups list only this device's prize logs at that store, with no per-store dollar totals and no rankings. "Heat" and "Payout" wording was removed.

@@ -76,8 +76,9 @@
 --   to authenticated
 --   using (auth.uid() = user_id);
 --
--- A retailer-level aggregate for a future heat map must not expose who
--- logged a prize. Do not create that view until Ralph and Andrew review it.
+-- A retailer-level aggregate or ranking view must not be created. Do not
+-- expose who logged a prize, and do not rank stores. Review with Ralph and
+-- Andrew is required before any shared map or list of logs by retailer.
 --
 -- comment on table public.prize_logs is
 --   'Draft Scratch Buddy prize logs. Not applied. The preview uses a local stub store.';

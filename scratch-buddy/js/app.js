@@ -1,9 +1,8 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
 import { distanceBand, evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
 import {
-    aggregatePayouts,
     formatDollars,
-    heatGroupStyle,
+    groupLogsByRetailer,
     LABEL_GPS_CHECKIN,
     LABEL_PHOTO,
     LABEL_SELF_REPORTED,
@@ -13,7 +12,7 @@ import {
     todayInNewYork,
     verificationLabel
 } from "./logs.js";
-import { createPayoutHeatMap, createRetailerMap, waitForLeaflet } from "./map.js";
+import { createLogMap, createRetailerMap, waitForLeaflet } from "./map.js";
 import { AGE_FAIL_COPY, LOG_DISCLOSURE, SHELL_MARKUP } from "./markup.js";
 import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
 import { deleteAllScratchBuddyData } from "./purge.js";
@@ -88,7 +87,7 @@ const logState = {
     logs: []
 };
 
-const heatState = {
+const logMapState = {
     api: null,
     promise: null
 };
@@ -99,7 +98,7 @@ function showTab(name) {
         find: $("panel-find"),
         map: $("panel-map"),
         log: $("panel-log"),
-        heat: $("panel-heat")
+        "logs-map": $("panel-logs-map")
     };
     tabs.forEach((tab) => {
         const selected = tab.dataset.tab === name;
@@ -114,8 +113,8 @@ function showTab(name) {
             if (api) api.invalidate();
         });
     }
-    if (name === "heat") {
-        ensureHeatMap().then((api) => {
+    if (name === "logs-map") {
+        ensureLogMap().then((api) => {
             if (api) api.invalidate();
         });
     }
@@ -870,7 +869,7 @@ async function removeLog(id) {
         try { await deletePhoto(entry.photoId); } catch { /* local stub */ }
     }
     await renderLogList();
-    refreshHeatMap();
+    refreshLogMap();
 }
 
 function hideCheckinPrompt() {
@@ -972,7 +971,7 @@ async function submitPrizeLog(event) {
         const checkStatus = $("log-checkin-status");
         if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked self-reported unless a photo is attached.";
         await renderLogList();
-        refreshHeatMap();
+        refreshLogMap();
     } catch (error) {
         if (status) status.textContent = error && error.message ? error.message : "The prize log could not be saved on this device.";
     }
@@ -1099,96 +1098,104 @@ function bindDeleteAllData() {
 }
 
 
-function describeHeatStatus(groups, locateNote) {
-    const status = $("heat-status");
+function formatLogMapEntry(entry) {
+    const bits = [
+        entry && entry.game ? entry.game : "Prize log",
+        entry && entry.occurredOn ? entry.occurredOn : null,
+        verificationLabel(entry && entry.verification)
+    ].filter(Boolean);
+    return bits.join(" · ");
+}
+
+function describeLogMapStatus(groups, locateNote) {
+    const status = $("logs-map-status");
     if (!status) return;
     if (!groups.length) {
-        status.textContent = "No payout data yet. Prize logs from this device will appear here after you add them. Nothing has been logged.";
+        status.textContent = "No prize logs on this map yet. Prize logs from this device will appear here after you add them. Nothing has been logged.";
         return;
     }
-    const logs = groups.reduce((sum, group) => sum + group.count, 0);
-    const base = `${formatCount(groups.length)} establishment${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Circle size follows check-in and photo marks. Tiles are from OpenStreetMap. Tap a circle for the logged totals.`;
+    const logs = groups.reduce((sum, group) => sum + ((group.entries && group.entries.length) || 0), 0);
+    const base = `${formatCount(groups.length)} store${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Every marker looks the same. Tiles are from OpenStreetMap. Tap a marker for your logs at that store.`;
     status.textContent = locateNote ? `${base} ${locateNote}` : base;
 }
 
-function refreshHeatMap() {
-    if (!heatState.api) return;
-    const groups = aggregatePayouts(loadLogs());
-    heatState.api.setPayouts(groups);
-    heatState.api.fitPayouts();
-    describeHeatStatus(groups);
+function refreshLogMap() {
+    if (!logMapState.api) return;
+    const groups = groupLogsByRetailer(loadLogs());
+    logMapState.api.setLogs(groups);
+    logMapState.api.fitLogs();
+    describeLogMapStatus(groups);
     return groups;
 }
 
-async function ensureHeatMap() {
-    if (heatState.api) {
-        refreshHeatMap();
-        heatState.api.invalidate();
-        return heatState.api;
+async function ensureLogMap() {
+    if (logMapState.api) {
+        refreshLogMap();
+        logMapState.api.invalidate();
+        return logMapState.api;
     }
-    if (heatState.promise) return heatState.promise;
-    const status = $("heat-status");
-    heatState.promise = (async () => {
+    if (logMapState.promise) return logMapState.promise;
+    const status = $("logs-map-status");
+    logMapState.promise = (async () => {
         try {
             await waitForLeaflet();
-            const container = $("payout-heat-map");
-            if (!container) throw new Error("The heat map container is missing.");
-            const api = createPayoutHeatMap({
+            const container = $("my-log-map");
+            if (!container) throw new Error("The log map container is missing.");
+            const api = createLogMap({
                 container,
                 formatAddress: formatRetailerAddress,
-                formatDollars,
-                groupStyle: heatGroupStyle
+                formatEntry: formatLogMapEntry
             });
-            const groups = aggregatePayouts(loadLogs());
-            api.setPayouts(groups);
-            api.fitPayouts();
-            heatState.api = api;
+            const groups = groupLogsByRetailer(loadLogs());
+            api.setLogs(groups);
+            api.fitLogs();
+            logMapState.api = api;
             requestAnimationFrame(() => api.invalidate());
-            describeHeatStatus(groups);
+            describeLogMapStatus(groups);
             container.dataset.ready = "true";
             return api;
         } catch (error) {
             const message = error && error.message
                 ? error.message
-                : "The heat map could not be loaded. No payouts are shown.";
+                : "The log map could not be loaded. No prize logs are shown.";
             if (status) status.textContent = message;
-            heatState.promise = null;
+            logMapState.promise = null;
             return null;
         }
     })();
-    return heatState.promise;
+    return logMapState.promise;
 }
 
-async function runHeatLocate() {
-    const api = await ensureHeatMap();
+async function runLogMapLocate() {
+    const api = await ensureLogMap();
     if (!api) return;
-    const status = $("heat-status");
+    const status = $("logs-map-status");
     try {
         const position = await requestDevicePosition();
         api.setUserPosition(position);
-        const groups = aggregatePayouts(loadLogs());
+        const groups = groupLogsByRetailer(loadLogs());
         const nearby = groups.filter((group) => {
             const distance = haversineMeters(position.lat, position.lng, group.lat, group.lng);
             return Number.isFinite(distance) && distance <= 25000;
         });
         const note = groups.length
-            ? `${nearby.length} logged establishment${nearby.length === 1 ? "" : "s"} ${nearby.length === 1 ? "is" : "are"} within 25 km of that position. The position was used only to center the map and was not saved.`
-            : "No prize logs are on this device, so no payout circles were added. The position was used only to center the map and was not saved.";
-        describeHeatStatus(groups, note);
+            ? `${nearby.length} logged store${nearby.length === 1 ? "" : "s"} ${nearby.length === 1 ? "is" : "are"} within 25 km of that position. The position was used only to center the map and was not saved.`
+            : "No prize logs are on this device, so no markers were added. The position was used only to center the map and was not saved.";
+        describeLogMapStatus(groups, note);
     } catch (error) {
         if (status) {
-            const prefix = status.textContent || "No payout data yet.";
+            const prefix = status.textContent || "No prize logs on this map yet.";
             const reason = error && error.message ? error.message : "The device position was not available.";
             status.textContent = `${prefix} ${reason}`;
         }
     }
 }
 
-function bindHeatMap() {
-    const locate = $("heat-locate");
-    const prompt = $("heat-location-prompt");
-    const allow = $("heat-locate-allow");
-    const deny = $("heat-locate-deny");
+function bindLogMap() {
+    const locate = $("logs-map-locate");
+    const prompt = $("logs-map-location-prompt");
+    const allow = $("logs-map-locate-allow");
+    const deny = $("logs-map-locate-deny");
     if (locate) {
         locate.addEventListener("click", () => {
             if (prompt) {
@@ -1200,7 +1207,7 @@ function bindHeatMap() {
     if (allow) {
         allow.addEventListener("click", () => {
             if (prompt) prompt.hidden = true;
-            runHeatLocate();
+            runLogMapLocate();
         });
     }
     if (deny) {
@@ -1218,7 +1225,7 @@ function bindShell() {
     bindFind();
     bindMap();
     bindPrizeLog();
-    bindHeatMap();
+    bindLogMap();
     loadFind();
 }
 
