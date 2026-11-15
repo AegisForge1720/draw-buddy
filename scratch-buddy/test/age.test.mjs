@@ -6,6 +6,7 @@ import {
     readAgePass,
     writeAgePass
 } from "../js/age.js";
+import { AGE_FAIL_COPY } from "../js/markup.js";
 
 const today = new Date(2026, 10, 14);
 
@@ -39,4 +40,17 @@ test("Scratch Buddy keeps the age gate and leaves pricing out", () => {
     assert.match(page, /scratch_buddy_age_gate/);
     assert.equal(page.includes("$1.99"), false);
     assert.equal(page.includes("Subscribe"), false);
+});
+
+test("the age gate uses one 18+ failure message", () => {
+    assert.equal(AGE_FAIL_COPY, "Sorry — Scratch Buddy is for adults 18 and over.");
+    const app = readFileSync(new URL("../js/app.js", import.meta.url), "utf8");
+    const legal = readFileSync(new URL("../js/legal-page.js", import.meta.url), "utf8");
+    assert.match(app, /AGE_FAIL_COPY/);
+    assert.match(legal, /AGE_FAIL_COPY/);
+    assert.equal(app.includes("not offered to children under 13"), false);
+    assert.equal(legal.includes("not offered to children under 13"), false);
+    assert.equal(classifyDob({ year: 2008, month: 11, day: 14 }, today).outcome, "pass");
+    assert.equal(classifyDob({ year: 2013, month: 11, day: 15 }, today).outcome, "under13");
+    assert.equal(classifyDob({ year: 2008, month: 11, day: 15 }, today).outcome, "under18");
 });

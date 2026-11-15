@@ -9,7 +9,11 @@ import {
     verificationLabel,
     heatWeight,
     heatGroupStyle,
-    aggregatePayouts
+    aggregatePayouts,
+    sanitizeCheckin,
+    LABEL_SELF_REPORTED,
+    LABEL_GPS_CHECKIN,
+    LABEL_PHOTO
 } from "../js/logs.js";
 
 const base = {
@@ -52,9 +56,11 @@ test("a prize log requires a preview sign-in, presence confirmation, a retailer,
     assert.equal(parsed.log.localOnly, true);
 });
 
-test("the venue path needs a Quick Draw retailer and a ticket photo", () => {
+test("the venue path needs a Quick Draw retailer, and a ticket photo is optional", () => {
     assert.equal(parsePrizeLog({ ...base, path: "bought_at_venue", photoAttached: true, retailerQuickDraw: false }).ok, false);
-    assert.equal(parsePrizeLog({ ...base, path: "bought_at_venue", photoAttached: false }).ok, false);
+    const withoutPhoto = parsePrizeLog({ ...base, path: "bought_at_venue", photoAttached: false });
+    assert.equal(withoutPhoto.ok, true);
+    assert.deepEqual(withoutPhoto.log.verification, ["unverified"]);
     const parsed = parsePrizeLog({ ...base, path: "bought_at_venue", photoAttached: true });
     assert.equal(parsed.ok, true);
     assert.deepEqual(parsed.log.verification, ["photo-attached"]);
@@ -65,8 +71,10 @@ test("verification flags and heat weights match the three levels", () => {
     assert.deepEqual(verificationFlags({ locationConfirmed: true, photoAttached: false }), ["location-confirmed"]);
     assert.deepEqual(verificationFlags({ locationConfirmed: false, photoAttached: true }), ["photo-attached"]);
     assert.deepEqual(verificationFlags({ locationConfirmed: true, photoAttached: true }), ["location-confirmed", "photo-attached"]);
-    assert.equal(verificationLabel(["unverified"]), "Unverified");
-    assert.equal(verificationLabel(["location-confirmed", "photo-attached"]), "Location-confirmed and photo-attached");
+    assert.equal(verificationLabel(["unverified"]), LABEL_SELF_REPORTED);
+    assert.equal(verificationLabel(["location-confirmed"]), LABEL_GPS_CHECKIN);
+    assert.equal(verificationLabel(["photo-attached"]), LABEL_PHOTO);
+    assert.equal(verificationLabel(["location-confirmed", "photo-attached"]), "GPS check-in near store and photo on this device");
     assert.equal(heatWeight(["unverified"]), 1);
     assert.equal(heatWeight(["location-confirmed"]), 2);
     assert.equal(heatWeight(["photo-attached"]), 2);
@@ -80,6 +88,11 @@ test("the draft SQL is not an applied migration and includes RLS", () => {
     assert.match(sql, /enable row level security/);
     assert.match(sql, /auth\.uid\(\) = user_id/);
     assert.match(sql, /Do not create a Storage bucket/);
+    assert.equal(sql.includes("checkin_lat"), false);
+    assert.equal(sql.includes("checkin_lng"), false);
+    assert.equal(sql.includes("prize_logs_location_coords_chk"), false);
+    assert.match(sql, /distance_band/);
+    assert.equal(sql.includes("prize_logs_venue_photo_chk"), false);
     // Every statement is commented so a casual apply cannot create production tables.
     for (const line of sql.split("\n")) {
         const trimmed = line.trim();
@@ -107,4 +120,29 @@ test("the heat map has no points until real logs exist, and weights follow verif
     assert.equal(second.weight, 3);
     assert.equal(heatGroupStyle(second).color, "#facc15");
     assert.deepEqual(aggregatePayouts([{ retailerId: "x", prizeAmount: 5 }]), []);
+});
+
+test("check-in records keep only pass/fail, a date, and a distance band", () => {
+    assert.equal(sanitizeCheckin(null), null);
+    assert.equal(sanitizeCheckin({ ok: false, lat: 43.2, lng: -77.5, at: "2026-11-15" }), null);
+    const clean = sanitizeCheckin({
+        ok: true,
+        lat: 43.204234,
+        lng: -77.558785,
+        accuracyM: 12,
+        distanceM: 20,
+        at: "2026-11-15T23:11:00-05:00",
+        distanceBand: "<50 m"
+    });
+    assert.deepEqual(clean, { ok: true, at: "2026-11-15", distanceBand: "<50 m" });
+    assert.equal(Object.prototype.hasOwnProperty.call(clean, "lat"), false);
+    const fromMeters = sanitizeCheckin({ ok: true, distanceM: 80, at: "2026-11-15" });
+    assert.equal(fromMeters.distanceBand, "50-150 m");
+    const parsed = parsePrizeLog({
+        ...base,
+        locationConfirmed: true,
+        checkin: { ok: true, lat: 1, lng: 2, accuracyM: 5, distanceM: 10, at: "2026-11-15T12:00:00Z" }
+    });
+    assert.equal(parsed.ok, true);
+    assert.deepEqual(parsed.log.checkin, { ok: true, at: "2026-11-15", distanceBand: "<50 m" });
 });

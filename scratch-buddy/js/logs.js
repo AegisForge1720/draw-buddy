@@ -20,14 +20,43 @@ export function verificationFlags({ locationConfirmed, photoAttached }) {
     return flags;
 }
 
+export const LABEL_SELF_REPORTED = "Self-reported";
+export const LABEL_GPS_CHECKIN = "GPS check-in near store";
+export const LABEL_PHOTO = "Photo on this device";
+
 export function verificationLabel(flags) {
     const set = new Set(flags || []);
     if (set.has("location-confirmed") && set.has("photo-attached")) {
-        return "Location-confirmed and photo-attached";
+        return `${LABEL_GPS_CHECKIN} and ${LABEL_PHOTO.toLowerCase()}`;
     }
-    if (set.has("location-confirmed")) return "Location-confirmed";
-    if (set.has("photo-attached")) return "Photo-attached";
-    return "Unverified";
+    if (set.has("location-confirmed")) return LABEL_GPS_CHECKIN;
+    if (set.has("photo-attached")) return LABEL_PHOTO;
+    return LABEL_SELF_REPORTED;
+}
+
+export function dateOnly(value) {
+    const text = String(value || "").trim();
+    if (/^\d{4}-\d{2}-\d{2}/.test(text)) return text.slice(0, 10);
+    return null;
+}
+
+const ALLOWED_BANDS = new Set(["<50 m", "50-150 m"]);
+
+// Keep only pass/fail, the date, and a coarse distance band. Drop coordinates.
+export function sanitizeCheckin(checkin) {
+    if (!checkin || typeof checkin !== "object" || checkin.ok !== true) return null;
+    let band = checkin.distanceBand;
+    if (!ALLOWED_BANDS.has(band) && Number.isFinite(checkin.distanceM)) {
+        if (checkin.distanceM < 50) band = "<50 m";
+        else if (checkin.distanceM <= 150) band = "50-150 m";
+        else band = null;
+    }
+    if (!ALLOWED_BANDS.has(band)) band = null;
+    return {
+        ok: true,
+        at: dateOnly(checkin.at),
+        distanceBand: band
+    };
 }
 
 // Heat-map weight: unverified 1, either confirmation 2, both 3 (1+2, or 2+2 capped conceptually as both=3).
@@ -90,10 +119,6 @@ export function parsePrizeLog(input) {
     if (path === "bought_at_venue" && !input.retailerQuickDraw) {
         return { ok: false, reason: "The venue path is only for retailers the official list marks as offering Quick Draw." };
     }
-    if (path === "bought_at_venue" && !photoAttached) {
-        return { ok: false, reason: "The venue path needs a photo of the ticket." };
-    }
-
     const flags = verificationFlags({ locationConfirmed, photoAttached });
     return {
         ok: true,
@@ -116,7 +141,7 @@ export function parsePrizeLog(input) {
             retailerQuickDraw: Boolean(input.retailerQuickDraw),
             presentConfirmed: true,
             locationConfirmed,
-            checkin: locationConfirmed ? (input.checkin || null) : null,
+            checkin: locationConfirmed ? sanitizeCheckin(input.checkin) : null,
             photoAttached,
             photoId: photoAttached ? (input.photoId || null) : null,
             verification: flags,
@@ -128,7 +153,23 @@ export function parsePrizeLog(input) {
 export function loadLogs(storage = localStorage) {
     try {
         const parsed = JSON.parse(storage.getItem(LOG_KEY) || "null");
-        return Array.isArray(parsed) ? parsed.filter((row) => row && row.retailerId && row.game) : [];
+        if (!Array.isArray(parsed)) return [];
+        let changed = false;
+        const rows = [];
+        for (const row of parsed) {
+            if (!row || !row.retailerId || !row.game) continue;
+            if (row.checkin) {
+                const clean = sanitizeCheckin(row.checkin);
+                if (clean !== row.checkin) {
+                    const hadCoords = row.checkin && ("lat" in row.checkin || "lng" in row.checkin || "accuracyM" in row.checkin || "distanceM" in row.checkin);
+                    if (hadCoords || JSON.stringify(clean) !== JSON.stringify(row.checkin)) changed = true;
+                    row.checkin = clean;
+                }
+            }
+            rows.push(row);
+        }
+        if (changed) storage.setItem(LOG_KEY, JSON.stringify(rows));
+        return rows;
     } catch {
         return [];
     }

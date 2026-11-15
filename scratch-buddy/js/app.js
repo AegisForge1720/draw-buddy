@@ -1,9 +1,12 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
-import { evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
+import { distanceBand, evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
 import {
     aggregatePayouts,
     formatDollars,
     heatGroupStyle,
+    LABEL_GPS_CHECKIN,
+    LABEL_PHOTO,
+    LABEL_SELF_REPORTED,
     loadLogs,
     parsePrizeLog,
     saveLogs,
@@ -11,8 +14,9 @@ import {
     verificationLabel
 } from "./logs.js";
 import { createPayoutHeatMap, createRetailerMap, waitForLeaflet } from "./map.js";
-import { SHELL_MARKUP } from "./markup.js";
+import { AGE_FAIL_COPY, LOG_DISCLOSURE, SHELL_MARKUP } from "./markup.js";
 import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
+import { deleteAllScratchBuddyData } from "./purge.js";
 import {
     formatCacheTimestamp,
     formatRetailerAddress,
@@ -24,8 +28,8 @@ import {
 import { clearSession, readSession, writeSession } from "./session.js";
 
 const FAIL_COPY = {
-    under13: "Sorry — Scratch Buddy is not offered to children under 13.",
-    under18: "Sorry — Scratch Buddy is for adults 18 and over."
+    under13: AGE_FAIL_COPY,
+    under18: AGE_FAIL_COPY
 };
 
 function $(id) {
@@ -79,6 +83,8 @@ const logState = {
     checkin: null,
     photoFile: null,
     photoPreviewUrl: null,
+    photoSource: null,
+    photoMode: "cover",
     logs: []
 };
 
@@ -112,6 +118,9 @@ function showTab(name) {
         ensureHeatMap().then((api) => {
             if (api) api.invalidate();
         });
+    }
+    if (name === "log") {
+        renderLogList();
     }
 }
 
@@ -492,8 +501,8 @@ function setLogPath(path) {
     const photoLabel = $("log-photo-label");
     const retailerLabel = $("log-retailer-label");
     if (logState.path === "bought_at_venue") {
-        if (note) note.textContent = "Venue path: pick a retailer the official list marks as offering Quick Draw, confirm you were there, and add a photo of the ticket. Use this if you bought the scratch-off at that venue.";
-        if (photoLabel) photoLabel.textContent = "Ticket photo (required)";
+        if (note) note.textContent = "Venue path: pick a retailer the official list marks as offering Quick Draw and confirm you were there. A ticket photo is optional. Use this if you bought the scratch-off at that venue.";
+        if (photoLabel) photoLabel.textContent = "Ticket photo (optional)";
         if (retailerLabel) retailerLabel.textContent = "Quick Draw venue";
         if (logState.selectedRetailer && !logState.selectedRetailer.quickDraw) {
             logState.selectedRetailer = null;
@@ -545,7 +554,7 @@ function renderLogRetailerChoices(rows) {
             logState.selectedRetailer = row;
             logState.checkin = null;
             const checkStatus = $("log-checkin-status");
-            if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+            if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked self-reported unless a photo is attached.";
             renderSelectedRetailer();
             renderLogRetailerChoices([]);
             const query = $("log-retailer-query");
@@ -581,7 +590,7 @@ function startLogForRetailer(row) {
     logState.selectedRetailer = row;
     logState.checkin = null;
     const checkStatus = $("log-checkin-status");
-    if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+    if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked self-reported unless a photo is attached.";
     renderSelectedRetailer();
     renderLogRetailerChoices([]);
     showTab("log");
@@ -605,12 +614,21 @@ function renderSession() {
     }
 }
 
+function hidePhotoRedact() {
+    const panel = $("photo-redact");
+    if (panel) panel.hidden = true;
+    const confirm = $("photo-redact-confirm");
+    if (confirm) confirm.checked = false;
+}
+
 function clearPhotoPreview() {
     if (logState.photoPreviewUrl) {
         URL.revokeObjectURL(logState.photoPreviewUrl);
         logState.photoPreviewUrl = null;
     }
     logState.photoFile = null;
+    logState.photoSource = null;
+    logState.photoMode = "cover";
     const preview = $("log-photo-preview");
     const status = $("log-photo-status");
     const input = $("log-photo");
@@ -620,9 +638,102 @@ function clearPhotoPreview() {
     }
     if (status) status.textContent = "No photo attached.";
     if (input) input.value = "";
+    hidePhotoRedact();
 }
 
-function setPhotoFile(file) {
+function setPhotoMode(mode) {
+    logState.photoMode = mode === "crop" ? "crop" : "cover";
+    const cover = $("photo-mode-cover");
+    const crop = $("photo-mode-crop");
+    if (cover) cover.setAttribute("aria-pressed", logState.photoMode === "cover" ? "true" : "false");
+    if (crop) crop.setAttribute("aria-pressed", logState.photoMode === "crop" ? "true" : "false");
+}
+
+async function drawPhotoSource() {
+    const canvas = $("photo-redact-canvas");
+    const source = logState.photoSource;
+    if (!canvas || !source) return;
+    const bitmap = await createImageBitmap(source);
+    const maxEdge = 900;
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height, 1));
+    canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+    canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    if (typeof bitmap.close === "function") bitmap.close();
+}
+
+function canvasPointer(event, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * canvas.width;
+    const y = ((event.clientY - rect.top) / rect.height) * canvas.height;
+    return {
+        x: Math.max(0, Math.min(canvas.width, x)),
+        y: Math.max(0, Math.min(canvas.height, y))
+    };
+}
+
+function bindPhotoRedactCanvas() {
+    const canvas = $("photo-redact-canvas");
+    if (!canvas || canvas.dataset.bound === "true") return;
+    canvas.dataset.bound = "true";
+    let drag = null;
+
+    const start = (event) => {
+        if (!logState.photoSource) return;
+        event.preventDefault();
+        const point = event.touches ? event.touches[0] : event;
+        drag = { ...canvasPointer(point, canvas), image: null };
+        if (logState.photoMode === "cover") {
+            drag.image = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height);
+        }
+    };
+    const move = (event) => {
+        if (!drag) return;
+        event.preventDefault();
+        const point = event.touches ? event.touches[0] : event;
+        const now = canvasPointer(point, canvas);
+        const ctx = canvas.getContext("2d");
+        const x = Math.min(drag.x, now.x);
+        const y = Math.min(drag.y, now.y);
+        const w = Math.abs(now.x - drag.x);
+        const h = Math.abs(now.y - drag.y);
+        if (logState.photoMode === "cover" && drag.image) {
+            ctx.putImageData(drag.image, 0, 0);
+            ctx.fillStyle = "#000";
+            ctx.fillRect(x, y, w, h);
+        }
+    };
+    const end = (event) => {
+        if (!drag) return;
+        event.preventDefault();
+        const point = (event.changedTouches && event.changedTouches[0]) || event;
+        const now = canvasPointer(point, canvas);
+        const ctx = canvas.getContext("2d");
+        const x = Math.min(drag.x, now.x);
+        const y = Math.min(drag.y, now.y);
+        const w = Math.abs(now.x - drag.x);
+        const h = Math.abs(now.y - drag.y);
+        if (logState.photoMode === "crop" && w > 8 && h > 8) {
+            const cropped = ctx.getImageData(x, y, Math.max(1, w), Math.max(1, h));
+            canvas.width = Math.max(1, Math.round(w));
+            canvas.height = Math.max(1, Math.round(h));
+            canvas.getContext("2d").putImageData(cropped, 0, 0);
+        } else if (logState.photoMode === "cover" && w > 2 && h > 2) {
+            ctx.fillStyle = "#000";
+            ctx.fillRect(x, y, w, h);
+        }
+        drag = null;
+    };
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end, { passive: false });
+}
+
+async function setPhotoFile(file) {
     const status = $("log-photo-status");
     if (!file) {
         clearPhotoPreview();
@@ -633,15 +744,58 @@ function setPhotoFile(file) {
         if (status) status.textContent = "Choose a photo of the ticket (an image file).";
         return;
     }
-    if (logState.photoPreviewUrl) URL.revokeObjectURL(logState.photoPreviewUrl);
+    if (logState.photoPreviewUrl) {
+        URL.revokeObjectURL(logState.photoPreviewUrl);
+        logState.photoPreviewUrl = null;
+    }
+    logState.photoFile = null;
+    logState.photoSource = file;
+    const preview = $("log-photo-preview");
+    if (preview) {
+        preview.hidden = true;
+        preview.removeAttribute("src");
+    }
+    const panel = $("photo-redact");
+    if (panel) panel.hidden = false;
+    const confirm = $("photo-redact-confirm");
+    if (confirm) confirm.checked = false;
+    setPhotoMode("cover");
+    bindPhotoRedactCanvas();
+    await drawPhotoSource();
+    if (status) {
+        status.textContent = "Cover the barcode, validation number, and PIN, or crop them out, then confirm before the photo can be saved. The photo is not stored until you do that.";
+    }
+}
+
+async function applyPhotoRedaction() {
+    const status = $("log-photo-status");
+    const confirm = $("photo-redact-confirm");
+    const canvas = $("photo-redact-canvas");
+    if (!confirm || !confirm.checked) {
+        if (status) status.textContent = "Confirm that you have covered the barcode, validation number, and PIN, or do not attach a photo.";
+        return;
+    }
+    if (!canvas) {
+        if (status) status.textContent = "The redaction step is missing.";
+        return;
+    }
+    const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+            (next) => next ? resolve(next) : reject(new Error("The photo could not be prepared.")),
+            "image/jpeg",
+            0.92
+        );
+    });
+    const file = new File([blob], "ticket-photo.jpg", { type: "image/jpeg" });
     logState.photoFile = file;
+    if (logState.photoPreviewUrl) URL.revokeObjectURL(logState.photoPreviewUrl);
     logState.photoPreviewUrl = URL.createObjectURL(file);
     const preview = $("log-photo-preview");
     if (preview) {
         preview.src = logState.photoPreviewUrl;
         preview.hidden = false;
     }
-    if (status) status.textContent = `Photo ready on this device: ${file.name || "ticket photo"}.`;
+    if (status) status.textContent = "Redacted photo ready on this device. Hidden camera data will be stripped again when it is saved.";
 }
 
 function verificationBadges(flags) {
@@ -654,9 +808,9 @@ function verificationBadges(flags) {
         span.textContent = text;
         wrap.appendChild(span);
     };
-    if (set.has("location-confirmed")) add("verify-location", "Location-confirmed");
-    if (set.has("photo-attached")) add("verify-photo", "Photo-attached");
-    if (set.has("unverified") || !set.size) add("verify-unverified", "Unverified");
+    if (set.has("location-confirmed")) add("verify-location", LABEL_GPS_CHECKIN);
+    if (set.has("photo-attached")) add("verify-photo", LABEL_PHOTO);
+    if (set.has("unverified") || !set.size) add("verify-unverified", LABEL_SELF_REPORTED);
     return wrap;
 }
 
@@ -667,10 +821,10 @@ async function renderLogList() {
     list.replaceChildren();
     logState.logs = loadLogs();
     if (!logState.logs.length) {
-        if (status) status.textContent = "No prize logs on this device yet.";
+        if (status) status.textContent = "No prize logs on this device yet. " + LOG_DISCLOSURE;
         return;
     }
-    if (status) status.textContent = `${logState.logs.length} prize log${logState.logs.length === 1 ? "" : "s"} on this device. These are not shared, and they have not been checked against a state record.`;
+    if (status) status.textContent = `${logState.logs.length} prize log${logState.logs.length === 1 ? "" : "s"} on this device. ${LOG_DISCLOSURE}`;
     for (const entry of logState.logs) {
         const item = document.createElement("li");
         item.className = "retailer-card";
@@ -744,21 +898,16 @@ async function runCheckin() {
         if (result.ok) {
             logState.checkin = {
                 ok: true,
-                lat: position.lat,
-                lng: position.lng,
-                accuracyM: result.accuracyM,
-                distanceM: result.distanceM,
-                at: new Date().toISOString()
+                at: todayInNewYork(),
+                distanceBand: distanceBand(result.distanceM)
             };
             if (status) {
-                status.textContent = `Location-confirmed: your device was ${formatDistance(result.distanceM)} from this retailer's published coordinates.`;
+                const band = logState.checkin.distanceBand ? ` Distance band: ${logState.checkin.distanceBand}.` : "";
+                status.textContent = `${LABEL_GPS_CHECKIN}.${band} The device position was used once for this check and was not saved.`;
             }
         } else {
             logState.checkin = null;
-            const extra = Number.isFinite(result.distanceM)
-                ? ` Distance recorded: ${formatDistance(result.distanceM)}.`
-                : "";
-            if (status) status.textContent = `${result.reason}${extra} This log will not be marked location-confirmed.`;
+            if (status) status.textContent = `${result.reason} This log will be marked ${LABEL_SELF_REPORTED.lower()} unless a photo is attached. The device position was not saved.`;
         }
     } catch (error) {
         logState.checkin = null;
@@ -792,6 +941,11 @@ async function submitPrizeLog(event) {
         checkin: logState.checkin && logState.checkin.ok ? logState.checkin : null,
         photoAttached: Boolean(logState.photoFile)
     });
+    const photoInput = $("log-photo");
+    if (photoInput && photoInput.files && photoInput.files[0] && !logState.photoFile) {
+        if (status) status.textContent = "Finish the cover or crop step and confirm that the barcode, validation number, and PIN are covered, or clear the photo.";
+        return;
+    }
     if (!parsed.ok) {
         if (status) status.textContent = parsed.reason;
         return;
@@ -816,7 +970,7 @@ async function submitPrizeLog(event) {
         setLogPath("standard");
         renderSelectedRetailer();
         const checkStatus = $("log-checkin-status");
-        if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+        if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked self-reported unless a photo is attached.";
         await renderLogList();
         refreshHeatMap();
     } catch (error) {
@@ -897,9 +1051,51 @@ function bindPrizeLog() {
             setPhotoFile(file || null);
         });
     }
+    const cover = $("photo-mode-cover");
+    const crop = $("photo-mode-crop");
+    const reset = $("photo-redact-reset");
+    const apply = $("photo-redact-apply");
+    if (cover) cover.addEventListener("click", () => setPhotoMode("cover"));
+    if (crop) crop.addEventListener("click", () => setPhotoMode("crop"));
+    if (reset) reset.addEventListener("click", () => drawPhotoSource());
+    if (apply) apply.addEventListener("click", () => applyPhotoRedaction());
     const form = $("prize-log-form");
     if (form) form.addEventListener("submit", submitPrizeLog);
+    bindDeleteAllData();
     renderLogList();
+}
+
+function bindDeleteAllData() {
+    const open = $("delete-all-data");
+    const prompt = $("delete-all-prompt");
+    const confirm = $("delete-all-confirm");
+    const cancel = $("delete-all-cancel");
+    const status = $("delete-all-status");
+    if (open) {
+        open.addEventListener("click", () => {
+            if (prompt) {
+                prompt.hidden = false;
+                prompt.scrollIntoView({ block: "nearest" });
+            }
+        });
+    }
+    if (cancel) {
+        cancel.addEventListener("click", () => {
+            if (prompt) prompt.hidden = true;
+        });
+    }
+    if (confirm) {
+        confirm.addEventListener("click", async () => {
+            if (status) status.textContent = "Deleting data on this device…";
+            try {
+                await deleteAllScratchBuddyData();
+                if (status) status.textContent = "All Scratch Buddy data on this device was deleted.";
+                window.location.reload();
+            } catch (error) {
+                if (status) status.textContent = error && error.message ? error.message : "The data on this device could not be deleted.";
+            }
+        });
+    }
 }
 
 
@@ -911,7 +1107,7 @@ function describeHeatStatus(groups, locateNote) {
         return;
     }
     const logs = groups.reduce((sum, group) => sum + group.count, 0);
-    const base = `${formatCount(groups.length)} establishment${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Circle size follows verification weight. Tiles are from OpenStreetMap. Tap a circle for the logged totals.`;
+    const base = `${formatCount(groups.length)} establishment${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Circle size follows check-in and photo marks. Tiles are from OpenStreetMap. Tap a circle for the logged totals.`;
     status.textContent = locateNote ? `${base} ${locateNote}` : base;
 }
 

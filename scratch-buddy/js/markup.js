@@ -1,5 +1,21 @@
 export const AFFILIATION = "Scratch Buddy is an independent app from NAV Analytics LLC. It is not affiliated with, endorsed by, or sponsored by the New York Lottery or the New York State Gaming Commission.";
 
+// Exact house wording from Ralph's Scratch Buddy review (§4.6), also used as
+// the short D3 fragment, short D1+age line, and short D4 in
+// /workspace/legal/paid_ads_platform_classification_memo.md and
+// /workspace/legal/teaser_week1_review.md. Do not paraphrase these three lines.
+export const PAST_RESULTS_LINE = "Past results don't predict future draws.";
+export const HOPENY_LINE = "18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).";
+export const NOT_AFFILIATED_LINE = "Not affiliated with any lottery.";
+export const LOG_DISCLOSURE = "Prize logs are self-reported by users and are not checked against New York Lottery records. They do not show which stores sell more prizes.";
+export const AGE_FAIL_COPY = "Sorry — Scratch Buddy is for adults 18 and over.";
+
+export const REQUIRED_LINES_MARKUP = `
+            <p>${PAST_RESULTS_LINE}</p>
+            <p>${HOPENY_LINE}</p>
+            <p>${NOT_AFFILIATED_LINE}</p>
+`;
+
 export const COIN_MARKUP = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="42" height="42" role="img" aria-hidden="true">
   <defs>
@@ -26,7 +42,6 @@ export const SHELL_MARKUP = `
                     <p class="text-white font-black text-sm tracking-wide leading-none">Scratch Buddy</p>
                     <p class="text-[9px] text-cyan-300/80 font-semibold tracking-wide mt-1">A social companion</p>
                 </div>
-                <span class="badge-ny shrink-0">NY</span>
             </div>
         </div>
     </header>
@@ -42,11 +57,11 @@ export const SHELL_MARKUP = `
         </div>
 
         <section id="panel-find" class="panel space-y-3" role="tabpanel" aria-labelledby="find-heading">
-            <h2 id="find-heading" class="section-title">Find a Machine or Venue</h2>
+            <h2 id="find-heading" class="section-title">Find a licensed retailer</h2>
             <p id="retailer-source" class="source-note">Loading the official retailer list…</p>
             <form id="retailer-search-form" class="space-y-3">
                 <label class="block">
-                    <span class="sr-only">Search for a machine or venue</span>
+                    <span class="sr-only">Search for a licensed retailer</span>
                     <input id="retailer-query" class="input-shell" type="search" name="q" placeholder="Search by name, address, city, or ZIP" autocomplete="off" enterkeyhint="search">
                 </label>
                 <label class="check-row">
@@ -60,7 +75,7 @@ export const SHELL_MARKUP = `
             </form>
             <div id="location-prompt" class="location-prompt" hidden>
                 <p class="location-prompt-title">Use your location?</p>
-                <p>Scratch Buddy can use your device location to list nearby licensed retailers. In this preview, that position stays on this device and is used only to sort this list. Location is optional and off until you agree.</p>
+                <p>Scratch Buddy can use your device location to list nearby licensed retailers. That position is used only to sort this list in this session and is not saved. Map tiles still go to the tile provider and can show the area you view. Location is optional and off until you agree.</p>
                 <div class="flex gap-2">
                     <button type="button" class="btn-primary flex-1" id="location-allow">Use my location</button>
                     <button type="button" class="btn-secondary flex-1" id="location-deny">Not now</button>
@@ -76,13 +91,17 @@ export const SHELL_MARKUP = `
                 <button type="button" class="btn-secondary flex-1" id="map-mode-all" aria-pressed="true">All locations</button>
                 <button type="button" class="btn-secondary flex-1" id="map-mode-results" aria-pressed="false" disabled>Search results</button>
             </div>
-            <div id="retailer-map" class="retailer-map" role="application" aria-label="Map of licensed New York Lottery retailers"></div>
+            <div id="retailer-map" class="retailer-map" role="application" aria-label="Map of licensed retailers"></div>
             <p id="map-status" class="source-note" role="status">Loading the map…</p>
+            <p class="source-note">${LOG_DISCLOSURE}</p>
+            <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
         </section>
 
         <section id="panel-log" class="panel space-y-3" role="tabpanel" aria-labelledby="log-heading" hidden>
             <h2 id="log-heading" class="section-title">Prize Log</h2>
             <p class="source-note">This is a preview account saved on this device only. A shared sign-in is not connected yet. No Supabase project or table has been created.</p>
+            <p class="source-note">${LOG_DISCLOSURE}</p>
+            <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
 
             <div id="log-session-form" class="space-y-2">
                 <label class="block">
@@ -141,13 +160,13 @@ export const SHELL_MARKUP = `
                     <button type="button" class="btn-secondary w-full" id="log-checkin">Optional GPS check-in</button>
                     <div id="checkin-prompt" class="location-prompt" hidden>
                         <p class="location-prompt-title">Optional location check-in</p>
-                        <p>Scratch Buddy can compare your device position with this retailer's published coordinates. In this preview, that position is used only for this prize log and stays on this device. Location is optional and off until you agree.</p>
+                        <p>Scratch Buddy can compare your device position with this retailer's published coordinates. The position is used once for this check and is not kept. Only a pass or fail, the date, and a coarse distance band are stored if the check passes. Location is optional and off until you agree.</p>
                         <div class="flex gap-2">
                             <button type="button" class="btn-primary flex-1" id="checkin-allow">Use my location</button>
                             <button type="button" class="btn-secondary flex-1" id="checkin-deny">Not now</button>
                         </div>
                     </div>
-                    <p id="log-checkin-status" class="source-note">No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.</p>
+                    <p id="log-checkin-status" class="source-note">No GPS check-in yet. A log without a matching check-in is marked self-reported unless a photo is attached.</p>
                 </div>
 
                 <div class="space-y-2">
@@ -155,7 +174,21 @@ export const SHELL_MARKUP = `
                         <span class="field-label" id="log-photo-label">Ticket photo (optional)</span>
                         <input id="log-photo" class="input-shell" type="file" accept="image/*">
                     </label>
-                    <p class="source-note">Ticket photos can show barcodes or serial numbers. This preview stores the photo only on this device. Consider cropping those details before you add a photo. A shared photo store has not been created.</p>
+                    <p class="source-note">A photo is optional, including on the venue path. Before a photo can be saved, cover the barcode, validation number, and PIN by drawing over them or cropping them out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device. No photo bucket has been created. If you cannot cover those details, do not attach a photo.</p>
+                    <div id="photo-redact" class="photo-redact" hidden>
+                        <p class="field-label">Cover or crop sensitive details</p>
+                        <canvas id="photo-redact-canvas" class="photo-canvas" aria-label="Ticket photo redaction canvas"></canvas>
+                        <div class="flex gap-2">
+                            <button type="button" class="btn-secondary flex-1" id="photo-mode-cover" aria-pressed="true">Draw cover</button>
+                            <button type="button" class="btn-secondary flex-1" id="photo-mode-crop" aria-pressed="false">Crop</button>
+                            <button type="button" class="btn-secondary flex-1" id="photo-redact-reset">Reset</button>
+                        </div>
+                        <label class="check-row">
+                            <input id="photo-redact-confirm" type="checkbox">
+                            <span>I have covered the barcode, validation number, and PIN on this photo.</span>
+                        </label>
+                        <button type="button" class="btn-primary w-full" id="photo-redact-apply">Use this redacted photo</button>
+                    </div>
                     <p id="log-photo-status" class="source-note">No photo attached.</p>
                     <img id="log-photo-preview" class="photo-preview" alt="Ticket photo preview" hidden>
                 </div>
@@ -167,21 +200,32 @@ export const SHELL_MARKUP = `
             <h3 class="section-title">Logs on this device</h3>
             <p id="log-list-status" class="empty-note" role="status">No prize logs on this device yet.</p>
             <ul id="prize-log-list" class="retailer-list"></ul>
+            <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
+            <div id="delete-all-prompt" class="location-prompt" hidden>
+                <p class="location-prompt-title">Delete all my data?</p>
+                <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone.</p>
+                <div class="flex gap-2">
+                    <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
+                    <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
+                </div>
+            </div>
+            <p id="delete-all-status" class="empty-note" role="status"></p>
         </section>
 
         <section id="panel-heat" class="panel space-y-3" role="tabpanel" aria-labelledby="heat-heading" hidden>
             <h2 id="heat-heading" class="section-title">Payout Heat Map</h2>
-            <p class="source-note">This map is built only from prize logs on this device. It does not include official payout records or invented points. Circle size follows verification weight: unverified 1, location-confirmed or photo-attached 2, both 3.</p>
-            <ul class="heat-legend" aria-label="Verification colors">
-                <li><span class="heat-swatch heat-swatch-unverified"></span> Unverified</li>
-                <li><span class="heat-swatch heat-swatch-location"></span> Location-confirmed</li>
-                <li><span class="heat-swatch heat-swatch-photo"></span> Photo-attached</li>
-                <li><span class="heat-swatch heat-swatch-both"></span> Location-confirmed and photo-attached</li>
+            <p class="source-note">This map is built only from prize logs on this device. It does not include official payout records or invented points. Circle size follows check-in and photo marks: self-reported 1, GPS check-in near store or photo on this device 2, both 3.</p>
+            <p class="source-note">${LOG_DISCLOSURE}</p>
+            <ul class="heat-legend" aria-label="Prize log marks">
+                <li><span class="heat-swatch heat-swatch-unverified"></span> Self-reported</li>
+                <li><span class="heat-swatch heat-swatch-location"></span> GPS check-in near store</li>
+                <li><span class="heat-swatch heat-swatch-photo"></span> Photo on this device</li>
+                <li><span class="heat-swatch heat-swatch-both"></span> GPS check-in near store and photo on this device</li>
             </ul>
             <button type="button" class="btn-secondary w-full" id="heat-locate">Optional: center on my location</button>
             <div id="heat-location-prompt" class="location-prompt" hidden>
                 <p class="location-prompt-title">Use your location?</p>
-                <p>Scratch Buddy can use your device location to center this payout map. In this preview, that position stays on this device, is not saved, and is not used to invent payouts. Location is optional and off until you agree.</p>
+                <p>Scratch Buddy can use your device location to center this payout map. The position is used only to center the map, is not saved, and is not used to invent payouts. Map tiles still go to the tile provider and can show the area you view. Location is optional and off until you agree.</p>
                 <div class="flex gap-2">
                     <button type="button" class="btn-primary flex-1" id="heat-locate-allow">Use my location</button>
                     <button type="button" class="btn-secondary flex-1" id="heat-locate-deny">Not now</button>
@@ -189,12 +233,14 @@ export const SHELL_MARKUP = `
             </div>
             <div id="payout-heat-map" class="retailer-map" role="application" aria-label="Payout heat map of prize logs on this device"></div>
             <p id="heat-status" class="empty-note" role="status">No payout data yet. Prize logs from this device will appear here after you add them. Nothing has been logged.</p>
+            <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
         </section>
 
         <footer class="text-center text-[10px] text-slate-500 px-1 py-3 space-y-2">
             <p>Scratch Buddy is a fun, social companion for scratch-off tickets you already bought. It does not sell tickets, and it is not a tool for placing wagers or picking places to play.</p>
-            <div class="help-box">
-                18+ only. Gambling can be addictive. If you or someone you know needs support, call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369). You can also visit <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a>.
+            <div class="help-box required-lines">
+                ${REQUIRED_LINES_MARKUP}
+                <p>You can also visit <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a>.</p>
             </div>
             <p><a href="./privacy.html">Privacy notice (draft)</a> · <a href="./terms.html">Terms (draft)</a></p>
             <p>${AFFILIATION}</p>
@@ -208,21 +254,39 @@ export const PRIVACY_MARKUP = `
     <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and a payout heat map built only from those logs. The maps use OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
+    <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and a payout heat map built only from those logs. Leaflet and the page styles are self-hosted. Passing the age check is not consent to tracking. Scratch Buddy does not install advertising pixels or other trackers.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>
+    <p class="empty-note">${NOT_AFFILIATED_LINE}</p>
     <p class="empty-note">Scratch Buddy does not sell lottery tickets or accept wagers.</p>
     <h2 class="section-title">What this preview stores</h2>
     <ul class="empty-note list-disc pl-4 space-y-1">
         <li>Age check. Under 18, nothing is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
-        <li>Optional Near me uses your device location only to sort nearby retailers in this browser session. The position is not saved unless you later add a GPS check-in to a prize log, and it is not used until you agree on a prompt in the app and in the browser.</li>
+        <li>Optional Near me and optional map centering use your device location once, in this session, to sort a list or center a view. The position is not saved.</li>
+        <li>Optional GPS check-in uses your device location once to compare it with a retailer's published coordinates. Only a pass or fail, the date, and a coarse distance band (&lt;50 m or 50-150 m) may be stored with a prize log. Coordinates, accuracy, and exact distance are not kept.</li>
         <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
-        <li>Prize logs you choose to save, including an optional GPS check-in and an optional ticket photo, stay in this browser (localStorage and IndexedDB). Ticket photos can show barcodes or serial numbers. Nothing is uploaded, and no Supabase table or photo bucket has been created.</li>
-        <li>The payout heat map reads only those local prize logs. Optional location on that map is used only to center the view and is not saved.</li>
+        <li>Prize logs you choose to save stay in this browser (localStorage and IndexedDB) until you delete them. There is no server copy in this preview.</li>
+        <li>A ticket photo is optional. A photo is stored only if you first cover the barcode, validation number, and PIN, or you crop those details out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device. No photo bucket has been created.</li>
+        <li>The payout heat map reads only those local prize logs.</li>
     </ul>
+    <h2 class="section-title">Network requests this preview makes</h2>
+    <p class="empty-note">Map tiles are fetched from OpenStreetMap (tile.openstreetmap.org) at the area you view. That tile host receives your IP address and the approximate map area and zoom. Leaflet and Tailwind are self-hosted in this preview, so those libraries are not requested from a third-party CDN. The official retailer list is read from a file served with this preview. There are no advertising or analytics pixels.</p>
+    <h2 class="section-title">Retention and deletion</h2>
+    <p class="empty-note">On this device, the age pass, preview sign-in, prize logs, and ticket photos are kept until you delete them. Use "Delete all my data" below, or remove a single prize log from the Prize Log tab. If a shared server is later approved, the proposed rule is: keep logs until you delete them, or delete them after 24 months of inactivity, and never keep raw location.</p>
+    <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
+    <div id="delete-all-prompt" class="location-prompt" hidden>
+        <p class="location-prompt-title">Delete all my data?</p>
+        <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone.</p>
+        <div class="flex gap-2">
+            <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
+            <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
+        </div>
+    </div>
+    <p id="delete-all-status" class="empty-note" role="status"></p>
     <h2 class="section-title">Responsible play</h2>
-    <p class="empty-note">18+ only. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+    <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
     <p class="empty-note"><a href="./index.html">Back to Scratch Buddy</a> · <a href="./terms.html">Terms (draft)</a></p>
     <p class="empty-note">${AFFILIATION}</p>
     <p class="empty-note">© 2026 NAV Analytics LLC</p>
@@ -233,10 +297,13 @@ export const TERMS_MARKUP = `
 <main class="max-w-md mx-auto px-3 py-6 space-y-3">
     <p class="preview-banner">DRAFT — pending legal review. This is not a terms of service. Do not rely on it.</p>
     <h1 class="text-white font-black text-lg">Terms (draft)</h1>
+    <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
     <p class="empty-note">Scratch Buddy is a preview from NAV Analytics LLC, 58 Owaissa Dr, Rochester, NY 14622.</p>
     <p class="empty-note">${AFFILIATION}</p>
+    <p class="empty-note">${NOT_AFFILIATED_LINE}</p>
     <p class="empty-note">18+ only. Scratch Buddy does not sell lottery tickets or accept wagers. It is a fun, social companion, not a tool for placing wagers.</p>
-    <p class="empty-note">Gambling can be addictive. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>
+    <p class="empty-note">${HOPENY_LINE}</p>
+    <p class="empty-note">${PAST_RESULTS_LINE}</p>
     <p class="empty-note"><a href="./index.html">Back to Scratch Buddy</a> · <a href="./privacy.html">Privacy notice (draft)</a></p>
     <p class="empty-note">${AFFILIATION}</p>
     <p class="empty-note">© 2026 NAV Analytics LLC</p>

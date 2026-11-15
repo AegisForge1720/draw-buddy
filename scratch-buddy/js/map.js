@@ -250,7 +250,7 @@ export function createPayoutHeatMap({ container, formatAddress, formatDollars, g
         summary.textContent = `Logged on this device: ${formatDollars(group.prizeTotal)} across ${count} prize log${count === 1 ? "" : "s"}. Weight ${style.weight}.`;
         wrap.appendChild(summary);
         const breakdown = document.createElement("p");
-        breakdown.textContent = `Unverified: ${group.unverified}. Location-confirmed: ${group.locationConfirmed}. Photo-attached: ${group.photoAttached}. Location-confirmed and photo-attached: ${group.both}.`;
+        breakdown.textContent = `Self-reported: ${group.unverified}. GPS check-in near store: ${group.locationConfirmed}. Photo on this device: ${group.photoAttached}. GPS check-in near store and photo on this device: ${group.both}.`;
         wrap.appendChild(breakdown);
         return wrap;
     }

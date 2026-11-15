@@ -26,24 +26,18 @@
 --   path text not null default 'standard' check (path in ('standard', 'bought_at_venue')),
 --   present_confirmed boolean not null check (present_confirmed = true),
 --   location_confirmed boolean not null default false,
---   checkin_lat double precision,
---   checkin_lng double precision,
---   checkin_accuracy_m double precision,
---   distance_to_retailer_m double precision,
+--   checked_in_at date,
+--   distance_band text check (
+--     distance_band is null or distance_band in ('<50 m', '50-150 m')
+--   ),
 --   photo_attached boolean not null default false,
 --   -- Reserved. Do not create a Storage bucket until Andrew approves it.
+--   -- Ticket photos, if any, stay on the device in this preview.
 --   photo_path text,
 --   created_at timestamptz not null default now(),
 --   updated_at timestamptz not null default now(),
---   constraint prize_logs_venue_photo_chk check (
---     path <> 'bought_at_venue' or photo_attached = true
---   ),
 --   constraint prize_logs_venue_qd_chk check (
 --     path <> 'bought_at_venue' or retailer_quick_draw = true
---   ),
---   constraint prize_logs_location_coords_chk check (
---     location_confirmed = false
---     or (checkin_lat is not null and checkin_lng is not null)
 --   )
 -- );
 --

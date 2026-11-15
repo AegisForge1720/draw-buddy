@@ -1,15 +1,17 @@
-# Questions for Ralph — Scratch Buddy prize logging
+# Scratch Buddy compliance notes
 
 Draft only. This preview is not deployed. Nothing in Supabase has been created.
 
-1. **Location data and privacy.** Near me and the optional GPS check-in use the device position only after an in-app prompt and the browser prompt. In this preview the position is not saved except as part of a prize log the person chooses to keep on this device (coordinates, accuracy, and distance to the retailer's published point). What may be stored, at what precision, for how long, and should check-in coordinates be kept at all once a pass/fail is recorded?
+Ralph reviewed commit `2a5c442` on 15 November 2026 (ET). Memo: `/workspace/legal/scratch_buddy_compliance_review.md`.
 
-2. **User-submitted prize claims and verification.** A log requires the person to confirm they were at that location. Optional GPS check-in can mark it location-confirmed if the device is within 150 meters of the published coordinates and the accuracy is good enough. A ticket photo can mark it photo-attached. Nothing is checked against a state database. How should unverified, location-confirmed, and photo-attached claims be presented, and what counts as verification?
+Applied in this preview (Ralph's required product changes 2–8 as assigned; numbering below matches that assignment, not every row in the memo's §4 list):
 
-3. **Naming retailers in payout rankings.** Later heat maps and lists would name establishments and show amounts people logged there. Is it acceptable to name retailers in payout rankings or maps built only from user-submitted claims, and what disclosure is required?
+2. GPS check-ins store only pass/fail, the date, and a coarse distance band (`<50 m` or `50-150 m`). Coordinates, accuracy, and exact meters are not kept. The SQL draft no longer has `checkin_lat` / `checkin_lng` or the coords constraint.
+3. Ticket photos are re-encoded to strip EXIF. A manual cover or crop step, plus a confirmation that the barcode, validation number, and PIN are covered, is required before a photo is stored. Photos stay on this device. No Storage bucket. A photo is optional on the venue path.
+4. Badges read "Self-reported", "GPS check-in near store", and "Photo on this device". Logs and map views include the disclosure that prize logs are not checked against New York Lottery records.
+5. The three required house lines are on the app shell, log and map views, and the legal pages, in the exact wording Ralph specified.
+6. The Find heading is "Find a licensed retailer". The NY badge is removed. There are no Lottery logos. `js/scratch.js` and its expected-value / ledger helpers were removed.
+7. The age gate stays 18+ and uses one failure message: "Sorry — Scratch Buddy is for adults 18 and over."
+8. The privacy notice discloses OpenStreetMap tile requests (IP and the area viewed). Leaflet and Tailwind are self-hosted. "Delete all my data" clears the on-device store. Retention: kept until the user deletes them; a future server, if approved, would also drop logs after 24 months of inactivity and would never keep raw location.
 
-4. **The "luck" framing.** Scratch Buddy is framed as a fun, social companion, not a tool for placing wagers or picking a place to play. Official copy should not imply that a machine or venue is "hot," "lucky," or a way to improve a person's chances. Please review the wording.
-
-5. **Age gate.** This preview uses an 18+ gate because that is the New York Lottery purchase age. The arcade rule is 13+. Which age gate should Scratch Buddy keep, and should it differ from Draw Buddy?
-
-6. **Ticket photo privacy.** Photos can show barcodes or serial numbers. This preview stores the photo only in the browser (IndexedDB) and does not upload it. Should photos be blurred or cropped before they are stored or shown, and what should be allowed if a shared store is later approved?
+Not applied, pending Andrew: Ralph's request to drop or rename the payout heat map, the weights, and the per-store totals (memo §4 item 2). The heat map is unchanged in concept; only the badge labels and disclosure were updated to match item 4.

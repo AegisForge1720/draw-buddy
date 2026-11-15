@@ -17,17 +17,16 @@ Search uses a local cache of the official **NYS Lottery Retailers** dataset from
 
 The official dataset lists licensed retailer locations that sell New York Lottery products. It does not identify individual ticket machines, and it does not flag which locations sell scratch-off tickets separately from other lottery products. `quickDraw` is true when the official Quick Draw field is `Y`.
 
-The app searches that cache by name, address, city, or ZIP. Near me is opt-in: the in-app prompt runs first, then the browser location prompt. The device position is used only to sort nearby retailers in that browser session and is not saved.
-
-No payout or prize-log data is shown yet. Empty lists stay empty. Nothing in the cache was invented or generated.
+The app searches that cache by name, address, city, or ZIP under the heading "Find a licensed retailer". Near me is opt-in: the in-app prompt runs first, then the browser location prompt. The device position is used only to sort nearby retailers in that browser session and is not saved.
 
 
 ## Retailer map
 
 The Map tab shows the same official cache on an interactive map:
 
-- Leaflet 1.9.4 with OpenStreetMap tiles
-- Leaflet.markercluster for the 13,129 locations
+- Self-hosted Leaflet 1.9.4 with OpenStreetMap tiles
+- Self-hosted Leaflet.markercluster for the 13,129 locations
+- Built Tailwind CSS, self-hosted (no CDN)
 - No analytics or tracking pixels
 - Search and Near me results can be shown on the map (gold markers). Each search row has a Show on map button that opens that location's details.
 - Tap a cluster to zoom in, or tap a marker for the name, address, and Quick Draw flag when the official list has one
@@ -41,10 +40,11 @@ The Prize Log tab is a local stub only:
 
 - A preview sign-in stores a display name on this device. It is not a shared account.
 - Every log requires the person to confirm they were at the selected official retailer.
-- Optional GPS check-in is opt-in (in-app prompt, then the browser prompt). A match within 150 meters, with accurate enough position data, marks the log location-confirmed.
-- The "Bought at a venue" path is for a Quick Draw venue from the official list and requires a ticket photo.
-- Standard logs may include a photo. Photos are stored in IndexedDB on this device only. Ticket photos can show barcodes or serial numbers; the form asks people to consider cropping those details.
-- Each log is marked unverified, location-confirmed, and/or photo-attached. Nothing is checked against a state database.
+- Optional GPS check-in is opt-in (in-app prompt, then the browser prompt). A match within 150 meters, with accurate enough position data, is stored only as a pass, the date, and a coarse distance band (`<50 m` or `50-150 m`). Coordinates are not kept.
+- The "Bought at a venue" path is for a Quick Draw venue from the official list. A ticket photo is optional.
+- A photo can be stored only after a cover or crop step and a confirmation that the barcode, validation number, and PIN are covered. The stored copy is re-encoded to strip EXIF and stays in IndexedDB on this device. No photo bucket has been created.
+- Each log is marked Self-reported, GPS check-in near store, and/or Photo on this device. Prize logs are not checked against New York Lottery records.
+- "Delete all my data" clears the age pass, preview sign-in, prize logs, and ticket photos on this device.
 - Draft SQL and RLS live in `supabase/migrations/0001_prize_logs.sql`. The statements are commented out. Do not apply them. A new Supabase project, table, or photo bucket needs Andrew's explicit OK. The recommendation is a separate Scratch Buddy project, not Draw Buddy's project.
 - Questions for Ralph are in `COMPLIANCE.md`.
 
@@ -54,14 +54,14 @@ The Heat Map tab plots prize logs from this device only:
 
 - No official payout feed and no shipped sample points
 - The map stays empty until a prize is logged on that device
-- Circle size follows verification weight (unverified 1, location-confirmed or photo-attached 2, both 3)
+- Circle size follows check-in and photo marks (self-reported 1, GPS check-in near store or photo on this device 2, both 3)
 - Colors match those levels. Tap a circle for the logged totals
 - Optional "center on my location" is opt-in and does not invent payouts or save the position
 
 
 ## Age check
 
-An 18+ age check runs before the app, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept.
+An 18+ age check runs before the app, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept. A failed check shows one message: "Sorry — Scratch Buddy is for adults 18 and over."
 
 `privacy.html` and `terms.html` are drafts and are marked pending legal review.
 

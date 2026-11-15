@@ -1,9 +1,10 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
-import { PRIVACY_MARKUP, TERMS_MARKUP } from "./markup.js";
+import { AGE_FAIL_COPY, PRIVACY_MARKUP, TERMS_MARKUP } from "./markup.js";
+import { deleteAllScratchBuddyData } from "./purge.js";
 
 const FAIL_COPY = {
-    under13: "Sorry — Scratch Buddy is not offered to children under 13.",
-    under18: "Sorry — Scratch Buddy is for adults 18 and over."
+    under13: AGE_FAIL_COPY,
+    under18: AGE_FAIL_COPY
 };
 
 function $(id) {
@@ -42,6 +43,39 @@ function grant(markup) {
     const shell = $("app-shell");
     shell.innerHTML = markup;
     shell.inert = false;
+    bindDeleteAllData();
+}
+
+function bindDeleteAllData() {
+    const open = $("delete-all-data");
+    const prompt = $("delete-all-prompt");
+    const confirm = $("delete-all-confirm");
+    const cancel = $("delete-all-cancel");
+    const status = $("delete-all-status");
+    if (!open) return;
+    open.addEventListener("click", () => {
+        if (prompt) {
+            prompt.hidden = false;
+            prompt.scrollIntoView({ block: "nearest" });
+        }
+    });
+    if (cancel) {
+        cancel.addEventListener("click", () => {
+            if (prompt) prompt.hidden = true;
+        });
+    }
+    if (confirm) {
+        confirm.addEventListener("click", async () => {
+            if (status) status.textContent = "Deleting data on this device…";
+            try {
+                await deleteAllScratchBuddyData();
+                if (status) status.textContent = "All Scratch Buddy data on this device was deleted.";
+                window.location.reload();
+            } catch (error) {
+                if (status) status.textContent = error && error.message ? error.message : "The data on this device could not be deleted.";
+            }
+        });
+    }
 }
 
 function renderAgeForm(markup) {

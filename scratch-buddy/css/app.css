@@ -272,18 +272,6 @@ body {
     padding: 1rem;
 }
 
-.badge-ny {
-    font-size: 8px;
-    background: #172554;
-    color: #67e8f9;
-    border: 1px solid #2563eb;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: 0.04em;
-}
-
 .preview-banner {
     background: #050814;
     border: 1px solid rgba(250, 204, 21, 0.3);
@@ -641,3 +629,27 @@ a { color: #facc15; }
 .heat-swatch-location { background: #22d3ee; }
 .heat-swatch-photo { background: #f59e0b; }
 .heat-swatch-both { background: #facc15; }
+
+.required-lines {
+    font-size: 10px;
+    line-height: 1.45;
+    color: #cbd5e1;
+}
+.required-lines p { margin: 0.2rem 0; }
+.help-box.required-lines, .help-box .required-lines { color: inherit; }
+.photo-redact {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.75rem;
+    border: 1px solid #1d4ed8;
+    border-radius: 0.65rem;
+    background: #050814;
+}
+.photo-canvas {
+    width: 100%;
+    max-height: 320px;
+    background: #0b132b;
+    border-radius: 0.5rem;
+    cursor: crosshair;
+    touch-action: none;
+}

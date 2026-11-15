@@ -81,3 +81,14 @@ export function requestDevicePosition(options = {}) {
         );
     });
 }
+
+export const DISTANCE_BAND_NEAR = "<50 m";
+export const DISTANCE_BAND_MATCH = "50-150 m";
+
+// Persist only these coarse bands. Exact meters are not stored.
+export function distanceBand(meters) {
+    if (!Number.isFinite(meters) || meters < 0) return null;
+    if (meters < 50) return DISTANCE_BAND_NEAR;
+    if (meters <= 150) return DISTANCE_BAND_MATCH;
+    return null;
+}
