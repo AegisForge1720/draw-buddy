@@ -32,7 +32,7 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">Retailer search and map preview. Search and the map use a local cache of the official New York State lottery retailer listing. Prize logging and the heat map are not connected yet. No payout data is shown.</p>
+        <p class="preview-banner">Prize log preview. Logs stay on this device in a local stub store. A shared sign-in and database are not connected. The payout heat map is not connected yet and stays empty until real logs can be shared.</p>
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
@@ -82,7 +82,91 @@ export const SHELL_MARKUP = `
 
         <section id="panel-log" class="panel space-y-3" role="tabpanel" aria-labelledby="log-heading" hidden>
             <h2 id="log-heading" class="section-title">Prize Log</h2>
-            <p class="empty-note">No prize logs on this device yet. Logging a prize, a location check-in, and a ticket photo will arrive in a later step. Nothing is filled in here.</p>
+            <p class="source-note">This is a preview account saved on this device only. A shared sign-in is not connected yet. No Supabase project or table has been created.</p>
+
+            <div id="log-session-form" class="space-y-2">
+                <label class="block">
+                    <span class="field-label">Display name</span>
+                    <input id="log-handle" class="input-shell" type="text" maxlength="40" autocomplete="nickname" placeholder="Name for this device">
+                </label>
+                <button type="button" class="btn-primary w-full" id="log-signin">Save preview sign-in</button>
+                <p id="log-session-status" class="empty-note" role="status"></p>
+            </div>
+            <div id="log-session-on" class="session-on" hidden>
+                <p id="log-session-label" class="empty-note"></p>
+                <button type="button" class="btn-secondary btn-compact" id="log-signout">Clear preview sign-in</button>
+            </div>
+
+            <form id="prize-log-form" class="space-y-3">
+                <div class="flex gap-2" role="group" aria-label="Prize log path">
+                    <button type="button" class="btn-secondary flex-1" id="log-path-standard" aria-pressed="true">Standard log</button>
+                    <button type="button" class="btn-secondary flex-1" id="log-path-venue" aria-pressed="false">Bought at a venue</button>
+                </div>
+                <p id="log-path-note" class="source-note">Standard path: pick any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.</p>
+
+                <label class="block">
+                    <span class="field-label">Game name</span>
+                    <input id="log-game" class="input-shell" type="text" maxlength="80" autocomplete="off">
+                </label>
+                <div class="row-2">
+                    <label class="block">
+                        <span class="field-label">Prize amount ($)</span>
+                        <input id="log-prize" class="input-shell" type="number" inputmode="decimal" min="0.01" step="0.01">
+                    </label>
+                    <label class="block">
+                        <span class="field-label">Ticket price (optional)</span>
+                        <input id="log-price" class="input-shell" type="number" inputmode="decimal" min="0" step="0.01">
+                    </label>
+                </div>
+                <label class="block">
+                    <span class="field-label">Date</span>
+                    <input id="log-date" class="input-shell" type="date">
+                </label>
+
+                <div class="space-y-2">
+                    <label class="block">
+                        <span class="field-label" id="log-retailer-label">Retailer or venue</span>
+                        <input id="log-retailer-query" class="input-shell" type="search" placeholder="Search the official list" autocomplete="off">
+                    </label>
+                    <ul id="log-retailer-choices" class="retailer-list"></ul>
+                    <p id="log-retailer-selected" class="empty-note">No retailer selected yet.</p>
+                </div>
+
+                <label class="check-row">
+                    <input id="log-present" type="checkbox">
+                    <span>I confirm I was at this location when I received this prize.</span>
+                </label>
+
+                <div class="space-y-2">
+                    <button type="button" class="btn-secondary w-full" id="log-checkin">Optional GPS check-in</button>
+                    <div id="checkin-prompt" class="location-prompt" hidden>
+                        <p class="location-prompt-title">Optional location check-in</p>
+                        <p>Scratch Buddy can compare your device position with this retailer's published coordinates. In this preview, that position is used only for this prize log and stays on this device. Location is optional and off until you agree.</p>
+                        <div class="flex gap-2">
+                            <button type="button" class="btn-primary flex-1" id="checkin-allow">Use my location</button>
+                            <button type="button" class="btn-secondary flex-1" id="checkin-deny">Not now</button>
+                        </div>
+                    </div>
+                    <p id="log-checkin-status" class="source-note">No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block">
+                        <span class="field-label" id="log-photo-label">Ticket photo (optional)</span>
+                        <input id="log-photo" class="input-shell" type="file" accept="image/*">
+                    </label>
+                    <p class="source-note">Ticket photos can show barcodes or serial numbers. This preview stores the photo only on this device. Consider cropping those details before you add a photo. A shared photo store has not been created.</p>
+                    <p id="log-photo-status" class="source-note">No photo attached.</p>
+                    <img id="log-photo-preview" class="photo-preview" alt="Ticket photo preview" hidden>
+                </div>
+
+                <button type="submit" class="btn-primary w-full" id="log-submit">Save prize log</button>
+                <p id="log-form-status" class="empty-note" role="status"></p>
+            </form>
+
+            <h3 class="section-title">Logs on this device</h3>
+            <p id="log-list-status" class="empty-note" role="status">No prize logs on this device yet.</p>
+            <ul id="prize-log-list" class="retailer-list"></ul>
         </section>
 
         <section id="panel-heat" class="panel space-y-3" role="tabpanel" aria-labelledby="heat-heading" hidden>
@@ -109,7 +193,7 @@ export const PRIVACY_MARKUP = `
     <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, and an interactive map of official retailer locations. The map uses OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, and a prize log that stays on this device. The map uses OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>
@@ -117,8 +201,9 @@ export const PRIVACY_MARKUP = `
     <h2 class="section-title">What this preview stores</h2>
     <ul class="empty-note list-disc pl-4 space-y-1">
         <li>Age check. Under 18, nothing is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
-        <li>Optional Near me uses your device location only to sort nearby retailers in this browser session. The position is not saved, and it is not used until you agree on a prompt in the app and in the browser.</li>
-        <li>Later steps may store a prize log, an optional location check-in, and an optional ticket photo on this device only. Those features are not connected yet.</li>
+        <li>Optional Near me uses your device location only to sort nearby retailers in this browser session. The position is not saved unless you later add a GPS check-in to a prize log, and it is not used until you agree on a prompt in the app and in the browser.</li>
+        <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
+        <li>Prize logs you choose to save, including an optional GPS check-in and an optional ticket photo, stay in this browser (localStorage and IndexedDB). Ticket photos can show barcodes or serial numbers. Nothing is uploaded, and no Supabase table or photo bucket has been created.</li>
     </ul>
     <h2 class="section-title">Responsible play</h2>
     <p class="empty-note">18+ only. Call the NY HOPEline at 1-877-8-HOPENY (1-877-846-7369) or text HOPENY (467369).</p>

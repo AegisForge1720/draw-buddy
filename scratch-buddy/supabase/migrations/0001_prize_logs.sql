@@ -1,0 +1,89 @@
+-- DRAFT ONLY. Do not apply this migration.
+-- Creating a new Supabase project, schema, table, view, or Storage bucket
+-- needs Andrew's explicit OK. This file is a local draft for review.
+--
+-- Recommendation: put Scratch Buddy in a separate Supabase project from
+-- Draw Buddy. If a shared project is later approved, use a dedicated
+-- schema named scratch_buddy instead of mixing tables into Draw Buddy's
+-- public schema. The statements below are written for public. only as a
+-- starting draft.
+
+-- create table if not exists public.prize_logs (
+--   id uuid primary key default gen_random_uuid(),
+--   user_id uuid not null references auth.users (id) on delete cascade,
+--   retailer_id text not null,
+--   retailer_name text not null,
+--   retailer_street text,
+--   retailer_city text,
+--   retailer_zip text,
+--   retailer_lat double precision,
+--   retailer_lng double precision,
+--   retailer_quick_draw boolean not null default false,
+--   game_name text not null,
+--   prize_amount_cents integer not null check (prize_amount_cents > 0),
+--   ticket_price_cents integer check (ticket_price_cents is null or ticket_price_cents >= 0),
+--   occurred_on date not null,
+--   path text not null default 'standard' check (path in ('standard', 'bought_at_venue')),
+--   present_confirmed boolean not null check (present_confirmed = true),
+--   location_confirmed boolean not null default false,
+--   checkin_lat double precision,
+--   checkin_lng double precision,
+--   checkin_accuracy_m double precision,
+--   distance_to_retailer_m double precision,
+--   photo_attached boolean not null default false,
+--   -- Reserved. Do not create a Storage bucket until Andrew approves it.
+--   photo_path text,
+--   created_at timestamptz not null default now(),
+--   updated_at timestamptz not null default now(),
+--   constraint prize_logs_venue_photo_chk check (
+--     path <> 'bought_at_venue' or photo_attached = true
+--   ),
+--   constraint prize_logs_venue_qd_chk check (
+--     path <> 'bought_at_venue' or retailer_quick_draw = true
+--   ),
+--   constraint prize_logs_location_coords_chk check (
+--     location_confirmed = false
+--     or (checkin_lat is not null and checkin_lng is not null)
+--   )
+-- );
+--
+-- create index prize_logs_user_created_idx
+--   on public.prize_logs (user_id, created_at desc);
+-- create index prize_logs_retailer_idx
+--   on public.prize_logs (retailer_id);
+--
+-- alter table public.prize_logs enable row level security;
+--
+-- create policy "Users can read their own prize logs"
+--   on public.prize_logs
+--   for select
+--   to authenticated
+--   using (auth.uid() = user_id);
+--
+-- create policy "Users can insert their own prize logs"
+--   on public.prize_logs
+--   for insert
+--   to authenticated
+--   with check (
+--     auth.uid() = user_id
+--     and present_confirmed = true
+--   );
+--
+-- create policy "Users can update their own prize logs"
+--   on public.prize_logs
+--   for update
+--   to authenticated
+--   using (auth.uid() = user_id)
+--   with check (auth.uid() = user_id);
+--
+-- create policy "Users can delete their own prize logs"
+--   on public.prize_logs
+--   for delete
+--   to authenticated
+--   using (auth.uid() = user_id);
+--
+-- A retailer-level aggregate for a future heat map must not expose who
+-- logged a prize. Do not create that view until Ralph and Andrew review it.
+--
+-- comment on table public.prize_logs is
+--   'Draft Scratch Buddy prize logs. Not applied. The preview uses a local stub store.';

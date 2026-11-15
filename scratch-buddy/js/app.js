@@ -1,14 +1,25 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
-import { formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
+import { evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
+import {
+    formatDollars,
+    loadLogs,
+    parsePrizeLog,
+    saveLogs,
+    todayInNewYork,
+    verificationLabel
+} from "./logs.js";
 import { createRetailerMap, waitForLeaflet } from "./map.js";
 import { SHELL_MARKUP } from "./markup.js";
+import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
 import {
     formatCacheTimestamp,
     formatRetailerAddress,
+    findRetailerById,
     loadRetailerCache,
     nearbyRetailers,
     searchRetailers
 } from "./retailers.js";
+import { clearSession, readSession, writeSession } from "./session.js";
 
 const FAIL_COPY = {
     under13: "Sorry — Scratch Buddy is not offered to children under 13.",
@@ -57,6 +68,16 @@ const findState = {
 const mapState = {
     api: null,
     promise: null
+};
+
+const logState = {
+    session: null,
+    path: "standard",
+    selectedRetailer: null,
+    checkin: null,
+    photoFile: null,
+    photoPreviewUrl: null,
+    logs: []
 };
 
 function showTab(name) {
@@ -148,14 +169,23 @@ function renderResults(rows) {
         }
         if (meta.childElementCount) item.appendChild(meta);
 
+        const actions = document.createElement("div");
+        actions.className = "flex gap-2";
         if (Number.isFinite(row.lat) && Number.isFinite(row.lng)) {
             const show = document.createElement("button");
             show.type = "button";
             show.className = "btn-secondary btn-compact";
             show.textContent = "Show on map";
             show.addEventListener("click", () => showRetailerOnMap(row.id, { preferResults: true }));
-            item.appendChild(show);
+            actions.appendChild(show);
         }
+        const logHere = document.createElement("button");
+        logHere.type = "button";
+        logHere.className = "btn-secondary btn-compact";
+        logHere.textContent = "Log a prize here";
+        logHere.addEventListener("click", () => startLogForRetailer(row));
+        actions.appendChild(logHere);
+        item.appendChild(actions);
         list.appendChild(item);
     });
 }
@@ -214,7 +244,8 @@ async function ensureMap() {
             if (!container) throw new Error("The map container is missing.");
             const api = createRetailerMap({
                 container,
-                formatAddress: formatRetailerAddress
+                formatAddress: formatRetailerAddress,
+                onLogPrize: startLogForRetailer
             });
             const count = api.setAllRetailers(findState.cache.retailers);
             api.setResultRetailers(findState.listedRows);
@@ -438,6 +469,425 @@ async function loadFind() {
     return findState.loadPromise;
 }
 
+
+function setLogPath(path) {
+    logState.path = path === "bought_at_venue" ? "bought_at_venue" : "standard";
+    const standard = $("log-path-standard");
+    const venue = $("log-path-venue");
+    if (standard) standard.setAttribute("aria-pressed", logState.path === "standard" ? "true" : "false");
+    if (venue) venue.setAttribute("aria-pressed", logState.path === "bought_at_venue" ? "true" : "false");
+    const note = $("log-path-note");
+    const photoLabel = $("log-photo-label");
+    const retailerLabel = $("log-retailer-label");
+    if (logState.path === "bought_at_venue") {
+        if (note) note.textContent = "Venue path: pick a retailer the official list marks as offering Quick Draw, confirm you were there, and add a photo of the ticket. Use this if you bought the scratch-off at that venue.";
+        if (photoLabel) photoLabel.textContent = "Ticket photo (required)";
+        if (retailerLabel) retailerLabel.textContent = "Quick Draw venue";
+        if (logState.selectedRetailer && !logState.selectedRetailer.quickDraw) {
+            logState.selectedRetailer = null;
+            renderSelectedRetailer();
+        }
+        const query = $("log-retailer-query");
+        if (query && query.value.trim()) searchLogRetailers();
+        else renderLogRetailerChoices([]);
+    } else {
+        if (note) note.textContent = "Standard path: pick any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.";
+        if (photoLabel) photoLabel.textContent = "Ticket photo (optional)";
+        if (retailerLabel) retailerLabel.textContent = "Retailer or venue";
+        const query = $("log-retailer-query");
+        if (query && query.value.trim()) searchLogRetailers();
+    }
+}
+
+function renderSelectedRetailer() {
+    const el = $("log-retailer-selected");
+    if (!el) return;
+    const row = logState.selectedRetailer;
+    if (!row) {
+        el.textContent = "No retailer selected yet.";
+        return;
+    }
+    const address = formatRetailerAddress(row) || "Address not in the source data.";
+    const qd = row.quickDraw ? " Quick Draw venue." : "";
+    el.textContent = `Selected: ${row.name}, ${address}.${qd}`;
+}
+
+function renderLogRetailerChoices(rows) {
+    const list = $("log-retailer-choices");
+    if (!list) return;
+    list.replaceChildren();
+    rows.forEach((row) => {
+        const item = document.createElement("li");
+        item.className = "retailer-card";
+        const name = document.createElement("h3");
+        name.textContent = row.name || "Unnamed retailer";
+        item.appendChild(name);
+        const address = document.createElement("p");
+        address.textContent = formatRetailerAddress(row) || "Address not in the source data.";
+        item.appendChild(address);
+        const pick = document.createElement("button");
+        pick.type = "button";
+        pick.className = "btn-secondary btn-compact";
+        pick.textContent = "Use this location";
+        pick.addEventListener("click", () => {
+            logState.selectedRetailer = row;
+            logState.checkin = null;
+            const checkStatus = $("log-checkin-status");
+            if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+            renderSelectedRetailer();
+            renderLogRetailerChoices([]);
+            const query = $("log-retailer-query");
+            if (query) query.value = "";
+        });
+        item.appendChild(pick);
+        list.appendChild(item);
+    });
+}
+
+function searchLogRetailers() {
+    const cache = findState.cache;
+    const query = $("log-retailer-query") ? $("log-retailer-query").value : "";
+    if (!cache) {
+        renderLogRetailerChoices([]);
+        return;
+    }
+    const result = searchRetailers(cache.retailers, query, {
+        quickDrawOnly: logState.path === "bought_at_venue",
+        limit: 8
+    });
+    if (result.emptyQuery) {
+        renderLogRetailerChoices([]);
+        return;
+    }
+    renderLogRetailerChoices(result.rows);
+}
+
+function startLogForRetailer(row) {
+    if (!row) return;
+    if (row.quickDraw) setLogPath("bought_at_venue");
+    else setLogPath("standard");
+    logState.selectedRetailer = row;
+    logState.checkin = null;
+    const checkStatus = $("log-checkin-status");
+    if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+    renderSelectedRetailer();
+    renderLogRetailerChoices([]);
+    showTab("log");
+    const game = $("log-game");
+    if (game) game.focus();
+}
+
+function renderSession() {
+    const off = $("log-session-form");
+    const on = $("log-session-on");
+    const label = $("log-session-label");
+    logState.session = readSession();
+    if (logState.session) {
+        if (off) off.hidden = true;
+        if (on) on.hidden = false;
+        if (label) label.textContent = `Preview sign-in: ${logState.session.handle} (this device only).`;
+    } else {
+        if (off) off.hidden = false;
+        if (on) on.hidden = true;
+        if (label) label.textContent = "";
+    }
+}
+
+function clearPhotoPreview() {
+    if (logState.photoPreviewUrl) {
+        URL.revokeObjectURL(logState.photoPreviewUrl);
+        logState.photoPreviewUrl = null;
+    }
+    logState.photoFile = null;
+    const preview = $("log-photo-preview");
+    const status = $("log-photo-status");
+    const input = $("log-photo");
+    if (preview) {
+        preview.hidden = true;
+        preview.removeAttribute("src");
+    }
+    if (status) status.textContent = "No photo attached.";
+    if (input) input.value = "";
+}
+
+function setPhotoFile(file) {
+    const status = $("log-photo-status");
+    if (!file) {
+        clearPhotoPreview();
+        return;
+    }
+    if (!isImageFile(file)) {
+        clearPhotoPreview();
+        if (status) status.textContent = "Choose a photo of the ticket (an image file).";
+        return;
+    }
+    if (logState.photoPreviewUrl) URL.revokeObjectURL(logState.photoPreviewUrl);
+    logState.photoFile = file;
+    logState.photoPreviewUrl = URL.createObjectURL(file);
+    const preview = $("log-photo-preview");
+    if (preview) {
+        preview.src = logState.photoPreviewUrl;
+        preview.hidden = false;
+    }
+    if (status) status.textContent = `Photo ready on this device: ${file.name || "ticket photo"}.`;
+}
+
+function verificationBadges(flags) {
+    const wrap = document.createElement("div");
+    wrap.className = "retailer-meta";
+    const set = new Set(flags || []);
+    const add = (cls, text) => {
+        const span = document.createElement("span");
+        span.className = `verify-badge ${cls}`;
+        span.textContent = text;
+        wrap.appendChild(span);
+    };
+    if (set.has("location-confirmed")) add("verify-location", "Location-confirmed");
+    if (set.has("photo-attached")) add("verify-photo", "Photo-attached");
+    if (set.has("unverified") || !set.size) add("verify-unverified", "Unverified");
+    return wrap;
+}
+
+async function renderLogList() {
+    const list = $("prize-log-list");
+    const status = $("log-list-status");
+    if (!list) return;
+    list.replaceChildren();
+    logState.logs = loadLogs();
+    if (!logState.logs.length) {
+        if (status) status.textContent = "No prize logs on this device yet.";
+        return;
+    }
+    if (status) status.textContent = `${logState.logs.length} prize log${logState.logs.length === 1 ? "" : "s"} on this device. These are not shared, and they have not been checked against a state record.`;
+    for (const entry of logState.logs) {
+        const item = document.createElement("li");
+        item.className = "retailer-card";
+        const title = document.createElement("h3");
+        title.textContent = `${entry.game} · ${formatDollars(entry.prizeAmount)}`;
+        item.appendChild(title);
+        const detail = document.createElement("p");
+        const place = [entry.retailerName, entry.retailerCity, entry.retailerZip].filter(Boolean).join(", ");
+        const pathLabel = entry.path === "bought_at_venue" ? "Bought at a venue. " : "";
+        detail.textContent = `${place}. ${entry.occurredOn}. ${pathLabel}${verificationLabel(entry.verification)}.`;
+        item.appendChild(detail);
+        item.appendChild(verificationBadges(entry.verification));
+        if (entry.photoAttached && entry.photoId) {
+            try {
+                const photo = await getPhoto(entry.photoId);
+                const url = photoObjectUrl(photo);
+                if (url) {
+                    const img = document.createElement("img");
+                    img.className = "log-thumb";
+                    img.alt = "Ticket photo stored on this device";
+                    img.src = url;
+                    item.appendChild(img);
+                }
+            } catch {
+                /* preview can still show the log without the thumbnail */
+            }
+        }
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "btn-secondary btn-compact";
+        remove.textContent = "Remove from this device";
+        remove.addEventListener("click", () => removeLog(entry.id));
+        item.appendChild(remove);
+        list.appendChild(item);
+    }
+}
+
+async function removeLog(id) {
+    const entry = logState.logs.find((row) => row.id === id);
+    const next = logState.logs.filter((row) => row.id !== id);
+    saveLogs(next);
+    if (entry && entry.photoId) {
+        try { await deletePhoto(entry.photoId); } catch { /* local stub */ }
+    }
+    await renderLogList();
+}
+
+function hideCheckinPrompt() {
+    const prompt = $("checkin-prompt");
+    if (prompt) prompt.hidden = true;
+}
+
+async function runCheckin() {
+    const status = $("log-checkin-status");
+    const retailer = logState.selectedRetailer;
+    if (!retailer) {
+        if (status) status.textContent = "Pick a retailer before using the GPS check-in.";
+        return;
+    }
+    if (status) status.textContent = "Getting your position…";
+    try {
+        const position = await requestDevicePosition();
+        const result = evaluateCheckIn({
+            userLat: position.lat,
+            userLng: position.lng,
+            accuracyM: position.accuracyM,
+            retailerLat: retailer.lat,
+            retailerLng: retailer.lng
+        });
+        if (result.ok) {
+            logState.checkin = {
+                ok: true,
+                lat: position.lat,
+                lng: position.lng,
+                accuracyM: result.accuracyM,
+                distanceM: result.distanceM,
+                at: new Date().toISOString()
+            };
+            if (status) {
+                status.textContent = `Location-confirmed: your device was ${formatDistance(result.distanceM)} from this retailer's published coordinates.`;
+            }
+        } else {
+            logState.checkin = null;
+            const extra = Number.isFinite(result.distanceM)
+                ? ` Distance recorded: ${formatDistance(result.distanceM)}.`
+                : "";
+            if (status) status.textContent = `${result.reason}${extra} This log will not be marked location-confirmed.`;
+        }
+    } catch (error) {
+        logState.checkin = null;
+        if (status) status.textContent = error && error.message ? error.message : "The device position was not available.";
+    }
+}
+
+async function submitPrizeLog(event) {
+    event.preventDefault();
+    const status = $("log-form-status");
+    const session = readSession();
+    const retailer = logState.selectedRetailer;
+    const parsed = parsePrizeLog({
+        handle: session && session.handle,
+        path: logState.path,
+        game: $("log-game") ? $("log-game").value : "",
+        prizeAmount: $("log-prize") ? $("log-prize").value : "",
+        ticketPrice: $("log-price") ? $("log-price").value : "",
+        occurredOn: $("log-date") ? $("log-date").value : "",
+        today: todayInNewYork(),
+        retailerId: retailer && retailer.id,
+        retailerName: retailer && retailer.name,
+        retailerStreet: retailer && retailer.street,
+        retailerCity: retailer && retailer.city,
+        retailerZip: retailer && retailer.zip,
+        retailerLat: retailer && retailer.lat,
+        retailerLng: retailer && retailer.lng,
+        retailerQuickDraw: retailer && retailer.quickDraw,
+        presentConfirmed: Boolean($("log-present") && $("log-present").checked),
+        locationConfirmed: Boolean(logState.checkin && logState.checkin.ok),
+        checkin: logState.checkin && logState.checkin.ok ? logState.checkin : null,
+        photoAttached: Boolean(logState.photoFile)
+    });
+    if (!parsed.ok) {
+        if (status) status.textContent = parsed.reason;
+        return;
+    }
+    try {
+        if (logState.photoFile) {
+            await savePhoto({ id: parsed.log.id, file: logState.photoFile });
+            parsed.log.photoId = parsed.log.id;
+            parsed.log.photoAttached = true;
+            parsed.log.verification = parsed.log.verification.includes("photo-attached")
+                ? parsed.log.verification
+                : parsed.log.verification.filter((flag) => flag !== "unverified").concat("photo-attached");
+        }
+        const next = [parsed.log, ...loadLogs()];
+        saveLogs(next);
+        if (status) status.textContent = `Saved on this device as ${verificationLabel(parsed.log.verification)}.`;
+        $("prize-log-form").reset();
+        $("log-date").value = todayInNewYork();
+        logState.selectedRetailer = null;
+        logState.checkin = null;
+        clearPhotoPreview();
+        setLogPath("standard");
+        renderSelectedRetailer();
+        const checkStatus = $("log-checkin-status");
+        if (checkStatus) checkStatus.textContent = "No GPS check-in yet. A log without a matching check-in is marked unverified unless a photo is attached.";
+        await renderLogList();
+    } catch (error) {
+        if (status) status.textContent = error && error.message ? error.message : "The prize log could not be saved on this device.";
+    }
+}
+
+function bindPrizeLog() {
+    logState.logs = loadLogs();
+    renderSession();
+    setLogPath("standard");
+    renderSelectedRetailer();
+    const date = $("log-date");
+    if (date) {
+        date.value = todayInNewYork();
+        date.max = todayInNewYork();
+    }
+    const signin = $("log-signin");
+    if (signin) {
+        signin.addEventListener("click", () => {
+            const result = writeSession($("log-handle") ? $("log-handle").value : "");
+            const sessionStatus = $("log-session-status");
+            if (!result.ok) {
+                if (sessionStatus) sessionStatus.textContent = result.reason;
+                return;
+            }
+            if (sessionStatus) sessionStatus.textContent = "";
+            renderSession();
+        });
+    }
+    const signout = $("log-signout");
+    if (signout) {
+        signout.addEventListener("click", () => {
+            clearSession();
+            renderSession();
+        });
+    }
+    const standard = $("log-path-standard");
+    const venue = $("log-path-venue");
+    if (standard) standard.addEventListener("click", () => setLogPath("standard"));
+    if (venue) venue.addEventListener("click", () => setLogPath("bought_at_venue"));
+    const retailerQuery = $("log-retailer-query");
+    if (retailerQuery) {
+        retailerQuery.addEventListener("input", searchLogRetailers);
+        retailerQuery.addEventListener("search", searchLogRetailers);
+    }
+    const checkin = $("log-checkin");
+    const prompt = $("checkin-prompt");
+    if (checkin) {
+        checkin.addEventListener("click", () => {
+            if (prompt) {
+                prompt.hidden = false;
+                prompt.scrollIntoView({ block: "nearest" });
+            }
+        });
+    }
+    const allow = $("checkin-allow");
+    const deny = $("checkin-deny");
+    if (allow) {
+        allow.addEventListener("click", () => {
+            hideCheckinPrompt();
+            runCheckin();
+        });
+    }
+    if (deny) {
+        deny.addEventListener("click", () => {
+            hideCheckinPrompt();
+            const checkStatus = $("log-checkin-status");
+            if (checkStatus && !logState.checkin) {
+                checkStatus.textContent = "GPS check-in was not used.";
+            }
+        });
+    }
+    const photo = $("log-photo");
+    if (photo) {
+        photo.addEventListener("change", () => {
+            const file = photo.files && photo.files[0];
+            setPhotoFile(file || null);
+        });
+    }
+    const form = $("prize-log-form");
+    if (form) form.addEventListener("submit", submitPrizeLog);
+    renderLogList();
+}
+
 function bindShell() {
     document.querySelectorAll('[role="tab"]').forEach((tab) => {
         tab.addEventListener("click", () => showTab(tab.dataset.tab));
@@ -445,6 +895,7 @@ function bindShell() {
     showTab("find");
     bindFind();
     bindMap();
+    bindPrizeLog();
     loadFind();
 }
 

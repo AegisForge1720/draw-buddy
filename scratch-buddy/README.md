@@ -34,6 +34,22 @@ The Map tab shows the same official cache on an interactive map:
 
 Prize logging and the payout heat map are not connected yet. The map does not invent locations or payouts.
 
+
+## Prize log
+
+The Prize Log tab is a local stub only:
+
+- A preview sign-in stores a display name on this device. It is not a shared account.
+- Every log requires the person to confirm they were at the selected official retailer.
+- Optional GPS check-in is opt-in (in-app prompt, then the browser prompt). A match within 150 meters, with accurate enough position data, marks the log location-confirmed.
+- The "Bought at a venue" path is for a Quick Draw venue from the official list and requires a ticket photo.
+- Standard logs may include a photo. Photos are stored in IndexedDB on this device only. Ticket photos can show barcodes or serial numbers; the form asks people to consider cropping those details.
+- Each log is marked unverified, location-confirmed, and/or photo-attached. Nothing is checked against a state database.
+- Draft SQL and RLS live in `supabase/migrations/0001_prize_logs.sql`. The statements are commented out. Do not apply them. A new Supabase project, table, or photo bucket needs Andrew's explicit OK. The recommendation is a separate Scratch Buddy project, not Draw Buddy's project.
+- Questions for Ralph are in `COMPLIANCE.md`.
+
+The payout heat map is not connected yet and stays empty until shared logs exist.
+
 ## Age check
 
 An 18+ age check runs before the app, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept.

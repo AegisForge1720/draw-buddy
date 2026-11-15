@@ -43,7 +43,7 @@ function clusterIcon(L, cluster, highlighted) {
     });
 }
 
-function buildPopup(row, formatAddress) {
+function buildPopup(row, formatAddress, onLogPrize) {
     const wrap = document.createElement("div");
     wrap.className = "sb-popup";
     const title = document.createElement("h3");
@@ -57,6 +57,14 @@ function buildPopup(row, formatAddress) {
         badge.className = "qd-badge";
         badge.textContent = "Quick Draw venue";
         wrap.appendChild(badge);
+    }
+    if (typeof onLogPrize === "function") {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "btn-secondary btn-compact";
+        button.textContent = "Log a prize here";
+        button.addEventListener("click", () => onLogPrize(row));
+        wrap.appendChild(button);
     }
     return wrap;
 }
@@ -78,7 +86,7 @@ function withCoords(rows) {
     return (rows || []).filter((row) => Number.isFinite(row.lat) && Number.isFinite(row.lng));
 }
 
-export function createRetailerMap({ container, formatAddress }) {
+export function createRetailerMap({ container, formatAddress, onLogPrize }) {
     const L = window.L;
     const map = L.map(container, {
         minZoom: 5,
@@ -110,7 +118,7 @@ export function createRetailerMap({ container, formatAddress }) {
                 title: row.name || "Retailer",
                 keyboard: true
             });
-            marker.bindPopup(() => buildPopup(row, formatAddress), { maxWidth: 260, className: "sb-popup-shell" });
+            marker.bindPopup(() => buildPopup(row, formatAddress, onLogPrize), { maxWidth: 260, className: "sb-popup-shell" });
             marker.retailerId = row.id;
             store.set(row.id, { marker, row });
             layers.push(marker);

@@ -73,6 +73,13 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /id="retailer-map"/);
     assert.match(SHELL_MARKUP, /id="map-mode-all"/);
     assert.match(SHELL_MARKUP, /id="map-mode-results"/);
+    assert.match(SHELL_MARKUP, /id="prize-log-form"/);
+    assert.match(SHELL_MARKUP, /I confirm I was at this location when I received this prize/);
+    assert.match(SHELL_MARKUP, /Bought at a venue/);
+    assert.match(SHELL_MARKUP, /Optional GPS check-in/);
+    assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
+    assert.match(SHELL_MARKUP, /barcodes or serial numbers/);
+    assert.equal(SHELL_MARKUP.includes("will arrive in a later step"), false);
     assert.match(html, /leaflet@1\.9\.4/);
     assert.match(html, /leaflet\.markercluster@1\.5\.3/);
     assert.equal(html.includes("googletagmanager"), false);
