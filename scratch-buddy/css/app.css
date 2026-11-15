@@ -454,3 +454,107 @@ a { color: #facc15; }
     font-weight: 700;
     color: #67e8f9;
 }
+
+.retailer-map {
+    height: 360px;
+    width: 100%;
+    border-radius: 0.65rem;
+    border: 1px solid #1d4ed8;
+    background: #050814;
+    z-index: 1;
+}
+@media (min-width: 768px) {
+    .retailer-map { height: 420px; }
+}
+
+.btn-compact {
+    min-height: 36px;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.65rem;
+    justify-self: start;
+}
+
+.sb-pin {
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    background: #22d3ee;
+    border: 2px solid #ecfeff;
+    box-shadow: 0 0 0 1px #0b132b;
+}
+.sb-pin-match {
+    background: #facc15;
+    border-color: #fef9c3;
+}
+
+.sb-cluster {
+    display: grid;
+    place-items: center;
+    border-radius: 9999px;
+    background: #1d4ed8;
+    border: 2px solid #67e8f9;
+    color: #fff;
+    font-weight: 800;
+    font-size: 11px;
+    box-shadow: 0 0 0 2px rgba(7, 11, 25, 0.55);
+}
+.sb-cluster span {
+    display: block;
+    line-height: 1;
+}
+.sb-cluster-sm { width: 32px; height: 32px; }
+.sb-cluster-md { width: 40px; height: 40px; font-size: 12px; }
+.sb-cluster-lg { width: 48px; height: 48px; font-size: 13px; }
+.sb-cluster-match {
+    background: #a16207;
+    border-color: #facc15;
+    color: #fffbeb;
+}
+
+.leaflet-container {
+    background: #070b19;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+    background: #0b132b;
+    color: #f8fafc;
+    border: 1px solid #1d4ed8;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+.leaflet-popup-content { margin: 0.7rem 0.8rem; }
+.sb-popup h3 {
+    margin: 0 0 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+}
+.sb-popup p {
+    margin: 0;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    line-height: 1.4;
+}
+.sb-popup .qd-badge { margin-top: 0.4rem; display: inline-block; }
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+    background: #0b132b;
+    color: #f8fafc;
+    border-bottom-color: #1d4ed8;
+}
+.leaflet-bar {
+    border: 1px solid #1d4ed8;
+    box-shadow: none;
+}
+.leaflet-control-attribution {
+    background: rgba(7, 11, 25, 0.85);
+    color: #94a3b8;
+    font-size: 10px;
+}
+.leaflet-control-attribution a { color: #67e8f9; }
+
+.btn-secondary[aria-pressed="true"] {
+    background: #1d4ed8;
+    color: #fff;
+    border-color: #3b82f6;
+}

@@ -32,7 +32,7 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">Retailer search preview. Search uses a local cache of the official New York State lottery retailer listing. The map, prize logging, and the heat map are not connected yet. No payout data is shown.</p>
+        <p class="preview-banner">Retailer search and map preview. Search and the map use a local cache of the official New York State lottery retailer listing. Prize logging and the heat map are not connected yet. No payout data is shown.</p>
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
@@ -72,9 +72,12 @@ export const SHELL_MARKUP = `
 
         <section id="panel-map" class="panel space-y-3" role="tabpanel" aria-labelledby="map-heading" hidden>
             <h2 id="map-heading" class="section-title">Retailer Map</h2>
-            <div class="map-frame">
-                <p class="empty-note">The interactive map is not connected yet. No locations are shown.</p>
+            <div class="flex gap-2" role="group" aria-label="Map list">
+                <button type="button" class="btn-secondary flex-1" id="map-mode-all" aria-pressed="true">All locations</button>
+                <button type="button" class="btn-secondary flex-1" id="map-mode-results" aria-pressed="false" disabled>Search results</button>
             </div>
+            <div id="retailer-map" class="retailer-map" role="application" aria-label="Map of licensed New York Lottery retailers"></div>
+            <p id="map-status" class="source-note" role="status">Loading the map…</p>
         </section>
 
         <section id="panel-log" class="panel space-y-3" role="tabpanel" aria-labelledby="log-heading" hidden>
@@ -106,7 +109,7 @@ export const PRIVACY_MARKUP = `
     <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
     <h1 class="text-white font-black text-lg">Privacy notice</h1>
     <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check and a retailer search. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
+    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, and an interactive map of official retailer locations. The map uses OpenStreetMap tiles. It does not install advertising pixels or other trackers. Passing the age check is not consent to tracking.</p>
     <h2 class="section-title">Who we are</h2>
     <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
     <p class="empty-note">${AFFILIATION}</p>

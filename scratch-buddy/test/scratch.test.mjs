@@ -70,6 +70,16 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /Use your location\?/);
     assert.match(SHELL_MARKUP, /The full official list is not shown all at once/);
     assert.match(SHELL_MARKUP, /id="retailer-near"/);
+    assert.match(SHELL_MARKUP, /id="retailer-map"/);
+    assert.match(SHELL_MARKUP, /id="map-mode-all"/);
+    assert.match(SHELL_MARKUP, /id="map-mode-results"/);
+    assert.match(html, /leaflet@1\.9\.4/);
+    assert.match(html, /leaflet\.markercluster@1\.5\.3/);
+    assert.equal(html.includes("googletagmanager"), false);
+    assert.equal(html.includes("google-analytics"), false);
+    const mapSource = readFileSync(new URL("../js/map.js", import.meta.url), "utf8");
+    assert.match(mapSource, /tile\.openstreetmap\.org/);
+    assert.equal(mapSource.includes("googletagmanager"), false);
     assert.match(SHELL_MARKUP, /No payout data yet/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
     assert.match(SHELL_MARKUP, /© 2026 NAV Analytics LLC/);

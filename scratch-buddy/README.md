@@ -21,6 +21,19 @@ The app searches that cache by name, address, city, or ZIP. Near me is opt-in: t
 
 No payout or prize-log data is shown yet. Empty lists stay empty. Nothing in the cache was invented or generated.
 
+
+## Retailer map
+
+The Map tab shows the same official cache on an interactive map:
+
+- Leaflet 1.9.4 with OpenStreetMap tiles
+- Leaflet.markercluster for the 13,129 locations
+- No analytics or tracking pixels
+- Search and Near me results can be shown on the map (gold markers). Each search row has a Show on map button that opens that location's details.
+- Tap a cluster to zoom in, or tap a marker for the name, address, and Quick Draw flag when the official list has one
+
+Prize logging and the payout heat map are not connected yet. The map does not invent locations or payouts.
+
 ## Age check
 
 An 18+ age check runs before the app, the privacy draft, and the terms draft. It stores only `flag: "18plus"` and an expiry in `scratch_buddy_age_gate`. The date of birth is not kept.

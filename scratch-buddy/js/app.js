@@ -1,5 +1,6 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
 import { formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
+import { createRetailerMap, waitForLeaflet } from "./map.js";
 import { SHELL_MARKUP } from "./markup.js";
 import {
     formatCacheTimestamp,
@@ -44,6 +45,20 @@ function showAgeFail(outcome) {
     title.focus();
 }
 
+const findState = {
+    cache: null,
+    loadError: null,
+    loadPromise: null,
+    listedRows: [],
+    listedKind: "none",
+    lastPosition: null
+};
+
+const mapState = {
+    api: null,
+    promise: null
+};
+
 function showTab(name) {
     const tabs = document.querySelectorAll('[role="tab"]');
     const panels = {
@@ -60,12 +75,12 @@ function showTab(name) {
         if (!panel) return;
         panel.hidden = key !== name;
     });
+    if (name === "map") {
+        ensureMap().then((api) => {
+            if (api) api.invalidate();
+        });
+    }
 }
-
-const findState = {
-    cache: null,
-    loadError: null
-};
 
 function formatCount(value) {
     return Number(value).toLocaleString("en-US");
@@ -132,8 +147,154 @@ function renderResults(rows) {
             meta.appendChild(distance);
         }
         if (meta.childElementCount) item.appendChild(meta);
+
+        if (Number.isFinite(row.lat) && Number.isFinite(row.lng)) {
+            const show = document.createElement("button");
+            show.type = "button";
+            show.className = "btn-secondary btn-compact";
+            show.textContent = "Show on map";
+            show.addEventListener("click", () => showRetailerOnMap(row.id, { preferResults: true }));
+            item.appendChild(show);
+        }
         list.appendChild(item);
     });
+}
+
+function updateMapModeButtons() {
+    const allBtn = $("map-mode-all");
+    const resultBtn = $("map-mode-results");
+    const hasResults = findState.listedRows.length > 0;
+    if (resultBtn) {
+        resultBtn.disabled = !hasResults;
+        const labelKind = findState.listedKind === "nearby" ? "Nearby results" : "Search results";
+        const count = hasResults ? ` (${findState.listedRows.length})` : "";
+        resultBtn.textContent = `${labelKind}${count}`;
+    }
+    const mode = mapState.api ? mapState.api.getMode() : "all";
+    if (allBtn) allBtn.setAttribute("aria-pressed", mode === "all" ? "true" : "false");
+    if (resultBtn) resultBtn.setAttribute("aria-pressed", mode === "results" ? "true" : "false");
+}
+
+function describeMapStatus() {
+    const api = mapState.api;
+    if (!api) return;
+    const status = $("map-status");
+    if (!status) return;
+    if (api.getMode() === "results") {
+        status.textContent = `Showing ${formatCount(api.resultCount())} result${api.resultCount() === 1 ? "" : "s"} from your search or Near me list. Gold markers are those locations. Switch to All locations to see the full official list. Tiles are from OpenStreetMap. Tap a marker or cluster for details.`;
+        return;
+    }
+    status.textContent = `${formatCount(api.allCount())} licensed locations from the official cache, grouped into clusters. Tiles are from OpenStreetMap. Tap a cluster to zoom in, or tap a marker for details.`;
+}
+
+function syncMapResults() {
+    if (!mapState.api) return;
+    mapState.api.setResultRetailers(findState.listedRows);
+    if (findState.lastPosition) mapState.api.setUserPosition(findState.lastPosition);
+    updateMapModeButtons();
+    describeMapStatus();
+}
+
+async function ensureMap() {
+    if (mapState.api) {
+        mapState.api.invalidate();
+        return mapState.api;
+    }
+    if (mapState.promise) return mapState.promise;
+    const status = $("map-status");
+    mapState.promise = (async () => {
+        try {
+            if (status) status.textContent = "Loading the map…";
+            await waitForLeaflet();
+            if (findState.loadPromise) await findState.loadPromise;
+            if (!findState.cache) {
+                throw new Error(findState.loadError || "The official retailer list could not be loaded. No locations are shown.");
+            }
+            const container = $("retailer-map");
+            if (!container) throw new Error("The map container is missing.");
+            const api = createRetailerMap({
+                container,
+                formatAddress: formatRetailerAddress
+            });
+            const count = api.setAllRetailers(findState.cache.retailers);
+            api.setResultRetailers(findState.listedRows);
+            if (findState.lastPosition) api.setUserPosition(findState.lastPosition);
+            api.applyMode("all");
+            api.fitNewYork();
+            mapState.api = api;
+            requestAnimationFrame(() => api.invalidate());
+            if (status && count === 0) {
+                status.textContent = "No retailers with published coordinates are in this cache. No locations are shown.";
+            } else {
+                describeMapStatus();
+            }
+            updateMapModeButtons();
+            container.dataset.ready = "true";
+            return api;
+        } catch (error) {
+            const message = error && error.message
+                ? error.message
+                : "The map could not be loaded. No locations are shown.";
+            if (status) status.textContent = message;
+            mapState.promise = null;
+            return null;
+        }
+    })();
+    return mapState.promise;
+}
+
+async function showRetailerOnMap(id, { preferResults = false } = {}) {
+    showTab("map");
+    const api = await ensureMap();
+    if (!api) return;
+    api.invalidate();
+    if (preferResults && findState.listedRows.length) {
+        api.setResultRetailers(findState.listedRows);
+        const mode = api.applyMode("results");
+        if (mode === "results") {
+            api.fitRows(findState.listedRows);
+        }
+    } else {
+        api.applyMode("all");
+    }
+    updateMapModeButtons();
+    describeMapStatus();
+    requestAnimationFrame(() => {
+        api.invalidate();
+        const found = api.focusRetailer(id);
+        if (!found) {
+            const status = $("map-status");
+            if (status) status.textContent = "That retailer has no published coordinates on the map.";
+        }
+    });
+}
+
+function bindMap() {
+    const allBtn = $("map-mode-all");
+    const resultBtn = $("map-mode-results");
+    if (allBtn) {
+        allBtn.addEventListener("click", async () => {
+            const api = await ensureMap();
+            if (!api) return;
+            api.applyMode("all");
+            api.fitNewYork();
+            updateMapModeButtons();
+            describeMapStatus();
+        });
+    }
+    if (resultBtn) {
+        resultBtn.addEventListener("click", async () => {
+            if (!findState.listedRows.length) return;
+            const api = await ensureMap();
+            if (!api) return;
+            api.setResultRetailers(findState.listedRows);
+            api.applyMode("results");
+            api.fitRows(findState.listedRows);
+            updateMapModeButtons();
+            describeMapStatus();
+        });
+    }
+    updateMapModeButtons();
 }
 
 function setStatus(message) {
@@ -158,20 +319,33 @@ function runSearch() {
     const quickDrawOnly = $("retailer-qd-only").checked;
     const result = searchRetailers(cache.retailers, query, { quickDrawOnly });
     if (result.emptyQuery) {
+        findState.listedRows = [];
+        findState.listedKind = "none";
         renderResults([]);
+        syncMapResults();
+        if (mapState.api) {
+            mapState.api.applyMode("all");
+            updateMapModeButtons();
+            describeMapStatus();
+        }
         setStatus("Enter a name, address, city, or ZIP, or use Near me. The full official list is not shown all at once.");
         return;
     }
+    findState.listedRows = result.rows;
+    findState.listedKind = "search";
     renderResults(result.rows);
+    syncMapResults();
     if (result.total === 0) {
+        findState.listedRows = [];
+        findState.listedKind = "none";
         setStatus("No retailers in this cache match that search.");
         return;
     }
     if (result.truncated) {
-        setStatus(`Showing the first ${result.rows.length} of ${formatCount(result.total)} matching retailers.`);
+        setStatus(`Showing the first ${result.rows.length} of ${formatCount(result.total)} matching retailers. Use Show on map to open one on the Map tab.`);
         return;
     }
-    setStatus(`${formatCount(result.total)} matching retailer${result.total === 1 ? "" : "s"}.`);
+    setStatus(`${formatCount(result.total)} matching retailer${result.total === 1 ? "" : "s"}. Use Show on map to open one on the Map tab.`);
 }
 
 async function runNearMe() {
@@ -185,18 +359,27 @@ async function runNearMe() {
     try {
         const position = await requestDevicePosition();
         const quickDrawOnly = $("retailer-qd-only").checked;
+        findState.lastPosition = position;
         const rows = nearbyRetailers(cache.retailers, position.lat, position.lng, {
             quickDrawOnly,
             distanceFn: haversineMeters
         });
+        findState.listedRows = rows;
+        findState.listedKind = "nearby";
         renderResults(rows);
+        syncMapResults();
         if (!rows.length) {
+            findState.listedRows = [];
+            findState.listedKind = "none";
             setStatus("No retailers with published coordinates were found near that position.");
             return;
         }
-        setStatus(`Showing the ${rows.length} closest licensed retailer${rows.length === 1 ? "" : "s"} to your position. The position was used only to sort this list and was not saved.`);
+        setStatus(`Showing the ${rows.length} closest licensed retailer${rows.length === 1 ? "" : "s"} to your position. The position was used only to sort this list and was not saved. Use Show on map to open one on the Map tab.`);
     } catch (error) {
+        findState.listedRows = [];
+        findState.listedKind = "none";
         renderResults([]);
+        syncMapResults();
         setStatus(error && error.message ? error.message : "The device position was not available.");
     }
 }
@@ -235,6 +418,7 @@ function bindFind() {
 
 async function loadFind() {
     const source = $("retailer-source");
+    findState.loadPromise = (async () => {
     try {
         const cache = await loadRetailerCache();
         if (!cache.retailers.length) {
@@ -250,6 +434,8 @@ async function loadFind() {
         if (source) source.textContent = findState.loadError;
         setStatus(findState.loadError);
     }
+    })();
+    return findState.loadPromise;
 }
 
 function bindShell() {
@@ -258,6 +444,7 @@ function bindShell() {
     });
     showTab("find");
     bindFind();
+    bindMap();
     loadFind();
 }
 
