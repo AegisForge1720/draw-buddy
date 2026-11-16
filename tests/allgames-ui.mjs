@@ -4,16 +4,48 @@ const require = createRequire("/workspace/tools/");
 const { chromium } = require("playwright-core");
 const url = process.argv[2] || "http://127.0.0.1:8881/", shots = process.argv[3] === "shots";
 const GAMES = (process.env.GAMES || "powerball,megamillions,millionaire,nylotto,take5,pick10,numbers,win4").split(",");
-const BANNED = /\blive\b|real-time|realtime|play along|Penny Arcade|®|™/i;
+const BANNED = /\blive\b|real-time|realtime|play along|Penny Arcade|®|™|Ticket check|Hot Number|🔥|🤖|would have won|\bWon \$|\$[\d,.]+ won\b/i;
+const NOT_OFFICIAL = "Not official ticket validation. Confirm prizes with the official lottery.";
+const SAME_NOTE = "These buttons can produce the same numbers.";
+const RG = "18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).", NA = "Not affiliated with any lottery.";
+const CAP = { powerball: 10, megamillions: 10, millionaire: 10, nylotto: 10, take5: 7, pick10: 7, numbers: 10, win4: 10 };
 const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--no-sandbox"] });
 let pass = 0, fail = 0; const ok = (n, c, i = "") => { c ? pass++ : fail++; console.log(`${c ? "PASS" : "FAIL"}  ${n}${i !== "" ? "  (" + i + ")" : ""}`); };
 for (const vp of shots ? [{ w: 390, h: 844, tag: "390", mobile: true }, { w: 1280, h: 900, tag: "desktop", mobile: false }] : [{ w: 390, h: 844, tag: "390", mobile: true }]) {
-  const c = await b.newContext({ viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: vp.mobile ? 2 : 1, isMobile: vp.mobile, hasTouch: vp.mobile, httpCredentials: { username: "andrew", password: process.env.PREVIEW_PASS } });
+  const ctxOpts = { viewport: { width: vp.w, height: vp.h }, deviceScaleFactor: vp.mobile ? 2 : 1, isMobile: vp.mobile, hasTouch: vp.mobile, httpCredentials: { username: "andrew", password: process.env.PREVIEW_PASS } };
+  { // 18+ age gate on a fresh device
+    const c0 = await b.newContext(ctxOpts), p0 = await c0.newPage(); await p0.goto(url, { waitUntil: "domcontentloaded" }); await p0.waitForTimeout(1500);
+    const shown = await p0.evaluate(() => getComputedStyle(document.getElementById('age-gate')).display !== 'none');
+    await p0.click('#age-no'); const no = await p0.evaluate(() => !document.getElementById('age-gate-no').hidden && getComputedStyle(document.getElementById('age-gate')).display !== 'none');
+    await p0.click('#age-yes'); await p0.waitForTimeout(200); const gone = await p0.evaluate(() => getComputedStyle(document.getElementById('age-gate')).display === 'none');
+    await p0.reload({ waitUntil: "domcontentloaded" }); await p0.waitForTimeout(800); const remembered = await p0.evaluate(() => getComputedStyle(document.getElementById('age-gate')).display === 'none');
+    ok(`[${vp.tag}] 18+ age gate: shown first, 'under 18' stays blocked, '18 or older' opens, remembered`, shown && no && gone && remembered, `${shown}/${no}/${gone}/${remembered}`);
+    await c0.close();
+  }
+  const c = await b.newContext(ctxOpts);
+  await c.addInitScript(() => { try { localStorage.setItem('draw_buddy_age_ok', String(Date.now())); } catch (e) {} });
   await c.addInitScript(() => { try { if (!sessionStorage.getItem('dgt')) { localStorage.removeItem('draw_buddy_dg_tickets'); sessionStorage.setItem('dgt', '1'); } } catch (e) {} });
   const p = await c.newPage(); p.setDefaultTimeout(30000); const errors = [];
   p.on("pageerror", e => errors.push(String(e).slice(0, 200))); p.on("console", m => { if (m.type() === "error" && !/404|Failed to load resource/.test(m.text())) errors.push(m.text().slice(0, 200)); });
   p.on("dialog", d => d.accept());
   await p.goto(url, { waitUntil: "networkidle" }); await p.waitForTimeout(3000);
+  { const pg = await p.evaluate(() => {
+      const vis = el => !!el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+      return { robots: (document.querySelector('meta[name="robots"]') || {}).content, title: document.title, build: window.DB_BUILD, flags: window.DB_FLAGS,
+        partnerVisible: Array.from(document.querySelectorAll('a[href*="lotto.com"], a[href*="ref=draw_buddy_stripe"], a[href*="draftkings"], a[href*="fanduel"], a[href*="betmgm"], a[href*="jackpocket"]')).filter(vis).length,
+        partnerInDom: document.querySelectorAll('a[href*="ref=draw_buddy_stripe"]').length,
+        share: vis(document.getElementById('share-btn')) || vis(document.getElementById('share-qr-btn')), tier: vis(document.getElementById('dev-tier-switcher')),
+        prices: Array.from(document.querySelectorAll('a[href*="buy.stripe.com"]')).filter(vis).length,
+        body: document.body.innerText, house: vis(document.getElementById('house-lines')) };
+    });
+    ok("robots meta noindex,nofollow + title", pg.robots === "noindex,nofollow" && pg.title === "Draw Buddy", pg.robots + " | " + pg.title);
+    ok("private preview build: Double Play + result notices on; partner/share/tier/pricing off", pg.build === "private-preview" && pg.flags.doublePlay && pg.flags.resultNotices && !pg.flags.partnerLinks && !pg.flags.shareQr && !pg.flags.tierSwitcher && !pg.flags.pricing, JSON.stringify(pg.flags));
+    ok("HOLD: no Lotto.com / ref=draw_buddy_stripe / sportsbook link visible (kept in code behind a flag)", pg.partnerVisible === 0 && pg.partnerInDom > 0 && !/Partner Apps|Sports Betting|Lotto\.com|DraftKings|FanDuel|BetMGM/.test(pg.body), `${pg.partnerVisible} visible, ${pg.partnerInDom} in DOM`);
+    ok("Share/QR and Free/Pro switcher hidden; no price/buy links visible", !pg.share && !pg.tier && pg.prices === 0 && !/\$9\.99|\$75/.test(pg.body));
+    ok("Footer entity NAV Analytics LLC; no 'Draw Buddy Analytics'", /© 2026 NAV Analytics LLC/.test(pg.body) && !/Draw Buddy Analytics/.test(pg.body));
+    ok("House lines visible on the page (HOPENY, not affiliated, D1)", pg.house && pg.body.includes(RG) && pg.body.includes(NA) && pg.body.includes("Past results don't predict future draws."));
+    const bad0 = pg.body.match(BANNED); ok("Quick Draw page wording rules", !bad0, bad0 ? bad0[0] : "");
+  }
   for (const g of GAMES) {
     await p.click(`#game-btn-${g}`);
     await p.waitForFunction(() => /official draws loaded|Data unavailable/.test(document.getElementById('dg-data')?.innerText || ''), null, { timeout: 30000 });
@@ -30,6 +62,9 @@ for (const vp of shots ? [{ w: 390, h: 844, tag: "390", mobile: true }, { w: 128
       await p.waitForFunction(() => !document.getElementById('dg-ticket').hidden, null, { timeout: 20000 });
       const t = await p.evaluate(() => ({ txt: document.getElementById('dg-ticket').innerText, st: document.getElementById('dg-auto-status').innerText }));
       ok(`${g} [${vp.tag}] ${m}: ticket with disclaimer`, /Past results don't predict future draws/.test(t.txt) && !/Not enough/.test(t.st), t.st.slice(0, 80));
+      ok(`${g} [${vp.tag}] ${m}: Hindsight check with not-official line`, /Hindsight check:/.test(t.txt) && t.txt.includes(NOT_OFFICIAL) && !/Ticket check/.test(t.txt));
+      const dr = await p.evaluate(() => { const el = document.getElementById('dg-s-draws'); return { n: el.options.length, v: Number(el.value), label: el.closest('label').innerText }; });
+      ok(`${g} [${vp.tag}] ${m}: draws in a row within app cap, labeled`, dr.n <= CAP[g] && dr.v <= CAP[g] && /app limit/i.test(dr.label), `${dr.v}/${dr.n}`);
       if (shots && m === "best") { await p.locator('#dg-settings').screenshot({ path: `/workspace/debug/allgames-${g}-${vp.tag}-2-settings.png` }); }
       if (shots && m === "hits") { await p.locator('#dg-ticket').screenshot({ path: `/workspace/debug/allgames-${g}-${vp.tag}-3-autopick-hits.png` }); }
     }
@@ -44,7 +79,10 @@ for (const vp of shots ? [{ w: 390, h: 844, tag: "390", mobile: true }, { w: 128
     ok(`${g} [${vp.tag}]: ticket logged`, logged >= 1, logged);
     const all = await p.evaluate(() => document.getElementById('dg-panel').innerText);
     const bad = all.match(BANNED); ok(`${g} [${vp.tag}]: wording rules (no live/real-time/play along/®/™)`, !bad, bad ? bad[0] : "");
-    ok(`${g} [${vp.tag}]: Ralph lines present`, all.includes("18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).") && all.includes("Not affiliated with any lottery.") && all.includes("Past results don't predict future draws."));
+    ok(`${g} [${vp.tag}]: Ralph lines present`, all.includes(RG) && all.includes(NA) && all.includes("Past results don't predict future draws."));
+    const top = await p.evaluate(() => { const el = document.getElementById('house-lines'), pn = document.getElementById('dg-panel'); return { txt: el.innerText, vis: el.getClientRects().length > 0, above: !!(el.compareDocumentPosition(pn) & Node.DOCUMENT_POSITION_FOLLOWING) }; });
+    ok(`${g} [${vp.tag}]: HOPENY / not affiliated / D1 visible above the game screen`, top.vis && top.above && top.txt.includes(RG) && top.txt.includes(NA) && top.txt.includes("Past results don't predict future draws."));
+    ok(`${g} [${vp.tag}]: same-numbers note under Auto Picks`, all.includes(SAME_NOTE));
     const mascot = await p.evaluate(() => Array.from(document.querySelectorAll('#dg-panel img')).map(i => i.src));
     ok(`${g} [${vp.tag}]: no mascot images next to picks/results`, mascot.length === 0, mascot.join(","));
     const buy = await p.evaluate(() => Array.from(document.querySelectorAll('#dg-panel a, #dg-panel button')).map(x => x.innerText).filter(t => /buy|checkout|order|purchase|subscribe/i.test(t)));

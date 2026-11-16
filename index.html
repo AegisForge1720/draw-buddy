@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Draw Buddy - Tactical & Venue Intelligence Suite</title>
+    <meta name="robots" content="noindex,nofollow">
+    <title>Draw Buddy</title>
+    <!-- Feature flags + house copy. Public defaults are all OFF; see js/flags.js. -->
+    <script src="/js/flags.js"></script>
     <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon.png">
     <link rel="alternate icon" type="image/png" sizes="192x192" href="/brand/icon-192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/brand/apple-touch-icon.png">
@@ -35,6 +38,13 @@
         .bd-ball.bd-bonus { background: radial-gradient(circle at 35% 30%, #fecaca, #ef4444 60%, #7f1d1d); color: #fff; border-color: #fca5a5; }
         @-webkit-keyframes bdDrop { 0% { -webkit-transform: translateY(-40px) scale(.6); opacity: 0; } 100% { -webkit-transform: none; opacity: 1; } }
         [hidden] { display: none !important; } /* utility classes like .flex must not override the hidden attribute */
+        /* Feature-flagged UI (js/flags.js): hidden unless <html> carries the flag class. Kept in the code, not deleted. */
+        html:not(.flag-partnerLinks) [data-flag~="partnerLinks"], html:not(.flag-shareQr) [data-flag~="shareQr"],
+        html:not(.flag-tierSwitcher) [data-flag~="tierSwitcher"], html:not(.flag-pricing) [data-flag~="pricing"] { display: none !important; }
+        /* 18+ age gate */
+        #age-gate { position: fixed; inset: 0; z-index: 200; background: #050814; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        html.age-ok #age-gate { display: none; }
+        html:not(.age-ok) body { overflow: hidden; }
         .bd-mynums { width:100%; min-width:0; }
         .bd-ticket { min-width:0; padding:3px 0; }
         .bd-ticket + .bd-ticket { border-top:1px solid #334155; margin-top:3px; padding-top:5px; }
@@ -69,6 +79,29 @@
 </head>
 <body class="min-h-screen pb-16">
 
+    <!-- 18+ age gate (host level, before any lottery surface). Remembered on this device for 30 days. -->
+    <div id="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
+        <div class="max-w-sm w-full bg-[#0b132b] border-2 border-yellow-400 rounded-2xl p-5 space-y-3 text-center shadow-2xl">
+            <h2 id="age-gate-title" class="text-base font-black text-yellow-300">Are you 18 or older?</h2>
+            <p class="text-[12px] text-slate-200">Draw Buddy covers NY Lottery draw games. It is for adults 18 and older.</p>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" id="age-yes" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-lg text-sm">I'm 18 or older</button>
+                <button type="button" id="age-no" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm border border-slate-600">I'm under 18</button>
+            </div>
+            <p id="age-gate-no" class="text-[11px] text-rose-200" hidden>Sorry, Draw Buddy is only for adults 18 and older.</p>
+            <p class="text-[11px] font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
+            <p class="text-[10px] text-slate-400">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var KEY = 'draw_buddy_age_ok', DAYS = 30;
+            try { var t = Number(localStorage.getItem(KEY)); if (t && Date.now() - t < DAYS * 864e5) document.documentElement.classList.add('age-ok'); } catch (e) {}
+            document.getElementById('age-yes').onclick = function () { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} document.documentElement.classList.add('age-ok'); };
+            document.getElementById('age-no').onclick = function () { try { localStorage.removeItem(KEY); } catch (e) {} document.getElementById('age-gate-no').hidden = false; };
+        })();
+    </script>
+
     <!-- Header -->
     <header class="bg-[#0b132b] border-b border-[#1d4ed8] sticky top-0 z-50 shadow-xl">
         <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between gap-1.5">
@@ -81,11 +114,11 @@
 
             <!-- Header Controls: Share (+ QR), Tier Switcher, Sync -->
             <div class="flex items-center space-x-1 shrink-0 ml-auto">
-                <div class="flex items-stretch rounded border border-cyan-500/60 overflow-hidden shadow-[0_0_8px_rgba(34,211,238,0.35)]">
+                <div data-flag="shareQr" class="flex items-stretch rounded border border-cyan-500/60 overflow-hidden shadow-[0_0_8px_rgba(34,211,238,0.35)]">
                     <button type="button" id="share-btn" onclick="previewShare()" aria-label="Share Draw Buddy" class="text-[10px] bg-cyan-950 hover:bg-cyan-900 text-cyan-200 pl-1.5 pr-1.5 py-1 font-black whitespace-nowrap flex items-center gap-1"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6" fill="#22d3ee" stroke="none"/><circle cx="6" cy="12" r="2.6" fill="#facc15" stroke="none"/><circle cx="18" cy="19" r="2.6" fill="#22d3ee" stroke="none"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg><span>Share</span></button>
                     <button type="button" id="share-qr-btn" onclick="openInviteModal()" aria-label="Show QR code" class="bg-cyan-950 hover:bg-cyan-900 text-cyan-300 px-1 border-l border-cyan-500/40 flex items-center"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="currentColor"><path d="M3 3h7v7H3zm2 2v3h3V5zm9-2h7v7h-7zm2 2v3h3V5zM3 14h7v7H3zm2 2v3h3v-3zm9-2h3v3h-3zm4 0h3v3h-3zm-4 4h3v3h-3zm4 0h3v3h-3z"/></svg></button>
                 </div>
-                <select id="dev-tier-switcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
+                <select id="dev-tier-switcher" data-flag="tierSwitcher" onchange="switchTestTier(this.value)" class="text-[9px] bg-[#111c38] text-yellow-400 border border-yellow-500/40 px-1.5 py-1 rounded font-bold focus:outline-none">
                     <option value="free">Free</option>
                     <option value="pro">Pro</option>
                 </select>
@@ -223,6 +256,12 @@
 
     <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
+        <!-- Required lines on every game screen (Ralph standing copy) -->
+        <div id="house-lines" class="text-center text-[9px] leading-snug space-y-0.5 bg-[#050814] border border-slate-800 rounded-lg px-2 py-1.5">
+            <p class="font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
+            <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
+        </div>
+
         <!-- PREVIEW: all other NY draw games (js/drawgames-ui.js). Hidden on Quick Draw. -->
         <section id="dg-panel" class="space-y-4" aria-label="Draw game" hidden></section>
 
@@ -232,10 +271,10 @@
                 <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">🎟️ Ticket Generator</h2>
             </div>
 
-            <!-- 🤖 Auto Picks: one window, every auto button works the same (fills settings + numbers, shows the one Your Ticket panel) -->
+            <!-- Auto Picks: one window, every auto button works the same (fills settings + numbers, shows the one Your Ticket panel) -->
             <div id="four-picks-panel" class="space-y-1.5 border border-cyan-700/50 rounded-xl p-2 bg-[#0b132b]">
                 <div class="flex items-center justify-between gap-2">
-                    <h3 class="text-[11px] uppercase tracking-wider text-cyan-300 font-black">🤖 Auto Picks</h3>
+                    <h3 class="text-[11px] uppercase tracking-wider text-cyan-300 font-black">Auto Picks</h3>
                 </div>
                 <div id="auto-grid" class="grid grid-cols-2 gap-1.5">
                     <button type="button" data-auto="hits" data-mode="hits" onclick="previewRunButton('hits')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-cyan-700">🎯 Hits Pick</button>
@@ -259,7 +298,7 @@
                 </div>
                 <p id="all-picks-note" class="text-[9px] text-slate-400"></p>
                 <div id="all-picks-results" class="space-y-2"></div>
-                <p class="text-[9px] text-slate-500">Timing is an estimate, not a forecast. Past results don't change the next draw's odds. Nothing is logged until you tap 📥 Log Ticket in Your Ticket.</p>
+                <p class="text-[9px] text-slate-500">Timing is an estimate, not a forecast. Past results don't predict future draws. Every draw is independent. Nothing is logged until you tap 📥 Log Ticket in Your Ticket.</p>
             </div>
             <div id="play-card-closed" class="text-[10px] text-emerald-300 bg-emerald-950/40 border border-emerald-600/50 rounded-lg p-2" hidden></div>
             <!-- 🎟️ Your Ticket (was Optimal Numbers to Play; moved back inside the Ticket Generator) -- Actionable Play Card with Lotto.com Integration & Scanner Upload -->
@@ -286,8 +325,8 @@
                     </div>
                 </div>
 
-                <!-- Lotto.com Courier Quick-Purchase Action Bar -->
-                <div class="bg-gradient-to-r from-emerald-950/80 to-green-950/80 p-3 rounded-lg border border-emerald-500/60 flex items-center justify-between">
+                <!-- HOLD (Ralph 2026-11-16, Gate 0): Lotto.com courier bar, behind the partnerLinks flag (off everywhere) -->
+                <div data-flag="partnerLinks" class="bg-gradient-to-r from-emerald-950/80 to-green-950/80 p-3 rounded-lg border border-emerald-500/60 flex items-center justify-between">
                     <div>
                         <div class="text-xs font-black text-emerald-300">🎟️ Ready to Play? Order Online via Lotto.com</div>
                         <div class="text-[10px] text-slate-300">Order official NY draw game tickets through a lottery courier</div>
@@ -445,7 +484,7 @@
                     <div class="overflow-x-auto"><table class="w-full text-[10px] font-mono">
                         <thead><tr class="text-blue-300 text-left"><th class="p-1">Draw</th><th class="p-1">Time (ET)</th><th class="p-1">Hits</th><th class="p-1">Prize per $1</th></tr></thead>
                         <tbody id="own-results-body"></tbody></table></div>
-                    <p class="text-[9px] text-slate-500">Official paytable, real NY Lottery draws. Past results don't change the odds of the next draw; each draw is independent.</p>
+                    <p class="text-[9px] text-slate-500">Official paytable, real NY Lottery draws. Past results don't predict future draws. Every draw is independent.</p>
                 </div>
                 </div>
             </section>
@@ -583,7 +622,7 @@
             </div>
         </div>
 
-        <!-- 🔥 Interactive Heatmap with Restored Deep-Dive Inspector: hidden by default; opens as a sheet when a ticket number is tapped -->
+        <!-- Interactive number-frequency map with Restored Deep-Dive Inspector: hidden by default; opens as a sheet when a ticket number is tapped -->
         <div id="heatmap-sheet" onclick="if (event.target === this) previewHeatClose()" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;z-index:70;background:rgba(0,0,0,.7);-webkit-overflow-scrolling:touch;overflow-y:auto">
         <div id="heatmap-panel" class="bg-[#0b132b] px-4 pb-4 pt-0 rounded-t-2xl border-2 border-yellow-400 shadow-2xl space-y-3 max-w-md mx-auto" style="margin-top:14vh;min-height:86vh">
             <div class="flex justify-between items-center gap-2 bg-[#0b132b] -mx-4 px-4 py-2 border-b border-yellow-500/40" style="position:-webkit-sticky;position:sticky;top:0;z-index:5">
@@ -591,16 +630,16 @@
                 <button type="button" onclick="previewHeatClose()" class="bg-[#050814] border border-yellow-500 text-yellow-300 font-black text-xs px-3 py-1.5 rounded-lg">✕ Close</button>
             </div>
             <div class="flex justify-between items-center">
-                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">🔥 Hot Number Heatmap (Tap to Inspect)</h2>
+                <h2 id="heatmap-title" class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Number Frequency (Tap to Inspect)</h2>
                 <div class="flex items-center space-x-2 text-[10px]">
-                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Hot</span>
-                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Med</span>
-                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Cold</span>
+                    <span class="text-red-400 font-bold flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full inline-block mr-1"></span>Most drawn</span>
+                    <span class="text-yellow-400 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full inline-block mr-1"></span>Average</span>
+                    <span class="text-blue-400 flex items-center"><span class="w-2 h-2 bg-blue-600 rounded-full inline-block mr-1"></span>Least drawn</span>
                 </div>
             </div>
 
             <!-- Free Locked Heatmap Banner Preview -->
-            <div id="heatmap-locked-banner" class="bg-gradient-to-r from-amber-950/80 to-yellow-950/80 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5 hidden">
+            <div id="heatmap-locked-banner" data-flag="pricing" class="bg-gradient-to-r from-amber-950/80 to-yellow-950/80 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5 hidden">
                 <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap & Quantum Deep-Dive Locked</div>
                 <p class="text-[10px] text-blue-300">Upgrade to Pro ($9.99) to unlock Markov transition picks, Kelly sizing, and Monte Carlo simulations.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1 px-3 rounded text-[10px] transition">
@@ -727,8 +766,8 @@
                 <div class="text-[9px] text-blue-400/70 text-center italic">Ranks your own logged slips at this venue by net result, graded on real draws. Nothing is shared.</div>
             </div>
 
-            <!-- Lotto.com Courier Quick-Access Button in Venue Hub -->
-            <div class="bg-[#050814] p-3 rounded-lg border border-emerald-500/40 flex items-center justify-between">
+            <!-- HOLD (Ralph 2026-11-16, Gate 0): Lotto.com button in the venue hub, behind the partnerLinks flag -->
+            <div data-flag="partnerLinks" class="bg-[#050814] p-3 rounded-lg border border-emerald-500/40 flex items-center justify-between">
                 <div>
                     <div class="text-xs font-black text-emerald-400">🎟️ Order Official NY Draw Tickets Online</div>
                     <div class="text-[10px] text-blue-300">Play Quick Draw, Powerball & Mega Millions via Lotto.com</div>
@@ -773,7 +812,7 @@
         </div>
 
         <!-- Lifetime Pro Pass & Venue B2B Subscription Section (Visible in Free Mode) -->
-        <div id="subscription-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
+        <div id="subscription-card" data-flag="pricing" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">💎 Unlock Access & Venue Referral Network</h2>
             <div class="space-y-3">
                 <div class="bg-[#050814] p-3.5 rounded-lg border border-yellow-500/30 space-y-2">
@@ -800,8 +839,8 @@
             </div>
         </div>
 
-        <!-- 🎯 More Fun at Your Fingertips (Lotto.com Pinned First) -->
-        <div class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
+        <!-- HOLD (Ralph 2026-11-16, Gate 0): Partner Apps & Sports Betting block (Lotto.com, sportsbooks, affiliate refs), behind the partnerLinks flag -->
+        <div data-flag="partnerLinks" class="bg-[#0b132b] p-4 rounded-xl border border-blue-500/40 shadow-xl space-y-3">
             <h2 class="text-xs uppercase tracking-wider text-cyan-400 font-semibold">🌐 Partner Apps & Sports Betting Utilities</h2>
             <div class="grid grid-cols-3 gap-2">
                 <a href="https://www.lotto.com/?ref=draw_buddy_stripe" target="_blank" rel="sponsored noopener" class="bg-[#050814] hover:bg-[#111c38] text-emerald-400 border border-emerald-500/40 p-2.5 rounded-lg font-bold text-xs text-center transition flex flex-col items-center justify-center">
@@ -843,16 +882,19 @@
                     <span class="text-[8px] text-blue-300 font-normal mt-0.5">Official site · not a partner</span>
                 </a>
             </div>
-            <p class="text-[9px] text-slate-400 leading-snug"><strong class="text-slate-300">Partner links:</strong> Draw Buddy may earn a commission if you sign up or order through links marked “Partner link”. It doesn't change what you pay. Sportsbook links: 21+ and physically in an eligible state. Lottery courier links: 18+ in NY. Gambling problem? Call or text 1-877-8-HOPENY (467369).</p>
+            <p class="text-[9px] text-slate-400 leading-snug"><strong class="text-slate-300">Partner links:</strong> Draw Buddy may earn a commission if you sign up or order through links marked “Partner link”. It doesn't change what you pay. Sportsbook links: 21+ and physically in an eligible state. Lottery courier links: 18+ in NY. 18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
         </div>
 
         <!-- ⚖️ Fine Print Disclaimer Footer & Responsible Gaming Support -->
         <footer class="text-center text-[10px] text-slate-500 px-2 py-4 space-y-2">
             <p><strong>Disclaimer:</strong> Draw Buddy is an analytical statistical modeling and entertainment tool designed for exploring probability distributions and mathematical probability sets. This app does not promote or endorse problem gambling. All odds, lookback weights, and simulation calculations are for mathematical entertainment and educational analysis only. Play responsibly.</p>
-            <div class="bg-[#050814] p-2.5 rounded-lg border border-yellow-500/30 text-[10px] text-yellow-300">
-                Need support with gambling concerns? Connect with <a href="https://www.gamblersanonymous.org" target="_blank" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a> for free, confidential resources.
+            <div id="footer-house-lines" class="bg-[#050814] p-2.5 rounded-lg border border-yellow-500/30 text-[10px] space-y-1">
+                <p class="font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
+                <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
+                <p class="text-slate-400">Official results and prizes: <a href="https://nylottery.ny.gov" target="_blank" rel="noopener" class="underline text-cyan-300">nylottery.ny.gov</a> (official site, not a partner). Draw data: data.ny.gov.</p>
             </div>
-            <p>© 2026 Draw Buddy Analytics. All rights reserved.</p>
+            <p>© 2026 <span class="entity-name">NAV Analytics LLC</span>. All rights reserved.</p>
+            <script>try { document.querySelectorAll('.entity-name').forEach(function (el) { if (window.DB_COPY && DB_COPY.ENTITY) el.textContent = DB_COPY.ENTITY; }); } catch (e) {}</script>
         </footer>
 
     </main>
@@ -1909,6 +1951,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             }
         }
         async function previewShare(fromSheet) {
+            if (window.DB_FLAGS && !DB_FLAGS.shareQr) return; // Share/QR is behind a flag (off on the preview and public builds)
             const data = { title: 'Draw Buddy', text: 'Draw Buddy: a Quick Draw companion for game night.', url: previewShareUrl() };
             if (navigator.share) {
                 try { await navigator.share(data); return; }
@@ -1917,6 +1960,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             await previewCopyLink();
         }
         function openInviteModal() {
+            if (window.DB_FLAGS && !DB_FLAGS.shareQr) return;
             const modal = document.getElementById('invite-modal'); if (!modal) return;
             const url = previewShareUrl(), box = document.getElementById('invite-qr'), u = document.getElementById('invite-url');
             if (u) u.textContent = url;
@@ -1973,7 +2017,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 bestWager = "2";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🔥 Tight 3-Number Surge (${(top3Avg20 / 20 * 100).toFixed(0)}% hit rate in 20 draws) → Locked 3-Spot`;
+                diagSummary = `Tight 3-Number Surge (${(top3Avg20 / 20 * 100).toFixed(0)}% hit rate in 20 draws) → Locked 3-Spot`;
             } else if (top4Avg50 >= 18.0) {
                 bestSpot = "4";
                 bestLookback = "50";
@@ -2490,7 +2534,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if(engineModeEl) engineModeEl.innerText = cfg.name.replace(/^NY /, ''); // one line keeps the sticky top compact
 
             const hmTitle = document.getElementById('heatmap-title');
-            if(hmTitle) hmTitle.innerText = "🔥 Hot Number Heatmap (Tap to Inspect)";
+            if(hmTitle) hmTitle.innerText = "📊 Number Frequency (Tap to Inspect)";
 
             const configTitle = document.getElementById('config-panel-title');
             if(configTitle) configTitle.innerText = `🎟️ Ticket Generator`;
@@ -2510,7 +2554,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                         <option value="50">50</option>
                         <option value="100" selected>100</option>
                     `;
-                    document.getElementById('multiplier-label').innerText = "Power Play / Megaplier";
+                    document.getElementById('multiplier-label').innerText = "Power Play";
                 }
             }
 
@@ -2592,7 +2636,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
 
         function checkProStatus() {
-            activeTier = localStorage.getItem('draw_buddy_active_tier') || 'pro'; // PREVIEW: Pro by default on this new address (was 'free')
+            // PREVIEW: Pro by default. With the Free/Pro switcher flagged off, always Pro so no upgrade price wall shows (nothing is charged).
+            activeTier = (window.DB_FLAGS && !DB_FLAGS.tierSwitcher) ? 'pro' : (localStorage.getItem('draw_buddy_active_tier') || 'pro');
             const switcher = document.getElementById('dev-tier-switcher');
             if(switcher) switcher.value = activeTier;
 

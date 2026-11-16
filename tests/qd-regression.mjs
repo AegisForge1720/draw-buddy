@@ -6,6 +6,7 @@ const { chromium } = require("playwright-core");
 const url = process.argv[2] || "http://127.0.0.1:8881/";
 const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--no-sandbox"] });
 const c = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true, httpCredentials: { username: "andrew", password: process.env.PREVIEW_PASS } });
+await c.addInitScript(() => { try { localStorage.setItem("draw_buddy_age_ok", String(Date.now())); } catch (e) {} });
 const p = await c.newPage(); p.setDefaultTimeout(30000);
 const errors = []; p.on("pageerror", e => errors.push(String(e).slice(0, 200)));
 p.on("console", m => { if (m.type() === "error" && !/404|Failed to load resource/.test(m.text())) errors.push(m.text().slice(0, 200)); });

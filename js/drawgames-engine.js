@@ -15,64 +15,64 @@
       bonus: { name: 'Powerball', max: 26, picked: true },
       price: 2, priceNote: '$2 per play',
       options: [
-        { key: 'powerplay', label: 'Power Play', cost: 1, note: 'Multiplies non-jackpot prizes 2X–10X (10X only when the jackpot is under $150 million). Match 5 becomes $2 million.' },
-        { key: 'doubleplay', label: 'Double Play', cost: 1, note: 'Same numbers in a second drawing about 30 minutes later; $10 million top prize. NY since June 2, 2026. Double Play results are not in the data.ny.gov feed, so Draw Buddy has no Double Play history.' }
+        { key: 'powerplay', label: 'Power Play', cost: 1, note: 'Multiplies non-jackpot prizes 2X–10X (10X only when the advertised jackpot is $150 million or less). Match 5 becomes $2 million. Draw Buddy\'s fixed-prize return with Power Play assumes the multiplier table where 10X is available.' },
+        { key: 'doubleplay', label: 'Double Play', cost: 1, note: 'Same numbers in a second drawing about 30 minutes later; $10 million top prize. NY since June 2, 2026. Double Play prizes are not multiplied by Power Play. Double Play results are not in the data.ny.gov feed, so Draw Buddy has no Double Play history and does not grade Double Play.' }
       ],
       schedule: [{ session: 'main', label: 'Mon/Wed/Sat 10:59 PM ET', days: [1, 3, 6], h: 22, m: 59, close: '10:00 PM ET' }],
-      maxDraws: 10, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
+      maxDraws: 10, official: { n: 39, unit: 'draws', src: 'nylottery.ny.gov Powerball Multi-Draw (up to 39 consecutive draws)' }, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 50000, '4': 100, '3b': 100, '3': 7, '2b': 7, '1b': 4, '0b': 4 },
       ppPrizes: { '5': 2000000 }, // Power Play: match 5 is a flat $2 million; other non-jackpot prizes × multiplier
       dpPrizes: { '5b': 10000000, '5': 500000, '4b': 50000, '4': 500, '3b': 500, '3': 20, '2b': 20, '1b': 10, '0b': 7 },
       // Power Play multiplier odds when 10X is available (official chart). History multipliers come from data.ny.gov.
       ppOdds: [[2, 1 / 1.79], [3, 1 / 3.31], [4, 1 / 14.33], [5, 1 / 21.5], [10, 1 / 43]],
-      source: 'NY Lottery Powerball rules and prize chart; draws: data.ny.gov d6yy-54nr'
+      source: 'nylottery.ny.gov Powerball page and 9 NYCRR 5007.13; draws: data.ny.gov d6yy-54nr'
     },
     megamillions: {
       key: 'megamillions', name: 'Mega Millions', kind: 'lotto', pick: 5, max: 70, drawn: 5,
       bonus: { name: 'Mega Ball', max: 24, picked: true },
-      price: 5, priceNote: '$5 per play (every ticket has a built-in 2X–10X multiplier; no Megaplier since Apr 8, 2025)',
+      price: 5, priceNote: '$5 per play (every play has a built-in 2X–10X multiplier, assigned at purchase)',
       options: [],
       schedule: [{ session: 'main', label: 'Tue/Fri 11:00 PM ET', days: [2, 5], h: 23, m: 0, close: '10:00 PM ET' }],
-      maxDraws: 10, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'nylottery.ny.gov Mega Millions Multi-Draw (up to 26 consecutive draws)' }, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 10000, '4': 500, '3b': 200, '3': 10, '2b': 10, '1b': 7, '0b': 5 },
       multOdds: [[2, 1 / 2.13], [3, 1 / 3.2], [4, 1 / 8], [5, 1 / 16], [10, 1 / 32]], builtInMultiplier: true,
-      source: 'Mega Millions rules (Apr 8, 2025 change) and NY prize chart; draws: data.ny.gov 5xaw-6ayf'
+      source: 'nylottery.ny.gov Mega Millions page, megamillions.com (Apr 8, 2025 matrix) and 9 NYCRR 5007.7; draws: data.ny.gov 5xaw-6ayf'
     },
     millionaire: {
       key: 'millionaire', name: 'Millionaire for Life', kind: 'lotto', pick: 5, max: 58, drawn: 5,
       bonus: { name: 'Millionaire Ball', max: 5, picked: true },
       price: 5, priceNote: '$5 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 11:15 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 23, m: 15, close: '10:15 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
+      maxDraws: 10, official: { n: 28, unit: 'draws', src: 'nylottery.ny.gov Millionaire for Life Multi-Draw (up to 28 consecutive draws)' }, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
       prizes: { '5b': '$1M a year for life', '5': '$100K a year for life', '4b': 7500, '4': 500, '3b': 250, '3': 50, '2b': 25, '2': 8, '1b': 8 },
-      source: 'NYS Gaming Commission (Feb 12, 2026) prize chart; draws: data.ny.gov a4w9-a3tp'
+      source: 'gaming.ny.gov (Feb 12, 2026) prize chart and nylottery.ny.gov Millionaire for Life page; draws: data.ny.gov a4w9-a3tp'
     },
     nylotto: {
       key: 'nylotto', name: 'NY Lotto', kind: 'lotto', pick: 6, max: 59, drawn: 6,
       bonus: { name: 'Bonus', max: 59, picked: false }, // drawn from the remaining 53; only counts with 5 matches
       price: 0.5, minPlays: 2, priceNote: '$1 for two plays (minimum two)', options: [],
       schedule: [{ session: 'main', label: 'Wed/Sat 8:15 PM ET', days: [3, 6], h: 20, m: 15, close: '8:00 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'nylottery.ny.gov Lotto Multi-Draw (up to 26 consecutive draws)' }, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
       prizes: { '6': 'Jackpot (pari-mutuel)', '5b': '2nd prize (pari-mutuel)', '5': '3rd prize (pari-mutuel)', '4': '4th prize (pari-mutuel)', '3': 1 },
-      source: 'NY Lottery Lotto rules; draws: data.ny.gov 6nbc-h7bj'
+      source: 'nylottery.ny.gov Lotto page and 9 NYCRR Part 5008; draws: data.ny.gov 6nbc-h7bj'
     },
     take5: {
       key: 'take5', name: 'Take 5', kind: 'lotto', pick: 5, max: 39, drawn: 5, bonus: null,
       price: 1, priceNote: '$1 per play', options: [],
       schedule: [
-        { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:20 PM ET' },
+        { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
+      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'NY Lottery how-to; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
       prizes: { '5': 'Top prize (pari-mutuel)', '4': 'pari-mutuel', '3': 'pari-mutuel', '2': 'Free Quick Pick' },
-      source: 'NY Lottery Take 5 rules; draws: data.ny.gov dg63-4siq'
+      source: 'nylottery.ny.gov Take 5 page; draws: data.ny.gov dg63-4siq'
     },
     pick10: {
       key: 'pick10', name: 'Pick 10', kind: 'keno', pick: 10, max: 80, drawn: 20, bonus: null,
       price: 1, priceNote: '$1 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 8:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 20, m: 30, close: '8:00 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
+      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'nylottery.ny.gov Pick 10 Multi-Draw (up to 7 consecutive draws, one a day)' }, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
       prizes: { '10': 500000, '9': 6000, '8': 300, '7': 40, '6': 10, '0': 4 },
-      source: 'NY Lottery Pick 10 prize chart; draws: data.ny.gov bycu-cw7c'
+      source: 'nylottery.ny.gov Pick 10 page and 9 NYCRR 5011.2; draws: data.ny.gov bycu-cw7c'
     },
     numbers: {
       key: 'numbers', name: 'Numbers', kind: 'digits', digits: 3, bonus: null,
@@ -80,8 +80,8 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
-      source: 'NY Lottery Numbers prize chart; draws: data.ny.gov hsys-3def'
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'NY Lottery how-to, Midday, Evening or both; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
+      source: 'nylottery.ny.gov Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
     },
     win4: {
       key: 'win4', name: 'Win 4', kind: 'digits', digits: 4, bonus: null,
@@ -89,8 +89,8 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
-      source: 'NY Lottery Win 4 prize chart; draws: data.ny.gov hsys-3def'
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'NY Lottery how-to, Midday, Evening or both; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
+      source: 'nylottery.ny.gov Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
     }
   };
   const ORDER = ['powerball', 'megamillions', 'millionaire', 'nylotto', 'take5', 'pick10', 'numbers', 'win4'];
@@ -100,7 +100,9 @@
   // ways = number of distinct orderings of the chosen digits.
   function digitWays(ds) { const c = {}; ds.forEach(d => c[d] = (c[d] || 0) + 1); let f = 1; for (let i = 2; i <= ds.length; i++) f *= i; Object.values(c).forEach(v => { for (let i = 2; i <= v; i++) f /= i; }); return f; }
   const NUM_BOX = { 3: 160, 6: 80 }, NUM_SB = { 3: [330, 80], 6: [290, 40] };
-  const W4_BOX = { 4: 1198, 6: 800, 12: 400, 24: 200 }, W4_SB = { 4: [3099, 599], 6: [2900, 400], 12: [2700, 200], 24: [2600, 100] };
+  // Win 4 4-way Box: $1,200 ($600 at 50¢) and Straight/4-way Box $3,100 / $600, per nylottery.ny.gov Win 4 odds and prizes
+  // (read Nov 16, 2026) and 9 NYCRR 5010.2. The $1,198 figure seen on third-party sites is not on the official page.
+  const W4_BOX = { 4: 1200, 6: 800, 12: 400, 24: 200 }, W4_SB = { 4: [3100, 600], 6: [2900, 400], 12: [2700, 200], 24: [2600, 100] };
   // Returns { cost, prizeOn(drawnDigits) , pWin, label } for a $1 or 50¢ play.
   function digitPlay(game, type, ds, wager) {
     const n = game === 'numbers' ? 3 : 4, straightTop = n === 3 ? 500 : 5000, w = wager === 0.5 ? 0.5 : 1, ways = digitWays(ds), space = Math.pow(10, n);
@@ -209,14 +211,20 @@
     let v = g.prizes[key];
     if (v === undefined && g.kind !== 'keno' && bHit && g.prizes[String(h)] !== undefined && !(g.bonus && g.bonus.picked)) v = g.prizes[String(h)];
     let cash = typeof v === 'number' ? v : 0, label = typeof v === 'string' ? v : null;
-    if (g.builtInMultiplier && cash) cash *= (row.mult || 1);
+    // Mega Millions: the 2X–10X multiplier is assigned to each play at purchase and printed on the ticket; it is not drawn,
+  // and the feed has no per-ticket multiplier. Past results are graded at base prizes only (never one draw-level multiplier).
     if (opts.powerplay && cash && g.key === 'powerball') cash = (g.ppPrizes[key] || cash * (row.mult || 1));
     return { h, bHit, key, cash, label, won: cash > 0 || !!label };
   }
 
+  // App limit for 'draws in a row' (never above the official multi-draw limit). Numbers / Win 4: 7 when one session
+  // (Midday or Evening) is played = 7 days; 10 when both are played = 5 days.
+  function drawCap(g, session) { return (g.maxDrawsOneSession && session && session !== 'any') ? g.maxDrawsOneSession : g.maxDraws; }
+
   // ---------- Auto picks (4 buttons, same idea as Quick Draw: frequency windows chosen by backtest) ----------
   const MODE_NAMES = { hits: '🎯 Hits Pick', best: '⚖️ Best Spot Pick', one: '1️⃣ 1 Spot Pick', jackpot: '🏆 Jackpot Pick' };
-  function modeMeaning(g) {
+  function modeMeaning(g, features) {
+    const dpOK = !features || features.doublePlay !== false;
     if (g.kind === 'digits') return {
       hits: 'Straight play: per position, the digit most drawn in the backtested window',
       best: 'Play type with the best official return per $1, then digits by backtest',
@@ -227,10 +235,10 @@
     return {
       hits: `Most-drawn numbers in the window that backtested the most matches${b ? `; ${b} by its own backtest` : ''}`,
       best: g.options.length ? 'Options with the best official fixed-prize return per $1, numbers scored by backtested prizes'
-        : (g.prizes && Object.values(g.prizes).some(v => typeof v === 'number') ? 'Numbers scored by backtested fixed prizes (official chart)' : 'Numbers scored by how often the backtest won any prize tier'),
-      one: b ? `Built around one ball: the ${b} that backtested best (it can win alone${g.prizes['0b'] ? `, $${g.prizes['0b']}` : ''}); main numbers from the Hits ranking`
+        : (g.prizes && Object.values(g.prizes).some(v => typeof v === 'number') ? 'Numbers scored by backtested fixed prizes (official chart)' : 'Numbers scored by how often the backtest matched any prize tier'),
+      one: b ? `Built around one ball: the ${b} that backtested best${g.prizes['0b'] ? ` (a ${b}-only match is a $${g.prizes['0b']} prize tier)` : ''}; main numbers are the most overdue in the last 100 draws`
         : 'Built around the one number that backtested best; the rest are the most overdue numbers',
-      jackpot: `Scored for near-jackpot matches (${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} of ${g.pick})${g.key === 'powerball' ? ' + Double Play for a second $10M top prize' : ''}`
+      jackpot: `Scored for near-jackpot matches (${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} of ${g.pick})${g.key === 'powerball' && dpOK ? ' + Double Play for a second $10M top prize' : ''}`
     };
   }
   function lottoBacktest(g, rows, P, PB, scoreFn, fixedN, opts) {
@@ -265,18 +273,19 @@
     }
     return best;
   }
-  function pickLotto(g, rows, mode) {
+  function pickLotto(g, rows, mode, session, features) {
+    const dpOK = !features || features.doublePlay !== false; // Double Play is behind a feature flag in the UI
     if (!rows || rows.length < MIN_BT + 10) return { error: `Not enough official ${g.name} draws in the current format to backtest (${rows ? rows.length : 0} loaded; need ${MIN_BT + 10}).` };
     const P = prefix(rows, g.max), PB = g.bonus && g.bonus.picked ? prefixBonus(rows, g.bonus.max) : null;
     const opts = {}, why = [];
     // Options (only Powerball has paid add-ons in NY).
     if (g.key === 'powerball') {
-      const base = fixedReturn(g, {}), pp = fixedReturn(g, { powerplay: true }), dp = fixedReturn(g, { doubleplay: true }), both = fixedReturn(g, { powerplay: true, doubleplay: true });
+      const base = fixedReturn(g, {}), pp = fixedReturn(g, { powerplay: true }), dp = dpOK ? fixedReturn(g, { doubleplay: true }) : null, both = dpOK ? fixedReturn(g, { powerplay: true, doubleplay: true }) : null;
       if (mode === 'best') {
-        const c = [['none', base], ['powerplay', pp], ['doubleplay', dp], ['both', both]].sort((a, b) => b[1].perDollar - a[1].perDollar)[0];
+        const c = [['none', base], ['powerplay', pp], ['doubleplay', dp], ['both', both]].filter(x => x[1]).sort((a, b) => b[1].perDollar - a[1].perDollar)[0];
         if (c[0] === 'powerplay' || c[0] === 'both') opts.powerplay = true; if (c[0] === 'doubleplay' || c[0] === 'both') opts.doubleplay = true;
-        why.push(`Options: ${c[0] === 'none' ? 'none' : c[0] === 'both' ? 'Power Play + Double Play' : c[0] === 'powerplay' ? 'Power Play' : 'Double Play'}: best fixed-prize return per $1 (${(c[1].perDollar * 100).toFixed(1)}¢; plain $2 play ${(base.perDollar * 100).toFixed(1)}¢). Jackpots not counted.`);
-      } else if (mode === 'jackpot') { opts.doubleplay = true; why.push('Double Play on: a second drawing with a fixed $10 million top prize (+$1).'); }
+        why.push(`Options: ${c[0] === 'none' ? 'none' : c[0] === 'both' ? 'Power Play + Double Play' : c[0] === 'powerplay' ? 'Power Play' : 'Double Play'}: best fixed-prize return per $1 (${(c[1].perDollar * 100).toFixed(1)}¢; plain $2 play ${(base.perDollar * 100).toFixed(1)}¢). Jackpots not counted${opts.powerplay ? '; Power Play figured on the multiplier table where 10X is available' : ''}.`);
+      } else if (mode === 'jackpot' && dpOK) { opts.doubleplay = true; why.push('Double Play on: a second drawing with a fixed $10 million top prize (+$1).'); }
     }
     opts.cost = g.price * (g.minPlays || 1) + (opts.powerplay ? 1 : 0) + (opts.doubleplay ? 1 : 0);
     const fixedCash = Object.values(g.prizes).some(v => typeof v === 'number' && v > 1);
@@ -308,13 +317,13 @@
     }
     // Number of draws: consecutive newest backtest draws the window's pick beat the chance average (1 to maxDraws), same rule as Quick Draw's Games.
     let run = 0; while (run < bt.beat.length && bt.beat[run]) run++;
-    const draws = Math.max(1, Math.min(g.maxDraws, run));
+    const cap = drawCap(g, session), draws = Math.max(1, Math.min(cap, run));
     why.unshift(`Lookback: ${bt.N} draws (backtested windows ${WINDOWS[0]}–${WINDOWS[WINDOWS.length - 1]} on the newest ${bt.bt} official draws)`);
     why.push(mode === 'jackpot' ? `Backtest: ${bt.big} of ${bt.bt} draws had ${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} matches; avg ${bt.avgHits.toFixed(2)} matches vs ${bt.exp.toFixed(2)} by chance`
       : mode === 'best' && fixedCash ? `Backtest: $${bt.cashPer$.toFixed(2)} fixed prizes back per $1; a prize in ${(bt.prizeRate * 100).toFixed(0)}% of draws`
         : `Backtest: avg ${bt.avgHits.toFixed(2)} matches vs ${bt.exp.toFixed(2)} by chance; a prize in ${(bt.prizeRate * 100).toFixed(0)}% of draws`);
     if (PB && mode !== 'one') why.push(`${g.bonus.name} ${bonus}: most drawn in the last ${bb ? bb.N : bt.N} draws (backtest ${(bb ? bb.rate * 100 : 0).toFixed(0)}% vs ${(100 / g.bonus.max).toFixed(1)}% by chance)`);
-    why.push(run ? `Draws ${draws}: the pick beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (1–${g.maxDraws})` : 'Draws 1: the pick did not beat chance in the newest backtest draw');
+    why.push(run ? `Draws ${draws}: the pick beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: the pick did not beat chance in the newest backtest draw');
     const fr = fixedReturn(g, opts);
     return { mode, name: MODE_NAMES[mode], nums, bonus, opts: { powerplay: !!opts.powerplay, doubleplay: !!opts.doubleplay }, draws, lookback: bt.N, plays: g.minPlays || 1,
       costPerDraw: opts.cost, why, backtest: { N: bt.N, bt: bt.bt, avgHits: bt.avgHits, exp: bt.exp, prizeRate: bt.prizeRate, big: bt.big, cashPer$: bt.cashPer$ }, odds: fr };
@@ -324,7 +333,7 @@
   function digitPrefix(rows, n) { const P = []; for (let pos = 0; pos < n; pos++) { const a = [new Uint32Array(10)]; rows.forEach((r, i) => { const x = new Uint32Array(a[i]); x[r.nums[pos]]++; a.push(x); }); P.push(a); } return P; }
   function digitTop(P, pos, from, to) { const a = P[pos][to], b = P[pos][from]; let best = 0, bv = -1; for (let d = 0; d <= 9; d++) { const v = a[d] - b[d]; if (v > bv) { bv = v; best = d; } } return best; }
   function digitOverallTop(rows, from, to, k) { const c = new Array(10).fill(0); rows.slice(from, to).forEach(r => r.nums.forEach(d => c[d]++)); return c.map((v, d) => [d, v]).sort((x, y) => y[1] - x[1] || x[0] - y[0]).slice(0, k).map(x => x[0]); }
-  function pickDigits(gk, rows, mode, wager) {
+  function pickDigits(gk, rows, mode, wager, session) {
     const n = gk === 'numbers' ? 3 : 4, g = GAMES[gk]; wager = wager || 1;
     if (!rows || rows.length < MIN_BT + 10) return { error: `Not enough official ${g.name} draws to backtest.` };
     const P = digitPrefix(rows, n), bt = Math.min(BT, rows.length - 6), why = [];
@@ -350,7 +359,7 @@
     else if (mode === 'one') {
       const f = bestN('frontpair', r => r.winRate), b = bestN('backpair', r => r.winRate);
       chosen = (b && (!f || b.winRate > f.winRate + 1e-12)) ? b : f; type = chosen.type;
-      why.push(`${type === 'frontpair' ? 'Front' : 'Back'} Pair: 2 digits in order; backtest won ${(chosen.winRate * 100).toFixed(1)}% of ${chosen.bt} draws vs 1.0% by chance (Front ${(f.winRate * 100).toFixed(1)}%, Back ${(b.winRate * 100).toFixed(1)}%)`);
+      why.push(`${type === 'frontpair' ? 'Front' : 'Back'} Pair: 2 digits in order; backtest matched the pair on ${(chosen.winRate * 100).toFixed(1)}% of ${chosen.bt} draws vs 1.0% by chance (Front ${(f.winRate * 100).toFixed(1)}%, Back ${(b.winRate * 100).toFixed(1)}%)`);
     } else {
       // Best Spot: full-number play type (Straight, Box, Straight/Box, Combination) with the best official return per $1
       // (exact odds); a tie goes to the higher chance of winning. Pairs are the 1 Spot button. Then the digits are backtested.
@@ -363,10 +372,10 @@
     if (!chosen) return { error: 'Backtest unavailable.' };
     const ds = build(type, chosen.N, -1), pl = digitPlay(gk, type, ds, wager);
     let run = 0; while (run < chosen.beat.length && chosen.beat[run]) run++;
-    const draws = Math.max(1, Math.min(g.maxDraws, run));
+    const cap = drawCap(g, session), draws = Math.max(1, Math.min(cap, run));
     why.unshift(`Lookback: ${chosen.N} draws (backtested on the newest ${chosen.bt} official draws)`);
-    why.push(`Backtest: $${chosen.per$.toFixed(2)} back per $1; won ${(chosen.winRate * 100).toFixed(1)}% of draws`);
-    why.push(run ? `Draws ${draws}: beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (1–${g.maxDraws})` : 'Draws 1: did not beat chance in the newest backtest draw');
+    why.push(`Backtest: $${chosen.per$.toFixed(2)} in prize tiers per $1; a prize tier matched on ${(chosen.winRate * 100).toFixed(1)}% of draws`);
+    why.push(run ? `Draws ${draws}: beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: did not beat chance in the newest backtest draw');
     return { mode, name: MODE_NAMES[mode], digits: ds, playType: type, playLabel: pl.label, wager: pl.cost === 1 && type === 'straightbox' ? 1 : wager, costPerDraw: pl.cost, draws, lookback: chosen.N, why,
       odds: { pAny: pl.pWin, top: pl.top, perDollar: digitReturnPer$(gk, type, ds, wager) }, backtest: { N: chosen.N, bt: chosen.bt, per$: chosen.per$, winRate: chosen.winRate } };
   }
@@ -388,12 +397,12 @@
 
   // ---------- Ticket grading against real rows ----------
   function grade(g, t, row) {
-    if (g.kind === 'digits') { const pl = digitPlay(g.key, t.playType, t.digits, t.wager); if (!pl) return null; const cash = pl.prizeOn(row.nums); return { cash, won: cash > 0, text: cash ? `Won $${cash.toFixed(2)} (${pl.label})` : `No prize (${pl.label})` }; }
+    if (g.kind === 'digits') { const pl = digitPlay(g.key, t.playType, t.digits, t.wager); if (!pl) return null; const cash = pl.prizeOn(row.nums); return { cash, won: cash > 0, text: cash ? `Matches a prize tier of $${cash.toLocaleString('en-US', { minimumFractionDigits: cash % 1 ? 2 : 0, maximumFractionDigits: 2 })} (${pl.label}; Booster not included)` : `No prize tier (${pl.label})` }; }
     const pr = lottoPrize(g, t.nums, t.bonus, row, t.opts || {});
     const txt = `${pr.h} of ${g.pick}${pr.bHit ? ' + ' + (g.bonus ? g.bonus.name : 'Bonus') : ''}`;
-    return { ...pr, text: pr.label ? `${txt}: ${pr.label}` : pr.cash ? `${txt}: $${pr.cash.toLocaleString()}${g.builtInMultiplier && row.mult ? ` (incl. ${row.mult}X)` : ''}` : `${txt}: no prize` };
+    return { ...pr, text: pr.label ? `${txt}: matches the ${pr.label} tier` : pr.cash ? `${txt}: matches a prize tier of $${pr.cash.toLocaleString()}${g.builtInMultiplier ? ' (base prize; your ticket\'s printed 2X–10X multiplier applies)' : ''}` : `${txt}: no prize tier` };
   }
 
-  const api = { GAMES, ORDER, RETIRED, C, tierProb, fixedReturn, digitPlay, digitReturnPer$, digitWays, DIGIT_TYPES, prefix, topK, overdue, freq, lottoPrize, pickLotto, pickDigits, modeMeaning, MODE_NAMES, nextDraws, etParts, etToMs, grade, WINDOWS, BT };
+  const api = { drawCap, GAMES, ORDER, RETIRED, C, tierProb, fixedReturn, digitPlay, digitReturnPer$, digitWays, DIGIT_TYPES, prefix, topK, overdue, freq, lottoPrize, pickLotto, pickDigits, modeMeaning, MODE_NAMES, nextDraws, etParts, etToMs, grade, WINDOWS, BT };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.DGEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
