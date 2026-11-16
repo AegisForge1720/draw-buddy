@@ -959,11 +959,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let previewNewestRow = null;
         const PREVIEW_EXTRA = [[1, 32], [2, 34], [3, 5], [4, 5], [5, 3], [10, 1]]; // 9 NYCRR 5013.4 Extra odds weights
 
+        // Typical seconds from a Quick Draw's scheduled time to NY Lottery posting it (measured by the preview server;
+        // fallback = measured 2026-11-16 4:32-4:48 PM ET: posts ~10-20 s after the draw).
+        const PREVIEW_POST_LAG_DEFAULT_S = 20;
+        let previewPostLagS = PREVIEW_POST_LAG_DEFAULT_S;
         async function previewFetchRecent() {
             try {
                 const r = await fetch('/preview-api/quickdraw/recent', { cache: 'no-store' });
                 if (!r.ok) return previewRecentRows;
                 const body = await r.json();
+                if (Number.isFinite(Number(body.postLagSeconds)) && Number(body.postLagSamples) > 0) previewPostLagS = Math.round(Number(body.postLagSeconds));
                 return (body.draws || []).map(d => ({
                     draw_number: d.drawNumber, winning_numbers: d.numbers, listed_order: (Array.isArray(d.listedOrder) && d.listedOrder.length === 20) ? d.listedOrder : null, extra_multiplier: d.extra,
                     draw_date: d.drawDate, draw_at: new Date(d.drawAtEt).toISOString(),
@@ -3263,13 +3268,38 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const box = document.getElementById('balldrop');
             if (previewBdWaitDismissed === waitNum) return;
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
-            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; box.hidden = false; previewBdReveal('w' + waitNum);
+            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; previewBdWaitSlips = slips.length; box.hidden = false; previewBdReveal('w' + waitNum);
             ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
             document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${waitNum}`;
-            document.getElementById('bd-mini').innerText = `in play · ${slips.length} ticket${slips.length === 1 ? '' : 's'} · waiting for results`;
-            document.getElementById('bd-sub').innerText = `Your logged ticket is in play for draw #${waitNum}. The balls drop here as soon as NY Lottery posts this draw's numbers, usually 1–2 minutes after the draw. Checking every 10 seconds; keep this page open.`;
+            previewBdWaitText();
             const res = document.getElementById('bd-result'); if (res) res.innerText = '';
             setTimeout(previewBdFit, 0);
+        }
+        // Waiting copy with the draw's scheduled time and the measured posting delay (updated every second).
+        let previewBdWaitAt = null, previewBdWaitSlips = 0;
+        function previewBdMmss(sec) { sec = Math.max(0, Math.round(sec)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`; }
+        function previewBdWaitText() {
+            if (previewBdMode !== 'wait' || !previewBdWaitDraw) return;
+            const n = previewBdWaitDraw, at = previewBdWaitAt, now = Date.now(), lag = previewPostLagS;
+            const mini = document.getElementById('bd-mini'), sub = document.getElementById('bd-sub');
+            const tk = `${previewBdWaitSlips} ticket${previewBdWaitSlips === 1 ? '' : 's'}`;
+            if (!at) { mini.innerText = `in play · ${tk} · waiting for results`; sub.innerText = `Your logged ticket is in play for draw #${n}. The balls drop here as soon as NY Lottery posts this draw's numbers (usually about ${lag} s after the draw).`; return; }
+            const when = previewFmtEtShort(at);
+            if (now < at) {
+                mini.innerText = `in play · ${tk} · draw at ${when.replace(' ET', '')}`;
+                sub.innerText = `Your logged ticket is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). NY Lottery usually posts the numbers about ${lag} s after the draw; the balls drop here as soon as they're posted.`;
+            } else {
+                mini.innerText = `in play · ${tk} · waiting for NY Lottery`;
+                sub.innerText = `Draw #${n} was at ${when}. Waiting for NY Lottery to post draw #${n} (usually about ${lag} s; ${previewBdMmss((now - at) / 1000)} so far). Checking every 3 s; the balls drop as soon as it posts.`;
+            }
+        }
+        setInterval(() => { try { previewBdWaitText(); } catch (e) {} }, 1000);
+        // Scheduled time of a Quick Draw by number, counted from a posted draw along the official 4-minute schedule.
+        function previewBdSlotFor(num, fromRow) {
+            let slot = Math.round(Date.parse(fromRow.draw_at) / 60000) * 60000, k = Number(fromRow.draw_number), guard = 0;
+            if (!Number.isFinite(slot)) return null;
+            while (k < num && guard++ < 400) { const nx = previewNextSlotAfter(slot); if (!nx) return null; slot = nx; k++; }
+            return k === num ? slot : null;
         }
         async function previewBdCheck(force) {
             if (previewBdBusy) return;
@@ -3277,6 +3307,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (previewBdBusy) return;
             const newest = rows[0], newestNum = Number(newest.draw_number), np = previewNextPurchasable(0), nextNum = np ? np.number : newestNum + 1;
             const all = previewBdQdAll();
+            previewBdWaitAt = null;
             const box = document.getElementById('balldrop');
             // Newest posted draw any logged slip covers. Older draws count only if posted in the last 15 min
             // (e.g. the phone was locked through the draw), so old tickets don't replay on every visit.
@@ -3297,6 +3328,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const waiting = all.filter(t => (t.gradedDraws || []).length < (t.games || 1) && parseInt(t.endDraw || t.draw) > newestNum && parseInt(t.draw) <= nextNum);
             if (waiting.length) {
                 const waitNum = Math.max(newestNum + 1, Math.min(...waiting.map(t => parseInt(t.draw))));
+                previewBdWaitAt = previewBdSlotFor(waitNum, newest);
                 const showingResult = previewBdMode === 'qd' && !box.hidden;
                 if (!showingResult && !previewBdHold && previewBdMode !== 'jp') previewBdShowWaiting(waitNum, waiting.filter(t => previewBdCovers(t, waitNum)).length ? waiting.filter(t => previewBdCovers(t, waitNum)) : waiting);
                 else if (showingResult) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw #${waitNum} pending`; }
@@ -3321,7 +3353,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const mine = new Set(slips.flatMap(t => t.numbers.map(Number)));
             const when = row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) : '';
             document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${row.draw_number}`;
-            document.getElementById('bd-sub').innerText = `${when ? when + ' · ' : ''}Results from NY Lottery, about a minute after the draw${row.unofficial ? ' (unofficial until verified)' : ''}`;
+            document.getElementById('bd-sub').innerText = `${when ? when + ' · ' : ''}Results from NY Lottery, usually posted about ${previewPostLagS} s after the draw${row.unofficial ? ' (unofficial until verified)' : ''}`;
             const balls = document.getElementById('bd-balls'), res = document.getElementById('bd-result'); balls.innerHTML = ''; balls.hidden = true; res.innerText = '';
             // 1–80 grid: the slip's numbers are outlined; each ball lights its cell as the counter advances.
             const qd = document.getElementById('bd-qd'), grid = document.getElementById('bd-grid'); qd.hidden = false;
@@ -3457,7 +3489,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 } catch (e) {}
             }
         }
-        setInterval(() => { previewBdCheck(false); }, 10000);
+        // Check every 10 s; every 3 s once a waited-for draw's time has passed (until NY Lottery posts it).
+        function previewBdNextDelay() {
+            const now = Date.now();
+            if (previewBdWaitAt) {
+                if (now >= previewBdWaitAt) return 3000;
+                return Math.max(1000, Math.min(10000, previewBdWaitAt - now + 500));
+            }
+            return 10000;
+        }
+        (function previewBdLoop() { setTimeout(async () => { try { if (!document.hidden) await previewBdCheck(false); } catch (e) {} previewBdLoop(); }, previewBdNextDelay()); })();
         // Phones pause timers while locked or in another app: check right away when the page comes back.
         document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { previewBdCheck(false); } catch (e) {} } });
         window.addEventListener('pageshow', () => { try { previewBdCheck(false); } catch (e) {} });

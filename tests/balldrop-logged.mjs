@@ -44,9 +44,15 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   check("ball drop is an inline card in the page (not in the sticky header), under house lines, above Ticket Generator", !flow.inHeader && flow.inMain && flow.afterHouse && flow.beforeGen, JSON.stringify(flow));
   check("waiting card is on screen below the header", flow.top >= flow.headerBottom - 1 && flow.bottom <= flow.inner, JSON.stringify(flow));
   if (shotWait) await p.screenshot({ path: shotWait });
+  const tm = await p.evaluate(() => { const np = previewNextPurchasable(0); return { mini: document.getElementById('bd-mini').innerText, sub: document.getElementById('bd-sub').innerText, delay: previewBdNextDelay(), waitAt: previewBdWaitAt, lag: previewPostLagS,
+    header: document.getElementById('header-next-draw').innerText, np: np && np.number, cd: previewSecondsToNextDraw(), toSlot: np ? Math.round((np.slot - Date.now()) / 1000) : null, slotOk: np ? previewIsSlot(np.slot) : false }; });
+  check("waiting copy names the draw time and the measured posting delay; polls every 3 s once the draw time has passed", /waiting for NY Lottery/.test(tm.mini) && /usually about \d+ s/.test(tm.sub) && tm.delay === 3000 && tm.waitAt <= Date.now(), JSON.stringify(tm));
+  check("header next draw and countdown follow the 4-minute schedule", tm.header === `#${tm.np}` && tm.slotOk && Math.abs(tm.cd - tm.toSlot) <= 2, JSON.stringify(tm));
   state.hide = false;
-  await p.waitForTimeout(14000);
+  await p.waitForTimeout(5000);
   const d = await bd(p);
+  // pacing: 20 balls + Extra wheel finish well inside the 4-minute cycle
+  check("ball pacing: 20 balls in about 18 s", await p.evaluate(() => PREVIEW_BD_BALL_MS * 20 <= 30000 && PREVIEW_BD_BALL_MS * 20 >= 15000));
   check("ball drop starts by itself when the draw posts", !d.hidden && d.grid && d.title.includes(`#${newest}`) && /Ball \d+ of 20/.test(d.mini), JSON.stringify(d));
   await p.waitForTimeout(20000);
   if (shot) await p.screenshot({ path: shot });
