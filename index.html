@@ -102,6 +102,7 @@
             <p id="age-gate-no" class="text-[11px] text-rose-200" hidden>Sorry, Draw Buddy is only for adults 18 and older.</p>
             <p class="text-[11px] font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
             <p class="text-[10px] text-slate-400">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
+            <p class="text-[10px] text-slate-400"><a href="privacy.html" class="underline text-cyan-300">Privacy</a> · <a href="terms.html" class="underline text-cyan-300">Terms</a></p>
         </div>
     </div>
     <script>
@@ -294,7 +295,7 @@
                     <button type="button" data-auto="hits" data-mode="hits" onclick="previewRunButton('hits')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-cyan-700">🎯 Hits Pick</button>
                     <button type="button" data-auto="best" data-mode="best" onclick="previewRunButton('best')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-emerald-700">⚖️ Best Spot Pick</button>
                     <button type="button" data-auto="one" data-mode="one" onclick="previewRunButton('one')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-indigo-700">1️⃣ 1 Spot Pick</button>
-                    <button type="button" data-auto="jackpot" data-mode="jackpot" onclick="previewRunButton('jackpot')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-amber-600">🏆 Jackpot Pick</button>
+                    <button type="button" data-auto="jackpot" data-mode="jackpot" onclick="previewRunButton('jackpot')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-amber-600">🏆 Top-Tier Pick</button>
                     <button type="button" data-auto="cluster" onclick="previewRunButton('cluster')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-blue-700">⚡ Balanced Pick</button>
                     <button type="button" data-auto="markov" onclick="previewRunButton('markov')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-orange-700">🧬 Markov Pick</button>
                     <button type="button" data-auto="jackpot10" onclick="previewRunButton('jackpot10')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-amber-950 border-yellow-500/40">🏆 10 Spot Pick<span class="block text-[9px] font-normal opacity-80">$4/gm +Extra</span></button>
@@ -518,7 +519,7 @@
                     <div style="position:absolute;left:50%;top:-6px;margin-left:-8px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:16px solid #facc15;filter:drop-shadow(0 1px 1px #000)"></div>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <div id="xpred-head" class="text-[9px] uppercase text-yellow-300 font-bold">Next Extra pick</div>
+                    <div id="xpred-head" class="text-[9px] uppercase text-yellow-300 font-bold">Based on recent draws</div>
                     <div id="xpred-pick" class="text-3xl font-black text-yellow-300 leading-tight">—</div>
                     <div id="xpred-sub" class="text-[9px] text-slate-300">—</div>
                     <div class="text-[9px] uppercase text-blue-300 mt-1.5">Latest draw</div>
@@ -938,6 +939,7 @@
                 <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
                 <p class="text-slate-400">Official results and prizes: <a href="https://nylottery.ny.gov" target="_blank" rel="noopener" class="underline text-cyan-300">nylottery.ny.gov</a> (official site, not a partner). Draw data: data.ny.gov.</p>
             </div>
+            <p><a href="privacy.html" class="underline text-cyan-300">Privacy</a> · <a href="terms.html" class="underline text-cyan-300">Terms</a></p>
             <p>© 2026 <span class="entity-name">NAV Analytics LLC</span>. All rights reserved.</p>
             <script>try { document.querySelectorAll('.entity-name').forEach(function (el) { if (window.DB_COPY && DB_COPY.ENTITY) el.textContent = DB_COPY.ENTITY; }); } catch (e) {}</script>
         </footer>
@@ -1400,7 +1402,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         // (frequency, ties to the lower number) and scored against what was actually drawn.
         const PREVIEW_DAY_MS = 24 * 60 * 60 * 1000, PREVIEW_BT = 40, PREVIEW_MIN_N = 10;
         let previewDayRows = [], previewDayMeta = null, previewPickModes = [];
-        const PREVIEW_MODE_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Jackpot Pick'};
+        const PREVIEW_MODE_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Top-Tier Pick'};
         async function previewLoadDay() {
             const since = Date.now() - PREVIEW_DAY_MS;
             let stored = [];
@@ -1418,7 +1420,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             previewDayMeta = { have: rows.length, expected: slots, stored: stored.length, recent: recent.length, gaps, newest: rows[0] ? Number(rows[0].draw_number) : null, oldest: rows.length ? Number(rows[rows.length - 1].draw_number) : null };
             const cov = document.getElementById('four-picks-coverage');
             if (cov) cov.innerText = rows.length
-                ? `Last 24 h: ${rows.length} of ${slots} scheduled draws available (#${previewDayMeta.oldest}–#${previewDayMeta.newest}).` + (gaps.length ? ` Not posted yet: ${gaps.map(g => g[0] === g[1] ? '#' + g[0] : `#${g[0]}–#${g[1]}`).join(', ')}, so windows skip them.` : '')
+                ? `Recent posted draws: ${rows.length} of ${slots} scheduled draws available (#${previewDayMeta.oldest}–#${previewDayMeta.newest}).` + (gaps.length ? ` Not posted yet: ${gaps.map(g => g[0] === g[1] ? '#' + g[0] : `#${g[0]}–#${g[1]}`).join(', ')}, so windows skip them.` : '')
                 : 'Data unavailable: no draws from the last 24 hours.';
         }
         function previewChoose2(n, k) { return previewChoose(n, k); }
@@ -1715,7 +1717,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         // Andrew 2026-11-16: a 1X Extra result means no multiplier, so it reads "No Extra". 2X-10X stay as-is.
         function previewXLabel(m) { return Number(m) === 1 ? 'No Extra' : `${m}X`; }
-        function previewExtraLabel(xp) { return xp ? `Extra: ${xp.extraOn ? 'ON' : 'OFF'} · predicted ${previewXLabel(xp.pick)} (last ${xp.N} draws)` : 'Extra: OFF · Extra history unavailable'; }
+        function previewExtraLabel(xp) { return xp ? `Extra: ${xp.extraOn ? 'ON' : 'OFF'} · ${previewXLabel(xp.pick)} based on recent draws (last ${xp.N} draws)` : 'Extra: OFF · Extra history unavailable'; }
         function previewRenderExtra() {
             const panel = document.getElementById('extra-wheel-panel'); if (!panel) return;
             if (activeGameKey !== 'quickdraw') { panel.hidden = true; return; }
@@ -1740,7 +1742,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             lEl.innerText = previewXLabel(Number(latest.extra_multiplier));
             const t = latest.draw_at ? previewFmtEt(Date.parse(latest.draw_at)).replace(/:\d\d ET$/, ' ET') : '';
             meta.innerText = `Draw #${latest.draw_number}${t ? ' · ' + t : ''}${latest.unofficial ? ' · unofficial until verified' : ''} · Source: New York Lottery`;
-            document.getElementById('xpred-head').innerText = `Next Extra pick · last ${xp.N} draws`;
+            document.getElementById('xpred-head').innerText = `Based on recent draws · last ${xp.N} draws`;
             document.getElementById('xpred-pick').innerText = previewXLabel(xp.pick);
             document.getElementById('xpred-sub').innerText = `Most frequent in the ${xp.N} newest draws available (#${xp.oldest}–#${xp.newest})` + (xp.missing > 0 ? `. ${xp.missing} draws in that range aren't posted to this app yet${xp.gap ? ` (#${xp.gap.from}–#${xp.gap.to})` : ''}, so the window reaches further back` : '') + (xp.N < xp.asked ? ` (only ${xp.N} available)` : '');
             document.getElementById('xpred-rate').innerHTML = `<b class="text-yellow-200">${previewXLabel(xp.pick)}</b> came up ${xp.cnt[xp.pick]} of ${xp.N} (${(xp.rate * 100).toFixed(1)}%) vs official ${(xp.official * 100).toFixed(2)}%`;
@@ -1750,8 +1752,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             call.innerText = xp.extraOn ? `Auto picks: Extra ON (2X-or-more rate at or above the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)` : `Auto picks: Extra OFF (2X-or-more rate below the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)`;
             call.className = 'font-black ' + (xp.extraOn ? 'text-emerald-400' : 'text-rose-300');
             document.getElementById('xpred-dir').innerText = xp.dir.n
-                ? `Direction pick: ${xp.dir.pick ? (xp.dir.pick === 'L' ? '⟲ Left' : 'Right ⟳') : 'even'} · Left ${xp.dir.L} / Right ${xp.dir.R} from your logged spins in this window (n=${xp.dir.n})`
-                : 'Direction pick: log spins with Left / Right below to see one for this window (n=0)';
+                ? `Direction pick: ${xp.dir.pick ? (xp.dir.pick === 'L' ? '⟲ Left' : 'Right ⟳') : 'even'} · Left ${xp.dir.L} / Right ${xp.dir.R} from your logged spins in this window (n=${xp.dir.n}) · For fun, not a prediction.`
+                : 'Direction pick: log spins with Left / Right below to see one for this window (n=0) · For fun, not a prediction.';
             // The pointer shows the pick. It spins when a new draw arrives or the pick changes.
             const num = Number(latest.draw_number);
             if (previewWheelDraw === null) previewSpinTo(xp.pick, false);
@@ -2134,7 +2136,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const avg = mk.hits.length ? mk.hits.reduce((a, b) => a + b, 0) / mk.hits.length : 0;
             const why = [
                 `Markov: after draw #${mk.lastDraw}, ${mk.top} followed those 20 numbers ${(mk.topP * 100).toFixed(1)}% of the time vs 25.0% base (${mk.used} consecutive draw pairs, smoothed)`,
-                `Backtest: avg ${avg.toFixed(2)} of 4 matched over ${mk.hits.length} draws vs 1.00 by chance (each predicted from the draw before it)`,
+                `Backtest: avg ${avg.toFixed(2)} of 4 matched over ${mk.hits.length} draws vs 1.00 by chance (each based on the draw before it)`,
                 previewKellyLine(kel),
                 'One step ahead: the model predicts the draw after #' + mk.lastDraw + '; later games reuse the same numbers'
             ];
@@ -3508,7 +3510,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         setInterval(() => { previewBdCheckJackpot(); }, 300000);
 
         // ===== PREVIEW: unified Auto Picks buttons =====
-        const PREVIEW_BTN_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Jackpot Pick', 'cluster': '⚡ Balanced Pick', 'markov': '🧬 Markov Pick', 'jackpot10': '🏆 10 Spot Pick'};
+        const PREVIEW_BTN_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Top-Tier Pick', 'cluster': '⚡ Balanced Pick', 'markov': '🧬 Markov Pick', 'jackpot10': '🏆 10 Spot Pick'};
         let previewSelectedButton = null, previewRerunning = false;
         function previewSetSelect(id, value, label) {
             const el = document.getElementById(id); if (!el) return;

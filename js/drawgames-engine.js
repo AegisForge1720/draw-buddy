@@ -62,7 +62,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both); checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
+      maxDraws: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both). App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
       prizes: { '5': 'Top prize (pari-mutuel)', '4': 'pari-mutuel', '3': 'pari-mutuel', '2': 'Free Quick Pick' },
       source: 'nylottery.ny.gov Take 5 page; draws: data.ny.gov dg63-4siq'
     },
@@ -80,7 +80,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance; checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
       source: 'nylottery.ny.gov Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
     },
     win4: {
@@ -89,7 +89,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance; checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
       source: 'nylottery.ny.gov Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
     }
   };
@@ -223,7 +223,7 @@
   function drawCap(g, session) { return (g.maxDrawsOneSession && session && session !== 'any') ? g.maxDrawsOneSession : g.maxDraws; }
 
   // ---------- Auto picks (4 buttons, same idea as Quick Draw: frequency windows chosen by backtest) ----------
-  const MODE_NAMES = { hits: '🎯 Hits Pick', best: '⚖️ Best Spot Pick', one: '1️⃣ 1 Spot Pick', jackpot: '🏆 Jackpot Pick' };
+  const MODE_NAMES = { hits: '🎯 Hits Pick', best: '⚖️ Best Spot Pick', one: '1️⃣ 1 Spot Pick', jackpot: '🏆 Top-Tier Pick' };
   function modeMeaning(g, features) {
     const dpOK = !features || features.doublePlay !== false;
     if (g.kind === 'digits') return {
@@ -237,8 +237,8 @@
       hits: `Most-drawn numbers in the window that backtested the most matches${b ? `; ${b} by its own backtest` : ''}`,
       best: g.options.length ? 'Options with the best official fixed-prize return per $1, numbers scored by backtested prizes'
         : (g.prizes && Object.values(g.prizes).some(v => typeof v === 'number') ? 'Numbers scored by backtested fixed prizes (official chart)' : 'Numbers scored by how often the backtest matched any prize tier'),
-      one: b ? `Built around one ball: the ${b} that backtested best${g.prizes['0b'] ? ` (a ${b}-only match is a $${g.prizes['0b']} prize tier)` : ''}; main numbers are the most overdue in the last 100 draws`
-        : 'Built around the one number that backtested best; the rest are the most overdue numbers',
+      one: b ? `Built around one ball: the ${b} that backtested best${g.prizes['0b'] ? ` (a ${b}-only match is a $${g.prizes['0b']} prize tier)` : ''}; main numbers are the longest since last drawn in the last 100 draws. A long gap does not make a number more likely.`
+        : 'Built around the one number that backtested best; the rest are the numbers longest since last drawn. A long gap does not make a number more likely.',
       jackpot: `Scored for near-jackpot matches (${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} of ${g.pick})${g.key === 'powerball' && dpOK ? ' + Double Play for a second $10M top prize' : ''}`
     };
   }
@@ -305,7 +305,7 @@
         const od = overdue(rows, 100, g.pick, 1, g.max, []);
         nums = od.nums;
         why.push(`1 Spot: ${g.bonus.name} ${bonus} is the one ball: most drawn ${g.bonus.name} in the last ${bb.N} draws (window chosen by backtest: right ${(bb.rate * 100).toFixed(0)}% of ${bb.bt} draws vs ${(100 / g.bonus.max).toFixed(1)}% by chance).`);
-        why.push(`Main numbers: the ${g.pick} most overdue in the last 100 draws (longest gaps: ${od.gaps.slice(0, 3).map(x => x + ' draws').join(', ')}…), so they don't repeat the Hits Pick.`);
+        why.push(`Main numbers: the ${g.pick} longest since last drawn in the last 100 draws (longest gaps: ${od.gaps.slice(0, 3).map(x => x + ' draws').join(', ')}…), so they don't repeat the Hits Pick. A long gap does not make a number more likely.`);
       } else {
         // The single number that backtested best: for each window, how often its #1 number was drawn next.
         let best = null; const btn = Math.min(BT, rows.length - 6);
@@ -313,7 +313,7 @@
         const anchor = topK(P, 0, best.N, 1, 1, g.max)[0];
         const od = overdue(rows, 100, g.pick - 1, 1, g.max, [anchor]);
         nums = [anchor].concat(od.nums).sort((a, b) => a - b);
-        why.push(`1 Spot: ${anchor} is the anchor: #1 in the last ${best.N} draws (backtest: drawn next ${(best.rate * 100).toFixed(0)}% of ${best.bt} draws vs ${(g.drawn / g.max * 100).toFixed(0)}% by chance). The other ${g.pick - 1}: most overdue in the last 100 draws (${od.nums.map((n, i) => `${n}: ${od.gaps[i]} draws ago`).slice(0, 3).join(', ')}…).`);
+        why.push(`1 Spot: ${anchor} is the anchor: #1 in the last ${best.N} draws (backtest: drawn next ${(best.rate * 100).toFixed(0)}% of ${best.bt} draws vs ${(g.drawn / g.max * 100).toFixed(0)}% by chance). The other ${g.pick - 1}: longest since last drawn in the last 100 draws (${od.nums.map((n, i) => `${n}: ${od.gaps[i]} draws ago`).slice(0, 3).join(', ')}…). A long gap does not make a number more likely.`);
       }
     }
     // Number of draws: consecutive newest backtest draws the window's pick beat the chance average (1 to maxDraws), same rule as Quick Draw's Games.

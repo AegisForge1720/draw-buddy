@@ -54,7 +54,7 @@ ok("Wagers offered match the official page/play slip (50c or $1)", ["numbers", "
 ok("Pick 10 and Take 5 capped at 7 draws", E.drawCap(E.GAMES.pick10, "main") === 7 && E.drawCap(E.GAMES.take5, "any") === 7);
 ok("Sources cite official sites, not nylottery.org", E.ORDER.every(k => !/nylottery\.org/i.test(E.GAMES[k].source) && /nylottery\.ny\.gov|gaming\.ny\.gov/.test(E.GAMES[k].source)));
 ok("Power Play note: 10X only at $150 million or less + table disclosure", /\$150 million or less/.test(E.GAMES.powerball.options[0].note) && /10X is available/.test(E.GAMES.powerball.options[0].note));
-ok("1 Spot subtitle matches the code (overdue main numbers)", ["powerball", "megamillions", "millionaire"].every(k => /most overdue/.test(E.modeMeaning(E.GAMES[k]).one) && !/Hits ranking|can win/.test(E.modeMeaning(E.GAMES[k]).one)));
+ok("1 Spot subtitle matches the code (longest-since-drawn main numbers)", ["powerball", "megamillions", "millionaire"].every(k => /longest since last drawn/.test(E.modeMeaning(E.GAMES[k]).one) && !/Hits ranking|can win/.test(E.modeMeaning(E.GAMES[k]).one)));
 ok("Double Play off: Jackpot Pick meaning has no Double Play", !/Double Play/.test(E.modeMeaning(E.GAMES.powerball, { doublePlay: false }).jackpot));
 const FL = require("../js/flags.js");
 ok("Flags: public build defaults are all off", Object.values(FL.PUBLIC_DEFAULTS).every(v => v === false) && FL.buildMode(null) === "public" && Object.values(FL.resolve(null)).every(v => v === false));

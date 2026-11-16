@@ -399,10 +399,10 @@
         hb.innerHTML = `<div class="text-[10px] font-bold text-red-300">${esc(g.bonus.name)} (last ${N} draws, chance average ${eb.toFixed(1)})</div><div class="grid gap-1" style="grid-template-columns:repeat(${Math.min(13, g.bonus.max)},minmax(0,1fr))">${Object.keys(fb).map(Number).map(n => `<div class="aspect-square rounded text-[9px] font-black flex flex-col items-center justify-center leading-none ${heatColor(fb[n], eb)}${state.pick && state.pick.bonus === n ? ' ring-2 ring-white' : ''}">${n}<span class="text-[7px] font-normal opacity-80">${fb[n]}</span></div>`).join('')}</div>`;
       } else hb.innerHTML = `<div class="text-[9px] text-slate-400">Number = times drawn in the last ${N} draws (chance average ${exp.toFixed(1)}). Red = well above average, blue = below.</div>`;
       const hot = Object.keys(f).map(Number).sort((a, b) => f[b] - f[a] || a - b).slice(0, 10), od = E.overdue(R, N, 10, 1, g.max);
-      hc.innerHTML = `<div><div class="font-bold text-orange-300">Most drawn (last ${N})</div>${hot.map(n => `${n} (${f[n]})`).join(' · ')}</div><div><div class="font-bold text-cyan-300">🧊 Overdue</div>${od.nums.map(n => `${n} (${od.gaps[od.nums.indexOf(n)] ?? ''})`).join(' · ')}</div>`;
+      hc.innerHTML = `<div><div class="font-bold text-orange-300">Most drawn (last ${N})</div>${hot.map(n => `${n} (${f[n]})`).join(' · ')}</div><div><div class="font-bold text-cyan-300">🧊 Longest since last drawn</div>${od.nums.map(n => `${n} (${od.gaps[od.nums.indexOf(n)] ?? ''})`).join(' · ')}</div>`;
       // overdue gaps are listed in gap order; show number with its gap
       const odPairs = (() => { const slice = R.slice(0, N); return od.nums.map(n => { const i = slice.findIndex(r => r.nums.includes(n)); return `${n} (${i < 0 ? N + '+' : i})`; }); })();
-      hc.lastElementChild.innerHTML = `<div class="font-bold text-cyan-300">🧊 Overdue (draws since seen)</div>${odPairs.join(' · ')}`;
+      hc.lastElementChild.innerHTML = `<div class="font-bold text-cyan-300">🧊 Longest since last drawn (draws since seen). A long gap does not make a number more likely.</div>${odPairs.join(' · ')}`;
     }
     // Backtest summary of all 4 buttons on the current data (honest: hindsight on real draws).
     const mp = modePicks() || {}, modes = ['hits', 'best', 'one', 'jackpot'].map(m => [m, mp[m] || { error: 'No official history loaded.' }]);
