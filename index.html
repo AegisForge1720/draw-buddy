@@ -183,9 +183,37 @@
                 </div>
             </div>
         </div>
-        <!-- PREVIEW: 🎱 Ball Drop (sticky, inside the header). Real NY Lottery results only; appears when a logged slip covers the current draws. -->
-        <div id="balldrop" class="max-w-md mx-auto px-3 pb-2" hidden>
-            <div class="bg-[#050814] border-2 border-yellow-400/80 rounded-xl p-3 shadow-2xl">
+    </header>
+
+    <!-- 📲 Share sheet: real QR of this page's link (made on this device) + copy link -->
+    <div id="invite-modal" onclick="if (event.target === this) closeInviteModal()" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-[#0b132b] border-2 border-cyan-400 rounded-2xl max-w-xs w-full p-5 space-y-3 shadow-[0_0_30px_rgba(56,189,248,0.3)] text-center">
+            <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
+                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6" fill="#22d3ee" stroke="none"/><circle cx="6" cy="12" r="2.6" fill="#facc15" stroke="none"/><circle cx="18" cy="19" r="2.6" fill="#22d3ee" stroke="none"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg> Share Draw Buddy</div>
+                <button onclick="closeInviteModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕</button>
+            </div>
+            <p class="text-[11px] text-blue-300">Have a friend at your table scan this to open Draw Buddy.</p>
+            <div id="invite-qr" class="bg-white p-3 rounded-xl inline-block shadow-lg mx-auto"></div>
+            <div id="invite-url" class="bg-[#050814] p-2 rounded border border-[#1d4ed8] text-[10px] font-mono text-yellow-300 break-all"></div>
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="previewCopyLink()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs">🔗 Copy link</button>
+                <button type="button" onclick="previewShare(true)" class="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded text-xs flex items-center justify-center gap-1"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6" fill="#22d3ee" stroke="none"/><circle cx="6" cy="12" r="2.6" fill="#facc15" stroke="none"/><circle cx="18" cy="19" r="2.6" fill="#22d3ee" stroke="none"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg> Share…</button>
+            </div>
+        </div>
+    </div>
+    <div id="share-toast" role="status" class="fixed left-1/2 bottom-6 z-[80] bg-[#050814] text-cyan-200 border border-cyan-500 rounded-full px-4 py-2 text-xs font-bold shadow-[0_0_16px_rgba(34,211,238,0.45)]" style="transform:translateX(-50%);-webkit-transform:translateX(-50%)" hidden></div>
+
+    <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+
+        <!-- Required lines on every game screen (Ralph standing copy) -->
+        <div id="house-lines" class="text-center text-[9px] leading-snug space-y-0.5 bg-[#050814] border border-slate-800 rounded-lg px-2 py-1.5">
+            <p class="font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
+            <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
+        </div>
+
+        <!-- PREVIEW: 🎱 Ball Drop card (in the page flow with the other sections, under the house lines). Real NY Lottery results only; appears when a logged slip covers the current draws. -->
+        <div id="balldrop" class="scroll-mt-4" hidden>
+            <div class="bg-[#050814] border-2 border-yellow-400/80 rounded-xl p-3 shadow-xl">
                 <div class="flex items-center justify-between gap-2">
                     <button type="button" id="bd-toggle" onclick="previewBdToggle()" class="flex-1 text-left min-w-0" aria-expanded="true">
                         <span id="bd-title" class="text-[13px] font-black text-yellow-300">🎱 Ball Drop</span>
@@ -238,33 +266,6 @@
                     <div id="bd-result" class="text-[11px] text-white leading-snug border-t border-slate-700 pt-2"></div>
                 </div>
             </div>
-        </div>
-    </header>
-
-    <!-- 📲 Share sheet: real QR of this page's link (made on this device) + copy link -->
-    <div id="invite-modal" onclick="if (event.target === this) closeInviteModal()" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-[#0b132b] border-2 border-cyan-400 rounded-2xl max-w-xs w-full p-5 space-y-3 shadow-[0_0_30px_rgba(56,189,248,0.3)] text-center">
-            <div class="flex justify-between items-center border-b border-[#1d4ed8] pb-2">
-                <div class="text-xs font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6" fill="#22d3ee" stroke="none"/><circle cx="6" cy="12" r="2.6" fill="#facc15" stroke="none"/><circle cx="18" cy="19" r="2.6" fill="#22d3ee" stroke="none"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg> Share Draw Buddy</div>
-                <button onclick="closeInviteModal()" class="text-slate-400 hover:text-white text-xs font-bold px-2 py-1 rounded bg-[#050814] border border-[#1d4ed8]">✕</button>
-            </div>
-            <p class="text-[11px] text-blue-300">Have a friend at your table scan this to open Draw Buddy.</p>
-            <div id="invite-qr" class="bg-white p-3 rounded-xl inline-block shadow-lg mx-auto"></div>
-            <div id="invite-url" class="bg-[#050814] p-2 rounded border border-[#1d4ed8] text-[10px] font-mono text-yellow-300 break-all"></div>
-            <div class="grid grid-cols-2 gap-2">
-                <button type="button" onclick="previewCopyLink()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2 rounded text-xs">🔗 Copy link</button>
-                <button type="button" onclick="previewShare(true)" class="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded text-xs flex items-center justify-center gap-1"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.6" fill="#22d3ee" stroke="none"/><circle cx="6" cy="12" r="2.6" fill="#facc15" stroke="none"/><circle cx="18" cy="19" r="2.6" fill="#22d3ee" stroke="none"/><path d="M8.3 10.8l7.4-4.3M8.3 13.2l7.4 4.3"/></svg> Share…</button>
-            </div>
-        </div>
-    </div>
-    <div id="share-toast" role="status" class="fixed left-1/2 bottom-6 z-[80] bg-[#050814] text-cyan-200 border border-cyan-500 rounded-full px-4 py-2 text-xs font-bold shadow-[0_0_16px_rgba(34,211,238,0.45)]" style="transform:translateX(-50%);-webkit-transform:translateX(-50%)" hidden></div>
-
-    <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-
-        <!-- Required lines on every game screen (Ralph standing copy) -->
-        <div id="house-lines" class="text-center text-[9px] leading-snug space-y-0.5 bg-[#050814] border border-slate-800 rounded-lg px-2 py-1.5">
-            <p class="font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
-            <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
         </div>
 
         <!-- PREVIEW: all other NY draw games (js/drawgames-ui.js). Hidden on Quick Draw. -->
@@ -3030,7 +3031,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let previewBdShown = null, previewBdDismissedAt = null, previewBdCollapsed = false, previewBdBusy = false, previewBdPbSeen = {};
         // After a drop finishes, fold the panel to its one-line summary once the user scrolls, so the sticky top stays small.
         let previewBdAutoFold = false;
-        window.addEventListener('scroll', () => { if (previewBdAutoFold && !previewBdBusy && !previewBdCollapsed && window.scrollY > 200) { previewBdAutoFold = false; previewBdToggle(); } }, { passive: true });
+        window.addEventListener('scroll', () => { if (false && previewBdAutoFold && !previewBdBusy && !previewBdCollapsed && window.scrollY > 200) { previewBdAutoFold = false; previewBdToggle(); } }, { passive: true });
         function previewBdToggle() { setTimeout(() => { try { previewBdFit(); } catch (e) {} }, 0); previewBdCollapsed = !previewBdCollapsed; document.getElementById('bd-body').hidden = previewBdCollapsed; document.getElementById('bd-toggle').setAttribute('aria-expanded', String(!previewBdCollapsed)); }
         function previewBdDismiss() { if (previewBdMode === 'wait') previewBdWaitDismissed = previewBdWaitDraw; else previewBdDismissedAt = previewBdShown || -1; document.getElementById('balldrop').hidden = true; }
         function previewBdQdSlips(nextNum) {
@@ -3046,12 +3047,23 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const deg = previewBdTurns * 360 - ang.mid;
             rotor.style.webkitTransform = `rotate(${deg}deg)`; rotor.style.transform = `rotate(${deg}deg)`;
         }
-        // The panel sits in the sticky header, so cap its body to the screen height (it scrolls inside if needed).
+        // The card sits in the page flow under the sticky header: size it to fit the screen area below the header.
+        function previewBdHeaderH() { const h = document.querySelector('header'); return h ? Math.round(h.getBoundingClientRect().height) : 0; }
+        // Bring the card into view gently, only if it is (partly) off-screen. Once per draw / waiting state.
+        let previewBdRevealedKey = null;
+        function previewBdReveal(key) {
+            if (previewBdRevealedKey === key) return; previewBdRevealedKey = key;
+            setTimeout(() => {
+                const box = document.getElementById('balldrop'); if (!box || box.hidden) return;
+                const r = box.getBoundingClientRect(), top = previewBdHeaderH() + 8;
+                if (r.top < top || r.bottom > window.innerHeight) { try { window.scrollTo({ top: Math.max(0, window.scrollY + r.top - top), behavior: 'smooth' }); } catch (e) { window.scrollTo(0, Math.max(0, window.scrollY + r.top - top)); } }
+            }, 60);
+        }
         function previewBdFit() {
             const body = document.getElementById('bd-body'), box = document.getElementById('balldrop'); if (!body || !box || box.hidden || body.hidden) return;
             body.style.maxHeight = 'none'; body.style.overflowY = 'hidden';
             // Fit the whole panel on the phone screen with no inner scroll bar: shrink the 1-80 board and the Extra wheel step by step.
-            const over = () => box.getBoundingClientRect().bottom - (window.innerHeight - 4);
+            const over = () => box.getBoundingClientRect().height - (window.innerHeight - previewBdHeaderH() - 16);
             let cell = 27, wheel = 112;
             const apply = () => { box.style.setProperty('--bd-cell', cell + 'px'); box.style.setProperty('--bd-gap', (cell >= 24 ? 4 : cell >= 20 ? 3 : 2) + 'px'); box.style.setProperty('--bd-wheel', wheel + 'px'); };
             box.classList.remove('bd-tight'); apply();
@@ -3086,7 +3098,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const box = document.getElementById('balldrop');
             if (previewBdWaitDismissed === waitNum) return;
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
-            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; box.hidden = false;
+            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; box.hidden = false; previewBdReveal('w' + waitNum);
             ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
             document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${waitNum}`;
             document.getElementById('bd-mini').innerText = `in play · ${slips.length} ticket${slips.length === 1 ? '' : 's'} · waiting for results`;
@@ -3139,7 +3151,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             previewBdBusy = true; previewBdAutoFold = false; previewBdMode = 'qd';
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
             const box = document.getElementById('balldrop'); box.hidden = false;
-            setTimeout(previewBdFit, 0);
+            setTimeout(previewBdFit, 0); previewBdReveal('d' + row.draw_number);
             const nums = (row.winning_numbers || []).map(Number), mult = Number(row.extra_multiplier) || 1;
             const mine = new Set(slips.flatMap(t => t.numbers.map(Number)));
             const when = row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) : '';
@@ -3219,7 +3231,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 previewBdWheelDraw = Number(row.draw_number); previewBdWheelMult = mult;
                 document.getElementById('bd-wheel-label').innerText = '🎡 Extra…';
                 document.getElementById('bd-wheel-prize').innerText = '';
-                wrap.hidden = false; previewBdDirUI(); previewBdFit();
+                wrap.hidden = false; previewBdDirUI(); previewBdFit(); previewBdReveal('wh' + row.draw_number);
                 { const body = document.getElementById('bd-body'); if (body && body.scrollHeight > body.clientHeight) { const target = wrap.offsetTop - body.offsetTop - 8; try { body.scrollTo({ top: target, behavior: 'smooth' }); } catch (e) { body.scrollTop = target; } } }
                 { const lg = previewDirLoad()[previewBdWheelDraw]; previewBdSpin(mult, true, lg ? lg.dir : 'R', true); }
                 await new Promise(r => setTimeout(r, 2700));
@@ -3230,7 +3242,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     line.textContent = `${ticketRows[i].label}: ${o.t.hasExtra ? `$${o.base.toFixed(2)} × ${mult}X = $${o.prize.toFixed(2)}` : `$${o.prize.toFixed(2)} · no Extra`}`;
                     wp.appendChild(line);
                 });
-                document.getElementById('bd-mini').innerText = `${totalText} · Extra ${mult}X`; previewBdFit();
+                document.getElementById('bd-mini').innerText = `${totalText} · Extra ${mult}X`; previewBdFit(); previewBdReveal('e' + row.draw_number);
                 previewBdAutoFold = true;
             }
             previewBdBusy = false;
@@ -3248,7 +3260,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     const row = data && data[0]; if (!row || previewBdPbSeen[g] === row.draw_number) continue;
                     const cover = slips.filter(t => parseInt(t.draw) <= Number(row.draw_number) && parseInt(t.endDraw || t.draw) >= Number(row.draw_number)); if (!cover.length) continue;
                     previewBdPbSeen[g] = row.draw_number;
-                    const box = document.getElementById('balldrop'); box.hidden = false; previewBdMode = 'jp';
+                    const box = document.getElementById('balldrop'); box.hidden = false; previewBdMode = 'jp'; previewBdReveal('jp' + g + row.draw_number);
                     { const w = document.getElementById('bd-wheel'); if (w) w.hidden = true; const q = document.getElementById('bd-qd'); if (q) q.hidden = true; const bb = document.getElementById('bd-balls'); if (bb) bb.hidden = false; }
                     if (cover.every(t => parseInt(t.endDraw || t.draw) <= Number(row.draw_number))) setTimeout(() => { if (previewBdMode === 'jp') { previewBdMode = null; box.hidden = true; } }, 60000);
                     const main = (row.winning_numbers || []).map(Number), bonus = row.bonus_number ?? row.powerball ?? row.mega_ball ?? null, mine = new Set(cover.flatMap(t => t.numbers.map(Number)));
