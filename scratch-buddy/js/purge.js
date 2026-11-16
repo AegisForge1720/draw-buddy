@@ -7,7 +7,8 @@ export const LOCAL_DATA_KEYS = [AGE_PASS_KEY, AGE_BLOCK_KEY, LOG_KEY, SESSION_KE
 
 export async function deleteAllScratchBuddyData({
     localStore = localStorage,
-    sessionStore = sessionStorage
+    sessionStore = sessionStorage,
+    onBlocked
 } = {}) {
     clearAgePass(localStore);
     clearSession(localStore);
@@ -16,5 +17,5 @@ export async function deleteAllScratchBuddyData({
         try { localStore.removeItem(key); } catch { /* ignore */ }
         try { sessionStore.removeItem(key); } catch { /* ignore */ }
     }
-    await deletePhotoDatabase();
+    return deletePhotoDatabase({ onBlocked });
 }

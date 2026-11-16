@@ -15,6 +15,7 @@ import {
 import { createLogMap, createRetailerMap, waitForLeaflet } from "./map.js";
 import { AGE_FAIL_COPY, LOG_DISCLOSURE, SHELL_MARKUP } from "./markup.js";
 import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
+import { PHOTO_DELETE_BLOCKED_COPY } from "./photos.js";
 import { deleteAllScratchBuddyData } from "./purge.js";
 import {
     formatCacheTimestamp,
@@ -84,6 +85,7 @@ const logState = {
     photoPreviewUrl: null,
     photoSource: null,
     photoMode: "cover",
+    redactionOps: 0,
     logs: []
 };
 
@@ -613,11 +615,28 @@ function renderSession() {
     }
 }
 
+function syncRedactionConfirm() {
+    const confirm = $("photo-redact-confirm");
+    if (!confirm) return;
+    const ok = (logState.redactionOps || 0) > 0;
+    confirm.disabled = !ok;
+    if (!ok) confirm.checked = false;
+}
+
+function resetRedactionOps() {
+    logState.redactionOps = 0;
+    syncRedactionConfirm();
+}
+
+function recordRedactionOp() {
+    logState.redactionOps = (logState.redactionOps || 0) + 1;
+    syncRedactionConfirm();
+}
+
 function hidePhotoRedact() {
     const panel = $("photo-redact");
     if (panel) panel.hidden = true;
-    const confirm = $("photo-redact-confirm");
-    if (confirm) confirm.checked = false;
+    resetRedactionOps();
 }
 
 function clearPhotoPreview() {
@@ -628,6 +647,7 @@ function clearPhotoPreview() {
     logState.photoFile = null;
     logState.photoSource = null;
     logState.photoMode = "cover";
+    logState.redactionOps = 0;
     const preview = $("log-photo-preview");
     const status = $("log-photo-status");
     const input = $("log-photo");
@@ -718,9 +738,11 @@ function bindPhotoRedactCanvas() {
             canvas.width = Math.max(1, Math.round(w));
             canvas.height = Math.max(1, Math.round(h));
             canvas.getContext("2d").putImageData(cropped, 0, 0);
+            recordRedactionOp();
         } else if (logState.photoMode === "cover" && w > 2 && h > 2) {
             ctx.fillStyle = "#000";
             ctx.fillRect(x, y, w, h);
+            recordRedactionOp();
         }
         drag = null;
     };
@@ -756,8 +778,7 @@ async function setPhotoFile(file) {
     }
     const panel = $("photo-redact");
     if (panel) panel.hidden = false;
-    const confirm = $("photo-redact-confirm");
-    if (confirm) confirm.checked = false;
+    resetRedactionOps();
     setPhotoMode("cover");
     bindPhotoRedactCanvas();
     await drawPhotoSource();
@@ -770,7 +791,11 @@ async function applyPhotoRedaction() {
     const status = $("log-photo-status");
     const confirm = $("photo-redact-confirm");
     const canvas = $("photo-redact-canvas");
-    if (!confirm || !confirm.checked) {
+    if (!(logState.redactionOps > 0)) {
+        if (status) status.textContent = "Cover or crop the barcode, validation number, and PIN before confirming. The checkbox stays off until you do that.";
+        return;
+    }
+    if (!confirm || confirm.disabled || !confirm.checked) {
         if (status) status.textContent = "Confirm that you have covered the barcode, validation number, and PIN, or do not attach a photo.";
         return;
     }
@@ -1056,7 +1081,22 @@ function bindPrizeLog() {
     const apply = $("photo-redact-apply");
     if (cover) cover.addEventListener("click", () => setPhotoMode("cover"));
     if (crop) crop.addEventListener("click", () => setPhotoMode("crop"));
-    if (reset) reset.addEventListener("click", () => drawPhotoSource());
+    if (reset) {
+        reset.addEventListener("click", () => {
+            logState.photoFile = null;
+            if (logState.photoPreviewUrl) {
+                URL.revokeObjectURL(logState.photoPreviewUrl);
+                logState.photoPreviewUrl = null;
+            }
+            const preview = $("log-photo-preview");
+            if (preview) {
+                preview.hidden = true;
+                preview.removeAttribute("src");
+            }
+            resetRedactionOps();
+            drawPhotoSource();
+        });
+    }
     if (apply) apply.addEventListener("click", () => applyPhotoRedaction());
     const form = $("prize-log-form");
     if (form) form.addEventListener("submit", submitPrizeLog);
@@ -1087,7 +1127,11 @@ function bindDeleteAllData() {
         confirm.addEventListener("click", async () => {
             if (status) status.textContent = "Deleting data on this device…";
             try {
-                await deleteAllScratchBuddyData();
+                await deleteAllScratchBuddyData({
+                    onBlocked() {
+                        if (status) status.textContent = PHOTO_DELETE_BLOCKED_COPY;
+                    }
+                });
                 if (status) status.textContent = "All Scratch Buddy data on this device was deleted.";
                 window.location.reload();
             } catch (error) {

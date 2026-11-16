@@ -110,18 +110,33 @@ export async function deletePhoto(id) {
     await run(STORE, "readwrite", (store) => store.delete(id));
 }
 
-export function deletePhotoDatabase() {
-    closePhotoDb();
+export const PHOTO_DELETE_BLOCKED_COPY = "Close other Scratch Buddy tabs to finish deleting photos on this device.";
+
+// Wait for onsuccess before reporting deletion complete.
+// onblocked must not resolve the promise; it only warns that another tab is still open.
+export function bindPhotoDatabaseDelete(request, { onBlocked } = {}) {
     return new Promise((resolve, reject) => {
-        if (!("indexedDB" in window)) {
-            resolve();
+        if (!request) {
+            resolve({ deleted: true, blocked: false });
             return;
         }
-        const request = indexedDB.deleteDatabase(DB_NAME);
-        request.onsuccess = () => resolve();
+        let blocked = false;
+        request.onsuccess = () => resolve({ deleted: true, blocked });
         request.onerror = () => reject(request.error || new Error("Photo storage could not be deleted."));
-        request.onblocked = () => resolve();
+        request.onblocked = () => {
+            blocked = true;
+            if (typeof onBlocked === "function") onBlocked();
+        };
     });
+}
+
+export function deletePhotoDatabase({ onBlocked } = {}) {
+    closePhotoDb();
+    if (typeof indexedDB === "undefined") {
+        return Promise.resolve({ deleted: true, blocked: false });
+    }
+    const request = indexedDB.deleteDatabase(DB_NAME);
+    return bindPhotoDatabaseDelete(request, { onBlocked });
 }
 
 export function photoObjectUrl(record) {

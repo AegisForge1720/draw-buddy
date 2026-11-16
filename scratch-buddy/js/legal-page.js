@@ -1,5 +1,6 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
 import { AGE_FAIL_COPY, PRIVACY_MARKUP, TERMS_MARKUP } from "./markup.js";
+import { PHOTO_DELETE_BLOCKED_COPY } from "./photos.js";
 import { deleteAllScratchBuddyData } from "./purge.js";
 
 const FAIL_COPY = {
@@ -68,7 +69,11 @@ function bindDeleteAllData() {
         confirm.addEventListener("click", async () => {
             if (status) status.textContent = "Deleting data on this device…";
             try {
-                await deleteAllScratchBuddyData();
+                await deleteAllScratchBuddyData({
+                    onBlocked() {
+                        if (status) status.textContent = PHOTO_DELETE_BLOCKED_COPY;
+                    }
+                });
                 if (status) status.textContent = "All Scratch Buddy data on this device was deleted.";
                 window.location.reload();
             } catch (error) {

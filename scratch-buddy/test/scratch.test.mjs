@@ -60,7 +60,13 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /No sample points are included/);
     assert.match(SHELL_MARKUP, /Optional: center on my location/);
     assert.match(SHELL_MARKUP, /id="delete-all-data"/);
+    assert.match(SHELL_MARKUP, /id="photo-redact-confirm"/);
+    assert.match(SHELL_MARKUP, /id="photo-redact-confirm"[^>]*\sdisabled/);
+    assert.match(SHELL_MARKUP, /close them so photos can be fully removed/);
     assert.match(PRIVACY_MARKUP, /Delete all my data/);
+    assert.match(PRIVACY_MARKUP, /close them so photos can be fully removed/);
+    assert.match(PRIVACY_MARKUP, /Under 18, only a session-only block flag is kept until the tab is closed; no date of birth is kept/);
+    assert.equal(PRIVACY_MARKUP.includes("Under 18, nothing is kept"), false);
     assert.match(PRIVACY_MARKUP, /tile\.openstreetmap\.org/);
     assert.match(PRIVACY_MARKUP, /Leaflet and Tailwind are self-hosted/);
     assert.equal(SHELL_MARKUP.includes("scratch_buddy_prize_logs"), false);

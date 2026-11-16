@@ -184,7 +184,7 @@ export const SHELL_MARKUP = `
                             <button type="button" class="btn-secondary flex-1" id="photo-redact-reset">Reset</button>
                         </div>
                         <label class="check-row">
-                            <input id="photo-redact-confirm" type="checkbox">
+                            <input id="photo-redact-confirm" type="checkbox" disabled>
                             <span>I have covered the barcode, validation number, and PIN on this photo.</span>
                         </label>
                         <button type="button" class="btn-primary w-full" id="photo-redact-apply">Use this redacted photo</button>
@@ -203,7 +203,7 @@ export const SHELL_MARKUP = `
             <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
             <div id="delete-all-prompt" class="location-prompt" hidden>
                 <p class="location-prompt-title">Delete all my data?</p>
-                <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone.</p>
+                <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
                 <div class="flex gap-2">
                     <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
                     <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
@@ -257,7 +257,7 @@ export const PRIVACY_MARKUP = `
     <p class="empty-note">Scratch Buddy does not sell lottery tickets or accept wagers.</p>
     <h2 class="section-title">What this preview stores</h2>
     <ul class="empty-note list-disc pl-4 space-y-1">
-        <li>Age check. Under 18, nothing is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
+        <li>Age check. Under 18, only a session-only block flag is kept until the tab is closed; no date of birth is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
         <li>Optional Near me and optional map centering use your device location once, in this session, to sort a list or center a view. The position is not saved.</li>
         <li>Optional GPS check-in uses your device location once to compare it with a retailer's published coordinates. Only a pass or fail, the date, and a coarse distance band (&lt;50 m or 50-150 m) may be stored with a prize log. Coordinates, accuracy, and exact distance are not kept.</li>
         <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
@@ -272,7 +272,7 @@ export const PRIVACY_MARKUP = `
     <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
     <div id="delete-all-prompt" class="location-prompt" hidden>
         <p class="location-prompt-title">Delete all my data?</p>
-        <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone.</p>
+        <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
         <div class="flex gap-2">
             <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
             <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
