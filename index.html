@@ -3107,7 +3107,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         async function vcComputeTag() { try { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(vcDevice())); return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 10); } catch (e) { return null; } }
         let vcTimer = null, vcRows = [], vcVenueId = null, vcMineTag = null, vcBusy = false;
         function vcVenue() { const c = (typeof previewInVenue === 'function') ? previewInVenue() : null; return c && previewVenue ? String(previewVenue.id).replace(/[^0-9A-Za-z_-]/g, '').slice(0, 40) : null; }
-        function vcHeaders(venue, json) { const h = { apikey: SUPABASE_ANON_KEY, 'x-db-venue': venue, 'x-db-device': vcDevice() }; if (json) { h['Content-Type'] = 'application/json'; h.Prefer = 'return=minimal'; } return h; }
+        // Preview-only key (RLS): injected by the private preview server as <meta name="db-chat-key">; absent everywhere else.
+        const VC_KEY = (document.querySelector('meta[name="db-chat-key"]') || {}).content || '';
+        function vcHeaders(venue, json) { const h = { apikey: SUPABASE_ANON_KEY, 'x-db-venue': venue, 'x-db-device': vcDevice(), 'x-db-chat-key': VC_KEY }; if (json) { h['Content-Type'] = 'application/json'; h.Prefer = 'return=minimal'; } return h; }
         function vcStatus(t) { const e = document.getElementById('vc-status'); if (e) e.innerText = t || ''; }
         function vcTime(iso) { try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(new Date(iso)); } catch (e) { return ''; } }
         function vcRender() {
