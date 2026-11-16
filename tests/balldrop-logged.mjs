@@ -3,7 +3,7 @@
 // (2) start the ball drop by itself once that draw posts (no reload, no re-log),
 // (3) catch up on a covered draw that posted while the phone was locked.
 // Real draws only: the "not posted yet" state is made by hiding the newest real row from the server reply.
-// Usage: PREVIEW_PASS=... node tests/balldrop-logged.mjs http://127.0.0.1:8879/ [screenshot.png]
+// Usage: PREVIEW_PASS=... node tests/balldrop-logged.mjs http://127.0.0.1:8879/ [done.png] [waiting.png] [prize.png]
 import { createRequire } from "module";
 const require = createRequire("/workspace/tools/");
 const { chromium } = require("playwright-core");
@@ -55,9 +55,24 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   await p.setViewportSize({ width: 360, height: 740 }); await p.evaluate(() => previewBdFit()); await p.waitForTimeout(300);
   const fit2 = await p.evaluate(() => { const box = document.getElementById('balldrop'), b = document.getElementById('bd-body'); return { h: Math.round(box.getBoundingClientRect().height), avail: innerHeight - Math.round(document.querySelector('header').getBoundingClientRect().height), sh: b.scrollHeight, ch: b.clientHeight }; });
   check("360x740: finished drop fits below the header, no inner scroll", fit2.h <= fit2.avail && fit2.sh <= fit2.ch + 1, JSON.stringify(fit2));
+  const pz = await p.evaluate(() => ({ amt: Array.from(document.querySelectorAll('#bd-mynums .bd-prize-amt')).map(e => e.textContent), res: document.getElementById('bd-result').innerText }));
+  check("prize line shown for the logged ticket once the balls finish", pz.amt.length === 1 && /^(Prize: \$\d+\.\d\d|No prize this draw\.)$/.test(pz.amt[0]), JSON.stringify(pz));
+  check("not-official line next to the amount, no win/jackpot wording", /Not official ticket validation\. Confirm prizes with the official lottery\./.test(pz.res) && !/\b(win|wins|winner|winning|jackpot|live)\b/i.test(pz.res + pz.amt.join(' ')), pz.res);
   const g = await p.evaluate(() => sessionTickets[0].gradedDraws);
   check("ticket graded for that draw", g.includes(newest), JSON.stringify(g));
   check("no page errors (1)", errs.length === 0, errs.join(" | "));
+  await c.close();
+}
+// 4: logged 4-spot ticket (Extra on, $2/draw) holding 4 of the newest real draw's numbers: prize = official table x wager x Extra.
+{
+  const t = slip(newest); t.numbers = rows[0].numbers.slice(0, 4); t.spot = 4; t.baseWager = 2; t.hasExtra = true;
+  const { c, p, errs } = await page([t], false);
+  await p.waitForTimeout(29000);
+  const r = await p.evaluate(() => ({ amt: Array.from(document.querySelectorAll('#bd-mynums .bd-prize-amt')).map(e => e.textContent), how: document.querySelector('#bd-mynums .bd-prize-how')?.textContent, tot: document.querySelector('#bd-result .bd-prize-total')?.textContent, expect: QD_PAYOUT_TABLE[4][4] * 2 * (Number(cachedDraws.concat(previewGradeDraws).find(d => d.draw_number == sessionTickets[0].draw)?.extra_multiplier) || 1), box: Math.round(document.getElementById('balldrop').getBoundingClientRect().height), avail: innerHeight - Math.round(document.querySelector('header').getBoundingClientRect().height), sh: document.getElementById('bd-body').scrollHeight, ch: document.getElementById('bd-body').clientHeight }));
+  check("logged ticket with 4 of 4 shows 'Prize: $X' = table x $2 x Extra", r.amt[0] === `Prize: $${r.expect.toFixed(2)}` && r.tot === `Prize this draw: $${r.expect.toFixed(2)}`, JSON.stringify(r));
+  check("prize card still fits 390x844 with no inner scroll", r.box <= r.avail && r.sh <= r.ch + 1, JSON.stringify(r));
+  if (process.argv[5]) await p.screenshot({ path: process.argv[5] });
+  check("no page errors (4)", errs.length === 0, errs.join(" | "));
   await c.close();
 }
 // 3: catch-up on a covered draw one back (posted while the phone was locked), if it posted < 15 min ago.

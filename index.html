@@ -54,7 +54,13 @@
         .bd-ticket-label { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#cbd5e1; font-weight:700; }
         .bd-ticket-matches { flex-shrink:0; color:#fde047; font-weight:800; }
         .bd-ticket-chips { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:3px; }
-        .bd-ticket-prize { font-size:10px; line-height:14px; color:#a7f3d0; margin-top:4px; }
+        .bd-ticket-prize { margin-top:4px; }
+        .bd-prize-amt { font-size:20px; line-height:24px; font-weight:900; }
+        .bd-prize-total { font-size:18px; line-height:22px; font-weight:900; }
+        .bd-prize-yes { color:#4ade80; } .bd-prize-no { color:#cbd5e1; font-size:14px; line-height:18px; }
+        .bd-prize-how { font-size:10px; line-height:13px; color:#a7f3d0; }
+        .bd-prize-note { font-size:10px; line-height:13px; color:#fcd34d; font-weight:700; margin-top:2px; }
+        #balldrop.bd-tight .bd-prize-amt { font-size:17px; line-height:20px; } #balldrop.bd-tight .bd-prize-total { font-size:15px; line-height:19px; }
         #bd-summary { display:block; }
         #bd-your-block { min-width:0; padding:0 0 5px; border-bottom:1px solid #334155; }
         #bd-grid-wrap { position:relative; padding-top:22px; }
@@ -254,7 +260,7 @@
                         </div>
                         <div class="flex-1 min-w-0 flex flex-col items-center text-center gap-1">
                         <div id="bd-wheel-label" class="text-xl font-black text-yellow-300 leading-tight">🎡 Extra…</div>
-                        <div id="bd-wheel-prize" class="text-[11px] text-white leading-snug"></div>
+                        <div id="bd-wheel-prize" class="bd-tight-hide text-[11px] text-white leading-snug"></div>
                         <div class="w-full max-w-[260px] space-y-1">
                             <div class="bd-tight-hide text-[9px] uppercase tracking-wider text-cyan-300 font-bold">Which way did the wheel spin?</div>
                             <div class="grid grid-cols-2 gap-1.5">
@@ -3293,7 +3299,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const waitNum = Math.max(newestNum + 1, Math.min(...waiting.map(t => parseInt(t.draw))));
                 const showingResult = previewBdMode === 'qd' && !box.hidden;
                 if (!showingResult && !previewBdHold && previewBdMode !== 'jp') previewBdShowWaiting(waitNum, waiting.filter(t => previewBdCovers(t, waitNum)).length ? waiting.filter(t => previewBdCovers(t, waitNum)) : waiting);
-                else if (showingResult && !previewBdHold) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw #${waitNum} pending`; }
+                else if (showingResult) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw #${waitNum} pending`; }
                 return;
             }
             if (!covering.length && !previewBdBusy && !previewBdHold && previewBdMode !== 'jp') { box.hidden = true; if (previewBdMode === 'wait') previewBdMode = null; }
@@ -3373,13 +3379,25 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             ticketRows.forEach((o, i) => {
                 const pay = info[i];
                 if (o.prizeEl) {
-                    o.prizeEl.hidden = false;
-                    o.prizeEl.textContent = `${o.t.hasExtra ? (mult === 1 ? `$${pay.prize.toFixed(2)} · No Extra this draw` : `$${pay.base.toFixed(2)} × Extra ${mult}X = $${pay.prize.toFixed(2)}`) : `$${pay.prize.toFixed(2)} · no Extra`} · ${pay.done}/${pay.total} draws done`;
+                    o.prizeEl.hidden = false; o.prizeEl.textContent = '';
+                    // Prize for this ticket on this draw: official NY Quick Draw prize table x wager per draw x Extra (only if Extra was on).
+                    const big = document.createElement('div'); big.className = 'bd-prize-amt ' + (pay.prize > 0 ? 'bd-prize-yes' : 'bd-prize-no');
+                    big.textContent = pay.prize > 0 ? `Prize: $${pay.prize.toFixed(2)}` : 'No prize this draw.';
+                    const how = document.createElement('div'); how.className = 'bd-prize-how';
+                    const wager = Number(o.t.baseWager || 1);
+                    how.textContent = `${pay.hits} of ${Number(o.t.spot) || o.t.numbers.length} matched · $${wager % 1 ? wager.toFixed(2) : wager}/draw${o.t.hasExtra ? (mult === 1 ? ' · Extra on, No Extra this draw' : (pay.prize > 0 ? ` · $${pay.base.toFixed(2)} × Extra ${mult}X` : ` · Extra ${mult}X`)) : ' · Extra off'} · ${pay.done}/${pay.total} draws done`;
+                    o.prizeEl.appendChild(big); o.prizeEl.appendChild(how);
                 }
             });
             const combined = info.reduce((sum, o) => sum + o.hits, 0), paid = info.reduce((sum, o) => sum + o.prize, 0);
             const totalText = `${combined} match${combined === 1 ? '' : 'es'}${ticketSuffix}`;
-            res.textContent = `$${paid.toFixed(2)} total prize this draw · Official NY Quick Draw paytable. Each draw is independent.`;
+            res.textContent = '';
+            { const tot = document.createElement('div'); tot.className = 'bd-prize-total ' + (paid > 0 ? 'bd-prize-yes' : 'bd-prize-no') + (slips.length === 1 ? ' bd-tight-hide' : '');
+              tot.textContent = paid > 0 ? `${slips.length > 1 ? 'Total prize this draw' : 'Prize this draw'}: $${paid.toFixed(2)}` : (slips.length > 1 ? 'No prize this draw on any ticket.' : 'No prize this draw.');
+              const note = document.createElement('div'); note.className = 'bd-prize-note';
+              note.textContent = `${(window.DB_COPY && window.DB_COPY.NOT_OFFICIAL) || 'Not official ticket validation. Confirm prizes with the official lottery.'} `;
+              const more = document.createElement('span'); more.className = 'bd-tight-hide'; more.textContent = 'Official NY Quick Draw prize table. Each draw is independent.'; note.appendChild(more);
+              res.appendChild(tot); res.appendChild(note); }
             document.getElementById('bd-mini').innerText = `Ball 20 of 20 · ${totalText}`;
             previewBdFit();
             // Extra wheel pop-up: spins to this draw's real multiplier (official-odds slices).
@@ -3396,18 +3414,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 await new Promise(r => setTimeout(r, 2700));
                 document.getElementById('bd-wheel-label').innerText = mult === 1 ? 'No Extra' : `Extra ${mult}X`;
                 const wp = document.getElementById('bd-wheel-prize'); wp.textContent = '';
-                info.forEach((o, i) => {
-                    const line = document.createElement('div');
-                    line.textContent = `${ticketRows[i].label}: ${o.t.hasExtra ? (mult === 1 ? `$${o.prize.toFixed(2)} · No Extra this draw` : `$${o.base.toFixed(2)} × ${mult}X = $${o.prize.toFixed(2)}`) : `$${o.prize.toFixed(2)} · no Extra`}`;
-                    wp.appendChild(line);
-                });
+                wp.textContent = info.some(o => o.t.hasExtra) ? (mult === 1 ? 'Extra on: this draw pays the base prize.' : `Extra on: prizes × ${mult}.`) : 'Extra off on your ticket.';
                 document.getElementById('bd-mini').innerText = `${totalText} · ${mult === 1 ? 'No Extra' : `Extra ${mult}X`}`; previewBdFit(); previewBdReveal('e' + row.draw_number);
                 previewBdAutoFold = true;
             }
             previewBdBusy = false;
-            // Slip's last draw: keep the result up for 45 s, then hide the panel.
+            // Slip's last draw: keep the result (and prize) up for 15 min so it can be read at the counter, then hide.
             if (slips.every(t => parseInt(t.endDraw || t.draw) <= Number(row.draw_number))) {
-                previewBdHold = setTimeout(() => { previewBdHold = null; previewBdDismissedAt = Number(row.draw_number); box.hidden = true; }, 45000);
+                previewBdHold = setTimeout(() => { previewBdHold = null; previewBdDismissedAt = Number(row.draw_number); box.hidden = true; }, 15 * 60000);
             }
         }
         // Powerball / Mega Millions: show results once posted (stored tables), no animation timing claims.
@@ -3428,7 +3442,18 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     document.getElementById('bd-balls').innerHTML = main.map(n => `<div class="bd-ball${mine.has(n) ? ' bd-hit' : ''}">${n}</div>`).join('') + (bonus != null ? `<div class="bd-ball bd-bonus">${bonus}</div>` : '');
                     const hits = Math.max(...cover.map(t => t.numbers.filter(n => main.includes(Number(n))).length));
                     document.getElementById('bd-mini').innerText = `${hits} main match${hits === 1 ? '' : 'es'}`;
-                    document.getElementById('bd-result').innerText = 'Check the official prize chart for this game.';
+                    // Prize per ticket from the official chart (js/drawgames-engine.js); amounts set by the lottery are named, not priced.
+                    const resEl = document.getElementById('bd-result'); resEl.textContent = '';
+                    const E = window.DGEngine, eg = E && E.GAMES[g]; let tot = 0, named = false;
+                    cover.forEach((t, i) => {
+                        let line = 'Check the official prize chart for this game.', amt = 0;
+                        if (eg) { const gr = E.grade(eg, { nums: t.numbers.map(Number), bonus: t.bonus != null ? Number(t.bonus) : (t.powerball != null ? Number(t.powerball) : null), opts: {} }, { nums: main, bonus: bonus != null ? Number(bonus) : null });
+                            if (gr && gr.cash > 0) { amt = gr.cash; line = `Prize: $${gr.cash.toLocaleString()}`; } else if (gr && gr.label) { named = true; line = `Prize: ${/jackpot/i.test(gr.label) ? 'top prize tier (amount set by the lottery)' : gr.label}`; } else if (gr) line = 'No prize this draw.'; }
+                        tot += amt;
+                        const d = document.createElement('div'); d.className = 'bd-prize-amt ' + (amt > 0 || /^Prize/.test(line) ? 'bd-prize-yes' : 'bd-prize-no'); d.textContent = (cover.length > 1 ? `Ticket ${i + 1}: ` : '') + line; resEl.appendChild(d);
+                    });
+                    if (cover.length > 1 && tot > 0) { const d = document.createElement('div'); d.className = 'bd-prize-total bd-prize-yes'; d.textContent = `Total prize this draw: $${tot.toLocaleString()}${named ? ' + named tier' : ''}`; resEl.appendChild(d); }
+                    const nt = document.createElement('div'); nt.className = 'bd-prize-note'; nt.textContent = ((window.DB_COPY && window.DB_COPY.NOT_OFFICIAL) || 'Not official ticket validation. Confirm prizes with the official lottery.') + ' Base prizes from the official chart.'; resEl.appendChild(nt);
                 } catch (e) {}
             }
         }

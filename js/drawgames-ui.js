@@ -472,7 +472,11 @@
     }
     if (token !== animToken) return;
     if (isPick) { res.textContent = `That's your pick. ${DISCLAIMER}`; return; }
-    if (my) { const t = g.kind === 'digits' ? { playType: my.playType || S().playType, digits: my.digits, wager: my.wager || S().wager } : { nums: my.nums, bonus: my.bonus, opts: my.opts || {} }; const gr = E.grade(g, t, row); res.innerHTML = `<b>${esc(my.name || 'Your ticket')}</b> vs this result: ${esc(gr ? gr.text : '')}. <span class="text-slate-400">Prize tiers from the official chart; each draw is independent.</span> <span class="text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</span>`; }
+    if (my) { const t = g.kind === 'digits' ? { playType: my.playType || S().playType, digits: my.digits, wager: my.wager || S().wager } : { nums: my.nums, bonus: my.bonus, opts: my.opts || {} }; const gr = E.grade(g, t, row);
+      // Prize amount, big and clear (official prize chart; tiers set by the lottery are named, not priced).
+      const lab = gr && gr.label ? (/jackpot/i.test(gr.label) ? 'top prize tier (amount set by the lottery)' : gr.label) : null;
+      const prizeTxt = gr && gr.cash > 0 ? `Prize: ${money(gr.cash)}` : lab ? `Prize: ${lab}` : 'No prize this draw.';
+      res.innerHTML = `<div class="dg-prize-amt ${gr && (gr.cash > 0 || lab) ? 'text-emerald-400' : 'text-slate-300'} font-black" style="font-size:${gr && (gr.cash > 0 || lab) ? 20 : 15}px;line-height:1.2">${esc(prizeTxt)}</div><b>${esc(my.name || 'Your ticket')}</b> vs this result: ${esc(gr ? gr.text.replace(/jackpot/ig, 'top prize') : '')}. <span class="text-slate-400">Prize tiers from the official chart; each draw is independent.</span> <span class="text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</span>`; }
     else res.textContent = 'Official result. Make a pick to see your matches light up.';
   }
   function replayLatest() { const R = rowsForStats(); if (!R.length) { $('dg-bd-result').textContent = 'Data unavailable: no official result loaded.'; return; } animate(R[0], { kind: 'result' }); }
