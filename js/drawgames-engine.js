@@ -239,7 +239,7 @@
         : (g.prizes && Object.values(g.prizes).some(v => typeof v === 'number') ? 'Numbers scored by backtested fixed prizes (official chart)' : 'Numbers scored by how often the backtest matched any prize tier'),
       one: b ? `Built around one ball: the ${b} that backtested best${g.prizes['0b'] ? ` (a ${b}-only match is a $${g.prizes['0b']} prize tier)` : ''}; main numbers are the longest since last drawn in the last 100 draws. A long gap does not make a number more likely.`
         : 'Built around the one number that backtested best; the rest are the numbers longest since last drawn. A long gap does not make a number more likely.',
-      jackpot: `Scored for near-jackpot matches (${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} of ${g.pick})${g.key === 'powerball' && dpOK ? ' + Double Play for a second $10M top prize' : ''}`
+      jackpot: `Scored for near-top-tier matches (${g.kind === 'keno' ? '8+' : (g.pick - 1) + '+'} of ${g.pick})${g.key === 'powerball' && dpOK ? ' + Double Play for a second $10M top prize' : ''}`
     };
   }
   function lottoBacktest(g, rows, P, PB, scoreFn, fixedN, opts) {

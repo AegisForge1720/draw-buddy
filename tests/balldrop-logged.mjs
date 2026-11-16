@@ -46,7 +46,7 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   if (shotWait) await p.screenshot({ path: shotWait });
   const tm = await p.evaluate(() => { const np = previewNextPurchasable(0); return { mini: document.getElementById('bd-mini').innerText, sub: document.getElementById('bd-sub').innerText, delay: previewBdNextDelay(), waitAt: previewBdWaitAt, lag: previewPostLagS,
     header: document.getElementById('header-next-draw').innerText, np: np && np.number, cd: previewSecondsToNextDraw(), toSlot: np ? Math.round((np.slot - Date.now()) / 1000) : null, slotOk: np ? previewIsSlot(np.slot) : false }; });
-  check("waiting copy names the draw time and the measured posting delay; polls every 3 s once the draw time has passed", /waiting for NY Lottery/.test(tm.mini) && /usually about \d+ s/.test(tm.sub) && tm.delay === 3000 && tm.waitAt <= Date.now(), JSON.stringify(tm));
+  check("waiting copy names the draw time and the official-posted-data line; polls every 3 s once the draw time has passed", /waiting for NY Lottery/.test(tm.mini) && /Results from official posted data/.test(tm.sub) && /Checking for new results/.test(tm.sub) && tm.delay === 3000 && tm.waitAt <= Date.now(), JSON.stringify(tm));
   check("header next draw and countdown follow the 4-minute schedule", tm.header === `#${tm.np}` && tm.slotOk && Math.abs(tm.cd - tm.toSlot) <= 2, JSON.stringify(tm));
   state.hide = false;
   await p.waitForTimeout(5000);

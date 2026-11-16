@@ -232,7 +232,7 @@
                     <button type="button" onclick="previewBdDismiss()" class="text-slate-400 text-sm px-1" aria-label="Dismiss until the next draw">✕</button>
                 </div>
                 <div id="bd-body" class="space-y-2 pt-1.5" style="overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain">
-                    <div id="bd-sub" class="text-[10px] text-slate-400">Results from NY Lottery, about a minute after the draw</div>
+                    <div id="bd-sub" class="text-[10px] text-slate-400">Results from official posted data. Results may be delayed; check official sources.</div>
                     <div id="bd-balls" class="flex flex-wrap gap-1 min-h-[28px]" hidden></div>
                     <div id="bd-qd" class="space-y-1.5" hidden>
                         <div id="bd-summary">
@@ -1347,7 +1347,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const waiting = previewSpread.openAt && Date.now() < previewSpread.openAt;
             box.className = box.className.replace(/border-(yellow|emerald)-[0-9/]+/g, '') + (waiting ? ' border-yellow-500/60' : ' border-emerald-400/70');
             label.innerText = waiting
-                ? `⏱ Play in ${Math.max(1, Math.round((close - Date.now()) / 60000))} min, starting draw #${previewSpread.start} at ${previewFmtEtShort(previewSpread.slot)} (place by ${previewFmtEt(close)})`
+                ? `⏱ Draw #${previewSpread.start} at ${previewFmtEtShort(previewSpread.slot)} · sales close in ${Math.max(1, Math.round((close - Date.now()) / 60000))} min`
                 : (previewSpread.button ? `✅ Place now: draw #${previewSpread.start} is on sale (place by ${previewFmtEt(close)})` : `⏱ Place by ${previewFmtEt(close)} for draw #${previewSpread.start}`);
             const m = Math.floor(left / 60), sec = left % 60;
             count.innerText = `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
@@ -1624,7 +1624,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (pk.openAt && now < pk.openAt) {
                     // Waiting: the start draw goes on sale after the draw before it.
                     const sec = Math.max(0, Math.round((close - now) / 1000)), mins = Math.max(1, Math.round((close - now) / 60000));
-                    place.innerText = `⏱ Play in ${mins} min, starting draw #${pk.start} at ${at} (place by ${by})`;
+                    place.innerText = `⏱ Draw #${pk.start} at ${at} · sales close in ${mins} min`;
                     c.innerText = fmt(sec); c.className = 'pick-count font-mono font-black text-sm shrink-0 text-cyan-300';
                     box.className = 'pick-timer rounded-md border border-yellow-500/60 bg-black/40 px-2 py-1 flex items-center justify-between gap-2';
                 } else {
@@ -3287,14 +3287,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const n = previewBdWaitDraw, at = previewBdWaitAt, now = Date.now(), lag = previewPostLagS;
             const mini = document.getElementById('bd-mini'), sub = document.getElementById('bd-sub');
             const tk = `${previewBdWaitSlips} ticket${previewBdWaitSlips === 1 ? '' : 's'}`;
-            if (!at) { mini.innerText = `in play · ${tk} · waiting for results`; sub.innerText = `Your logged ticket is in play for draw #${n}. The balls drop here as soon as NY Lottery posts this draw's numbers (usually about ${lag} s after the draw).`; return; }
+            if (!at) { mini.innerText = `in play · ${tk} · waiting for results`; sub.innerText = `Your logged ticket is in play for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
             const when = previewFmtEtShort(at);
             if (now < at) {
                 mini.innerText = `in play · ${tk} · draw at ${when.replace(' ET', '')}`;
-                sub.innerText = `Your logged ticket is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). NY Lottery usually posts the numbers about ${lag} s after the draw; the balls drop here as soon as they're posted.`;
+                sub.innerText = `Your logged ticket is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
             } else {
                 mini.innerText = `in play · ${tk} · waiting for NY Lottery`;
-                sub.innerText = `Draw #${n} was at ${when}. Waiting for NY Lottery to post draw #${n} (usually about ${lag} s; ${previewBdMmss((now - at) / 1000)} so far). Checking every 3 s; the balls drop as soon as it posts.`;
+                sub.innerText = `Draw #${n} was at ${when}. Waiting for draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
             }
         }
         setInterval(() => { try { previewBdWaitText(); } catch (e) {} }, 1000);
@@ -3357,7 +3357,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const mine = new Set(slips.flatMap(t => t.numbers.map(Number)));
             const when = row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) : '';
             document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${row.draw_number}`;
-            document.getElementById('bd-sub').innerText = `${when ? when + ' · ' : ''}Results from NY Lottery, usually posted about ${previewPostLagS} s after the draw${row.unofficial ? ' (unofficial until verified)' : ''}`;
+            document.getElementById('bd-sub').innerText = `${when ? when + ' · ' : ''}Results from official posted data. Results may be delayed; check official sources.${row.unofficial ? ' (unofficial until verified)' : ''}`;
             const balls = document.getElementById('bd-balls'), res = document.getElementById('bd-result'); balls.innerHTML = ''; balls.hidden = true; res.innerText = '';
             // 1–80 grid: the slip's numbers are outlined; each ball lights its cell as the counter advances.
             const qd = document.getElementById('bd-qd'), grid = document.getElementById('bd-grid'); qd.hidden = false;
@@ -3474,7 +3474,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     if (cover.every(t => parseInt(t.endDraw || t.draw) <= Number(row.draw_number))) setTimeout(() => { if (previewBdMode === 'jp') { previewBdMode = null; box.hidden = true; } }, 60000);
                     const main = (row.winning_numbers || []).map(Number), bonus = row.bonus_number ?? row.powerball ?? row.mega_ball ?? null, mine = new Set(cover.flatMap(t => t.numbers.map(Number)));
                     document.getElementById('bd-title').innerText = `🎱 ${GAME_CONFIGS[g].name} · Draw #${row.draw_number}`;
-                    document.getElementById('bd-sub').innerText = (row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) + ' · ' : (row.draw_date || '') + ' · ') + 'Results from NY Lottery once posted';
+                    document.getElementById('bd-sub').innerText = (row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) + ' · ' : (row.draw_date || '') + ' · ') + 'Results from official posted data. Results may be delayed; check official sources.';
                     document.getElementById('bd-balls').innerHTML = main.map(n => `<div class="bd-ball${mine.has(n) ? ' bd-hit' : ''}">${n}</div>`).join('') + (bonus != null ? `<div class="bd-ball bd-bonus">${bonus}</div>` : '');
                     const hits = Math.max(...cover.map(t => t.numbers.filter(n => main.includes(Number(n))).length));
                     document.getElementById('bd-mini').innerText = `${hits} main match${hits === 1 ? '' : 'es'}`;
