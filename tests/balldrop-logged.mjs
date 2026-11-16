@@ -36,7 +36,7 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   const { c, p, errs, state } = await page([slip(newest)], true);
   await p.waitForTimeout(6000);
   const w = await bd(p);
-  check("waiting panel shows for in-play logged ticket", !w.hidden && w.title.includes(`#${newest}`) && /in play/.test(w.mini) && !w.grid, JSON.stringify(w));
+  check("waiting panel shows for in-play logged ticket", !w.hidden && w.title.includes(`#${newest}`) && /in play|Tracking/.test(w.mini) && !w.grid, JSON.stringify(w));
   check("waiting copy has no 'live'/'win'", !/\b(live|win|wins|won)\b/i.test(w.sub + w.mini + w.title));
   const flow = await p.evaluate(() => { const box = document.getElementById('balldrop'), r = box.getBoundingClientRect(), h = document.querySelector('header').getBoundingClientRect();
     const order = (a, b) => !!(document.getElementById(a).compareDocumentPosition(document.getElementById(b)) & Node.DOCUMENT_POSITION_FOLLOWING);
@@ -46,7 +46,7 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   if (shotWait) await p.screenshot({ path: shotWait });
   const tm = await p.evaluate(() => { const np = previewNextPurchasable(0); return { mini: document.getElementById('bd-mini').innerText, sub: document.getElementById('bd-sub').innerText, delay: previewBdNextDelay(), waitAt: previewBdWaitAt, lag: previewPostLagS,
     header: document.getElementById('header-next-draw').innerText, np: np && np.number, cd: previewSecondsToNextDraw(), toSlot: np ? Math.round((np.slot - Date.now()) / 1000) : null, slotOk: np ? previewIsSlot(np.slot) : false }; });
-  check("waiting copy names the draw time and the official-posted-data line; polls every 3 s once the draw time has passed", /waiting for NY Lottery/.test(tm.mini) && /Results from official posted data/.test(tm.sub) && /Checking for new results/.test(tm.sub) && tm.delay === 3000 && tm.waitAt <= Date.now(), JSON.stringify(tm));
+  check("waiting copy names the draw time and the official-posted-data line; polls every 3 s once the draw time has passed", /Tracking \d+ number sets? · waiting for posted results/.test(tm.mini) && /Results from official posted data/.test(tm.sub) && /Checking for new results/.test(tm.sub) && tm.delay === 3000 && tm.waitAt <= Date.now(), JSON.stringify(tm));
   check("header next draw and countdown follow the 4-minute schedule", tm.header === `#${tm.np}` && tm.slotOk && Math.abs(tm.cd - tm.toSlot) <= 2, JSON.stringify(tm));
   state.hide = false;
   await p.waitForTimeout(5000);

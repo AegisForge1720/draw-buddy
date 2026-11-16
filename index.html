@@ -283,7 +283,7 @@
         <!-- 🎟️ Ticket Generator (was "⚡ CONFIG QUANTUM MATRIX") -->
         <div id="qd-generator-card" class="bg-[#0b132b] p-4 rounded-xl border border-[#1d4ed8] shadow-xl space-y-3">
             <div class="flex justify-between items-center gap-2">
-                <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">🎟️ Ticket Generator</h2>
+                <h2 id="config-panel-title" class="text-[11px] uppercase tracking-wider text-yellow-400 font-semibold truncate font-mono">🎟️ Number Set Generator</h2>
             </div>
 
             <!-- Auto Picks: one window, every auto button works the same (fills settings + numbers, shows the one Your Ticket panel) -->
@@ -313,14 +313,14 @@
                 </div>
                 <p id="all-picks-note" class="text-[9px] text-slate-400"></p>
                 <div id="all-picks-results" class="space-y-2"></div>
-                <p class="text-[9px] text-slate-500">Timing is an estimate, not a forecast. Past results don't predict future draws. Every draw is independent. Nothing is logged until you tap 📥 Log Ticket in Your Ticket.</p>
+                <p class="text-[9px] text-slate-500">Timing is an estimate, not a forecast. Past results don't predict future draws. Every draw is independent. Nothing is logged until you tap 📥 Log Number Set in Your Number Set.</p>
             </div>
             <div id="play-card-closed" class="text-[10px] text-emerald-300 bg-emerald-950/40 border border-emerald-600/50 rounded-lg p-2" hidden></div>
             <!-- 🎟️ Your Ticket (was Optimal Numbers to Play; moved back inside the Ticket Generator) -- Actionable Play Card with Lotto.com Integration & Scanner Upload -->
             <div id="play-card" class="bg-[#050814] p-3 rounded-xl border-2 border-yellow-400 shadow-2xl space-y-4 hidden">
                 <div class="flex justify-between items-start border-b border-[#1d4ed8] pb-3">
                     <div>
-                        <div class="text-[11px] uppercase tracking-wider text-yellow-400 font-black">🎟️ Your Ticket</div>
+                        <div class="text-[11px] uppercase tracking-wider text-yellow-400 font-black">🎟️ Your Number Set</div>
                         <div id="card-draw-label" class="text-base font-black text-white mt-0.5">—</div>
                         <div id="card-why" class="text-[9px] text-cyan-200/90 leading-snug mt-1" hidden></div>
                         <div id="card-mc" class="text-[9px] text-emerald-200/90 leading-snug mt-1" hidden></div>
@@ -328,10 +328,10 @@
                         <!-- PREVIEW: spread timer (when to place the ticket) -->
                         <div id="spread-timer" class="mt-1.5 rounded-md border border-yellow-500/60 bg-black/40 px-2 py-1" hidden>
                             <div class="flex items-center justify-between gap-2">
-                                <span id="spread-timer-label" class="text-[10px] font-bold text-yellow-300">⏱ Place by —</span>
+                                <span id="spread-timer-label" class="text-[10px] font-bold text-yellow-300">⏱ Sales close —</span>
                                 <span id="spread-timer-count" class="font-mono font-black text-cyan-300 text-sm">--:--</span>
                             </div>
-                            <div id="spread-timer-note" class="text-[9px] text-slate-400">Estimate: NY Lottery's feed lists sales closing at draw time; this shows 30 s earlier as a margin.</div>
+                            <div id="spread-timer-note" class="text-[9px] text-slate-400">Estimate only: this shows 30 s before the scheduled draw time as a margin. Check with your retailer.</div>
                         </div>
                     </div>
                     <div class="text-right bg-[#050814] px-3 py-1.5 rounded-lg border border-emerald-500/50">
@@ -398,7 +398,7 @@
                 </div>
                 <!-- 📥 Log Ticket (bottom of Your Ticket) -->
                 <div id="log-ticket-slot" class="space-y-1 border-t border-yellow-500/40 pt-3">
-                    <button type="button" id="log-ticket-main" onclick="if (!this.disabled) logTicketToCloud()" disabled class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl shadow-lg text-base transition disabled:opacity-40 disabled:cursor-not-allowed">📥 Log Ticket</button>
+                    <button type="button" id="log-ticket-main" onclick="if (!this.disabled) logTicketToCloud()" disabled class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 text-slate-950 font-black py-3.5 rounded-xl shadow-lg text-base transition disabled:opacity-40 disabled:cursor-not-allowed">📥 Log Number Set</button>
                     <div id="log-ticket-hint" class="text-[10px] text-slate-300 text-center"></div>
                 </div>
             </div>
@@ -462,7 +462,7 @@
                 <select id="kelly-bankroll" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
                     <option value="50">$50</option><option value="100" selected>$100</option><option value="200">$200</option><option value="500">$500</option><option value="1000">$1,000</option>
                 </select>
-                <div class="text-[9px] text-slate-500 mt-1">Auto picks use ¼ Kelly of this bankroll. Base wager $1–$10; Extra doubles the cost. Negative edge: Kelly says no bet; ticket uses $1 base.</div>
+                <div class="text-[9px] text-slate-500 mt-1">Auto picks use ¼ Kelly of this bankroll. Base wager $1–$10; Extra doubles the cost. Negative edge: Kelly says no bet; number set uses $1 base.</div>
             </div>
                 </div>
                 <button type="button" id="custom-pick-btn" onclick="previewSelectedButton = null; previewHighlight(null); generateTicket('Custom Pick (from Wager & Games)'); previewSettingsSummary();" class="w-full mt-2 bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded-lg text-xs">🛠️ Custom Pick (from Wager &amp; Games)</button>
@@ -641,7 +641,7 @@
         <div id="heatmap-sheet" onclick="if (event.target === this) previewHeatClose()" style="display:none;position:fixed;left:0;right:0;top:0;bottom:0;z-index:70;background:rgba(0,0,0,.7);-webkit-overflow-scrolling:touch;overflow-y:auto">
         <div id="heatmap-panel" class="bg-[#0b132b] px-4 pb-4 pt-0 rounded-t-2xl border-2 border-yellow-400 shadow-2xl space-y-3 max-w-md mx-auto" style="margin-top:14vh;min-height:86vh">
             <div class="flex justify-between items-center gap-2 bg-[#0b132b] -mx-4 px-4 py-2 border-b border-yellow-500/40" style="position:-webkit-sticky;position:sticky;top:0;z-index:5">
-                <span id="heatmap-sheet-note" class="text-[10px] text-cyan-300 font-bold">From your ticket</span>
+                <span id="heatmap-sheet-note" class="text-[10px] text-cyan-300 font-bold">From your number set</span>
                 <button type="button" onclick="previewHeatClose()" class="bg-[#050814] border border-yellow-500 text-yellow-300 font-black text-xs px-3 py-1.5 rounded-lg">✕ Close</button>
             </div>
             <div class="flex justify-between items-center">
@@ -1185,7 +1185,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const src = k.n ? `backtest avg ${k.obsMean.toFixed(2)} of ${k.spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance, shrunk to ${k.mean.toFixed(2)}` : 'official odds';
             return k.f > 0
                 ? `Kelly: edge ${((k.ret - 1) * 100).toFixed(1)}% per $1 (${src}) → f* ${(k.f * 100).toFixed(2)}%, ¼ Kelly of $${k.bankroll} = $${k.stake.toFixed(2)} → $${k.base} base`
-                : `Kelly: edge ${((k.ret - 1) * 100).toFixed(1)}% per $1 (prize ${(k.p * 100).toFixed(1)}% at ${k.b.toFixed(2)}:1; ${src}) → f* ${(k.f * 100).toFixed(1)}%, negative, so Kelly says don't bet; ticket uses the $1 base minimum${k.extra ? " ($2 with Extra)" : ""}`;
+                : `Kelly: edge ${((k.ret - 1) * 100).toFixed(1)}% per $1 (prize ${(k.p * 100).toFixed(1)}% at ${k.b.toFixed(2)}:1; ${src}) → f* ${(k.f * 100).toFixed(1)}%, negative, so Kelly says don't bet; number set uses the $1 base minimum${k.extra ? " ($2 with Extra)" : ""}`;
         }
         // Monte Carlo: each simulated game draws 20 of 80 at random and an Extra multiplier from the official weights.
         function previewMonteCarlo(nums, base, extra, games) {
@@ -1212,7 +1212,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         function previewMoney(v) { return `${v < 0 ? '-' : '+'}$${Math.abs(v).toFixed(0)}`; }
         function previewMcLine(m) {
-            return `🌀 Monte Carlo, ${m.sims.toLocaleString('en-US')} random sessions of this ticket ($${m.spend} spent): returns ${(m.ret * 100).toFixed(0)}¢ per $1 on average, ends ahead ${(m.ahead * 100).toFixed(1)}% of the time. Net: middle ${previewMoney(m.p50)}, 90% between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}, best ${previewMoney(m.max)}.`;
+            return `🌀 Monte Carlo, ${m.sims.toLocaleString('en-US')} random sessions of this number set ($${m.spend} spent): returns ${(m.ret * 100).toFixed(0)}¢ per $1 on average, ends ahead ${(m.ahead * 100).toFixed(1)}% of the time. Net: middle ${previewMoney(m.p50)}, 90% between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}, best ${previewMoney(m.max)}.`;
         }
         function previewTicketNow() {
             if (activeGameKey !== 'quickdraw' || !lastGeneratedNumbers.length) return null;
@@ -1231,13 +1231,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (activeGameKey !== 'quickdraw') return 'Kelly sizing uses the Quick Draw paytable. Switch to Quick Draw.';
             const extra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
             const k = previewLastKelly && previewLastKelly.spot === spot && previewLastKelly.extra === extra ? previewLastKelly : previewKelly(spot, extra, []);
-            return `🧮 Kelly Criterion, f* = (b·p − q) / b:\n\n• ${spot}-Spot${extra ? ' + Extra' : ''}\n• p (chance of any prize): ${(k.p * 100).toFixed(2)}%\n• b (net odds of an average prize): ${k.b.toFixed(2)} to 1\n• Expected return per $1: $${k.ret.toFixed(3)}\n• f* = ${(k.f * 100).toFixed(2)}% of bankroll\n• ${k.f > 0 ? `¼ Kelly of $${k.bankroll} = $${k.stake.toFixed(2)} → $${k.base} base` : 'Negative, so Kelly says not to bet. Tickets use the $1 minimum.'}\n\nHit odds: ${k.n ? `official 20-of-80 odds tilted to this pick's backtest average (${k.obsMean.toFixed(2)} of ${spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance), shrunk to ${k.mean.toFixed(2)}` : 'official odds'}.`;
+            return `🧮 Kelly Criterion, f* = (b·p − q) / b:\n\n• ${spot}-Spot${extra ? ' + Extra' : ''}\n• p (chance of any prize): ${(k.p * 100).toFixed(2)}%\n• b (net odds of an average prize): ${k.b.toFixed(2)} to 1\n• Expected return per $1: $${k.ret.toFixed(3)}\n• f* = ${(k.f * 100).toFixed(2)}% of bankroll\n• ${k.f > 0 ? `¼ Kelly of $${k.bankroll} = $${k.stake.toFixed(2)} → $${k.base} base` : 'Negative, so Kelly says not to bet. Number sets use the $1 minimum.'}\n\nHit odds: ${k.n ? `official 20-of-80 odds tilted to this pick's backtest average (${k.obsMean.toFixed(2)} of ${spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance), shrunk to ${k.mean.toFixed(2)}` : 'official odds'}.`;
         }
         function previewMonteCarloText() {
             const tk = previewTicketNow();
-            if (!tk) return 'Monte Carlo runs on your ticket. Tap a pick first (Quick Draw).';
+            if (!tk) return 'Monte Carlo runs on your number set. Tap a pick first (Quick Draw).';
             const m = previewMonteCarlo(tk.nums, tk.base, tk.extra, tk.games);
-            return `🌀 Monte Carlo (${m.sims.toLocaleString('en-US')} sessions; each game draws 20 of 80 at random${tk.extra ? ', Extra from official odds' : ''}):\n\n• Ticket: ${tk.nums.length}-spot, $${tk.base} base${tk.extra ? ' + Extra' : ''}, ${tk.games} game${tk.games === 1 ? '' : 's'} ($${m.spend})\n• Average return: ${(m.ret * 100).toFixed(1)}¢ per $1 (net ${previewMoney(m.meanNet)})\n• Sessions that ended ahead: ${(m.ahead * 100).toFixed(1)}%\n• Net, middle session: ${previewMoney(m.p50)}\n• 90% of sessions between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}\n• Best session: ${previewMoney(m.max)}\n\nEvery draw is independent; this is not a prediction.`;
+            return `🌀 Monte Carlo (${m.sims.toLocaleString('en-US')} sessions; each game draws 20 of 80 at random${tk.extra ? ', Extra from official odds' : ''}):\n\n• Number set: ${tk.nums.length}-spot, $${tk.base} base${tk.extra ? ' + Extra' : ''}, ${tk.games} game${tk.games === 1 ? '' : 's'} ($${m.spend})\n• Average return: ${(m.ret * 100).toFixed(1)}¢ per $1 (net ${previewMoney(m.meanNet)})\n• Sessions that ended ahead: ${(m.ahead * 100).toFixed(1)}%\n• Net, middle session: ${previewMoney(m.p50)}\n• 90% of sessions between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}\n• Best session: ${previewMoney(m.max)}\n\nEvery draw is independent; this is not a prediction.`;
         }
         // Countdown from the real ET clock. Quick Draw: every 4 minutes, 4:00 AM to 3:24 AM ET.
         // Powerball: Mon/Wed/Sat 10:59 PM ET. Mega Millions: Tue/Fri 11:00 PM ET.
@@ -1318,7 +1318,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const lbl = document.getElementById('card-draw-label');
                 if (lbl) lbl.innerText = previewSpread.games > 1 ? `Draws #${previewSpread.start} – #${end} (${previewSpread.games} Games)` : `Target Draw #${previewSpread.start} (Single Game)`;
                 const note = document.getElementById('spread-timer-note');
-                if (note) note.innerText = `Rolled forward to draw #${previewSpread.start}: the earlier start closed. Estimate: NY Lottery's feed lists sales closing at draw time; this shows 30 s earlier as a margin.`;
+                if (note) note.innerText = `Rolled forward to draw #${previewSpread.start}: the earlier start closed. Estimate only: this shows 30 s before the scheduled draw time as a margin. Check with your retailer.`;
             }
             return rolled;
         }
@@ -1348,7 +1348,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             box.className = box.className.replace(/border-(yellow|emerald)-[0-9/]+/g, '') + (waiting ? ' border-yellow-500/60' : ' border-emerald-400/70');
             label.innerText = waiting
                 ? `⏱ Draw #${previewSpread.start} at ${previewFmtEtShort(previewSpread.slot)} · sales close in ${Math.max(1, Math.round((close - Date.now()) / 60000))} min`
-                : (previewSpread.button ? `✅ Place now: draw #${previewSpread.start} is on sale (place by ${previewFmtEt(close)})` : `⏱ Place by ${previewFmtEt(close)} for draw #${previewSpread.start}`);
+                : (previewSpread.button ? `⏱ Draw #${previewSpread.start} · on sale · sales close at ${previewFmtEt(close)}` : `⏱ Draw #${previewSpread.start} · sales close at ${previewFmtEt(close)}`);
             const m = Math.floor(left / 60), sec = left % 60;
             count.innerText = `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
             count.className = 'font-mono font-black text-sm ' + (left <= 30 ? 'text-rose-400' : 'text-cyan-300');
@@ -1629,7 +1629,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     box.className = 'pick-timer rounded-md border border-yellow-500/60 bg-black/40 px-2 py-1 flex items-center justify-between gap-2';
                 } else {
                     const sec = Math.max(0, Math.round((close - now) / 1000));
-                    place.innerText = `✅ Place now: draw #${pk.start} at ${at} is on sale (place by ${by})`;
+                    place.innerText = `⏱ Draw #${pk.start} at ${at} · on sale · sales close at ${by}`;
                     c.innerText = fmt(sec); c.className = 'pick-count font-mono font-black text-sm shrink-0 ' + (sec <= 30 ? 'text-rose-400' : 'text-emerald-300');
                     box.className = 'pick-timer rounded-md border border-emerald-400/70 bg-emerald-950/40 px-2 py-1 flex items-center justify-between gap-2';
                 }
@@ -1741,7 +1741,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             }
             lEl.innerText = previewXLabel(Number(latest.extra_multiplier));
             const t = latest.draw_at ? previewFmtEt(Date.parse(latest.draw_at)).replace(/:\d\d ET$/, ' ET') : '';
-            meta.innerText = `Draw #${latest.draw_number}${t ? ' · ' + t : ''}${latest.unofficial ? ' · unofficial until verified' : ''} · Source: New York Lottery`;
+            meta.innerText = `Draw #${latest.draw_number}${t ? ' · ' + t : ''}${latest.unofficial ? ' · unofficial until verified' : ''} · Source: official posted data (data.ny.gov)`;
             document.getElementById('xpred-head').innerText = `Based on recent draws · last ${xp.N} draws`;
             document.getElementById('xpred-pick').innerText = previewXLabel(xp.pick);
             document.getElementById('xpred-sub').innerText = `Most frequent in the ${xp.N} newest draws available (#${xp.oldest}–#${xp.newest})` + (xp.missing > 0 ? `. ${xp.missing} draws in that range aren't posted to this app yet${xp.gap ? ` (#${xp.gap.from}–#${xp.gap.to})` : ''}, so the window reaches further back` : '') + (xp.N < xp.asked ? ` (only ${xp.N} available)` : '');
@@ -1836,7 +1836,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             saveHistoryArchive(); updateLedgerUI(); gradePendingTickets();
             document.getElementById('manual-numbers-input').value = '';
             msg.innerText = `Logged ${spot}-spot for draws #${start}${c.g > 1 ? ' – #' + (start + c.g - 1) : ''} ($${c.total.toFixed(2)}). It grades itself as results post.`;
-            previewClosePlayCard(`✅ Custom ticket logged. Tap a pick above for a new ticket.`);
+            previewClosePlayCard(`✅ Custom number set logged. Tap a pick above for a new number set.`);
         }
         // ===== PREVIEW: Extra wheel direction log (localStorage only; one entry per draw number) =====
         const PREVIEW_DIR_KEY = 'draw_buddy_extra_direction_log';
@@ -2138,7 +2138,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 `Markov: after draw #${mk.lastDraw}, ${mk.top} followed those 20 numbers ${(mk.topP * 100).toFixed(1)}% of the time vs 25.0% base (${mk.used} consecutive draw pairs, smoothed)`,
                 `Backtest: avg ${avg.toFixed(2)} of 4 matched over ${mk.hits.length} draws vs 1.00 by chance (each based on the draw before it)`,
                 previewKellyLine(kel),
-                'One step ahead: the model predicts the draw after #' + mk.lastDraw + '; later games reuse the same numbers'
+                'One step ahead: these numbers are based on draw #' + mk.lastDraw + '; later games reuse the same numbers. Not a prediction.'
             ];
             if (diagEl) { diagEl.innerText = `🧬 ${mk.top}: ${(mk.topP * 100).toFixed(1)}% after the last draw vs 25% base`; diagEl.className = "text-[9px] text-cyan-400 font-mono font-bold text-center"; }
             updateCostDisplay(); updateOptimizedRoiBadge();
@@ -2534,7 +2534,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const listEl = document.getElementById('leaderboard-list'), sub = document.getElementById('venue-lb-sub'); if (!listEl) return;
             const v = previewVenue; if (sub) sub.innerText = `Active Venue: ${v ? v.name : 'none selected'}`;
             const rows = v ? (sessionTickets || []).filter(t => t.venueId === v.id) : [];
-            if (!rows.length) { listEl.innerHTML = `<div class="p-2.5 text-center text-[10px] text-slate-500">${v ? 'No logged tickets at this venue yet' : 'Pick a venue to see your slips logged there'}</div>`; return; }
+            if (!rows.length) { listEl.innerHTML = `<div class="p-2.5 text-center text-[10px] text-slate-500">${v ? 'No logged number sets at this venue yet' : 'Pick a venue to see your slips logged there'}</div>`; return; }
             const ranked = rows.map(t => ({ t, net: (parseFloat(t.payout) || 0) - (parseFloat(t.wager) || 0), g: (t.gradedDraws || []).length ? 1 : 0 })).sort((a, b) => b.g - a.g || b.net - a.net || (b.t.bestHits || 0) - (a.t.bestHits || 0));
             let tw = 0, tp = 0; rows.forEach(t => { tw += parseFloat(t.wager) || 0; tp += parseFloat(t.payout) || 0; });
             listEl.innerHTML = ranked.slice(0, 5).map((o, i) => { const t = o.t, range = (t.games || 1) > 1 ? `#${t.draw}–#${t.endDraw}` : `#${t.draw}`; return `
@@ -2592,7 +2592,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if(hmTitle) hmTitle.innerText = "📊 Number Frequency (Tap to Inspect)";
 
             const configTitle = document.getElementById('config-panel-title');
-            if(configTitle) configTitle.innerText = `🎟️ Ticket Generator`;
+            if(configTitle) configTitle.innerText = `🎟️ Number Set Generator`;
 
             const lookbackSelect = document.getElementById('lookback-draws');
             if (lookbackSelect) {
@@ -2766,7 +2766,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function runMonteCarloModal() {
             if (activeTier === 'free') {
-                alert("🔒 Monte Carlo Simulation is a Pro feature! Upgrade to Pro ($9.99) to run 10,000-session simulations of your ticket.");
+                alert("🔒 Monte Carlo Simulation is a Pro feature! Upgrade to Pro ($9.99) to run 10,000-session simulations of your number set.");
                 return;
             }
             alert(previewMonteCarloText());
@@ -2783,7 +2783,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (n === num) { c.style.outline = '3px solid #ffffff'; c.style.outlineOffset = '1px'; c.style.webkitTransform = 'scale(1.12)'; c.style.transform = 'scale(1.12)'; c.style.zIndex = '2'; c.style.position = 'relative'; }
                 else if (tix.includes(n)) { c.style.outline = '2px dashed #22d3ee'; c.style.outlineOffset = '0'; }
             });
-            const note = document.getElementById('heatmap-sheet-note'); if (note) note.innerText = `#${num} from your ticket · dashed = your other numbers`;
+            const note = document.getElementById('heatmap-sheet-note'); if (note) note.innerText = `#${num} from your number set · dashed = your other numbers`;
             sheet.style.display = 'block'; document.body.style.overflow = 'hidden';
             sheet.scrollTop = 0;
             inspectNumber(num, true);
@@ -3286,14 +3286,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (previewBdMode !== 'wait' || !previewBdWaitDraw) return;
             const n = previewBdWaitDraw, at = previewBdWaitAt, now = Date.now(), lag = previewPostLagS;
             const mini = document.getElementById('bd-mini'), sub = document.getElementById('bd-sub');
-            const tk = `${previewBdWaitSlips} ticket${previewBdWaitSlips === 1 ? '' : 's'}`;
-            if (!at) { mini.innerText = `in play · ${tk} · waiting for results`; sub.innerText = `Your logged ticket is in play for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
+            const tk = `${previewBdWaitSlips} number set${previewBdWaitSlips === 1 ? '' : 's'}`;
+            if (!at) { mini.innerText = `Tracking ${tk} · waiting for posted results`; sub.innerText = `Your logged number set is in play for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
             const when = previewFmtEtShort(at);
             if (now < at) {
                 mini.innerText = `in play · ${tk} · draw at ${when.replace(' ET', '')}`;
-                sub.innerText = `Your logged ticket is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
+                sub.innerText = `Your logged number set is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
             } else {
-                mini.innerText = `in play · ${tk} · waiting for NY Lottery`;
+                mini.innerText = `Tracking ${tk} · waiting for posted results`;
                 sub.innerText = `Draw #${n} was at ${when}. Waiting for draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
             }
         }
@@ -3341,7 +3341,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (!covering.length && !previewBdBusy && !previewBdHold && previewBdMode !== 'jp') { box.hidden = true; if (previewBdMode === 'wait') previewBdMode = null; }
         }
         function previewBdTicketLabel(t, i) {
-            const name = t.pickName || (t.pickKey && PREVIEW_BTN_NAMES[t.pickKey]) || (t.manual ? 'My Numbers' : `Ticket ${i + 1}`);
+            const name = t.pickName || (t.pickKey && PREVIEW_BTN_NAMES[t.pickKey]) || (t.manual ? 'My Numbers' : `Number set ${i + 1}`);
             return `${String(name).slice(0, 45)} · ${Number(t.spot) || t.numbers.length}-spot`;
         }
         const PREVIEW_BD_BALL_MS = 900; // one ball lands at a time: 20 balls ≈ 18 s, then the 2.7 s Extra wheel
@@ -3383,7 +3383,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     myBox.appendChild(el); o.countEl = count; o.prizeEl = prize; o.el = el;
                 });
             }
-            const ticketSuffix = ` · ${slips.length} ticket${slips.length === 1 ? '' : 's'}`;
+            const ticketSuffix = ` · ${slips.length} number set${slips.length === 1 ? '' : 's'}`;
             document.getElementById('bd-wheel').hidden = true;
             previewBdFit();
             const order = (Array.isArray(row.listed_order) && row.listed_order.length === nums.length) ? row.listed_order.map(Number) : nums.slice();
@@ -3429,7 +3429,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const totalText = `${combined} match${combined === 1 ? '' : 'es'}${ticketSuffix}`;
             res.textContent = '';
             { const tot = document.createElement('div'); tot.className = 'bd-prize-total ' + (paid > 0 ? 'bd-prize-yes' : 'bd-prize-no') + (slips.length === 1 ? ' bd-tight-hide' : '');
-              tot.textContent = paid > 0 ? `${slips.length > 1 ? 'Total prize this draw' : 'Prize this draw'}: $${paid.toFixed(2)}` : (slips.length > 1 ? 'No prize this draw on any ticket.' : 'No prize this draw.');
+              tot.textContent = paid > 0 ? `${slips.length > 1 ? 'Total prize this draw' : 'Prize this draw'}: $${paid.toFixed(2)}` : (slips.length > 1 ? 'No prize this draw on any number set.' : 'No prize this draw.');
               const note = document.createElement('div'); note.className = 'bd-prize-note';
               note.textContent = `${(window.DB_COPY && window.DB_COPY.NOT_OFFICIAL) || 'Not official ticket validation. Confirm prizes with the official lottery.'} `;
               const more = document.createElement('span'); more.className = 'bd-tight-hide'; more.textContent = 'Official NY Quick Draw prize table. Each draw is independent.'; note.appendChild(more);
@@ -3450,7 +3450,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 await new Promise(r => setTimeout(r, 2700));
                 document.getElementById('bd-wheel-label').innerText = mult === 1 ? 'No Extra' : `Extra ${mult}X`;
                 const wp = document.getElementById('bd-wheel-prize'); wp.textContent = '';
-                wp.textContent = info.some(o => o.t.hasExtra) ? (mult === 1 ? 'Extra on: this draw pays the base prize.' : `Extra on: prizes × ${mult}.`) : 'Extra off on your ticket.';
+                wp.textContent = info.some(o => o.t.hasExtra) ? (mult === 1 ? 'Extra on: this draw pays the base prize.' : `Extra on: prizes × ${mult}.`) : 'Extra off on your number set.';
                 document.getElementById('bd-mini').innerText = `${totalText} · ${mult === 1 ? 'No Extra' : `Extra ${mult}X`}`; previewBdFit(); previewBdReveal('e' + row.draw_number);
                 previewBdAutoFold = true;
             }
@@ -3486,7 +3486,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                         if (eg) { const gr = E.grade(eg, { nums: t.numbers.map(Number), bonus: t.bonus != null ? Number(t.bonus) : (t.powerball != null ? Number(t.powerball) : null), opts: {} }, { nums: main, bonus: bonus != null ? Number(bonus) : null });
                             if (gr && gr.cash > 0) { amt = gr.cash; line = `Prize: $${gr.cash.toLocaleString()}`; } else if (gr && gr.label) { named = true; line = `Prize: ${/jackpot/i.test(gr.label) ? 'top prize tier (amount set by the lottery)' : gr.label}`; } else if (gr) line = 'No prize this draw.'; }
                         tot += amt;
-                        const d = document.createElement('div'); d.className = 'bd-prize-amt ' + (amt > 0 || /^Prize/.test(line) ? 'bd-prize-yes' : 'bd-prize-no'); d.textContent = (cover.length > 1 ? `Ticket ${i + 1}: ` : '') + line; resEl.appendChild(d);
+                        const d = document.createElement('div'); d.className = 'bd-prize-amt ' + (amt > 0 || /^Prize/.test(line) ? 'bd-prize-yes' : 'bd-prize-no'); d.textContent = (cover.length > 1 ? `Number set ${i + 1}: ` : '') + line; resEl.appendChild(d);
                     });
                     if (cover.length > 1 && tot > 0) { const d = document.createElement('div'); d.className = 'bd-prize-total bd-prize-yes'; d.textContent = `Total prize this draw: $${tot.toLocaleString()}${named ? ' + named tier' : ''}`; resEl.appendChild(d); }
                     const nt = document.createElement('div'); nt.className = 'bd-prize-note'; nt.textContent = ((window.DB_COPY && window.DB_COPY.NOT_OFFICIAL) || 'Not official ticket validation. Confirm prizes with the official lottery.') + ' Base prizes from the official chart.'; resEl.appendChild(nt);
@@ -3568,7 +3568,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewAllTiming(r) {
             const sp = r.spread, close = sp.slot - PREVIEW_CLOSE_MARGIN_MS;
             const waiting = sp.openAt && Date.now() < sp.openAt;
-            return `${waiting ? 'Play in ' + Math.max(1, Math.ceil((sp.openAt - Date.now()) / 60000)) + ' min' : 'Place now'} · draw #${sp.start} at ${previewFmtEtShort(sp.slot)} · place by ${previewFmtEtShort(close)}`;
+            return `${waiting ? 'On sale in ' + Math.max(1, Math.ceil((sp.openAt - Date.now()) / 60000)) + ' min' : 'On sale now'} · draw #${sp.start} at ${previewFmtEtShort(sp.slot)} · sales close at ${previewFmtEtShort(close)}`;
         }
         function previewRenderAllPicks() {
             const box = document.getElementById('all-picks-results'); if (!box) return;
@@ -3593,7 +3593,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (!r.spread || r.spread.slot - PREVIEW_CLOSE_MARGIN_MS <= Date.now()) {
                 await previewRunButton(r.key, false);
                 document.getElementById('four-picks-status').innerText = `${PREVIEW_BTN_NAMES[r.key]}: that time closed, so this pick was refreshed for an available draw.`;
-            } else { previewLoadPickRow(r); document.getElementById('four-picks-status').innerText = `Loaded ${PREVIEW_BTN_NAMES[r.key]} into 🎟️ Your Ticket. Nothing logged yet.`; }
+            } else { previewLoadPickRow(r); document.getElementById('four-picks-status').innerText = `Loaded ${PREVIEW_BTN_NAMES[r.key]} into 🎟️ Your Number Set. Nothing logged yet.`; }
             const pc = document.getElementById('play-card'); if (pc) pc.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         async function previewRunAllPicks() {
@@ -3621,7 +3621,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 else { document.getElementById('play-card').classList.add('hidden'); previewSelectedButton = old.key; previewSpread = old.spread; PREVIEW_ALL_FIELDS.forEach(id => previewSetSelect(id, old.settings[id])); previewHighlight(old.key); previewSettingsSummary(); updateCostDisplay(); }
                 previewRenderAllPicks();
                 document.getElementById('all-picks-note').innerText = `${previewAllRows.length} picks · sorted by soonest time to place · built ${previewFmtEtShort(Date.now())}.`;
-                status.innerText = 'All picks ready below. Tap Use this to load one into Your Ticket.';
+                status.innerText = 'All picks ready below. Tap Use this to load one into Your Number Set.';
             } catch (e) { status.innerText = 'Could not build all picks from the available data. Try again shortly.'; }
             finally { previewAllBusy = false; btn.disabled = false; btn.style.opacity = ''; }
         }
@@ -3707,7 +3707,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const g = ci.games >= 0 && v[ci.games] ? parseInt(v[ci.games], 10) : 1; if (!(g >= 1 && g <= 20)) return bad.push(`row ${rowNo}: games 1–20`);
                 previewAddUploaded({ draw, spot, nums: p.nums, w, x, g, fileName: name }); ok++;
             });
-            if (ok) previewClosePlayCard(`✅ ${ok} uploaded slip${ok === 1 ? '' : 's'} added to the P/L History Archive. Tap a pick above for a new ticket.`);
+            if (ok) previewClosePlayCard(`✅ ${ok} uploaded slip${ok === 1 ? '' : 's'} added to the P/L History Archive. Tap a pick above for a new number set.`);
             previewBatchMsg(`${name}: imported ${ok} slip${ok === 1 ? '' : 's'}${bad.length ? `; skipped ${bad.length} (${bad.slice(0, 4).join('; ')}${bad.length > 4 ? '…' : ''})` : ''}. Grading against real draws…`);
             previewGradeUploads();
         }
@@ -3752,13 +3752,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             document.getElementById('batch-numbers').value = ''; document.getElementById('batch-draw-num').value = draw + g;
             previewBatchFile = null; document.getElementById('batch-review-img').hidden = true; document.getElementById('batch-review-file').innerText = 'Next slip: take or upload another photo, or type it here.';
             previewGradeUploads();
-            previewClosePlayCard(`✅ Upload added to the P/L History Archive. Tap a pick above for a new ticket.`);
+            previewClosePlayCard(`✅ Upload added to the P/L History Archive. Tap a pick above for a new number set.`);
         }
         function previewSyncLogBtn() {
             const pc = document.getElementById('play-card'), b = document.getElementById('log-ticket-main'), h = document.getElementById('log-ticket-hint'); if (!pc || !b) return;
             const on = !pc.classList.contains('hidden') && Array.isArray(lastGeneratedNumbers) && lastGeneratedNumbers.length > 0;
             b.disabled = !on;
-            if (h) h.innerText = on ? `${(document.getElementById('card-draw-label') || {}).innerText || ''} · logs this ticket and closes the panel` : '';
+            if (h) h.innerText = on ? `${(document.getElementById('card-draw-label') || {}).innerText || ''} · logs this number set and closes the panel` : '';
         }
         try { new MutationObserver(() => previewSyncLogBtn()).observe(document.getElementById('play-card'), { attributes: true, attributeFilter: ['class'] }); } catch (e) {}
         function previewClosePlayCard(msg) {

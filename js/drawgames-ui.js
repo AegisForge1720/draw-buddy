@@ -127,7 +127,7 @@
       </div>
 
       <div class="bg-[#0b132b] p-3 rounded-xl border border-[#1d4ed8] shadow-xl space-y-2" id="dg-log">
-        <div class="flex items-center justify-between"><h3 class="text-[11px] uppercase tracking-wider text-yellow-400 font-black">📊 My Logged Tickets</h3>
+        <div class="flex items-center justify-between"><h3 class="text-[11px] uppercase tracking-wider text-yellow-400 font-black">📊 My Logged Number Sets</h3>
         <button type="button" id="dg-log-clear" class="text-[9px] text-rose-300 border border-rose-800 rounded px-2 py-0.5">Clear</button></div>
         <div id="dg-notice" class="text-[10px] text-emerald-200 bg-emerald-950/40 border border-emerald-600/50 rounded-lg p-2" hidden></div>
         <div id="dg-log-list" class="space-y-1.5 text-[10px]"></div>
@@ -144,7 +144,7 @@
     $('dg-bd-reveal').onclick = () => revealPick();
     $('dg-own-use').onclick = () => useOwn();
     $('dg-own').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); useOwn(); } });
-    $('dg-log-clear').onclick = () => { if (confirm('Clear the logged tickets for this game?')) { saveTickets(tickets().filter(t => t.game !== state.game)); renderLog(); } };
+    $('dg-log-clear').onclick = () => { if (confirm('Clear the logged number sets for this game?')) { saveTickets(tickets().filter(t => t.game !== state.game)); renderLog(); } };
     $('dg-lookback').onchange = e => { state.lookback = e.target.value; renderStats(); };
   }
 
@@ -272,7 +272,7 @@
       if (b != null && (b < 1 || b > g.bonus.max)) { msg.textContent = `${g.bonus.name} must be 1 to ${g.bonus.max}.`; return; }
       state.pick = { name: '✍️ My Numbers', nums: main.sort((x, y) => x - y), bonus: b, opts: { powerplay: S().powerplay, doubleplay: S().doubleplay }, why: ['Your own numbers.'], source: 'own' };
     }
-    msg.textContent = 'Loaded into Your Ticket below. Check it against history there.';
+    msg.textContent = 'Loaded into Your Number Set below. Check it against history there.';
     renderTicket();
   }
 
@@ -296,7 +296,7 @@
     if (g.builtInMultiplier) notes.push('Base prizes only: each Mega Millions play has its own 2X–10X multiplier printed on the ticket, and the feed does not have it.');
     if (g.kind === 'digits') notes.push('Booster is not included.');
     if (dp) notes.push(`${DP_NOT_GRADED} Spend excludes the Double Play $1.`);
-    return `<div id="dg-hindsight" class="text-[10px] text-slate-200 border-t border-slate-700 pt-1.5"><b>Hindsight check:</b> on the last ${N} official draws this ticket matched a prize tier on ${won} draw${won === 1 ? '' : 's'}${cash ? `, ${money(cash)} in fixed prize tiers vs ${money(spent)} spent` : ''}.${tierTxt ? `<div class="text-[9px] text-slate-400">Matches: ${esc(tierTxt)}</div>` : ''}${notes.length ? `<div class="text-[9px] text-slate-400">${esc(notes.join(' '))}</div>` : ''}<div class="text-[9px] text-slate-500">Hindsight only${state.pick && state.pick.source === 'auto' ? ': the auto picks were chosen from these same draws' : ': a lookback on draws that already happened'}. It does not improve the chance of a future prize.</div><div class="text-[9px] text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</div></div>`;
+    return `<div id="dg-hindsight" class="text-[10px] text-slate-200 border-t border-slate-700 pt-1.5"><b>Hindsight check:</b> on the last ${N} official draws this number set matched a prize tier on ${won} draw${won === 1 ? '' : 's'}${cash ? `, ${money(cash)} in fixed prize tiers vs ${money(spent)} spent` : ''}.${tierTxt ? `<div class="text-[9px] text-slate-400">Matches: ${esc(tierTxt)}</div>` : ''}${notes.length ? `<div class="text-[9px] text-slate-400">${esc(notes.join(' '))}</div>` : ''}<div class="text-[9px] text-slate-500">Hindsight only${state.pick && state.pick.source === 'auto' ? ': the auto picks were chosen from these same draws' : ': a lookback on draws that already happened'}. It does not improve the chance of a future prize.</div><div class="text-[9px] text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</div></div>`;
   }
   function renderTicket() {
     const box = $('dg-ticket'), pk = state.pick, g = G(); if (!pk) { box.hidden = true; return; }
@@ -307,7 +307,7 @@
     const same = state.pick.source === 'auto' ? sameText(sameAs(pk, pk.mode)) : sameText(sameAs(pk, null));
     box.hidden = false;
     box.innerHTML = `
-      <div class="flex items-start justify-between gap-2"><div><div class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">🎟️ Your Ticket</div><div class="text-[11px] font-black text-white">${esc(pk.name)}</div></div>
+      <div class="flex items-start justify-between gap-2"><div><div class="text-[10px] uppercase tracking-wider text-yellow-300 font-black">🎟️ Your Number Set</div><div class="text-[11px] font-black text-white">${esc(pk.name)}</div></div>
       <div class="text-right"><div class="text-[9px] text-blue-300">${esc(g.kind === 'digits' ? (E.digitPlay(g.key, s.playType, pk.digits, s.wager) || {}).label || '' : g.name)}${s.powerplay ? ' + Power Play' : ''}${s.doubleplay ? ' + Double Play' : ''}${g.minPlays ? ` · ${s.plays} plays` : ''}</div><div class="text-[12px] font-black text-emerald-400">${money(cost * s.draws)}</div></div></div>
       <div class="flex flex-wrap gap-1">${ticketBalls(pk, g)}</div>
       ${same ? `<div id="dg-same-ticket" class="text-[10px] font-bold text-yellow-200">${esc(same)}.</div>` : ''}
@@ -318,7 +318,7 @@
       ${historyCheck(pk, g)}
       <div class="text-[9px] text-yellow-300 font-bold">${esc(DISCLAIMER)}</div>
       <div class="grid grid-cols-2 gap-2"><button type="button" id="dg-t-reveal" class="bg-amber-700 hover:bg-amber-600 text-white font-bold py-2 rounded-lg text-[11px]">🎱 Reveal in Ball Drop</button>
-      <button type="button" id="dg-t-log" class="bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 font-black py-2 rounded-lg text-[11px]">📥 Log Ticket</button></div>`;
+      <button type="button" id="dg-t-log" class="bg-gradient-to-r from-emerald-500 to-green-600 text-slate-950 font-black py-2 rounded-lg text-[11px]">📥 Log Number Set</button></div>`;
     $('dg-t-reveal').onclick = () => { revealPick(); $('dg-balldrop').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
     $('dg-t-log').onclick = () => logTicket();
   }
@@ -344,7 +344,7 @@
   }
   function renderLog() {
     const g = G(), list = $('dg-log-list'), mine = tickets().filter(t => t.game === state.game).sort((a, b) => b.at - a.at);
-    if (!mine.length) { list.innerHTML = '<div class="text-slate-400">No tickets logged for this game yet. Tap 📥 Log Ticket on a pick.</div>'; return; }
+    if (!mine.length) { list.innerHTML = '<div class="text-slate-400">No number sets logged for this game yet. Tap 📥 Log Number Set on a pick.</div>'; return; }
     list.innerHTML = mine.slice(0, 20).map(t => {
       const done = t.draws.filter(d => t.results[d.date + '|' + d.session]).length, won = Object.values(t.results).reduce((s, x) => s + (x.cash || 0), 0);
       const nums = t.digits ? t.digits.join('') + ' · ' + ((E.digitPlay(g.key, t.playType, t.digits, t.wager) || {}).label || t.playType) : t.nums.map(pad).join(' ') + (t.bonus != null ? ' + ' + pad(t.bonus) : '');
@@ -433,7 +433,7 @@
     const my = how.ticket || (how.kind === 'result' ? state.pick : null), token = ++animToken;
     stage.innerHTML = ''; res.textContent = '';
     const isPick = how.kind === 'pick';
-    sub.textContent = isPick ? `Pick reveal: your ${how.label || 'ticket'} drops one ball at a time. This is not a draw.` : `Result replay · official result for ${fmtDate(row.date)}${row.session !== 'main' ? ' ' + sesLabel(row.session) : ''} (data.ny.gov)${row.mult ? ` · multiplier ${row.mult}X` : ''}${row.booster ? ` · Booster ${row.booster}%` : ''}`;
+    sub.textContent = isPick ? `Pick reveal: your ${how.label || 'number set'} drops one ball at a time. This is not a draw.` : `Result replay · official result for ${fmtDate(row.date)}${row.session !== 'main' ? ' ' + sesLabel(row.session) : ''} (data.ny.gov)${row.mult ? ` · multiplier ${row.mult}X` : ''}${row.booster ? ` · Booster ${row.booster}%` : ''}`;
     note.textContent = isPick ? '' : g.kind === 'digits' ? 'Digits drop in the order drawn.' : 'data.ny.gov lists the numbers low to high, so the balls drop low to high (the order they came out of the machine is not in the feed).';
     const wait = reduced() ? 60 : BALL_MS;
     if (g.kind === 'keno') {
@@ -476,7 +476,7 @@
       // Prize amount, big and clear (official prize chart; tiers set by the lottery are named, not priced).
       const lab = gr && gr.label ? (/jackpot/i.test(gr.label) ? 'top prize tier (amount set by the lottery)' : gr.label) : null;
       const prizeTxt = gr && gr.cash > 0 ? `Prize: ${money(gr.cash)}` : lab ? `Prize: ${lab}` : 'No prize this draw.';
-      res.innerHTML = `<div class="dg-prize-amt ${gr && (gr.cash > 0 || lab) ? 'text-emerald-400' : 'text-slate-300'} font-black" style="font-size:${gr && (gr.cash > 0 || lab) ? 20 : 15}px;line-height:1.2">${esc(prizeTxt)}</div><b>${esc(my.name || 'Your ticket')}</b> vs this result: ${esc(gr ? gr.text.replace(/jackpot/ig, 'top prize') : '')}. <span class="text-slate-400">Prize tiers from the official chart; each draw is independent.</span> <span class="text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</span>`; }
+      res.innerHTML = `<div class="dg-prize-amt ${gr && (gr.cash > 0 || lab) ? 'text-emerald-400' : 'text-slate-300'} font-black" style="font-size:${gr && (gr.cash > 0 || lab) ? 20 : 15}px;line-height:1.2">${esc(prizeTxt)}</div><b>${esc(my.name || 'Your number set')}</b> vs this result: ${esc(gr ? gr.text.replace(/jackpot/ig, 'top prize') : '')}. <span class="text-slate-400">Prize tiers from the official chart; each draw is independent.</span> <span class="text-amber-200 font-bold">${esc(NOT_OFFICIAL)}</span>`; }
     else res.textContent = 'Official result. Make a pick to see your matches light up.';
   }
   function replayLatest() { const R = rowsForStats(); if (!R.length) { $('dg-bd-result').textContent = 'Data unavailable: no official result loaded.'; return; } animate(R[0], { kind: 'result' }); }
