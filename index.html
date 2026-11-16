@@ -1023,7 +1023,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (xb && xb.hidden) {
                     let xp = null; try { xp = previewExtraPredict(); } catch (e) {}
                     let L = 0, R = 0; try { Object.values(previewDirLoad() || {}).forEach(e => { if (e.dir === 'L') L++; else if (e.dir === 'R') R++; }); } catch (e) {}
-                    t = `· ${xp ? `next ${xp.pick}X · Extra ${xp.extraOn ? 'on' : 'off'}` : 'no data yet'} · L ${L} / R ${R}`;
+                    t = `· ${xp ? `next ${previewXLabel(xp.pick)} · Extra ${xp.extraOn ? 'on' : 'off'}` : 'no data yet'} · L ${L} / R ${R}`;
                 }
                 xs.innerText = t;
             }
@@ -1614,7 +1614,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 out += `<path d="M0 0 L${x1} ${y1} A${R} ${R} 0 ${large} 1 ${x2} ${y2} Z" fill="${PREVIEW_WHEEL_COLORS[m]}" stroke="#050814" stroke-width="1.5"/>`;
                 if ((to - from) < 15) return; // 5X and 10X wedges are too thin for a label; the table lists them
                 const [tx, ty] = pt(mid, (to - from) < 30 ? 72 : 60);
-                out += `<text x="${tx}" y="${ty}" fill="#fff" font-size="${(to - from) < 30 ? 11 : 15}" font-weight="900" text-anchor="middle" dominant-baseline="middle" transform="rotate(${mid.toFixed(1)} ${tx} ${ty})">${m}X</text>`;
+                out += `<text x="${tx}" y="${ty}" fill="#fff" font-size="${(to - from) < 30 ? 11 : (Number(m) === 1 ? 13 : 15)}" font-weight="900" text-anchor="middle" dominant-baseline="middle" transform="rotate(${mid.toFixed(1)} ${tx} ${ty})">${previewXLabel(m)}</text>`;
             });
             out += `<circle r="14" fill="#050814" stroke="#facc15" stroke-width="2"/>`;
             svg.innerHTML = out;
@@ -1669,7 +1669,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             return { gap, missing, N: rows.length, asked: N, pick, wpick, cnt, rate: cnt[pick] / rows.length, official, plus, rate2, extraOn, oldest, newest,
                 dir: { n: inWin.length, L, R, pick: inWin.length ? (L > R ? 'L' : R > L ? 'R' : null) : null } };
         }
-        function previewExtraLabel(xp) { return xp ? `Extra: ${xp.extraOn ? 'ON' : 'OFF'} · predicted ${xp.pick}X (last ${xp.N} draws)` : 'Extra: OFF · Extra history unavailable'; }
+        // Andrew 2026-11-16: a 1X Extra result means no multiplier, so it reads "No Extra". 2X-10X stay as-is.
+        function previewXLabel(m) { return Number(m) === 1 ? 'No Extra' : `${m}X`; }
+        function previewExtraLabel(xp) { return xp ? `Extra: ${xp.extraOn ? 'ON' : 'OFF'} · predicted ${previewXLabel(xp.pick)} (last ${xp.N} draws)` : 'Extra: OFF · Extra history unavailable'; }
         function previewRenderExtra() {
             const panel = document.getElementById('extra-wheel-panel'); if (!panel) return;
             if (activeGameKey !== 'quickdraw') { panel.hidden = true; return; }
@@ -1683,7 +1685,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             tbody.innerHTML = PREVIEW_EXTRA.map(([m, wt]) => {
                 const isPick = xp && xp.pick === m, isLatest = latest && Number(latest.extra_multiplier) === m;
                 const c = xp ? xp.cnt[m] : 0, share = rows.length ? (c / rows.length * 100).toFixed(1) + '%' : '—';
-                return `<tr class="${isPick ? 'bg-yellow-400/20 text-yellow-200 font-black' : 'text-slate-200'}"><td class="py-0.5"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PREVIEW_WHEEL_COLORS[m]};margin-right:4px"></span>${m}X${isPick ? ' ◀ pick' : ''}${isLatest ? ' · latest' : ''}</td><td>${wt} in 80</td><td>${(wt / 80 * 100).toFixed(2)}%</td><td>${rows.length ? c + ' · ' + share : '—'}</td></tr>`;
+                return `<tr class="${isPick ? 'bg-yellow-400/20 text-yellow-200 font-black' : 'text-slate-200'}"><td class="py-0.5"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${PREVIEW_WHEEL_COLORS[m]};margin-right:4px"></span>${previewXLabel(m)}${isPick ? ' ◀ pick' : ''}${isLatest ? ' · latest' : ''}</td><td>${wt} in 80</td><td>${(wt / 80 * 100).toFixed(2)}%</td><td>${rows.length ? c + ' · ' + share : '—'}</td></tr>`;
             }).join('');
             const lEl = document.getElementById('extra-latest'), meta = document.getElementById('extra-latest-meta');
             if (!latest || !xp) {
@@ -1691,14 +1693,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 ['xpred-pick', 'xpred-sub', 'xpred-rate', 'xpred-weighted', 'xpred-2plus', 'xpred-extra-call', 'xpred-dir'].forEach(id => document.getElementById(id).innerText = id === 'xpred-sub' ? 'Data unavailable' : '—');
                 return;
             }
-            lEl.innerText = `${Number(latest.extra_multiplier)}X`;
+            lEl.innerText = previewXLabel(Number(latest.extra_multiplier));
             const t = latest.draw_at ? previewFmtEt(Date.parse(latest.draw_at)).replace(/:\d\d ET$/, ' ET') : '';
             meta.innerText = `Draw #${latest.draw_number}${t ? ' · ' + t : ''}${latest.unofficial ? ' · unofficial until verified' : ''} · Source: New York Lottery`;
             document.getElementById('xpred-head').innerText = `Next Extra pick · last ${xp.N} draws`;
-            document.getElementById('xpred-pick').innerText = `${xp.pick}X`;
+            document.getElementById('xpred-pick').innerText = previewXLabel(xp.pick);
             document.getElementById('xpred-sub').innerText = `Most frequent in the ${xp.N} newest draws available (#${xp.oldest}–#${xp.newest})` + (xp.missing > 0 ? `. ${xp.missing} draws in that range aren't posted to this app yet${xp.gap ? ` (#${xp.gap.from}–#${xp.gap.to})` : ''}, so the window reaches further back` : '') + (xp.N < xp.asked ? ` (only ${xp.N} available)` : '');
-            document.getElementById('xpred-rate').innerHTML = `<b class="text-yellow-200">${xp.pick}X</b> came up ${xp.cnt[xp.pick]} of ${xp.N} (${(xp.rate * 100).toFixed(1)}%) vs official ${(xp.official * 100).toFixed(2)}%`;
-            document.getElementById('xpred-weighted').innerText = `Recency-weighted pick: ${xp.wpick}X${xp.wpick === xp.pick ? ' (same)' : ''}`;
+            document.getElementById('xpred-rate').innerHTML = `<b class="text-yellow-200">${previewXLabel(xp.pick)}</b> came up ${xp.cnt[xp.pick]} of ${xp.N} (${(xp.rate * 100).toFixed(1)}%) vs official ${(xp.official * 100).toFixed(2)}%`;
+            document.getElementById('xpred-weighted').innerText = `Recency-weighted pick: ${previewXLabel(xp.wpick)}${xp.wpick === xp.pick ? ' (same)' : ''}`;
             document.getElementById('xpred-2plus').innerText = `2X or more: ${xp.plus} of ${xp.N} (${(xp.rate2 * 100).toFixed(1)}%) vs official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%`;
             const call = document.getElementById('xpred-extra-call');
             call.innerText = xp.extraOn ? `Auto picks: Extra ON (2X-or-more rate at or above the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)` : `Auto picks: Extra OFF (2X-or-more rate below the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)`;
@@ -1819,7 +1821,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (changed) previewDirSave(log);
             const keep = sel.value;
             const recent = (previewExtraRows || []).slice(0, 10);
-            sel.innerHTML = recent.map(r => `<option value="${r.draw_number}">#${r.draw_number} · ${Number(r.extra_multiplier)}X${log[r.draw_number] ? ' · ' + (log[r.draw_number].dir === 'L' ? 'Left' : 'Right') : ''}</option>`).join('');
+            sel.innerHTML = recent.map(r => `<option value="${r.draw_number}">#${r.draw_number} · ${previewXLabel(Number(r.extra_multiplier))}${log[r.draw_number] ? ' · ' + (log[r.draw_number].dir === 'L' ? 'Left' : 'Right') : ''}</option>`).join('');
             if (keep && recent.some(r => String(r.draw_number) === keep)) sel.value = keep;
             const entries = Object.keys(log).map(k => ({ num: Number(k), ...log[k] })).sort((a, b) => b.num - a.num);
             const n = entries.length, stats = document.getElementById('dir-stats');
@@ -1827,12 +1829,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const mults = PREVIEW_EXTRA.map(([m]) => m);
             const row = d => {
                 const es = entries.filter(e => e.dir === d), c = es.length, known = es.filter(e => e.extra);
-                const by = mults.map(m => { const k = known.filter(e => e.extra === m).length; return k ? `${m}X ${k} (${(k / known.length * 100).toFixed(0)}%)` : null; }).filter(Boolean).join(' · ');
+                const by = mults.map(m => { const k = known.filter(e => e.extra === m).length; return k ? `${previewXLabel(m)} ${k} (${(k / known.length * 100).toFixed(0)}%)` : null; }).filter(Boolean).join(' · ');
                 const over = known.length ? `${(known.filter(e => e.extra > 1).length / known.length * 100).toFixed(0)}% 2X or more` : '—';
                 return `<div class="py-0.5"><span class="font-black ${d === 'L' ? 'text-indigo-300' : 'text-teal-300'}">${d === 'L' ? '⟲ Left' : 'Right ⟳'}: ${c} of ${n} (${(c / n * 100).toFixed(0)}%)</span><div class="text-[9px] text-slate-400">${known.length ? by + ' · ' + over : 'Multiplier not posted yet'}</div></div>`;
             };
             stats.innerHTML = `<div class="text-[9px] text-blue-300 mb-0.5">From your logged draws (n=${n})</div>` + row('L') + row('R');
-            document.getElementById('dir-log').innerHTML = entries.slice(0, 6).map(e => `<div class="flex items-center justify-between text-[10px] bg-[#0b132b] rounded px-2 py-1"><span>#${e.num} · ${e.dir === 'L' ? '⟲ Left' : 'Right ⟳'} · ${e.extra ? e.extra + 'X' : 'pending'}</span><button type="button" class="text-rose-300 font-bold" onclick="previewUndoDirection(${e.num})">Undo</button></div>`).join('') + (n > 6 ? `<div class="text-[9px] text-slate-500">+${n - 6} older</div>` : '');
+            document.getElementById('dir-log').innerHTML = entries.slice(0, 6).map(e => `<div class="flex items-center justify-between text-[10px] bg-[#0b132b] rounded px-2 py-1"><span>#${e.num} · ${e.dir === 'L' ? '⟲ Left' : 'Right ⟳'} · ${e.extra ? previewXLabel(e.extra) : 'pending'}</span><button type="button" class="text-rose-300 font-bold" onclick="previewUndoDirection(${e.num})">Undo</button></div>`).join('') + (n > 6 ? `<div class="text-[9px] text-slate-500">+${n - 6} older</div>` : '');
         }
     </script>
     <script>
@@ -3215,7 +3217,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const pay = info[i];
                 if (o.prizeEl) {
                     o.prizeEl.hidden = false;
-                    o.prizeEl.textContent = `${o.t.hasExtra ? `$${pay.base.toFixed(2)} × Extra ${mult}X = $${pay.prize.toFixed(2)}` : `$${pay.prize.toFixed(2)} · no Extra`} · ${pay.done}/${pay.total} draws done`;
+                    o.prizeEl.textContent = `${o.t.hasExtra ? (mult === 1 ? `$${pay.prize.toFixed(2)} · No Extra this draw` : `$${pay.base.toFixed(2)} × Extra ${mult}X = $${pay.prize.toFixed(2)}`) : `$${pay.prize.toFixed(2)} · no Extra`} · ${pay.done}/${pay.total} draws done`;
                 }
             });
             const combined = info.reduce((sum, o) => sum + o.hits, 0), paid = info.reduce((sum, o) => sum + o.prize, 0);
@@ -3235,14 +3237,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 { const body = document.getElementById('bd-body'); if (body && body.scrollHeight > body.clientHeight) { const target = wrap.offsetTop - body.offsetTop - 8; try { body.scrollTo({ top: target, behavior: 'smooth' }); } catch (e) { body.scrollTop = target; } } }
                 { const lg = previewDirLoad()[previewBdWheelDraw]; previewBdSpin(mult, true, lg ? lg.dir : 'R', true); }
                 await new Promise(r => setTimeout(r, 2700));
-                document.getElementById('bd-wheel-label').innerText = `Extra ${mult}X`;
+                document.getElementById('bd-wheel-label').innerText = mult === 1 ? 'No Extra' : `Extra ${mult}X`;
                 const wp = document.getElementById('bd-wheel-prize'); wp.textContent = '';
                 info.forEach((o, i) => {
                     const line = document.createElement('div');
-                    line.textContent = `${ticketRows[i].label}: ${o.t.hasExtra ? `$${o.base.toFixed(2)} × ${mult}X = $${o.prize.toFixed(2)}` : `$${o.prize.toFixed(2)} · no Extra`}`;
+                    line.textContent = `${ticketRows[i].label}: ${o.t.hasExtra ? (mult === 1 ? `$${o.prize.toFixed(2)} · No Extra this draw` : `$${o.base.toFixed(2)} × ${mult}X = $${o.prize.toFixed(2)}`) : `$${o.prize.toFixed(2)} · no Extra`}`;
                     wp.appendChild(line);
                 });
-                document.getElementById('bd-mini').innerText = `${totalText} · Extra ${mult}X`; previewBdFit(); previewBdReveal('e' + row.draw_number);
+                document.getElementById('bd-mini').innerText = `${totalText} · ${mult === 1 ? 'No Extra' : `Extra ${mult}X`}`; previewBdFit(); previewBdReveal('e' + row.draw_number);
                 previewBdAutoFold = true;
             }
             previewBdBusy = false;
