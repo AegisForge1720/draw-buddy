@@ -181,7 +181,7 @@
     }
     if (g.minPlays) h += sel('dg-s-plays', 'Plays per draw', [2, 4, 6, 8, 10].map(n => [n, `${n} plays ($${(n * g.price).toFixed(0)})`]), s.plays);
     const cap = E.drawCap(g, s.session); if (s.draws > cap) s.draws = cap;
-    h += sel('dg-s-draws', `Draws in a row (app limit: ${cap}; official playslip may differ)`, Array.from({ length: cap }, (_, i) => [i + 1, String(i + 1)]), s.draws);
+    h += sel('dg-s-draws', `Draws in a row (app limit: ${cap}${g.official ? `; official: up to ${g.official.n} consecutive ${g.official.unit}` : ''})`, Array.from({ length: cap }, (_, i) => [i + 1, String(i + 1)]), s.draws);
     if (g.key === 'powerball') {
       h += `<label class="flex items-center gap-1.5 text-[11px] text-white"><input type="checkbox" id="dg-s-pp" class="accent-cyan-500"${s.powerplay ? ' checked' : ''}> Power Play (+$1)</label>`;
       if (FLAGS.doublePlay) h += `<label class="flex items-center gap-1.5 text-[11px] text-white"><input type="checkbox" id="dg-s-dp" class="accent-cyan-500"${s.doubleplay ? ' checked' : ''}> Double Play (+$1)</label>`;

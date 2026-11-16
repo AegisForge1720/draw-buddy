@@ -62,7 +62,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'NY Lottery how-to; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
+      maxDraws: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both); checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
       prizes: { '5': 'Top prize (pari-mutuel)', '4': 'pari-mutuel', '3': 'pari-mutuel', '2': 'Free Quick Pick' },
       source: 'nylottery.ny.gov Take 5 page; draws: data.ny.gov dg63-4siq'
     },
@@ -80,7 +80,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'NY Lottery how-to, Midday, Evening or both; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance; checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
       source: 'nylottery.ny.gov Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
     },
     win4: {
@@ -89,7 +89,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'NY Lottery how-to, Midday, Evening or both; not stated on the nylottery.ny.gov game page; playslip not checked', unverified: true }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance; checked Nov 16, 2026' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
       source: 'nylottery.ny.gov Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
     }
   };
@@ -120,6 +120,7 @@
       return { cost: 1, pWin: ways / space, top: ex, prizeOn: d => same(d, ds) ? ex : anyOrder(d, ds) ? any : 0, label: `${ways}-Way Straight/Box ($1)` };
     }
     if (type === 'combo') {
+      if (ways === 1) return null; // all digits the same: only 3/6-way (Numbers) and 4/6/12/24-way (Win 4) combinations exist (9 NYCRR 5009.2(b), 5010.2(b))
       return { cost: w * ways, pWin: ways / space, top: straightTop * w, prizeOn: d => anyOrder(d, ds) ? straightTop * w : 0, label: `${ways}-Way Combination ($${(w * ways).toFixed(2)})` };
     }
     if (type === 'frontpair' || type === 'backpair') {
