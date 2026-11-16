@@ -4,42 +4,57 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="format-detection" content="telephone=no">
-  <title>Draw Buddy</title>
+  <meta name="description" content="Draw Buddy is coming soon: a fun, social draw-stats companion for adults. See what's close to release and what's in development.">
+  <title>Draw Buddy — What's coming</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0b1020;
+      --navy-0: #050814;
+      --navy-1: #0b132b;
+      --navy-2: #111c38;
+      --blue-1: #1d4ed8;
+      --blue-2: #2563eb;
+      --gold: #facc15;
+      --cyan: #22d3ee;
       --fg: #f4f7fb;
-      --muted: #a8b3c7;
-      --accent: #8eb7ff;
+      --muted: #9aa6c0;
       --line: rgba(255, 255, 255, 0.12);
+      --card: #111c38;
     }
 
     * { box-sizing: border-box; }
 
-    html, body { margin: 0; height: 100%; }
+    html, body { margin: 0; }
 
     body {
       font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
       color: var(--fg);
       background:
-        radial-gradient(900px 420px at 50% -80px, #24345c 0%, transparent 70%),
-        var(--bg);
-      display: grid;
-      place-items: center;
+        radial-gradient(900px 480px at 50% -120px, #111c38 0%, transparent 70%),
+        var(--navy-0);
       min-height: 100vh;
       min-height: 100dvh;
-      padding: 1.5rem;
     }
 
-    main {
-      width: min(34rem, 100%);
+    .hero {
+      width: min(40rem, 100%);
+      margin: 0 auto;
+      padding: 2.25rem 1.5rem 1.75rem;
       text-align: center;
     }
 
+    .hero-mascot {
+      display: block;
+      width: 148px;
+      height: 148px;
+      margin: 0 auto 1.1rem;
+    }
+
     .name {
-      margin: 0 0 1.25rem;
-      color: var(--accent);
+      margin: 0 0 0.85rem;
+      color: var(--cyan);
       font-size: 0.8rem;
       font-weight: 650;
       letter-spacing: 0.16em;
@@ -48,33 +63,135 @@
 
     h1 {
       margin: 0;
-      font-size: clamp(2.5rem, 10vw, 3.75rem);
+      font-size: clamp(2.25rem, 9vw, 3.5rem);
       font-weight: 700;
       letter-spacing: -0.035em;
       line-height: 1.05;
     }
 
     .lede {
-      margin: 1.1rem auto 0;
+      margin: 1.05rem auto 0;
       max-width: 28rem;
       color: var(--muted);
       font-size: 1.05rem;
       line-height: 1.55;
     }
 
+    .roadmap {
+      width: min(36rem, 100%);
+      margin: 0 auto;
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .group {
+      margin: 0 0 2.25rem;
+    }
+
+    .group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Gold is reserved for these small section/status labels only. */
+    .group-label {
+      margin: 0 0 0.85rem;
+      color: var(--gold);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .cards {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.25rem 1.2rem 1.35rem;
+    }
+
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin: 0 0 0.85rem;
+    }
+
+    .card-mascot {
+      width: 88px;
+      height: 88px;
+      flex: 0 0 88px;
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .status {
+      display: inline-block;
+      margin-top: 0.28rem;
+      color: var(--navy-0);
+      background: var(--gold);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.45rem;
+      border-radius: 999px;
+    }
+
+    .status.dev {
+      color: var(--fg);
+      background: var(--blue-1);
+    }
+
+    .card p {
+      margin: 0.65rem 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.55;
+    }
+
+    .card .note {
+      margin-top: 0.9rem;
+      color: var(--fg);
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .price {
+      margin-top: 0.85rem;
+      padding: 0.75rem 0.8rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      border-radius: 0.7rem;
+      color: var(--fg);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
     footer {
-      margin-top: 2.75rem;
-      padding-top: 1.15rem;
-      border-top: 1px solid var(--line);
+      width: min(40rem, 100%);
+      margin: 0 auto;
+      padding: 2rem 1.5rem 2.5rem;
+      text-align: center;
       color: var(--muted);
       font-size: 0.82rem;
       line-height: 1.5;
+      border-top: 1px solid var(--line);
     }
 
     footer p { margin: 0.35rem 0; }
 
     footer a {
-      color: var(--accent);
+      color: var(--cyan);
       text-decoration: underline;
     }
 
@@ -82,17 +199,58 @@
   </style>
 </head>
 <body>
-  <main>
+  <header class="hero">
+    <img class="hero-mascot" src="assets/draw-buddy-mascot.png" width="148" height="148" alt="Draw Buddy robot mascot, a white robot with a blue headband giving a thumbs-up, with a bar chart on its chest.">
     <p class="name">Draw Buddy</p>
-    <h1>Coming soon</h1>
-    <p class="lede">A lottery stats and number-tracking app for adults. Launching soon on iOS and Android.</p>
-    <footer>
-      <p>18+ only. Draw Buddy does not sell lottery tickets or accept wagers.</p>
-      <p>Gambling problem? Call <span class="nowrap">1-877-8-HOPENY</span> <span class="nowrap">(1-877-846-7369)</span> or text HOPENY <span class="nowrap">(467369)</span>.</p>
-      <p>© 2026 NAV Analytics LLC</p>
-      <p><a href="privacy.html">Privacy</a></p>
-    </footer>
+    <h1>What's coming</h1>
+    <p class="lede">Here's what's close to release and what's still in development. No launch dates yet.</p>
+  </header>
+
+  <main class="roadmap">
+    <section class="group" aria-labelledby="close-to-release">
+      <p class="group-label" id="close-to-release">Close to release</p>
+      <div class="cards">
+        <article class="card">
+          <div class="card-head">
+            <img class="card-mascot" src="assets/draw-buddy-mascot.png" width="88" height="88" alt="">
+            <div>
+              <h3>Draw Buddy</h3>
+              <span class="status">Close to release</span>
+            </div>
+          </div>
+          <p>A fun, social draw-stats companion for enjoyment, not a betting tool. A downloadable app, coming soon on iOS and Android.</p>
+          <p class="price">Pricing coming soon.</p>
+          <p class="note">18+ only. Draw Buddy does not sell lottery tickets or accept wagers.</p>
+          <p class="note">Past results don't predict future draws.</p>
+          <p class="note">Not affiliated with any lottery.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="group" aria-labelledby="in-development">
+      <p class="group-label" id="in-development">In development</p>
+      <div class="cards">
+        <article class="card">
+          <div class="card-head">
+            <img class="card-mascot" src="assets/scratch-off-companion-mascot.png" width="88" height="88" alt="Robot mascot for a scratch-off companion app (name coming soon), a white robot with green glasses on its head.">
+            <div>
+              <h3>A scratch-off companion app (name coming soon)</h3>
+              <span class="status dev">In development</span>
+            </div>
+          </div>
+          <p>A scratch-off retailer finder and personal ticket log.</p>
+          <p class="note">18+ only. A scratch-off companion app (name coming soon) does not sell lottery tickets or accept wagers.</p>
+        </article>
+      </div>
+    </section>
   </main>
+
+  <footer>
+    <p>18+ only for Draw Buddy and for a scratch-off companion app (name coming soon). These apps do not sell lottery tickets or accept wagers.</p>
+    <p>Gambling problem? Call <span class="nowrap">1-877-8-HOPENY</span> <span class="nowrap">(1-877-846-7369)</span> or text HOPENY <span class="nowrap">(467369)</span>.</p>
+    <p>© 2026 NAV Analytics LLC</p>
+    <p><a href="privacy.html">Privacy</a></p>
+  </footer>
   <script>
     window.goatcounter = {
       path: function (p) {
@@ -110,4 +268,5 @@
     })();
   </script>
 </body>
+
 </html>
