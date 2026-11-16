@@ -74,7 +74,7 @@
         <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between gap-1.5">
             <div id="header-brand" class="flex items-center gap-1 shrink-0">
                 <h1 class="sr-only">Draw Buddy</h1>
-                <img src="/brand/draw-buddy-mascot-v3-open.png" width="49" height="56" alt="Draw Buddy" style="display:block;height:56px;width:auto">
+                <img id="header-mascot" src="/brand/drawbuddy-robot-blink-static.png" width="56" height="56" alt="Draw Buddy" style="display:block;height:56px;width:56px">
 
                 <span id="header-state-badge" class="text-[8px] bg-blue-950 text-cyan-300 border border-blue-600 px-1.5 py-0.5 rounded font-black leading-none">NY</span>
             </div>
@@ -3453,6 +3453,49 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 previewRenderDirection();
             } catch (e) { console.warn('preview configurator setup', e); }
         };
+    </script>
+    <script>
+        /* Header mascot idle blink only. Never run this on a pick, result, stat reveal, or purchase. */
+        (function () {
+            var img = document.getElementById("header-mascot");
+            if (!img) return;
+            var STATIC_SRC = "/brand/drawbuddy-robot-blink-static.png";
+            var HALF_SRC = "/brand/drawbuddy-robot-blink-half.png";
+            var CLOSED_SRC = "/brand/drawbuddy-robot-blink-closed.png";
+            [HALF_SRC, CLOSED_SRC].forEach(function (src) {
+                var preload = new Image();
+                preload.src = src;
+            });
+            function later(fn, ms) { return setTimeout(fn, ms); }
+            function reduced() {
+                return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            }
+            function idleDelay() {
+                return 8000 + Math.floor(Math.random() * 7000);
+            }
+            function schedule() {
+                later(blink, idleDelay());
+            }
+            function blink() {
+                if (reduced()) {
+                    img.src = STATIC_SRC;
+                    schedule();
+                    return;
+                }
+                img.src = HALF_SRC;
+                later(function () { img.src = CLOSED_SRC; }, 70);
+                later(function () { img.src = HALF_SRC; }, 180);
+                later(function () {
+                    img.src = STATIC_SRC;
+                    schedule();
+                }, 250);
+            }
+            if (reduced()) {
+                img.src = STATIC_SRC;
+                return;
+            }
+            schedule();
+        })();
     </script>
 </body>
 </html>
