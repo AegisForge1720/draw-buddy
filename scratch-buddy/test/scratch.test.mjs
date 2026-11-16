@@ -53,9 +53,16 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /My Log Map/);
     assert.match(SHELL_MARKUP, /No prize logs on this map yet/);
     assert.match(SHELL_MARKUP, /Every store marker looks the same/);
-    assert.equal(SHELL_MARKUP.toLowerCase().includes("heat"), false);
+    assert.match(SHELL_MARKUP, /id="preview-features"/);
+    assert.match(SHELL_MARKUP, /Preview features/);
+    assert.match(SHELL_MARKUP, /preview-only, Ralph no-go/);
+    assert.match(SHELL_MARKUP, /data-preview-flag="officialStoreSales"/);
+    assert.match(SHELL_MARKUP, /data-preview-flag="officialSalesHeatMap"/);
+    assert.match(SHELL_MARKUP, /data-preview-flag="userLogHeatLayer"/);
+    assert.match(SHELL_MARKUP, /data-preview-flag="storeSalesSortFilter"/);
+    assert.match(SHELL_MARKUP, /data-preview-flag="prizesRemainingTable"/);
+    assert.match(SHELL_MARKUP, /id="tab-prizes"/);
     assert.equal(SHELL_MARKUP.toLowerCase().includes("payout"), false);
-    assert.equal(PRIVACY_MARKUP.toLowerCase().includes("heat"), false);
     assert.equal(PRIVACY_MARKUP.toLowerCase().includes("payout"), false);
     assert.match(SHELL_MARKUP, /No sample points are included/);
     assert.match(SHELL_MARKUP, /Optional: center on my location/);

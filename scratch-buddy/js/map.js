@@ -86,7 +86,7 @@ function withCoords(rows) {
     return (rows || []).filter((row) => Number.isFinite(row.lat) && Number.isFinite(row.lng));
 }
 
-export function createRetailerMap({ container, formatAddress, onLogPrize }) {
+export function createRetailerMap({ container, formatAddress, onLogPrize, buildExtra }) {
     const L = window.L;
     const map = L.map(container, {
         minZoom: 5,
@@ -118,7 +118,14 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
                 title: row.name || "Retailer",
                 keyboard: true
             });
-            marker.bindPopup(() => buildPopup(row, formatAddress, onLogPrize), { maxWidth: 260, className: "sb-popup-shell" });
+            marker.bindPopup(() => {
+                const wrap = buildPopup(row, formatAddress, onLogPrize);
+                if (typeof buildExtra === "function") {
+                    const extra = buildExtra(row);
+                    if (extra) wrap.appendChild(extra);
+                }
+                return wrap;
+            }, { maxWidth: 280, className: "sb-popup-shell" });
             marker.retailerId = row.id;
             store.set(row.id, { marker, row });
             layers.push(marker);
@@ -196,11 +203,69 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
         map.invalidateSize();
     }
 
+    const officialLayer = L.layerGroup();
+    const officialRenderer = L.canvas({ padding: 0.4 });
+    let officialVisible = false;
+    let pinsVisible = true;
+
+    function setRetailerPinsVisible(visible) {
+        pinsVisible = visible !== false;
+        const active = mode === "results" ? resultCluster : allCluster;
+        const inactive = mode === "results" ? allCluster : resultCluster;
+        if (map.hasLayer(inactive)) map.removeLayer(inactive);
+        if (pinsVisible) {
+            if (!map.hasLayer(active)) map.addLayer(active);
+        } else if (map.hasLayer(active)) {
+            map.removeLayer(active);
+        }
+        return pinsVisible;
+    }
+
+    function setOfficialHeatVisible(visible) {
+        officialVisible = Boolean(visible);
+        if (officialVisible) {
+            if (!map.hasLayer(officialLayer)) officialLayer.addTo(map);
+        } else if (map.hasLayer(officialLayer)) {
+            map.removeLayer(officialLayer);
+        }
+        return officialVisible;
+    }
+
+    function setOfficialHeatPoints(points) {
+        officialLayer.clearLayers();
+        const rows = Array.isArray(points) ? points : [];
+        for (const point of rows) {
+            if (!Number.isFinite(point.lat) || !Number.isFinite(point.lng) || !point.color) continue;
+            const marker = L.circleMarker([point.lat, point.lng], {
+                renderer: officialRenderer,
+                radius: 8,
+                color: "#0b132b",
+                weight: 1,
+                fillColor: point.color,
+                fillOpacity: 0.78
+            });
+            if (typeof point.popup === "function") {
+                marker.bindPopup(() => point.popup(), { maxWidth: 280, className: "sb-popup-shell" });
+            }
+            officialLayer.addLayer(marker);
+        }
+        if (officialVisible && !map.hasLayer(officialLayer)) officialLayer.addTo(map);
+        return rows.length;
+    }
+
+    // Keep pin visibility in sync when the list mode changes.
+    const applyModeWithPins = applyMode;
+    function applyModeTracked(next) {
+        const applied = applyModeWithPins(next);
+        setRetailerPinsVisible(pinsVisible);
+        return applied;
+    }
+
     return {
         map,
         setAllRetailers,
         setResultRetailers,
-        applyMode,
+        applyMode: applyModeTracked,
         getMode: () => mode,
         resultCount: () => resultById.size,
         allCount: () => allById.size,
@@ -208,12 +273,16 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
         fitNewYork,
         focusRetailer,
         setUserPosition,
+        setOfficialHeatPoints,
+        setOfficialHeatVisible,
+        setRetailerPinsVisible,
+        officialHeatCount: () => officialLayer.getLayers().length,
         invalidate
     };
 }
 
 
-export function createLogMap({ container, formatAddress, formatEntry }) {
+export function createLogMap({ container, formatAddress, formatEntry, heatStyleFor }) {
     const L = window.L;
     const map = L.map(container, {
         minZoom: 5,
@@ -230,6 +299,7 @@ export function createLogMap({ container, formatAddress, formatEntry }) {
     const layer = L.layerGroup().addTo(map);
     let userMarker = null;
     let groups = [];
+    let styleMode = "uniform";
     const markerStyle = {
         radius: 10,
         color: "#0b132b",
@@ -237,6 +307,31 @@ export function createLogMap({ container, formatAddress, formatEntry }) {
         fillColor: "#22d3ee",
         fillOpacity: 0.85
     };
+
+    function styleFor(group) {
+        if (styleMode === "heat" && typeof heatStyleFor === "function") {
+            const style = heatStyleFor(group) || {};
+            return {
+                radius: style.radius || 10,
+                color: "#0b132b",
+                weight: 1,
+                fillColor: style.color || "#22d3ee",
+                fillOpacity: 0.85
+            };
+        }
+        return markerStyle;
+    }
+
+    function redrawLogs() {
+        layer.clearLayers();
+        for (const group of groups) {
+            if (!Number.isFinite(group.lat) || !Number.isFinite(group.lng)) continue;
+            const marker = L.circleMarker([group.lat, group.lng], styleFor(group));
+            marker.bindPopup(() => popupFor(group), { maxWidth: 260, className: "sb-popup-shell" });
+            layer.addLayer(marker);
+        }
+        return groups.length;
+    }
 
     function popupFor(group) {
         const wrap = document.createElement("div");
@@ -272,16 +367,15 @@ export function createLogMap({ container, formatAddress, formatEntry }) {
         return wrap;
     }
 
-    function setLogs(nextGroups) {
-        layer.clearLayers();
+    function setLogs(nextGroups, { style } = {}) {
         groups = Array.isArray(nextGroups) ? nextGroups : [];
-        for (const group of groups) {
-            if (!Number.isFinite(group.lat) || !Number.isFinite(group.lng)) continue;
-            const marker = L.circleMarker([group.lat, group.lng], markerStyle);
-            marker.bindPopup(() => popupFor(group), { maxWidth: 260, className: "sb-popup-shell" });
-            layer.addLayer(marker);
-        }
-        return groups.length;
+        if (style === "uniform" || style === "heat") styleMode = style;
+        return redrawLogs();
+    }
+
+    function setStyleMode(next) {
+        styleMode = next === "heat" ? "heat" : "uniform";
+        return redrawLogs();
     }
 
     function fitLogs() {
@@ -325,6 +419,8 @@ export function createLogMap({ container, formatAddress, formatEntry }) {
     return {
         map,
         setLogs,
+        setStyleMode,
+        getStyleMode: () => styleMode,
         fitLogs,
         fitNewYork,
         setUserPosition,

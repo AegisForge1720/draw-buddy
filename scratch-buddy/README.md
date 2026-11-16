@@ -66,9 +66,29 @@ An 18+ age check runs before the app, the privacy draft, and the terms draft. It
 
 If the repository root is published, `/scratch-buddy/` is a public URL. The age check is not a server wall. A `noindex,nofollow` meta tag is on each page. That is not a substitute for a host-level age wall.
 
+## This branch (`scratch-buddy-full-preview`)
+
+This branch adds official NY Open Data layers and related preview tools. They are **preview-only, Ralph no-go**. Do not merge this branch into `scratch-buddy-wip` or `main`. Do not serve it on the compliant 8876 preview.
+
+Every added feature is behind a named flag in `js/feature-flags.js`. Those flags **default to OFF**. Andrew can switch each one on in the in-app **Preview features** panel (also linked from the header). The choice stays on this device.
+
+Flags:
+
+- `officialStoreSales` — official store amounts (Daily DRAW PAID Sales, Daily IG PAID Sales, Daily IG SETTLES Sales)
+- `officialSalesHeatMap` — color-coded official amounts layer, legend, and toggles
+- `userLogHeatLayer` — optional verification-weighted heat layer of logs on this device
+- `storeSalesSortFilter` — sort and filter by those amounts, Sells scratch-offs tag, hide no sales in 30 days
+- `prizesRemainingTable` — statewide official prizes-remaining table (`nzqa-7unk`)
+
+Official caches: `data/retailer-sales.json` (`xyvi-fbb9`, joined to `2vvn-pdyi` after stripping leading zeros) and `data/prizes-remaining.json` (`nzqa-7unk`). Refresh with `python3 scripts/refresh-official-data.py`. Missing official rows are shown as no data. The source, the unaudited NY Open Data caveat, and the note that under-$600 cash-outs only show where tickets were cashed appear with the official amounts.
+
+The Quick Draw venue path is unchanged.
+
 ## Run
 
-This preview is served privately on port 8876 with basic auth (user `andrew`, password in `~/.secrets/scratch_preview_pass`). Do not print that password.
+The Ralph-compliant preview stays on port 8876 (`scratch-buddy-wip`, password in `~/.secrets/scratch_preview_pass`).
+
+This full-preview branch is served separately on port 8875 with basic auth (user `andrew`, password in `~/.secrets/scratch_full_preview_pass`). Do not print that password. Do not put this branch on the 8876 tunnel.
 
 From this folder, for a local unauthenticated check:
 

@@ -15,3 +15,12 @@ Applied in this preview (Ralph's required product changes 2–8 as assigned; num
 8. The privacy notice discloses OpenStreetMap tile requests (IP and the area viewed). Leaflet and Tailwind are self-hosted. "Delete all my data" clears the on-device store. Retention: kept until the user deletes them; a future server, if approved, would also drop logs after 24 months of inactivity and would never keep raw location.
 
 Applied after Andrew's approval (Ralph memo §4 item 2 / assigned change 1): the tab and view are "My Log Map." Markers are uniform. heatWeight and aggregatePayouts were removed. Popups list only this device's prize logs at that store, with no per-store dollar totals and no rankings. "Heat" and "Payout" wording was removed.
+
+## preview-only, Ralph no-go (this branch only)
+
+`scratch-buddy-full-preview` adds official-amount views, a color-coded official heat map, a user-log heat layer, store sort/filters, and a statewide prizes-remaining table. Ralph has a no-go on public use of these items.
+
+- Do not merge this branch into `scratch-buddy-wip` or `main`.
+- Every flag in `js/feature-flags.js` defaults to OFF. The in-app Preview features panel is how they are switched on for this private preview.
+- Each flag is labeled preview-only, Ralph no-go in the config comments, the panel, and the diff summary for Ralph.
+- This branch must not be served on the existing 8876 / team tunnel. That host stays on `scratch-buddy-wip`.

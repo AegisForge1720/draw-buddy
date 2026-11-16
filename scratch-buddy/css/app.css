@@ -210,9 +210,15 @@ body {
 
 .btn-secondary:hover { color: #fff; }
 
+[role="tablist"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+}
+
 .tab-btn {
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 1 1 18%;
+    min-width: 4.4rem;
     background: #050814;
     color: #94a3b8;
     border: 1px solid #1d4ed8;
@@ -225,7 +231,7 @@ body {
 }
 
 .tab-btn + .tab-btn { border-left-width: 0; }
-
+.tab-btn { border-radius: 0; }
 .tab-btn:first-child { border-radius: 0.5rem 0 0 0.5rem; }
 .tab-btn:last-child { border-radius: 0 0.5rem 0.5rem 0; }
 
@@ -635,3 +641,164 @@ a { color: #facc15; }
     margin: 0 0 0.3rem;
     font-size: 0.8rem;
 }
+
+.filter-box {
+    display: grid;
+    gap: 0.55rem;
+    padding: 0.7rem 0.75rem;
+    border: 1px solid #1e293b;
+    border-radius: 0.65rem;
+    background: #0b132b;
+}
+.filter-box .field-label { margin-bottom: 0.2rem; }
+
+.official-amounts {
+    margin-top: 0.45rem;
+    display: grid;
+    gap: 0.35rem;
+}
+.official-range {
+    margin: 0.25rem 0 0;
+    color: #67e8f9;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+.official-dl {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 0.7rem;
+    margin: 0;
+}
+.official-dl dt {
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    margin: 0;
+}
+.official-dl dd {
+    margin: 0;
+    color: #f8fafc;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-align: right;
+}
+
+.scratch-badge {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #bbf7d0;
+    border: 1px solid rgba(74, 222, 128, 0.45);
+    background: rgba(34, 197, 94, 0.12);
+    border-radius: 9999px;
+    padding: 2px 7px;
+}
+
+.heat-legend {
+    display: grid;
+    gap: 0.28rem;
+    margin: 0.2rem 0 0;
+}
+.heat-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #cbd5e1;
+    font-size: 0.72rem;
+}
+.heat-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    border: 1px solid #0b132b;
+    flex: 0 0 auto;
+}
+.heat-legend-title {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.prizes-table-wrap {
+    display: grid;
+    gap: 0.55rem;
+}
+.prize-game {
+    border: 1px solid #1e293b;
+    border-radius: 0.65rem;
+    background: #0b132b;
+    padding: 0.15rem 0.7rem 0.55rem;
+}
+.prize-game > summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 0.55rem 0;
+    font-weight: 800;
+    color: #f8fafc;
+}
+.prize-game > summary::-webkit-details-marker { display: none; }
+.prize-game-name {
+    display: block;
+    font-size: 0.85rem;
+}
+.prize-game-number {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 0.15rem;
+}
+.prize-status-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+}
+.prize-status-table th,
+.prize-status-table td {
+    text-align: right;
+    padding: 0.28rem 0.2rem;
+    border-top: 1px solid #1e293b;
+    color: #e2e8f0;
+}
+.prize-status-table th:first-child,
+.prize-status-table td:first-child {
+    text-align: left;
+}
+.prize-status-table th {
+    color: #94a3b8;
+    font-weight: 800;
+    text-transform: none;
+}
+
+.preview-features-panel {
+    border-color: #facc15;
+    background: #16120a;
+}
+.preview-features-panel .section-title { margin-top: 0; }
+.preview-features-list { display: grid; gap: 0.7rem; }
+.preview-flag-row { align-items: flex-start; }
+.preview-flag-blurb {
+    display: block;
+    color: #94a3b8;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 0.15rem;
+}
+.nogo-label {
+    display: inline-block;
+    margin-left: 0.25rem;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fde047;
+    border: 1px solid rgba(250, 204, 21, 0.45);
+    background: rgba(250, 204, 21, 0.08);
+    border-radius: 9999px;
+    padding: 1px 6px;
+    vertical-align: middle;
+}
+#preview-features-jump { flex: 0 0 auto; white-space: nowrap; }

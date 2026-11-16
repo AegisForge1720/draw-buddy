@@ -12,8 +12,42 @@ import {
     todayInNewYork,
     verificationLabel
 } from "./logs.js";
+import {
+    FEATURE_FLAG_ITEMS,
+    PREVIEW_FLAG_NOGO_LABEL,
+    isFeatureOn,
+    refreshFeatureFlags,
+    writeFeatureFlag
+} from "./feature-flags.js";
+import { aggregateLogHeat, logHeatStyle, LOG_HEAT_LEGEND } from "./log-heat.js";
 import { createLogMap, createRetailerMap, waitForLeaflet } from "./map.js";
 import { AGE_FAIL_COPY, LOG_DISCLOSURE, SHELL_MARKUP } from "./markup.js";
+import {
+    OFFICIAL_FIELD_LABELS,
+    OFFICIAL_METRICS,
+    OFFICIAL_RANGES,
+    SALES_HEAT_COLORS,
+    SELLS_SCRATCH_OFFS_LABEL,
+    colorForAmount,
+    filterAndSortRetailers,
+    formatOfficialAmount,
+    hasSalesIn30Days,
+    legendItems,
+    loadOfficialSalesCache,
+    metricValue,
+    officialSalesCaveat,
+    quantileBreaks,
+    rangeLabel,
+    salesForRetailer,
+    sellsScratchOffs
+} from "./official-sales.js";
+import {
+    filterPrizeGames,
+    formatOfficialCount,
+    groupPrizeStatus,
+    loadPrizesRemainingCache,
+    officialPrizeCaveat
+} from "./prizes-remaining.js";
 import { deletePhoto, getPhoto, isImageFile, photoObjectUrl, savePhoto } from "./photos.js";
 import { PHOTO_DELETE_BLOCKED_COPY } from "./photos.js";
 import { deleteAllScratchBuddyData } from "./purge.js";
@@ -23,6 +57,7 @@ import {
     findRetailerById,
     loadRetailerCache,
     nearbyRetailers,
+    SEARCH_LIMIT,
     searchRetailers
 } from "./retailers.js";
 import { clearSession, readSession, writeSession } from "./session.js";
@@ -66,9 +101,24 @@ const findState = {
     cache: null,
     loadError: null,
     loadPromise: null,
+    rawRows: [],
     listedRows: [],
     listedKind: "none",
     lastPosition: null
+};
+
+// preview-only, Ralph no-go caches and UI state for official amounts / prize status.
+const officialState = {
+    cache: null,
+    loadError: null,
+    loadPromise: null
+};
+
+const prizesState = {
+    cache: null,
+    games: [],
+    loadError: null,
+    loadPromise: null
 };
 
 const mapState = {
@@ -100,8 +150,12 @@ function showTab(name) {
         find: $("panel-find"),
         map: $("panel-map"),
         log: $("panel-log"),
-        "logs-map": $("panel-logs-map")
+        "logs-map": $("panel-logs-map"),
+        prizes: $("panel-prizes")
     };
+    if (name === "prizes" && !isFeatureOn("prizesRemainingTable")) {
+        name = "find";
+    }
     tabs.forEach((tab) => {
         const selected = tab.dataset.tab === name;
         tab.setAttribute("aria-selected", selected ? "true" : "false");
@@ -123,11 +177,377 @@ function showTab(name) {
     if (name === "log") {
         renderLogList();
     }
+    if (name === "prizes") {
+        loadPrizes();
+    }
 }
 
 function formatCount(value) {
     return Number(value).toLocaleString("en-US");
 }
+
+
+function applyPreviewFlags() {
+    refreshFeatureFlags();
+    document.querySelectorAll("[data-preview-flag]").forEach((el) => {
+        const on = isFeatureOn(el.dataset.previewFlag);
+        if (el.id === "tab-prizes") {
+            el.hidden = !on;
+            if (!on && el.getAttribute("aria-selected") === "true") showTab("find");
+            return;
+        }
+        if (el.getAttribute("role") === "tabpanel") {
+            if (!on) el.hidden = true;
+            return;
+        }
+        el.hidden = !on;
+    });
+    applyListedFilters();
+    if (mapState.api) refreshOfficialHeatLayer();
+    if (logMapState.api) refreshLogMap();
+    if (isFeatureOn("prizesRemainingTable")) loadPrizes();
+}
+
+function bindPreviewFeatures() {
+    const list = $("preview-features-list");
+    if (!list) return;
+    list.replaceChildren();
+    refreshFeatureFlags();
+    for (const item of FEATURE_FLAG_ITEMS) {
+        const label = document.createElement("label");
+        label.className = "check-row preview-flag-row";
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `preview-flag-${item.id}`;
+        input.checked = isFeatureOn(item.id);
+        input.addEventListener("change", () => {
+            writeFeatureFlag(item.id, input.checked);
+            refreshFeatureFlags();
+            applyPreviewFlags();
+        });
+        const text = document.createElement("span");
+        const name = document.createElement("strong");
+        name.textContent = item.name;
+        const nogo = document.createElement("span");
+        nogo.className = "nogo-label";
+        nogo.textContent = PREVIEW_FLAG_NOGO_LABEL;
+        const blurb = document.createElement("span");
+        blurb.className = "preview-flag-blurb";
+        blurb.textContent = item.blurb;
+        text.append(name, document.createTextNode(" "), nogo, blurb);
+        label.append(input, text);
+        list.appendChild(label);
+    }
+    const jump = $("preview-features-jump");
+    if (jump) {
+        jump.addEventListener("click", (event) => {
+            const panel = $("preview-features");
+            if (!panel) return;
+            event.preventDefault();
+            panel.scrollIntoView({ block: "start" });
+        });
+    }
+    applyPreviewFlags();
+}
+
+function officialAmountsElement(row) {
+    if (!isFeatureOn("officialStoreSales")) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "official-amounts";
+    const store = salesForRetailer(officialState.cache, row && row.id);
+    const cache = officialState.cache;
+    const today = todayInNewYork();
+    for (const range of OFFICIAL_RANGES) {
+        const heading = document.createElement("p");
+        heading.className = "official-range";
+        heading.textContent = rangeLabel(range, cache, today);
+        wrap.appendChild(heading);
+        const table = document.createElement("dl");
+        table.className = "official-dl";
+        for (const metric of OFFICIAL_METRICS) {
+            const dt = document.createElement("dt");
+            dt.textContent = OFFICIAL_FIELD_LABELS[metric];
+            const dd = document.createElement("dd");
+            dd.textContent = formatOfficialAmount(metricValue(store, metric, range));
+            table.append(dt, dd);
+        }
+        wrap.appendChild(table);
+    }
+    return wrap;
+}
+
+function readSalesFilters() {
+    if (!isFeatureOn("storeSalesSortFilter")) {
+        return { sortMetric: null, sortRange: "days30", sortDir: "desc", sellsScratchOffsOnly: false, hideNoSales: false };
+    }
+    const metric = $("sales-sort-metric") ? $("sales-sort-metric").value : "";
+    return {
+        sortMetric: metric || null,
+        sortRange: $("sales-sort-range") ? $("sales-sort-range").value : "days30",
+        sortDir: $("sales-sort-dir") ? $("sales-sort-dir").value : "desc",
+        sellsScratchOffsOnly: Boolean($("sales-filter-scratchoffs") && $("sales-filter-scratchoffs").checked),
+        hideNoSales: Boolean($("sales-filter-hide-none") && $("sales-filter-hide-none").checked)
+    };
+}
+
+function applyListedFilters() {
+    if (!findState.rawRows) findState.rawRows = [];
+    if (!findState.rawRows.length || findState.listedKind === "none") {
+        if (findState.listedKind === "none") return;
+    }
+    const filters = readSalesFilters();
+    const result = filterAndSortRetailers(findState.rawRows, officialState.cache, {
+        ...filters,
+        limit: SEARCH_LIMIT
+    });
+    findState.listedRows = result.rows;
+    renderResults(result.rows);
+    syncMapResults();
+    return result;
+}
+
+async function loadOfficialSales() {
+    if (officialState.cache || officialState.loadPromise) return officialState.loadPromise;
+    officialState.loadPromise = (async () => {
+        try {
+            officialState.cache = await loadOfficialSalesCache();
+        } catch {
+            officialState.loadError = "The official retailer sales cache could not be loaded. Official amounts are shown as no data.";
+            officialState.cache = null;
+        }
+        if (isFeatureOn("officialStoreSales")) {
+            const caveat = $("official-sales-caveat");
+            if (caveat) {
+                const source = officialState.cache
+                    ? `${officialSalesCaveat(officialState.cache)} This cache was retrieved ${formatCacheTimestamp(officialState.cache.retrievedAt) || "at an unknown time"}.`
+                    : officialState.loadError;
+                caveat.textContent = source;
+            }
+        }
+        return officialState.cache;
+    })();
+    return officialState.loadPromise;
+}
+
+function refreshOfficialHeatLayer() {
+    const api = mapState.api;
+    const legend = $("official-heat-legend");
+    if (!api) return;
+    if (!isFeatureOn("officialSalesHeatMap")) {
+        api.setOfficialHeatVisible(false);
+        api.setOfficialHeatPoints([]);
+        api.setRetailerPinsVisible(true);
+        if (legend) {
+            legend.hidden = true;
+            legend.replaceChildren();
+        }
+        return;
+    }
+    const metric = $("map-heat-metric") ? $("map-heat-metric").value : "ig_paid";
+    const range = $("map-heat-range") ? $("map-heat-range").value : "days30";
+    const hideNone = Boolean($("map-heat-hide-none") && $("map-heat-hide-none").checked);
+    const heatOn = !($("map-official-heat") && $("map-official-heat").checked === false);
+    const pinsOn = !($("map-retailer-pins") && $("map-retailer-pins").checked === false);
+    const retailers = (findState.cache && findState.cache.retailers) || [];
+    const cache = officialState.cache;
+    const values = [];
+    const pending = [];
+    for (const row of retailers) {
+        if (!Number.isFinite(row.lat) || !Number.isFinite(row.lng)) continue;
+        const store = salesForRetailer(cache, row.id);
+        if (hideNone && !hasSalesIn30Days(store)) continue;
+        const amount = metricValue(store, metric, range);
+        if (!Number.isFinite(amount)) continue;
+        values.push(amount);
+        pending.push({ row, store, amount });
+    }
+    const breaks = quantileBreaks(values);
+    const today = todayInNewYork();
+    const points = pending.map((item) => ({
+        lat: item.row.lat,
+        lng: item.row.lng,
+        color: colorForAmount(item.amount, breaks, SALES_HEAT_COLORS),
+        popup() {
+            const wrap = document.createElement("div");
+            wrap.className = "sb-popup";
+            const title = document.createElement("h3");
+            title.textContent = item.row.name || "Unnamed retailer";
+            wrap.appendChild(title);
+            const address = document.createElement("p");
+            address.textContent = formatRetailerAddress(item.row) || "Address not in the source data.";
+            wrap.appendChild(address);
+            const amountLine = document.createElement("p");
+            amountLine.textContent = `${OFFICIAL_FIELD_LABELS[metric]}, ${rangeLabel(range, cache, today)}: ${formatOfficialAmount(item.amount)}`;
+            wrap.appendChild(amountLine);
+            const extra = officialAmountsElement(item.row);
+            if (extra) wrap.appendChild(extra);
+            return wrap;
+        }
+    }));
+    api.setOfficialHeatPoints(points);
+    api.setOfficialHeatVisible(heatOn);
+    api.setRetailerPinsVisible(pinsOn);
+    if (!legend) return;
+    legend.replaceChildren();
+    const title = document.createElement("p");
+    title.className = "heat-legend-title";
+    title.textContent = `${OFFICIAL_FIELD_LABELS[metric]} · ${rangeLabel(range, cache, today)}`;
+    legend.appendChild(title);
+    const items = legendItems(breaks, SALES_HEAT_COLORS, values);
+    if (!items.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "no data";
+        legend.appendChild(empty);
+    } else {
+        for (const item of items) {
+            const row = document.createElement("div");
+            row.className = "heat-legend-item";
+            const swatch = document.createElement("span");
+            swatch.className = "heat-swatch";
+            swatch.style.background = item.color;
+            const label = document.createElement("span");
+            label.textContent = item.label;
+            row.append(swatch, label);
+            legend.appendChild(row);
+        }
+    }
+    legend.hidden = !heatOn;
+}
+
+function bindOfficialHeatControls() {
+    ["map-official-heat", "map-retailer-pins", "map-heat-hide-none", "map-heat-metric", "map-heat-range"].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener("change", () => refreshOfficialHeatLayer());
+    });
+}
+
+function logMapHeatOn() {
+    return isFeatureOn("userLogHeatLayer") && Boolean($("log-map-style-heat") && $("log-map-style-heat").checked);
+}
+
+function renderLogHeatLegend() {
+    const legend = $("log-heat-legend");
+    if (!legend) return;
+    const on = logMapHeatOn();
+    legend.replaceChildren();
+    if (!on) {
+        legend.hidden = true;
+        return;
+    }
+    for (const item of LOG_HEAT_LEGEND) {
+        const row = document.createElement("div");
+        row.className = "heat-legend-item";
+        const swatch = document.createElement("span");
+        swatch.className = "heat-swatch";
+        swatch.style.background = item.color;
+        const label = document.createElement("span");
+        label.textContent = item.label;
+        row.append(swatch, label);
+        legend.appendChild(row);
+    }
+    legend.hidden = false;
+}
+
+function bindLogHeatControls() {
+    document.querySelectorAll('input[name="log-map-style"]').forEach((el) => {
+        el.addEventListener("change", () => {
+            refreshLogMap();
+        });
+    });
+}
+
+function renderPrizeGames(query) {
+    const wrap = $("prizes-table");
+    const status = $("prizes-status");
+    if (!wrap) return;
+    wrap.replaceChildren();
+    if (!isFeatureOn("prizesRemainingTable")) return;
+    if (!prizesState.cache) {
+        if (status) status.textContent = prizesState.loadError || "no data";
+        return;
+    }
+    const games = filterPrizeGames(prizesState.games, query);
+    if (!games.length) {
+        if (status) status.textContent = "No games in this official cache match that search.";
+        return;
+    }
+    if (status) {
+        status.textContent = `${games.length} game${games.length === 1 ? "" : "s"} from the official prize status report. Counts are statewide, not per store.`;
+    }
+    for (const game of games) {
+        const details = document.createElement("details");
+        details.className = "prize-game";
+        const summary = document.createElement("summary");
+        const name = document.createElement("span");
+        name.className = "prize-game-name";
+        name.textContent = game.game_name || "Unnamed game";
+        const number = document.createElement("span");
+        number.className = "prize-game-number";
+        number.textContent = `game_number ${game.game_number}`;
+        summary.append(name, number);
+        details.appendChild(summary);
+        const table = document.createElement("table");
+        table.className = "prize-status-table";
+        const head = document.createElement("thead");
+        head.innerHTML = "<tr><th>prize_amount</th><th>paid</th><th>unpaid</th><th>total</th></tr>";
+        table.appendChild(head);
+        const body = document.createElement("tbody");
+        for (const tier of game.tiers) {
+            const tr = document.createElement("tr");
+            const cells = [tier.prize_amount, formatOfficialCount(tier.paid), formatOfficialCount(tier.unpaid), formatOfficialCount(tier.total)];
+            for (const value of cells) {
+                const td = document.createElement("td");
+                td.textContent = value;
+                tr.appendChild(td);
+            }
+            body.appendChild(tr);
+        }
+        table.appendChild(body);
+        details.appendChild(table);
+        wrap.appendChild(details);
+    }
+}
+
+async function loadPrizes() {
+    if (!isFeatureOn("prizesRemainingTable")) return null;
+    if (prizesState.cache) {
+        renderPrizeGames($("prizes-query") ? $("prizes-query").value : "");
+        return prizesState.cache;
+    }
+    if (prizesState.loadPromise) return prizesState.loadPromise;
+    const source = $("prizes-source");
+    prizesState.loadPromise = (async () => {
+        try {
+            const cache = await loadPrizesRemainingCache();
+            prizesState.cache = cache;
+            prizesState.games = groupPrizeStatus(cache.rows);
+            if (source) {
+                const retrieved = formatCacheTimestamp(cache.retrievedAt);
+                source.textContent = `${officialPrizeCaveat(cache)} This cache was retrieved ${retrieved || "at an unknown time"}. ${cache.gameCount} games, ${cache.rowCount} prize-tier rows.`;
+            }
+            renderPrizeGames($("prizes-query") ? $("prizes-query").value : "");
+            return cache;
+        } catch {
+            prizesState.loadError = "The official prizes-remaining cache could not be loaded. no data";
+            prizesState.loadPromise = null;
+            if (source) source.textContent = prizesState.loadError;
+            const status = $("prizes-status");
+            if (status) status.textContent = "no data";
+            return null;
+        }
+    })();
+    return prizesState.loadPromise;
+}
+
+function bindPrizes() {
+    const query = $("prizes-query");
+    if (!query) return;
+    query.addEventListener("input", () => {
+        renderPrizeGames(query.value);
+    });
+}
+
 
 function describeSource(cache) {
     const retrieved = formatCacheTimestamp(cache.retrievedAt);
@@ -189,7 +609,18 @@ function renderResults(rows) {
             distance.textContent = formatDistance(row.distanceM);
             meta.appendChild(distance);
         }
+        if (isFeatureOn("officialStoreSales") || isFeatureOn("storeSalesSortFilter")) {
+            const store = salesForRetailer(officialState.cache, row.id);
+            if (sellsScratchOffs(store)) {
+                const tag = document.createElement("span");
+                tag.className = "scratch-badge";
+                tag.textContent = SELLS_SCRATCH_OFFS_LABEL;
+                meta.appendChild(tag);
+            }
+        }
         if (meta.childElementCount) item.appendChild(meta);
+        const amounts = officialAmountsElement(row);
+        if (amounts) item.appendChild(amounts);
 
         const actions = document.createElement("div");
         actions.className = "flex gap-2";
@@ -267,7 +698,8 @@ async function ensureMap() {
             const api = createRetailerMap({
                 container,
                 formatAddress: formatRetailerAddress,
-                onLogPrize: startLogForRetailer
+                onLogPrize: startLogForRetailer,
+                buildExtra: officialAmountsElement
             });
             const count = api.setAllRetailers(findState.cache.retailers);
             api.setResultRetailers(findState.listedRows);
@@ -275,6 +707,8 @@ async function ensureMap() {
             api.applyMode("all");
             api.fitNewYork();
             mapState.api = api;
+            if (officialState.loadPromise) await officialState.loadPromise;
+            refreshOfficialHeatLayer();
             requestAnimationFrame(() => api.invalidate());
             if (status && count === 0) {
                 status.textContent = "No retailers with published coordinates are in this cache. No locations are shown.";
@@ -370,8 +804,9 @@ function runSearch() {
     }
     const query = $("retailer-query").value;
     const quickDrawOnly = $("retailer-qd-only").checked;
-    const result = searchRetailers(cache.retailers, query, { quickDrawOnly });
+    const result = searchRetailers(cache.retailers, query, { quickDrawOnly, limit: Number.MAX_SAFE_INTEGER });
     if (result.emptyQuery) {
+        findState.rawRows = [];
         findState.listedRows = [];
         findState.listedKind = "none";
         renderResults([]);
@@ -384,21 +819,22 @@ function runSearch() {
         setStatus("Enter a name, address, city, or ZIP, or use Near me. The full official list is not shown all at once.");
         return;
     }
-    findState.listedRows = result.rows;
+    findState.rawRows = result.rows;
     findState.listedKind = "search";
-    renderResults(result.rows);
-    syncMapResults();
-    if (result.total === 0) {
+    const filtered = applyListedFilters();
+    const shown = filtered ? filtered.total : result.total;
+    if (shown === 0) {
         findState.listedRows = [];
-        findState.listedKind = "none";
-        setStatus("No retailers in this cache match that search.");
+        setStatus(result.total === 0
+            ? "No retailers in this cache match that search."
+            : "No matching retailers are left after those official-amount filters.");
         return;
     }
-    if (result.truncated) {
-        setStatus(`Showing the first ${result.rows.length} of ${formatCount(result.total)} matching retailers. Use Show on map to open one on the Map tab.`);
+    if (filtered && filtered.truncated) {
+        setStatus(`Showing the first ${filtered.rows.length} of ${formatCount(filtered.total)} matching retailers. Use Show on map to open one on the Map tab.`);
         return;
     }
-    setStatus(`${formatCount(result.total)} matching retailer${result.total === 1 ? "" : "s"}. Use Show on map to open one on the Map tab.`);
+    setStatus(`${formatCount(shown)} matching retailer${shown === 1 ? "" : "s"}. Use Show on map to open one on the Map tab.`);
 }
 
 async function runNearMe() {
@@ -417,17 +853,19 @@ async function runNearMe() {
             quickDrawOnly,
             distanceFn: haversineMeters
         });
-        findState.listedRows = rows;
+        findState.rawRows = rows;
         findState.listedKind = "nearby";
-        renderResults(rows);
-        syncMapResults();
-        if (!rows.length) {
+        const filtered = applyListedFilters();
+        const shown = filtered ? filtered.total : rows.length;
+        if (!shown) {
             findState.listedRows = [];
-            findState.listedKind = "none";
-            setStatus("No retailers with published coordinates were found near that position.");
+            setStatus(rows.length
+                ? "No nearby retailers are left after those official-amount filters."
+                : "No retailers with published coordinates were found near that position.");
             return;
         }
-        setStatus(`Showing the ${rows.length} closest licensed retailer${rows.length === 1 ? "" : "s"} to your position. The position was used only to sort this list and was not saved. Use Show on map to open one on the Map tab.`);
+        const count = filtered ? filtered.rows.length : rows.length;
+        setStatus(`Showing ${count} licensed retailer${count === 1 ? "" : "s"} near your position. The position was used only to sort this list and was not saved. Use Show on map to open one on the Map tab.`);
     } catch (error) {
         findState.listedRows = [];
         findState.listedKind = "none";
@@ -467,6 +905,21 @@ function bindFind() {
             setStatus("Near me was not used. You can search by name, address, city, or ZIP instead.");
         });
     }
+    ["sales-sort-metric", "sales-sort-range", "sales-sort-dir", "sales-filter-scratchoffs", "sales-filter-hide-none", "retailer-qd-only"].forEach((id) => {
+        const el = $(id);
+        if (!el) return;
+        el.addEventListener("change", () => {
+            if (findState.listedKind === "search") runSearch();
+            else if (findState.listedKind === "nearby") {
+                if (id === "retailer-qd-only" && findState.lastPosition) {
+                    // Re-run Near me against the already-granted position so the Quick Draw filter applies.
+                    runNearMe();
+                } else {
+                    applyListedFilters();
+                }
+            }
+        });
+    });
 }
 
 async function loadFind() {
@@ -482,6 +935,9 @@ async function loadFind() {
         }
         findState.cache = cache;
         if (source) source.innerHTML = describeSource(cache).html;
+        await loadOfficialSales();
+        if (findState.listedKind !== "none") applyListedFilters();
+        if (mapState.api) refreshOfficialHeatLayer();
     } catch {
         findState.loadError = "The official retailer list could not be loaded. No retailers are shown.";
         if (source) source.textContent = findState.loadError;
@@ -1165,10 +1621,13 @@ function describeLogMapStatus(groups, locateNote) {
 
 function refreshLogMap() {
     if (!logMapState.api) return;
-    const groups = groupLogsByRetailer(loadLogs());
-    logMapState.api.setLogs(groups);
+    const logs = loadLogs();
+    const heatOn = logMapHeatOn();
+    const groups = heatOn ? aggregateLogHeat(logs) : groupLogsByRetailer(logs);
+    logMapState.api.setLogs(groups, { style: heatOn ? "heat" : "uniform" });
     logMapState.api.fitLogs();
-    describeLogMapStatus(groups);
+    renderLogHeatLegend();
+    describeLogMapStatus(groups, heatOn ? "The heat layer sizes and colors these markers by verification weight on this device only." : "");
     return groups;
 }
 
@@ -1188,12 +1647,11 @@ async function ensureLogMap() {
             const api = createLogMap({
                 container,
                 formatAddress: formatRetailerAddress,
-                formatEntry: formatLogMapEntry
+                formatEntry: formatLogMapEntry,
+                heatStyleFor: logHeatStyle
             });
-            const groups = groupLogsByRetailer(loadLogs());
-            api.setLogs(groups);
-            api.fitLogs();
             logMapState.api = api;
+            const groups = refreshLogMap();
             requestAnimationFrame(() => api.invalidate());
             describeLogMapStatus(groups);
             container.dataset.ready = "true";
@@ -1265,11 +1723,15 @@ function bindShell() {
     document.querySelectorAll('[role="tab"]').forEach((tab) => {
         tab.addEventListener("click", () => showTab(tab.dataset.tab));
     });
+    bindPreviewFeatures();
     showTab("find");
     bindFind();
     bindMap();
+    bindOfficialHeatControls();
     bindPrizeLog();
     bindLogMap();
+    bindLogHeatControls();
+    bindPrizes();
     loadFind();
 }
 
