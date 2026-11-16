@@ -166,6 +166,13 @@ body {
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
+.header-mascot {
+    display: block;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
 .panel {
     background: #0b132b;
     border: 1px solid #1d4ed8;
