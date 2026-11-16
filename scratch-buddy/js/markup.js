@@ -16,20 +16,8 @@ export const REQUIRED_LINES_MARKUP = `
             <p>${NOT_AFFILIATED_LINE}</p>
 `;
 
-export const COIN_MARKUP = `
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="42" height="42" role="img" aria-hidden="true">
-  <defs>
-    <radialGradient id="sbCoinGold" cx="50%" cy="38%" r="60%">
-      <stop offset="0%" stop-color="#FFEE55"/>
-      <stop offset="70%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#CC9900"/>
-    </radialGradient>
-  </defs>
-  <circle cx="64" cy="64" r="60" fill="url(#sbCoinGold)" stroke="#FFF8DC" stroke-width="4"/>
-  <circle cx="64" cy="64" r="48" fill="none" stroke="#A16207" stroke-width="2" stroke-dasharray="4 3"/>
-  <rect x="40" y="44" width="48" height="40" rx="4" fill="#111827" stroke="#FDE047" stroke-width="2"/>
-  <path d="M48 56h32M48 64h24M48 72h16" stroke="#FACC15" stroke-width="3" stroke-linecap="round"/>
-</svg>
+export const ROBOT_MARKUP = `
+<img class="header-mascot" src="./brand/scratch-buddy-transparent-1024.png" width="56" height="56" alt="">
 `;
 
 export const SHELL_MARKUP = `
@@ -37,7 +25,7 @@ export const SHELL_MARKUP = `
         <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
                 <h1 class="sr-only">Scratch Buddy</h1>
-                ${COIN_MARKUP}
+                ${ROBOT_MARKUP}
                 <div class="min-w-0">
                     <p class="text-white font-black text-sm tracking-wide leading-none">Scratch Buddy</p>
                     <p class="text-[9px] text-cyan-300/80 font-semibold tracking-wide mt-1">A social companion</p>
