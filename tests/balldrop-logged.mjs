@@ -1,0 +1,70 @@
+// Regression (Nov 16 field test): a LOGGED Quick Draw ticket that is in play must
+// (1) show a "waiting for results" Ball Drop panel until NY Lottery posts its draw,
+// (2) start the ball drop by itself once that draw posts (no reload, no re-log),
+// (3) catch up on a covered draw that posted while the phone was locked.
+// Real draws only: the "not posted yet" state is made by hiding the newest real row from the server reply.
+// Usage: PREVIEW_PASS=... node tests/balldrop-logged.mjs http://127.0.0.1:8879/ [screenshot.png]
+import { createRequire } from "module";
+const require = createRequire("/workspace/tools/");
+const { chromium } = require("playwright-core");
+const url = process.argv[2] || "http://127.0.0.1:8879/";
+const shot = process.argv[3] || null;
+const auth = "Basic " + Buffer.from("andrew:" + process.env.PREVIEW_PASS).toString("base64");
+const recent = await (await fetch(url + "preview-api/quickdraw/recent", { headers: { Authorization: auth } })).json();
+const rows = recent.draws; const newest = rows[0].drawNumber;
+const b = await chromium.launch({ executablePath: "/usr/bin/google-chrome", args: ["--no-sandbox"] });
+const results = []; const check = (name, ok, info = "") => results.push({ name, ok: !!ok, info });
+const slip = d => ({ pickName: "My Numbers", draw: d, endDraw: d, spot: 4, games: 1, wager: 1, costPerGame: 1, baseWager: 1, hasExtra: false, numbers: rows[0].numbers.slice(0, 2).concat([1, 80].filter(n => !rows[0].numbers.slice(0, 2).includes(n))).slice(0, 4), gradedDraws: [], bestHits: 0, winningGamesCount: 0, hits: "Pending", payout: 0, timestamp: new Date(Date.now() - 600000).toISOString(), manual: true });
+async function page(tickets, hideNewest) {
+  const c = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, httpCredentials: { username: "andrew", password: process.env.PREVIEW_PASS } });
+  await c.addInitScript(t => { localStorage.setItem("draw_buddy_age_ok", String(Date.now())); localStorage.setItem("draw_buddy_pl_archive", JSON.stringify(t)); }, tickets);
+  const p = await c.newPage(); const errs = []; p.on("pageerror", e => errs.push(String(e).slice(0, 200)));
+  const state = { hide: hideNewest };
+  await p.route("**/preview-api/quickdraw/recent", async route => {
+    const r = await route.fetch(); const j = await r.json();
+    if (state.hide) j.draws = j.draws.filter(d => d.drawNumber !== newest);
+    await route.fulfill({ response: r, json: j });
+  });
+  await p.goto(url, { waitUntil: "networkidle" });
+  return { c, p, errs, state };
+}
+const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').hidden, title: document.getElementById('bd-title').innerText, mini: document.getElementById('bd-mini').innerText, sub: document.getElementById('bd-sub').innerText, grid: !document.getElementById('bd-qd').hidden }));
+
+// 1+2: ticket for the newest draw, which "hasn't posted yet", then posts.
+{
+  const { c, p, errs, state } = await page([slip(newest)], true);
+  await p.waitForTimeout(6000);
+  const w = await bd(p);
+  check("waiting panel shows for in-play logged ticket", !w.hidden && w.title.includes(`#${newest}`) && /in play/.test(w.mini) && !w.grid, JSON.stringify(w));
+  check("waiting copy has no 'live'", !/\blive\b/i.test(w.sub + w.mini + w.title));
+  state.hide = false;
+  await p.waitForTimeout(14000);
+  const d = await bd(p);
+  check("ball drop starts by itself when the draw posts", !d.hidden && d.grid && d.title.includes(`#${newest}`) && /Ball \d+ of 20/.test(d.mini), JSON.stringify(d));
+  if (shot) await p.screenshot({ path: shot });
+  await p.waitForTimeout(20000);
+  const fit = await p.evaluate(() => { const box = document.getElementById('balldrop'), b = document.getElementById('bd-body'); return { bottom: Math.round(box.getBoundingClientRect().bottom), inner: innerHeight, sh: b.scrollHeight, ch: b.clientHeight, wheel: !document.getElementById('bd-wheel').hidden }; });
+  check("390x844: finished drop (board + Extra wheel) fits the screen, no inner scroll", fit.bottom <= fit.inner && fit.sh <= fit.ch + 1, JSON.stringify(fit));
+  await p.setViewportSize({ width: 360, height: 740 }); await p.evaluate(() => previewBdFit()); await p.waitForTimeout(300);
+  const fit2 = await p.evaluate(() => { const box = document.getElementById('balldrop'), b = document.getElementById('bd-body'); return { bottom: Math.round(box.getBoundingClientRect().bottom), inner: innerHeight, sh: b.scrollHeight, ch: b.clientHeight }; });
+  check("360x740: finished drop fits the screen, no inner scroll", fit2.bottom <= fit2.inner && fit2.sh <= fit2.ch + 1, JSON.stringify(fit2));
+  const g = await p.evaluate(() => sessionTickets[0].gradedDraws);
+  check("ticket graded for that draw", g.includes(newest), JSON.stringify(g));
+  check("no page errors (1)", errs.length === 0, errs.join(" | "));
+  await c.close();
+}
+// 3: catch-up on a covered draw one back (posted while the phone was locked), if it posted < 15 min ago.
+{
+  const prev = rows[1]; const age = Date.now() - Date.parse(prev.drawAtEt);
+  if (age < 14 * 60000) {
+    const { c, p, errs } = await page([slip(prev.drawNumber)], false);
+    await p.waitForTimeout(6000);
+    const d = await bd(p);
+    check("catch-up drop for a covered draw that posted while away", !d.hidden && d.grid && d.title.includes(`#${prev.drawNumber}`), JSON.stringify(d));
+    check("no page errors (3)", errs.length === 0, errs.join(" | "));
+    await c.close();
+  } else check("catch-up drop (skipped: previous draw older than 14 min)", true);
+}
+await b.close();
+for (const r of results) console.log(`${r.ok ? "PASS" : "FAIL"}  ${r.name}${r.info !== "" ? "  (" + r.info + ")" : ""}`);
+process.exit(results.every(r => r.ok) ? 0 : 1);

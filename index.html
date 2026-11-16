@@ -61,8 +61,11 @@
         .bd-mynums.bd-many { max-height:198px; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding-right:3px; }
         .bd-chip { width: 22px; height: 22px; justify-self: center; border-radius: 9999px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #a5f3fc; border: 1.5px dashed #22d3ee; background: #0b132b; box-sizing: border-box; }
         .bd-chip.bd-chip-hit { background: radial-gradient(circle at 35% 30%, #fef9c3, #facc15 55%, #a16207); color: #111827; border: 1.5px solid #fde047; box-shadow: 0 0 6px rgba(250,204,21,.85); -webkit-animation: bdPop .35s ease-out; animation: bdPop .35s ease-out; }
-        .bd-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px 2px; padding: 3px 2px; }
-        .bd-cell { width: 27px; height: 27px; justify-self: center; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; background: #0b132b; color: #475569; border: 1px solid #1e293b; box-sizing: border-box; }
+        .bd-grid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: var(--bd-gap, 4px) 2px; padding: 3px 2px; }
+        #bd-body { overflow-x: hidden; scrollbar-width: none; } #bd-body::-webkit-scrollbar { display: none; }
+        #balldrop.bd-tight .bd-tight-hide { display: none !important; } #balldrop.bd-tight #bd-toggle[aria-expanded="true"] #bd-mini { display: none; } #balldrop.bd-tight #bd-sub { font-size: 9px; line-height: 12px; } #balldrop.bd-tight #bd-body > * + * { margin-top: 5px; } #balldrop.bd-tight .bd-ticket-chips { gap: 2px; } #balldrop.bd-tight .bd-chip { width: 19px; height: 19px; font-size: 9px; } #balldrop.bd-tight .bd-ticket + .bd-ticket { margin-top: 1px; padding-top: 3px; } #balldrop.bd-tight .bd-ticket-head { margin-bottom: 1px; }
+        .bd-wheel-disc { width: var(--bd-wheel, 112px); height: var(--bd-wheel, 112px); flex-shrink: 0; }
+        .bd-cell { width: var(--bd-cell, 27px); height: var(--bd-cell, 27px); justify-self: center; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: calc(var(--bd-cell, 27px) * .44); font-weight: 800; background: #0b132b; color: #475569; border: 1px solid #1e293b; box-sizing: border-box; }
                 .bd-cell.bd-lit { background: radial-gradient(circle at 35% 30%, #e0f2fe, #3b82f6 60%, #1e3a8a); color: #fff; border-color: #93c5fd; -webkit-animation: bdLand .35s cubic-bezier(.3,1.3,.5,1) both; animation: bdLand .35s cubic-bezier(.3,1.3,.5,1) both; }
         #bd-result:empty { display: none; }
         .bd-cell.bd-lit.bd-win { background: radial-gradient(circle at 35% 30%, #fef9c3, #facc15 55%, #a16207); color: #111827; border: 1.5px solid #fde047; box-shadow: 0 0 8px rgba(250,204,21,.85); }
@@ -208,26 +211,28 @@
                             <div id="bd-grid" class="bd-grid" aria-label="Quick Draw numbers 1 to 80"></div>
                         </div>
                         <div class="flex items-start justify-between gap-2">
-                            <div id="bd-order-note" class="text-[9px] text-slate-500"></div>
-                            <div class="text-[8px] text-slate-400 whitespace-nowrap"><span style="display:inline-block;width:9px;height:9px;background:#3b82f6;border-radius:9999px;vertical-align:-1px"></span> drawn <span style="display:inline-block;width:9px;height:9px;background:#facc15;border-radius:9999px;vertical-align:-1px;margin-left:4px"></span> won</div>
+                            <div id="bd-order-note" class="bd-tight-hide text-[9px] text-slate-500"></div>
+                            <div class="text-[8px] text-slate-400 whitespace-nowrap"><span style="display:inline-block;width:9px;height:9px;background:#3b82f6;border-radius:9999px;vertical-align:-1px"></span> drawn <span style="display:inline-block;width:9px;height:9px;background:#facc15;border-radius:9999px;vertical-align:-1px;margin-left:4px"></span> match</div>
                         </div>
                     </div>
-                    <div id="bd-wheel" class="flex flex-col items-center text-center gap-1.5 border-t border-yellow-500/30 pt-2" hidden>
-                        <div class="relative" style="width:132px;height:132px">
-                            <div id="bd-wheel-rotor" style="width:132px;height:132px;transition:transform 2.6s cubic-bezier(.17,.67,.2,1);-webkit-transition:-webkit-transform 2.6s cubic-bezier(.17,.67,.2,1)">
-                                <svg id="bd-wheel-svg" viewBox="-100 -100 200 200" width="132" height="132" aria-label="Extra multiplier wheel"></svg>
+                    <div id="bd-wheel" class="flex flex-row items-center gap-3 border-t border-yellow-500/30 pt-2" hidden>
+                        <div class="relative bd-wheel-disc">
+                            <div id="bd-wheel-rotor" class="bd-wheel-disc" style="transition:transform 2.6s cubic-bezier(.17,.67,.2,1);-webkit-transition:-webkit-transform 2.6s cubic-bezier(.17,.67,.2,1)">
+                                <svg id="bd-wheel-svg" viewBox="-100 -100 200 200" width="100%" height="100%" aria-label="Extra multiplier wheel"></svg>
                             </div>
                             <div style="position:absolute;left:50%;top:-6px;margin-left:-8px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:15px solid #facc15;filter:drop-shadow(0 1px 1px #000)"></div>
                         </div>
-                        <div id="bd-wheel-label" class="text-2xl font-black text-yellow-300 leading-tight">🎡 Extra…</div>
+                        <div class="flex-1 min-w-0 flex flex-col items-center text-center gap-1">
+                        <div id="bd-wheel-label" class="text-xl font-black text-yellow-300 leading-tight">🎡 Extra…</div>
                         <div id="bd-wheel-prize" class="text-[11px] text-white leading-snug"></div>
                         <div class="w-full max-w-[260px] space-y-1">
-                            <div class="text-[9px] uppercase tracking-wider text-cyan-300 font-bold">Which way did the wheel spin?</div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" id="bd-dir-L" onclick="previewBdLogDir('L')" class="bg-indigo-700 text-white font-black py-2 rounded-lg text-sm border-2 border-transparent">⟲ Left</button>
-                                <button type="button" id="bd-dir-R" onclick="previewBdLogDir('R')" class="bg-teal-700 text-white font-black py-2 rounded-lg text-sm border-2 border-transparent">Right ⟳</button>
+                            <div class="bd-tight-hide text-[9px] uppercase tracking-wider text-cyan-300 font-bold">Which way did the wheel spin?</div>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <button type="button" id="bd-dir-L" onclick="previewBdLogDir('L')" class="bg-indigo-700 text-white font-black py-1.5 rounded-lg text-sm border-2 border-transparent">⟲ Left</button>
+                                <button type="button" id="bd-dir-R" onclick="previewBdLogDir('R')" class="bg-teal-700 text-white font-black py-1.5 rounded-lg text-sm border-2 border-transparent">Right ⟳</button>
                             </div>
-                            <div id="bd-dir-msg" class="text-[9px] text-slate-400"></div>
+                            <div id="bd-dir-msg" class="bd-tight-hide text-[9px] text-slate-400"></div>
+                        </div>
                         </div>
                     </div>
                     <div id="bd-result" class="text-[11px] text-white leading-snug border-t border-slate-700 pt-2"></div>
@@ -3027,7 +3032,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let previewBdAutoFold = false;
         window.addEventListener('scroll', () => { if (previewBdAutoFold && !previewBdBusy && !previewBdCollapsed && window.scrollY > 200) { previewBdAutoFold = false; previewBdToggle(); } }, { passive: true });
         function previewBdToggle() { setTimeout(() => { try { previewBdFit(); } catch (e) {} }, 0); previewBdCollapsed = !previewBdCollapsed; document.getElementById('bd-body').hidden = previewBdCollapsed; document.getElementById('bd-toggle').setAttribute('aria-expanded', String(!previewBdCollapsed)); }
-        function previewBdDismiss() { previewBdDismissedAt = previewBdShown || -1; document.getElementById('balldrop').hidden = true; }
+        function previewBdDismiss() { if (previewBdMode === 'wait') previewBdWaitDismissed = previewBdWaitDraw; else previewBdDismissedAt = previewBdShown || -1; document.getElementById('balldrop').hidden = true; }
         function previewBdQdSlips(nextNum) {
             return (sessionTickets || []).filter(t => (t.game || 'quickdraw') === 'quickdraw' && Array.isArray(t.numbers) && t.numbers.length
                 && (t.gradedDraws || []).length < (t.games || 1) && parseInt(t.draw) <= nextNum && parseInt(t.endDraw || t.draw) >= nextNum - 1);
@@ -3044,8 +3049,17 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         // The panel sits in the sticky header, so cap its body to the screen height (it scrolls inside if needed).
         function previewBdFit() {
             const body = document.getElementById('bd-body'), box = document.getElementById('balldrop'); if (!body || !box || box.hidden || body.hidden) return;
-            const top = Math.max(0, body.getBoundingClientRect().top);
-            body.style.maxHeight = Math.max(160, Math.round(window.innerHeight - top - 14)) + 'px';
+            body.style.maxHeight = 'none'; body.style.overflowY = 'hidden';
+            // Fit the whole panel on the phone screen with no inner scroll bar: shrink the 1-80 board and the Extra wheel step by step.
+            const over = () => box.getBoundingClientRect().bottom - (window.innerHeight - 4);
+            let cell = 27, wheel = 112;
+            const apply = () => { box.style.setProperty('--bd-cell', cell + 'px'); box.style.setProperty('--bd-gap', (cell >= 24 ? 4 : cell >= 20 ? 3 : 2) + 'px'); box.style.setProperty('--bd-wheel', wheel + 'px'); };
+            box.classList.remove('bd-tight'); apply();
+            while (over() > 0 && (cell > 22 || wheel > 92)) { if (cell > 22) cell -= 1; if (wheel > 92) wheel -= 4; apply(); }
+            // Still too tall (short phones): drop the helper lines (help text only; results, prizes and source stay), then shrink more.
+            if (over() > 0) { box.classList.add('bd-tight'); while (over() > 0 && (cell > 16 || wheel > 72)) { if (cell > 16) cell -= 1; if (wheel > 72) wheel -= 4; apply(); } }
+            // Last resort only (very short screens / several tickets): the panel scrolls inside, with the bar hidden.
+            const o = over(); if (o > 0) { body.style.maxHeight = Math.max(160, body.clientHeight - Math.ceil(o)) + 'px'; body.style.overflowY = 'auto'; }
         }
         window.addEventListener('resize', () => { try { previewBdFit(); } catch (e) {} });
         function previewBdDirUI() {
@@ -3064,20 +3078,54 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             try { previewWheelPick = null; previewRenderExtra(); } catch (e) {}
             previewBdDirUI();
         }
+        // Waiting state: a logged slip is in play but NY Lottery hasn't posted its draw yet (results land ~1-2 min after the draw).
+        let previewBdWaitDraw = null, previewBdWaitDismissed = null;
+        function previewBdQdAll() { return (sessionTickets || []).filter(t => (t.game || 'quickdraw') === 'quickdraw' && Array.isArray(t.numbers) && t.numbers.length); }
+        function previewBdCovers(t, num) { return parseInt(t.draw) <= num && parseInt(t.endDraw || t.draw) >= num; }
+        function previewBdShowWaiting(waitNum, slips) {
+            const box = document.getElementById('balldrop');
+            if (previewBdWaitDismissed === waitNum) return;
+            if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
+            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; box.hidden = false;
+            ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
+            document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${waitNum}`;
+            document.getElementById('bd-mini').innerText = `in play · ${slips.length} ticket${slips.length === 1 ? '' : 's'} · waiting for results`;
+            document.getElementById('bd-sub').innerText = `Your logged ticket is in play for draw #${waitNum}. The balls drop here as soon as NY Lottery posts this draw's numbers, usually 1–2 minutes after the draw. Checking every 10 seconds; keep this page open.`;
+            const res = document.getElementById('bd-result'); if (res) res.innerText = '';
+            setTimeout(previewBdFit, 0);
+        }
         async function previewBdCheck(force) {
             if (previewBdBusy) return;
             const rows = await previewFetchRecent(); if (!rows || !rows.length) return;
+            if (previewBdBusy) return;
             const newest = rows[0], newestNum = Number(newest.draw_number), np = previewNextPurchasable(0), nextNum = np ? np.number : newestNum + 1;
-            const slips = previewBdQdSlips(nextNum).concat((sessionTickets || []).filter(t => (t.game || 'quickdraw') === 'quickdraw' && parseInt(t.draw) <= newestNum && parseInt(t.endDraw || t.draw) >= newestNum && !previewBdQdSlips(nextNum).includes(t)));
+            const all = previewBdQdAll();
             const box = document.getElementById('balldrop');
-            const covering = slips.filter(t => parseInt(t.draw) <= newestNum && parseInt(t.endDraw || t.draw) >= newestNum);
-            // Plain screen until a logged slip's draw has results; nothing shows while waiting for the first draw.
-            if (!covering.length) { if (!previewBdBusy && !previewBdHold && previewBdMode !== 'jp') box.hidden = true; return; }
-            if (!force && previewBdShown === newestNum) return;
-            if (!force && previewBdDismissedAt === newestNum) return;
-            previewBdShown = newestNum; previewBdDismissedAt = null;
-            try { gradePendingTickets(); } catch (e) {}
-            await previewBdAnimate(newest, covering);
+            // Newest posted draw any logged slip covers. Older draws count only if posted in the last 15 min
+            // (e.g. the phone was locked through the draw), so old tickets don't replay on every visit.
+            const target = rows.find((r, i) => all.some(t => previewBdCovers(t, Number(r.draw_number)))
+                && (i === 0 || (r.draw_at && Date.now() - Date.parse(r.draw_at) < 15 * 60000)));
+            const targetNum = target ? Number(target.draw_number) : null;
+            const covering = target ? all.filter(t => previewBdCovers(t, targetNum)) : [];
+            const fresh = target && (force || (previewBdShown !== targetNum && previewBdDismissedAt !== targetNum)) && (previewBdShown == null || targetNum >= previewBdShown || force);
+            if (fresh && covering.length) {
+                previewBdShown = targetNum; previewBdDismissedAt = null; previewBdWaitDraw = null;
+                // Grade with the just-posted rows too (the page's history may have loaded before this draw posted).
+                try { const have = new Set(previewGradeDraws.map(r => parseInt(r.draw_number))); previewGradeDraws = previewGradeDraws.concat(rows.filter(r => Array.isArray(r.winning_numbers) && r.winning_numbers.length === 20 && !have.has(parseInt(r.draw_number)))); } catch (e) {}
+                try { gradePendingTickets(); } catch (e) {}
+                await previewBdAnimate(target, covering);
+                return;
+            }
+            // Slips whose next draw hasn't posted yet (on sale now or already drawn, results pending).
+            const waiting = all.filter(t => (t.gradedDraws || []).length < (t.games || 1) && parseInt(t.endDraw || t.draw) > newestNum && parseInt(t.draw) <= nextNum);
+            if (waiting.length) {
+                const waitNum = Math.max(newestNum + 1, Math.min(...waiting.map(t => parseInt(t.draw))));
+                const showingResult = previewBdMode === 'qd' && !box.hidden;
+                if (!showingResult && !previewBdHold && previewBdMode !== 'jp') previewBdShowWaiting(waitNum, waiting.filter(t => previewBdCovers(t, waitNum)).length ? waiting.filter(t => previewBdCovers(t, waitNum)) : waiting);
+                else if (showingResult && !previewBdHold) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw #${waitNum} pending`; }
+                return;
+            }
+            if (!covering.length && !previewBdBusy && !previewBdHold && previewBdMode !== 'jp') { box.hidden = true; if (previewBdMode === 'wait') previewBdMode = null; }
         }
         function previewBdTicketLabel(t, i) {
             const name = t.pickName || (t.pickKey && PREVIEW_BTN_NAMES[t.pickKey]) || (t.manual ? 'My Numbers' : `Ticket ${i + 1}`);
@@ -3085,6 +3133,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         const PREVIEW_BD_BALL_MS = 900; // one ball lands at a time: 20 balls ≈ 18 s, then the 2.7 s Extra wheel
         async function previewBdAnimate(row, slips) {
+            try { await previewBdAnimateInner(row, slips); } catch (e) { console.warn('ball drop', e); } finally { previewBdBusy = false; }
+        }
+        async function previewBdAnimateInner(row, slips) {
             previewBdBusy = true; previewBdAutoFold = false; previewBdMode = 'qd';
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
             const box = document.getElementById('balldrop'); box.hidden = false;
@@ -3179,7 +3230,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     line.textContent = `${ticketRows[i].label}: ${o.t.hasExtra ? `$${o.base.toFixed(2)} × ${mult}X = $${o.prize.toFixed(2)}` : `$${o.prize.toFixed(2)} · no Extra`}`;
                     wp.appendChild(line);
                 });
-                document.getElementById('bd-mini').innerText = `${totalText} · Extra ${mult}X`;
+                document.getElementById('bd-mini').innerText = `${totalText} · Extra ${mult}X`; previewBdFit();
                 previewBdAutoFold = true;
             }
             previewBdBusy = false;
@@ -3210,7 +3261,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 } catch (e) {}
             }
         }
-        setInterval(() => { previewBdCheck(false); }, 20000);
+        setInterval(() => { previewBdCheck(false); }, 10000);
+        // Phones pause timers while locked or in another app: check right away when the page comes back.
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) { try { previewBdCheck(false); } catch (e) {} } });
+        window.addEventListener('pageshow', () => { try { previewBdCheck(false); } catch (e) {} });
         setTimeout(() => { try { previewBdCheck(false); previewBdCheckJackpot(); } catch (e) {} }, 3000);
         setInterval(() => { previewBdCheckJackpot(); }, 300000);
 
