@@ -22,10 +22,6 @@
       --muted: #9aa6c0;
       --line: rgba(255, 255, 255, 0.12);
       --card: #111c38;
-      --quote-bg: #0a0c10;
-      --quote-card: #161410;
-      --quote-accent: #fb923c;
-      --quote-line: rgba(251, 146, 60, 0.28);
     }
 
     * { box-sizing: border-box; }
@@ -84,20 +80,18 @@
     .roadmap {
       width: min(36rem, 100%);
       margin: 0 auto;
-      padding: 0 1.25rem 2.5rem;
-    }
-
-    h2 {
-      margin: 0 0 1rem;
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      padding: 0 1.25rem 1.25rem;
     }
 
     .group {
       margin: 0 0 2.25rem;
     }
 
+    .group:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Gold is reserved for these small section/status labels only. */
     .group-label {
       margin: 0 0 0.85rem;
       color: var(--gold);
@@ -175,56 +169,12 @@
     .price {
       margin-top: 0.85rem;
       padding: 0.75rem 0.8rem;
-      background: rgba(250, 204, 21, 0.08);
-      border: 1px solid rgba(250, 204, 21, 0.22);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
       border-radius: 0.7rem;
       color: var(--fg);
       font-size: 0.9rem;
       line-height: 1.5;
-    }
-
-    .price strong {
-      color: var(--gold);
-      font-weight: 700;
-    }
-
-    /* Quote Buddy is a separate product: different band, palette, and no links to the lottery apps. */
-    .separate {
-      background: var(--quote-bg);
-      border-top: 1px solid var(--quote-line);
-      border-bottom: 1px solid var(--quote-line);
-      margin: 0.5rem 0 0;
-      padding: 2rem 1.25rem 2.15rem;
-    }
-
-    .separate-inner {
-      width: min(36rem, 100%);
-      margin: 0 auto;
-    }
-
-    .separate .group-label {
-      color: var(--quote-accent);
-    }
-
-    .separate h2 {
-      margin: 0 0 0.4rem;
-    }
-
-    .separate .intro {
-      margin: 0 0 1rem;
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-    }
-
-    .separate .card {
-      background: var(--quote-card);
-      border-color: var(--quote-line);
-    }
-
-    .separate .status.dev {
-      background: #9a3412;
-      color: #fff7ed;
     }
 
     footer {
@@ -235,6 +185,7 @@
       color: var(--muted);
       font-size: 0.82rem;
       line-height: 1.5;
+      border-top: 1px solid var(--line);
     }
 
     footer p { margin: 0.35rem 0; }
@@ -268,8 +219,10 @@
             </div>
           </div>
           <p>A fun, social draw-stats companion for enjoyment, not a betting tool. A downloadable app, coming soon on iOS and Android.</p>
-          <p class="price"><strong>Pricing coming soon.</strong> The app is planned at $1.99 per month or $17 per year, with a founding-member rate of $17 per year locked for the first 2,000 annual subscribers.</p>
+          <p class="price">Pricing coming soon.</p>
           <p class="note">18+ only. Draw Buddy does not sell lottery tickets or accept wagers.</p>
+          <p class="note">Past results don't predict future draws.</p>
+          <p class="note">Not affiliated with any lottery.</p>
         </article>
       </div>
     </section>
@@ -285,30 +238,12 @@
               <span class="status dev">In development</span>
             </div>
           </div>
-          <p>A scratch-off retailer finder and personal win log.</p>
+          <p>A scratch-off retailer finder and personal ticket log.</p>
           <p class="note">18+ only. Scratch Buddy does not sell lottery tickets or accept wagers.</p>
         </article>
       </div>
     </section>
   </main>
-
-  <aside class="separate" aria-labelledby="separate-product">
-    <div class="separate-inner">
-      <p class="group-label" id="separate-product">A separate product</p>
-      <h2>From NAV Analytics</h2>
-      <p class="intro">This is a quoting tool for the trades. It is not a lottery app, and it is shown here only so you can see what else is in development.</p>
-      <article class="card">
-        <div class="card-head">
-          <img class="card-mascot" src="assets/quote-buddy-mascot.png" width="88" height="88" alt="Quote Buddy robot mascot, a white robot in an orange hard hat holding a clipboard.">
-          <div>
-            <h3>Quote Buddy</h3>
-            <span class="status dev">In development</span>
-          </div>
-        </div>
-        <p>A quoting app for construction and service trades.</p>
-      </article>
-    </div>
-  </aside>
 
   <footer>
     <p>18+ only for Draw Buddy and Scratch Buddy. These apps do not sell lottery tickets or accept wagers.</p>
@@ -333,4 +268,5 @@
     })();
   </script>
 </body>
+
 </html>
