@@ -1615,7 +1615,10 @@ function describeLogMapStatus(groups, locateNote) {
         return;
     }
     const logs = groups.reduce((sum, group) => sum + ((group.entries && group.entries.length) || 0), 0);
-    const base = `${formatCount(groups.length)} store${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. Every marker looks the same. Tiles are from OpenStreetMap. Tap a marker for your logs at that store.`;
+    const look = logMapHeatOn()
+        ? "Marker size and color follow verification weight on this device only."
+        : "Every marker looks the same.";
+    const base = `${formatCount(groups.length)} store${groups.length === 1 ? "" : "s"} from ${formatCount(logs)} prize log${logs === 1 ? "" : "s"} on this device. ${look} Tiles are from OpenStreetMap. Tap a marker for your logs at that store.`;
     status.textContent = locateNote ? `${base} ${locateNote}` : base;
 }
 
@@ -1627,7 +1630,7 @@ function refreshLogMap() {
     logMapState.api.setLogs(groups, { style: heatOn ? "heat" : "uniform" });
     logMapState.api.fitLogs();
     renderLogHeatLegend();
-    describeLogMapStatus(groups, heatOn ? "The heat layer sizes and colors these markers by verification weight on this device only." : "");
+    describeLogMapStatus(groups);
     return groups;
 }
 
