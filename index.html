@@ -2231,6 +2231,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
                 const played = t.numbers || [];
                 if (played.length === 0) return;
+                if (!t.drawHits || typeof t.drawHits !== 'object') t.drawHits = {};
+                for (let d = startDraw; d <= endDraw; d++) { // per-draw hit counts, also back-filled for draws graded before this existed
+                    if (drawMap[d] && t.drawHits[d] === undefined) { t.drawHits[d] = played.filter(n => (drawMap[d].winning_numbers || []).includes(n)).length; updated = true; }
+                }
 
                 for (let dNum = startDraw; dNum <= endDraw; dNum++) {
                     if (!t.gradedDraws.includes(dNum) && drawMap[dNum]) {
@@ -2254,13 +2258,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 }
 
                 const gradedCount = t.gradedDraws.length;
+                const dh = Object.values(t.drawHits || {}), anyHit = dh.filter(h => h >= 1).length;
+                const anyTxt = dh.length ? ` • 1+ hit in ${anyHit}/${dh.length} gm${dh.length === 1 ? '' : 's'}` : '';
                 if (gradedCount === 0) {
                     t.hits = numGames > 1 ? `Pending (0/${numGames} gms)` : `Pending`;
                 } else if (gradedCount < numGames) {
-                    t.hits = `In play (${gradedCount}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`;
+                    t.hits = `In play (${gradedCount}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}${anyTxt}`;
                 } else {
                     t.hits = numGames > 1
-                        ? `Done (${numGames}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`
+                        ? `Done (${numGames}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}${anyTxt}`
                         : `${t.bestHits}/${t.spot} Hit`;
                 }
             });
@@ -3421,6 +3427,13 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     const wager = Number(o.t.baseWager || 1);
                     how.textContent = `${pay.hits} of ${Number(o.t.spot) || o.t.numbers.length} matched · $${wager % 1 ? wager.toFixed(2) : wager}/draw${o.t.hasExtra ? (mult === 1 ? ' · Extra on, No Extra this draw' : (pay.prize > 0 ? ` · $${pay.base.toFixed(2)} × Extra ${mult}X` : ` · Extra ${mult}X`)) : ' · Extra off'} · ${pay.done}/${pay.total} draws done`;
                     o.prizeEl.appendChild(big); o.prizeEl.appendChild(how);
+                    if (pay.total > 1) { // multi-draw ticket: how many of its draws so far hit at least one number (losing draws included)
+                        const dh = Object.assign({}, o.t.drawHits || {}); dh[Number(row.draw_number)] = pay.hits;
+                        const v = Object.values(dh), any = v.filter(h => h >= 1).length;
+                        const tally = document.createElement('div'); tally.className = 'bd-prize-how';
+                        tally.textContent = `Hit at least 1 number in ${any} of ${v.length} draw${v.length === 1 ? '' : 's'} so far`;
+                        o.prizeEl.appendChild(tally);
+                    }
                 }
             });
             const combined = info.reduce((sum, o) => sum + o.hits, 0), paid = info.reduce((sum, o) => sum + o.prize, 0);
