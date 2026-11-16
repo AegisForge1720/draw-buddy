@@ -58,7 +58,7 @@ ok("1 Spot subtitle matches the code (overdue main numbers)", ["powerball", "meg
 ok("Double Play off: Jackpot Pick meaning has no Double Play", !/Double Play/.test(E.modeMeaning(E.GAMES.powerball, { doublePlay: false }).jackpot));
 const FL = require("../js/flags.js");
 ok("Flags: public build defaults are all off", Object.values(FL.PUBLIC_DEFAULTS).every(v => v === false) && FL.buildMode(null) === "public" && Object.values(FL.resolve(null)).every(v => v === false));
-ok("Flags: private preview turns on only Double Play + result notices", FL.PRIVATE_PREVIEW.doublePlay && FL.PRIVATE_PREVIEW.resultNotices && !FL.PRIVATE_PREVIEW.partnerLinks && !FL.PRIVATE_PREVIEW.shareQr && !FL.PRIVATE_PREVIEW.tierSwitcher && !FL.PRIVATE_PREVIEW.pricing);
+ok("Flags: private preview turns every feature on; public defaults stay off", Object.values(FL.PRIVATE_PREVIEW).every(Boolean) && !Object.values(FL.PUBLIC_DEFAULTS).some(Boolean));
 ok("House copy is exact", FL.COPY.RG === "18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369)." && FL.COPY.NA === "Not affiliated with any lottery." && FL.COPY.D1.startsWith("Past results don't predict future draws.") && FL.COPY.ENTITY === "NAV Analytics LLC");
 // Schedule: Sun Nov 15, 2026 9:10 PM ET
 const now = Date.UTC(2026, 10, 16, 2, 10);

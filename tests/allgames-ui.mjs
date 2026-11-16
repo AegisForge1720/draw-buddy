@@ -39,9 +39,9 @@ for (const vp of shots ? [{ w: 390, h: 844, tag: "390", mobile: true }, { w: 128
         body: document.body.innerText, house: vis(document.getElementById('house-lines')) };
     });
     ok("robots meta noindex,nofollow + title", pg.robots === "noindex,nofollow" && pg.title === "Draw Buddy", pg.robots + " | " + pg.title);
-    ok("private preview build: Double Play + result notices on; partner/share/tier/pricing off", pg.build === "private-preview" && pg.flags.doublePlay && pg.flags.resultNotices && !pg.flags.partnerLinks && !pg.flags.shareQr && !pg.flags.tierSwitcher && !pg.flags.pricing, JSON.stringify(pg.flags));
-    ok("HOLD: no Lotto.com / ref=draw_buddy_stripe / sportsbook link visible (kept in code behind a flag)", pg.partnerVisible === 0 && pg.partnerInDom > 0 && !/Partner Apps|Sports Betting|Lotto\.com|DraftKings|FanDuel|BetMGM/.test(pg.body), `${pg.partnerVisible} visible, ${pg.partnerInDom} in DOM`);
-    ok("Share/QR and Free/Pro switcher hidden; no price/buy links visible", !pg.share && !pg.tier && pg.prices === 0 && !/\$9\.99|\$75/.test(pg.body));
+    ok("private preview build: every feature on (Andrew 2026-11-16)", pg.build === "private-preview" && pg.flags.doublePlay && pg.flags.resultNotices && pg.flags.partnerLinks && pg.flags.shareQr && pg.flags.tierSwitcher && pg.flags.pricing, JSON.stringify(pg.flags));
+    ok("Private preview: partner/affiliate links shown (public builds keep them off; see public-flags test)", pg.partnerVisible > 0, `${pg.partnerVisible} visible, ${pg.partnerInDom} in DOM`);
+    ok("Private preview: Share/QR and Free/Pro switcher shown in the top banner", pg.share && pg.tier);
     ok("Footer entity NAV Analytics LLC; no 'Draw Buddy Analytics'", /© 2026 NAV Analytics LLC/.test(pg.body) && !/Draw Buddy Analytics/.test(pg.body));
     ok("House lines visible on the page (HOPENY, not affiliated, D1)", pg.house && pg.body.includes(RG) && pg.body.includes(NA) && pg.body.includes("Past results don't predict future draws."));
     const bad0 = pg.body.match(BANNED); ok("Quick Draw page wording rules", !bad0, bad0 ? bad0[0] : "");

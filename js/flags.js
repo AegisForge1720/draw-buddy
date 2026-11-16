@@ -5,7 +5,9 @@
  * gets the public defaults below.
  * Ralph review 2026-11-16: doublePlay + resultNotices may be on for Andrew's private preview only.
  * partnerLinks (Lotto.com / ref=draw_buddy_stripe / sportsbook "Partner Apps"), shareQr, tierSwitcher
- * and pricing stay OFF everywhere, including the private preview (Gate 0 / §206 hold). */
+ * and pricing stay OFF in every public build (Gate 0 / §206 hold).
+ * Andrew 2026-11-16: his private preview shows every feature (partner links, Share/QR, Free/Pro switcher,
+ * pricing) so features can be trimmed later; none of it goes public without Ralph's clearance. */
 (function (root) {
   'use strict';
   const PUBLIC_DEFAULTS = Object.freeze({
@@ -16,7 +18,7 @@
     tierSwitcher: false,   // Free/Pro test switcher
     pricing: false         // any price, upgrade or buy button (no prices until the §206 cure)
   });
-  const PRIVATE_PREVIEW = Object.freeze(Object.assign({}, PUBLIC_DEFAULTS, { doublePlay: true, resultNotices: true }));
+  const PRIVATE_PREVIEW = Object.freeze(Object.assign({}, PUBLIC_DEFAULTS, { doublePlay: true, resultNotices: true, partnerLinks: true, shareQr: true, tierSwitcher: true, pricing: true }));
   // House copy (exact wording; Ralph's standing rules).
   const COPY = Object.freeze({
     D1: "Past results don't predict future draws. Every draw is independent.",
