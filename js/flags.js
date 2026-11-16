@@ -7,7 +7,8 @@
  * partnerLinks (Lotto.com / ref=draw_buddy_stripe / sportsbook "Partner Apps"), shareQr, tierSwitcher
  * and pricing stay OFF in every public build (Gate 0 / §206 hold).
  * Andrew 2026-11-16: his private preview shows every feature (partner links, Share/QR, Free/Pro switcher,
- * pricing) so features can be trimmed later; none of it goes public without Ralph's clearance. */
+ * pricing) so features can be trimmed later; none of it goes public without Ralph's clearance.
+ * Andrew 2026-11-16 3:37 PM: venueChat (real venue chat) built for the private preview only. */
 (function (root) {
   'use strict';
   const PUBLIC_DEFAULTS = Object.freeze({
@@ -16,9 +17,10 @@
     partnerLinks: false,   // HOLD: Lotto.com courier buttons, sportsbook / partner tiles (affiliate links)
     shareQr: false,        // header Share button and QR sheet
     tierSwitcher: false,   // Free/Pro test switcher
-    pricing: false         // any price, upgrade or buy button (no prices until the §206 cure)
+    pricing: false,        // any price, upgrade or buy button (no prices until the §206 cure)
+    venueChat: false       // Venue chat (user messages, Supabase venue_messages). Private preview only until Ralph clears UGC moderation + terms
   });
-  const PRIVATE_PREVIEW = Object.freeze(Object.assign({}, PUBLIC_DEFAULTS, { doublePlay: true, resultNotices: true, partnerLinks: true, shareQr: true, tierSwitcher: true, pricing: true }));
+  const PRIVATE_PREVIEW = Object.freeze(Object.assign({}, PUBLIC_DEFAULTS, { doublePlay: true, resultNotices: true, partnerLinks: true, shareQr: true, tierSwitcher: true, pricing: true, venueChat: true }));
   // House copy (exact wording; Ralph's standing rules).
   const COPY = Object.freeze({
     D1: "Past results don't predict future draws. Every draw is independent.",

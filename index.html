@@ -40,7 +40,9 @@
         [hidden] { display: none !important; } /* utility classes like .flex must not override the hidden attribute */
         /* Feature-flagged UI (js/flags.js): hidden unless <html> carries the flag class. Kept in the code, not deleted. */
         html:not(.flag-partnerLinks) [data-flag~="partnerLinks"], html:not(.flag-shareQr) [data-flag~="shareQr"],
-        html:not(.flag-tierSwitcher) [data-flag~="tierSwitcher"], html:not(.flag-pricing) [data-flag~="pricing"] { display: none !important; }
+        html:not(.flag-tierSwitcher) [data-flag~="tierSwitcher"], html:not(.flag-pricing) [data-flag~="pricing"],
+        html:not(.flag-venueChat) [data-flag~="venueChat"] { display: none !important; }
+        .vc-msg + .vc-msg { border-top: 1px solid #1e293b; }
         /* 18+ age gate */
         #age-gate { position: fixed; inset: 0; z-index: 200; background: #050814; display: flex; align-items: center; justify-content: center; padding: 24px; }
         html.age-ok #age-gate { display: none; }
@@ -754,6 +756,37 @@
                     <button type="button" onclick="previewVenueCheckByLocation()" class="bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded-lg text-[11px]">📡 Check by location</button>
                 </div>
                 <div id="venue-checkin-msg" class="text-[9px] text-slate-400">Check in while you're at this venue. It moves this window to the top for 4 hours or until you tap Leave. Location is checked only when you tap, on this device, and never saved or sent.</div>
+            </div>
+
+            <!-- PREVIEW (flag venueChat, private preview only): 💬 Venue chat. Real messages from people checked in to this venue
+                 (Supabase venue_messages, RLS scoped to the venue). No seeded or sample messages. Messages expire after 24 hours. -->
+            <div id="venue-chat-card" data-flag="venueChat" class="bg-[#050814] p-3 rounded-xl border border-cyan-500/50 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                    <h3 class="text-[11px] uppercase tracking-wider text-cyan-300 font-black">💬 Venue chat</h3>
+                    <span id="vc-where" class="text-[9px] text-slate-400 truncate"></span>
+                </div>
+                <p class="text-[9px] text-slate-300 leading-snug">Be respectful. Don't share personal info. Not affiliated with any lottery.</p>
+                <div id="vc-join" class="text-[10px] text-blue-300">Pick a venue and tap ✅ I'm here to join this venue's chat.</div>
+                <div id="vc-name-row" class="space-y-1" hidden>
+                    <label for="vc-name" class="text-[10px] text-slate-300">Pick a display name (2–20 letters or numbers; no real names needed)</label>
+                    <div class="flex gap-1.5">
+                        <input id="vc-name" maxlength="20" autocomplete="off" class="flex-1 min-w-0 bg-[#0b132b] border border-[#1d4ed8] rounded-lg px-2 py-1.5 text-xs text-white" placeholder="e.g. CornerBooth">
+                        <button type="button" id="vc-name-save" onclick="vcSaveName()" class="shrink-0 bg-cyan-600 text-white font-black text-xs px-3 rounded-lg">Save</button>
+                    </div>
+                </div>
+                <div id="vc-room" class="space-y-2" hidden>
+                    <div id="vc-list" class="bg-[#0b132b] border border-slate-800 rounded-lg px-2 max-h-64 overflow-y-auto text-[11px]" aria-live="polite" aria-label="Venue chat messages"></div>
+                    <form id="vc-form" class="flex gap-1.5" onsubmit="event.preventDefault(); vcSend();">
+                        <input id="vc-input" maxlength="280" autocomplete="off" class="flex-1 min-w-0 bg-[#0b132b] border border-[#1d4ed8] rounded-lg px-2 py-1.5 text-xs text-white" placeholder="Message this venue…" aria-label="Message">
+                        <button type="submit" id="vc-send" class="shrink-0 bg-cyan-600 text-white font-black text-xs px-3 rounded-lg">Send</button>
+                    </form>
+                    <div class="flex items-center justify-between gap-2 text-[9px] text-slate-400">
+                        <span id="vc-me"></span><span id="vc-count">0/280</span>
+                    </div>
+                </div>
+                <div id="vc-status" class="text-[9px] text-amber-300" role="status"></div>
+                <p class="text-[9px] text-slate-500 leading-snug">Messages disappear after 24 hours. Report hides a message for you; 3 reports hide it for everyone. Hide person hides someone on this device.</p>
+                <p class="text-[9px] font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
             </div>
 
             <!-- PREVIEW: restored 🏆 Venue Leaderboard card layout (14347c7). Real data only: slips logged on this device at this venue (no shared player table exists). -->
@@ -2413,6 +2446,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             }, () => { msg.innerText = 'Location permission was not given. Tap ✅ I\'m here instead.'; }, { timeout: 10000, maximumAge: 0, enableHighAccuracy: true });
         }
         function previewApplyVenuePlacement() {
+            try { vcRefreshUI(); } catch (e) {}
             const sec = document.getElementById('quickdraw-venue-section'), anchor = document.getElementById('venue-home-anchor'), main = document.querySelector('main');
             if (!sec || !anchor || !main) return;
             const c = previewInVenue(), bar = document.getElementById('venue-here-bar'), row = document.getElementById('venue-checkin-row');
@@ -3024,6 +3058,129 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             currentGameIndex++;
             // PREVIEW: the header keeps the real next draw number. Close the panel; it re-opens on the next pick.
             previewClosePlayCard(`✅ Logged ${spotTier}-spot for draw${numGames > 1 ? 's' : ''} #${startDrawNum}${numGames > 1 ? '–#' + endDrawNum : ''}. Tap a pick above for the next one.`);
+        }
+
+
+        // ===== PREVIEW (flag venueChat): 💬 Venue chat =====
+        // Real messages only, via Supabase table venue_messages. No accounts or email: a random id made on this device
+        // (x-db-device) and the checked-in venue (x-db-venue) go in request headers; RLS only returns/accepts that venue's rows.
+        // Server also enforces: 280 chars, name rules, word filter, no phone/email, rate limits, 24 h expiry, 3 reports hide.
+        const VC_ON = !!(window.DB_FLAGS && window.DB_FLAGS.venueChat);
+        const VC_REST = SUPABASE_URL + '/rest/v1/';
+        const VC_POLL_MS = 4000;
+        const VC_BAD = /(^| )(fuck\w*|shit\w*|cunt\w*|bitch\w*|asshole\w*|nigg\w*|fag\w*|faggot\w*|retard\w*|kike\w*|spic\w*|chink\w*|tranny\w*|whore\w*|slut\w*)( |$)/;
+        function vcBlockedText(t) { return VC_BAD.test(String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ')); }
+        function vcNameProblem(n) {
+            n = String(n || '').trim();
+            if (!/^[A-Za-z0-9 _.-]{2,20}$/.test(n)) return 'Use 2–20 letters, numbers, spaces, _ . or -.';
+            if (vcBlockedText(n)) return 'Pick a different name.';
+            if (/(official|lottery|nylottery|draw.?budd|admin|moderator|mod$|staff|support|gaming ?commission)/.test(n.toLowerCase().replace(/[^a-z0-9]+/g, ''))) return 'Names can\'t look official (Official, Lottery, Staff, Draw Buddy…).';
+            return '';
+        }
+        function vcTextProblem(t) {
+            t = String(t || '').trim();
+            if (!t) return 'Type a message first.';
+            if (t.length > 280) return 'Keep it to 280 characters.';
+            if (vcBlockedText(t)) return 'That message has words that aren\'t allowed here.';
+            if (/\(?\d{3}\)?[\s.-]?\d{3}[\s.-]\d{4}|\d{10}|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(t)) return 'Don\'t share personal info (phone numbers or emails).';
+            return '';
+        }
+        function vcLoad(k, d) { try { const v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? d : v; } catch (e) { return d; } }
+        function vcSave(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+        function vcDevice() {
+            let id = vcLoad('draw_buddy_device_id', null);
+            if (!id || !/^[0-9a-f-]{36}$/i.test(id)) { id = (crypto.randomUUID ? crypto.randomUUID() : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 3 | 8)).toString(16); })); vcSave('draw_buddy_device_id', id); }
+            return id;
+        }
+        // My author tag = first 10 hex of sha256(device id), same as the server's generated column.
+        async function vcComputeTag() { try { const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(vcDevice())); return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 10); } catch (e) { return null; } }
+        let vcTimer = null, vcRows = [], vcVenueId = null, vcMineTag = null, vcBusy = false;
+        function vcVenue() { const c = (typeof previewInVenue === 'function') ? previewInVenue() : null; return c && previewVenue ? String(previewVenue.id).replace(/[^0-9A-Za-z_-]/g, '').slice(0, 40) : null; }
+        function vcHeaders(venue, json) { const h = { apikey: SUPABASE_ANON_KEY, 'x-db-venue': venue, 'x-db-device': vcDevice() }; if (json) { h['Content-Type'] = 'application/json'; h.Prefer = 'return=minimal'; } return h; }
+        function vcStatus(t) { const e = document.getElementById('vc-status'); if (e) e.innerText = t || ''; }
+        function vcTime(iso) { try { return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', minute: '2-digit' }).format(new Date(iso)); } catch (e) { return ''; } }
+        function vcRender() {
+            const list = document.getElementById('vc-list'); if (!list) return;
+            const hidden = new Set(vcLoad('draw_buddy_chat_hidden_people', [])), reported = new Set(vcLoad('draw_buddy_chat_reported', []));
+            const rows = vcRows.filter(r => !hidden.has(r.author_tag) && !reported.has(r.id)).slice().reverse();
+            const atBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 40;
+            list.textContent = '';
+            if (!rows.length) { const e = document.createElement('div'); e.className = 'py-3 text-center text-slate-400 text-[10px]'; e.textContent = 'No messages here in the last 24 hours. Say hi to the room.'; list.appendChild(e); }
+            rows.forEach(r => {
+                const own = !!vcMineTag && r.author_tag === vcMineTag;
+                const el = document.createElement('div'); el.className = 'vc-msg py-1.5'; el.dataset.id = r.id; el.dataset.author = r.author_tag;
+                const head = document.createElement('div'); head.className = 'flex items-center justify-between gap-2';
+                const who = document.createElement('span'); who.className = 'font-black ' + (own ? 'text-emerald-300' : 'text-cyan-300') + ' truncate'; who.textContent = r.display_name + (own ? ' (you)' : '');
+                const right = document.createElement('span'); right.className = 'shrink-0 flex items-center gap-1.5 text-[9px] text-slate-400';
+                const tm = document.createElement('span'); tm.textContent = vcTime(r.created_at); right.appendChild(tm);
+                if (!own) {
+                    const rp = document.createElement('button'); rp.type = 'button'; rp.className = 'vc-report underline text-amber-300'; rp.textContent = 'Report'; rp.onclick = () => vcReport(r); right.appendChild(rp);
+                    const hp = document.createElement('button'); hp.type = 'button'; hp.className = 'vc-hide underline text-slate-300'; hp.textContent = 'Hide person'; hp.onclick = () => vcHidePerson(r); right.appendChild(hp);
+                }
+                head.appendChild(who); head.appendChild(right);
+                const body = document.createElement('div'); body.className = 'vc-body text-white break-words'; body.textContent = r.body;
+                el.appendChild(head); el.appendChild(body); list.appendChild(el);
+            });
+            if (atBottom || vcRender.first !== false) { list.scrollTop = list.scrollHeight; vcRender.first = false; }
+        }
+        async function vcFetch() {
+            const venue = vcVenue(); if (!venue) return;
+            try {
+                const r = await fetch(VC_REST + 'venue_messages?select=id,author_tag,display_name,body,created_at&order=created_at.desc&limit=80', { headers: vcHeaders(venue), cache: 'no-store' });
+                if (!r.ok) { vcStatus('Venue chat is unavailable right now.'); return; }
+                vcRows = await r.json(); if (vcVenueId === venue) { vcRender(); if (/unavailable/.test(document.getElementById('vc-status').innerText)) vcStatus(''); }
+            } catch (e) { vcStatus('Venue chat is unavailable right now (no connection).'); }
+        }
+        function vcSaveName() {
+            const inp = document.getElementById('vc-name'), n = inp.value.trim(), p = vcNameProblem(n);
+            if (p) { vcStatus(p); return; }
+            vcSave('draw_buddy_chat_name', n); vcStatus(''); vcRefreshUI();
+        }
+        async function vcSend() {
+            if (vcBusy) return;
+            const venue = vcVenue(), name = vcLoad('draw_buddy_chat_name', ''), inp = document.getElementById('vc-input');
+            if (!venue) { vcStatus('Check in to a venue first.'); return; }
+            const text = inp.value.trim(), p = vcTextProblem(text); if (p) { vcStatus(p); return; }
+            vcBusy = true; document.getElementById('vc-send').disabled = true;
+            try {
+                const row = { venue_id: venue, device_id: vcDevice(), display_name: name, body: text };
+                const r = await fetch(VC_REST + 'venue_messages', { method: 'POST', headers: vcHeaders(venue, true), body: JSON.stringify(row) });
+                if (!r.ok) { let m = ''; try { m = (await r.json()).message || ''; } catch (e) {} vcStatus(/slow down|busy|not allowed|personal info/.test(m) ? m.charAt(0).toUpperCase() + m.slice(1) + '.' : 'Message not sent. Try again.'); return; }
+                inp.value = ''; document.getElementById('vc-count').innerText = '0/280'; vcStatus('');
+                await vcFetch();
+            } catch (e) { vcStatus('Message not sent (no connection).'); }
+            finally { vcBusy = false; document.getElementById('vc-send').disabled = false; }
+        }
+        async function vcReport(row) {
+            const venue = vcVenue(); if (!venue) return;
+            const rep = vcLoad('draw_buddy_chat_reported', []); if (!rep.includes(row.id)) { rep.push(row.id); vcSave('draw_buddy_chat_reported', rep.slice(-500)); }
+            vcRender(); vcStatus('Reported. It is hidden for you; 3 reports hide it for everyone.');
+            try { await fetch(VC_REST + 'venue_message_reports', { method: 'POST', headers: vcHeaders(venue, true), body: JSON.stringify({ message_id: row.id, device_id: vcDevice(), venue_id: venue }) }); } catch (e) {}
+        }
+        function vcHidePerson(row) {
+            const h = vcLoad('draw_buddy_chat_hidden_people', []); if (!h.includes(row.author_tag)) { h.push(row.author_tag); vcSave('draw_buddy_chat_hidden_people', h.slice(-500)); }
+            vcRender(); vcStatus(`Hidden ${row.display_name} on this device.`);
+        }
+        function vcRefreshUI() {
+            if (!VC_ON) return;
+            const venue = vcVenue(), name = vcLoad('draw_buddy_chat_name', '');
+            const join = document.getElementById('vc-join'), nameRow = document.getElementById('vc-name-row'), room = document.getElementById('vc-room'), where = document.getElementById('vc-where');
+            if (!join) return;
+            join.hidden = !!venue; nameRow.hidden = !venue || !!name; room.hidden = !venue || !name;
+            where.innerText = venue && previewVenue ? previewVenue.name : '';
+            document.getElementById('vc-me').innerText = name ? `You're ${name}` : '';
+            if (venue !== vcVenueId) { vcVenueId = venue; vcRows = []; vcRender.first = true; if (venue && name) vcRender(); }
+            if (vcTimer) { clearInterval(vcTimer); vcTimer = null; }
+            if (venue && name) { vcFetch(); vcTimer = setInterval(() => { if (!document.hidden) vcFetch(); }, VC_POLL_MS); }
+        }
+        if (VC_ON) {
+            vcComputeTag().then(t => { vcMineTag = t; try { vcRender(); } catch (e) {} });
+            setTimeout(() => {
+                const inp = document.getElementById('vc-input'); if (inp) inp.addEventListener('input', () => { document.getElementById('vc-count').innerText = `${inp.value.length}/280`; });
+                const nm = document.getElementById('vc-name'); if (nm) nm.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); vcSaveName(); } });
+                vcRefreshUI();
+            }, 0);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) vcFetch(); });
         }
 
         // ===== PREVIEW: 🎱 Ball Drop =====
