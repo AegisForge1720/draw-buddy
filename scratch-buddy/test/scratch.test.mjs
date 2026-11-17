@@ -9,6 +9,7 @@ import {
     NOT_AFFILIATED_LINE,
     PAST_RESULTS_LINE,
     SHELL_MARKUP,
+    shellMarkup,
     PRIVACY_MARKUP,
     TERMS_MARKUP
 } from "../js/markup.js";
@@ -46,7 +47,10 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.match(SHELL_MARKUP, /id="map-mode-results"/);
     assert.match(SHELL_MARKUP, /id="prize-log-form"/);
     assert.match(SHELL_MARKUP, /I confirm I was at this location when I received this prize/);
-    assert.match(SHELL_MARKUP, /Bought at a venue/);
+    // Ralph N1: the Quick Draw venue path and filter are off in the public build, on only in the private preview.
+    assert.equal(SHELL_MARKUP.includes("Bought at a venue"), false);
+    assert.equal(SHELL_MARKUP.includes("Quick Draw venues only"), false);
+    assert.match(shellMarkup({ quickDrawVenue: true, previewBanner: true }), /Bought at a venue/);
     assert.match(SHELL_MARKUP, /Optional GPS check-in/);
     assert.match(SHELL_MARKUP, /No prize logs on this device yet/);
     assert.match(SHELL_MARKUP, /id="my-log-map"/);
@@ -57,7 +61,8 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.equal(SHELL_MARKUP.toLowerCase().includes("payout"), false);
     assert.equal(PRIVACY_MARKUP.toLowerCase().includes("heat"), false);
     assert.equal(PRIVACY_MARKUP.toLowerCase().includes("payout"), false);
-    assert.match(SHELL_MARKUP, /No sample points are included/);
+    assert.match(SHELL_MARKUP, /does not include official prize records or invented points/);
+    assert.match(shellMarkup({ quickDrawVenue: true, previewBanner: true }), /No sample points are included/);
     assert.match(SHELL_MARKUP, /Optional: center on my location/);
     assert.match(SHELL_MARKUP, /id="delete-all-data"/);
     assert.match(SHELL_MARKUP, /id="photo-redact-confirm"/);
@@ -78,7 +83,9 @@ test("the shell stays behind an age gate and ships no invented data or banned ph
     assert.equal(html.includes("googletagmanager"), false);
     assert.equal(html.includes("google-analytics"), false);
     const mapSource = readFileSync(new URL("../js/map.js", import.meta.url), "utf8");
-    assert.match(mapSource, /tile\.openstreetmap\.org/);
+    const flagsSource = readFileSync(new URL("../js/flags.js", import.meta.url), "utf8");
+    assert.match(flagsSource, /tile\.openstreetmap\.org/);
+    assert.match(mapSource, /TILE_PROVIDER\.url/);
     assert.equal(mapSource.includes("googletagmanager"), false);
     assert.match(SHELL_MARKUP, /© 2026 NAV Analytics LLC/);
     assert.equal(SHELL_MARKUP.includes(AFFILIATION), true);

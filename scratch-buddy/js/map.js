@@ -1,3 +1,5 @@
+import { FLAGS, TILE_PROVIDER } from "./flags.js";
+
 export const NY_BOUNDS = [
     [40.4774, -79.7626],
     [45.0159, -71.7517]
@@ -52,7 +54,7 @@ function buildPopup(row, formatAddress, onLogPrize) {
     const address = document.createElement("p");
     address.textContent = formatAddress(row) || "Address not in the source data.";
     wrap.appendChild(address);
-    if (row.quickDraw) {
+    if (FLAGS.quickDrawVenue && row.quickDraw) {
         const badge = document.createElement("p");
         badge.className = "qd-badge";
         badge.textContent = "Quick Draw venue";
@@ -94,8 +96,8 @@ export function createRetailerMap({ container, formatAddress, onLogPrize }) {
         zoomControl: true,
         attributionControl: true
     });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a>',
+    L.tileLayer(TILE_PROVIDER.url, {
+        attribution: TILE_PROVIDER.attribution,
         maxZoom: 18
     }).addTo(map);
 
@@ -222,8 +224,8 @@ export function createLogMap({ container, formatAddress, formatEntry }) {
         attributionControl: true
     });
     L.control.zoom({ position: "topright" }).addTo(map);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap</a>',
+    L.tileLayer(TILE_PROVIDER.url, {
+        attribution: TILE_PROVIDER.attribution,
         maxZoom: 18
     }).addTo(map);
 

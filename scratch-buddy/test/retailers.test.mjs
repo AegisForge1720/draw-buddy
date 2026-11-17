@@ -76,10 +76,14 @@ test("the official retailer cache has a source, a retrieved-at date, and no extr
     const payload = JSON.parse(readFileSync(new URL("../data/retailers.json", import.meta.url), "utf8"));
     assert.equal(payload.datasetId, "2vvn-pdyi");
     assert.equal(payload.source, "NYS Lottery Retailers");
-    assert.match(payload.retrievedAt, /^2026-11-15T18:07:43-05:00$/);
+    assert.match(payload.retrievedAt, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}-0[45]:00$/);
+    // Ralph item 11: the cache must be refreshed at least weekly before a public build is cut.
+    // (Run scripts/refresh-retailers.mjs.) Enforced in the launch checklist, not here, so old
+    // branches still test green.
     assert.equal(payload.count, payload.retailers.length);
     assert.ok(payload.retailers.length > 0);
-    assert.equal(payload.retailers.length, 13129);
+    assert.ok(payload.retailers.length > 10000, "official list unexpectedly small");
+    assert.equal(new Set(payload.retailers.map((row) => row.id)).size, payload.retailers.length, "duplicate ids");
     assert.equal(payload.quickDrawCount, payload.retailers.filter((row) => row.quickDraw).length);
     const first = payload.retailers[0];
     ["id", "name", "street", "city", "state", "zip", "lat", "lng"].forEach((key) => {

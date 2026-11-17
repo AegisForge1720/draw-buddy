@@ -1,3 +1,5 @@
+import { FLAGS, TILE_PROVIDER } from "./flags.js";
+
 export const AFFILIATION = "Scratch Buddy is an independent app from NAV Analytics LLC. It is not affiliated with, endorsed by, or sponsored by the New York Lottery or the New York State Gaming Commission.";
 
 // Exact house wording from Ralph's Scratch Buddy review (§4.6), also used as
@@ -20,7 +22,8 @@ export const ROBOT_MARKUP = `
 <img class="header-mascot" src="./brand/scratch-buddy-transparent-1024.png" width="56" height="56" alt="">
 `;
 
-export const SHELL_MARKUP = `
+export function shellMarkup(flags = FLAGS) {
+    return `
     <header class="app-header">
         <div class="max-w-md mx-auto px-3 py-2.5 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
@@ -35,7 +38,7 @@ export const SHELL_MARKUP = `
     </header>
 
     <main class="max-w-md mx-auto px-3 pt-3 pb-8 space-y-3">
-        <p class="preview-banner">My Log Map preview. Markers come only from prize logs on this device. The map stays empty until you log a prize. No sample points are included. A shared database is not connected.</p>
+        ${flags.previewBanner ? `<p class="preview-banner">Private preview. My Log Map markers come only from prize logs on this device. The map stays empty until you log a prize. No sample points are included. A shared database is not connected.</p>` : ""}
 
         <div class="flex w-full" role="tablist" aria-label="Scratch Buddy sections">
             <button type="button" class="tab-btn" id="tab-find" role="tab" aria-controls="panel-find" aria-selected="true" data-tab="find">Find</button>
@@ -52,10 +55,10 @@ export const SHELL_MARKUP = `
                     <span class="sr-only">Search for a licensed retailer</span>
                     <input id="retailer-query" class="input-shell" type="search" name="q" placeholder="Search by name, address, city, or ZIP" autocomplete="off" enterkeyhint="search">
                 </label>
-                <label class="check-row">
+                ${flags.quickDrawVenue ? `<label class="check-row">
                     <input id="retailer-qd-only" type="checkbox">
                     <span>Quick Draw venues only</span>
-                </label>
+                </label>` : ""}
                 <div class="flex gap-2">
                     <button type="submit" class="btn-primary flex-1" id="retailer-search">Search</button>
                     <button type="button" class="btn-secondary flex-1" id="retailer-near">Near me</button>
@@ -87,7 +90,7 @@ export const SHELL_MARKUP = `
 
         <section id="panel-log" class="panel space-y-3" role="tabpanel" aria-labelledby="log-heading" hidden>
             <h2 id="log-heading" class="section-title">Prize Log</h2>
-            <p class="source-note">This is a preview account saved on this device only. A shared sign-in is not connected yet. No Supabase project or table has been created.</p>
+            <p class="source-note">${flags.previewBanner ? "This is a preview account saved on this device only. A shared sign-in is not connected yet. No Supabase project or table has been created." : "There are no accounts. Your display name and prize logs are saved on this device only and are never uploaded."}</p>
             <p class="source-note">${LOG_DISCLOSURE}</p>
             <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
 
@@ -96,20 +99,20 @@ export const SHELL_MARKUP = `
                     <span class="field-label">Display name</span>
                     <input id="log-handle" class="input-shell" type="text" maxlength="40" autocomplete="nickname" placeholder="Name for this device">
                 </label>
-                <button type="button" class="btn-primary w-full" id="log-signin">Save preview sign-in</button>
+                <button type="button" class="btn-primary w-full" id="log-signin">Save display name</button>
                 <p id="log-session-status" class="empty-note" role="status"></p>
             </div>
             <div id="log-session-on" class="session-on" hidden>
                 <p id="log-session-label" class="empty-note"></p>
-                <button type="button" class="btn-secondary btn-compact" id="log-signout">Clear preview sign-in</button>
+                <button type="button" class="btn-secondary btn-compact" id="log-signout">Clear display name</button>
             </div>
 
             <form id="prize-log-form" class="space-y-3">
-                <div class="flex gap-2" role="group" aria-label="Prize log path">
+                ${flags.quickDrawVenue ? `<div class="flex gap-2" role="group" aria-label="Prize log path">
                     <button type="button" class="btn-secondary flex-1" id="log-path-standard" aria-pressed="true">Standard log</button>
                     <button type="button" class="btn-secondary flex-1" id="log-path-venue" aria-pressed="false">Bought at a venue</button>
-                </div>
-                <p id="log-path-note" class="source-note">Standard path: pick any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.</p>
+                </div>` : ""}
+                <p id="log-path-note" class="source-note">${flags.quickDrawVenue ? "Standard path: pick" : "Pick"} any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.</p>
 
                 <label class="block">
                     <span class="field-label">Game name</span>
@@ -132,7 +135,7 @@ export const SHELL_MARKUP = `
 
                 <div class="space-y-2">
                     <label class="block">
-                        <span class="field-label" id="log-retailer-label">Retailer or venue</span>
+                        <span class="field-label" id="log-retailer-label">${flags.quickDrawVenue ? "Retailer or venue" : "Retailer"}</span>
                         <input id="log-retailer-query" class="input-shell" type="search" placeholder="Search the official list" autocomplete="off">
                     </label>
                     <ul id="log-retailer-choices" class="retailer-list"></ul>
@@ -162,7 +165,7 @@ export const SHELL_MARKUP = `
                         <span class="field-label" id="log-photo-label">Ticket photo (optional)</span>
                         <input id="log-photo" class="input-shell" type="file" accept="image/*">
                     </label>
-                    <p class="source-note">A photo is optional, including on the venue path. Before a photo can be saved, cover the barcode, validation number, and PIN by drawing over them or cropping them out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device. No photo bucket has been created. If you cannot cover those details, do not attach a photo.</p>
+                    <p class="source-note">A photo is optional${flags.quickDrawVenue ? ", including on the venue path" : ""}. Before a photo can be saved, cover the barcode, validation number, and PIN by drawing over them or cropping them out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device and are never uploaded. If you cannot cover those details, do not attach a photo.</p>
                     <div id="photo-redact" class="photo-redact" hidden>
                         <p class="field-label">Cover or crop sensitive details</p>
                         <canvas id="photo-redact-canvas" class="photo-canvas" aria-label="Ticket photo redaction canvas"></canvas>
@@ -191,7 +194,7 @@ export const SHELL_MARKUP = `
             <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
             <div id="delete-all-prompt" class="location-prompt" hidden>
                 <p class="location-prompt-title">Delete all my data?</p>
-                <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
+                <p>This removes the age pass, display name, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
                 <div class="flex gap-2">
                     <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
                     <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
@@ -224,70 +227,120 @@ export const SHELL_MARKUP = `
                 ${REQUIRED_LINES_MARKUP}
                 <p>You can also visit <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a>.</p>
             </div>
-            <p><a href="./privacy.html">Privacy notice (draft)</a> · <a href="./terms.html">Terms (draft)</a></p>
+            <p><a href="./privacy.html">Privacy</a> · <a href="./terms.html">Terms</a></p>
             <p>${AFFILIATION}</p>
             <p>© 2026 NAV Analytics LLC</p>
         </footer>
     </main>
 `;
+}
+
+export const SHELL_MARKUP = shellMarkup(FLAGS);
+
+const CONTACT_EMAIL = "ralph@insertcoinindustries.com";
+const LEGAL_UPDATED = "November 17, 2026";
 
 export const PRIVACY_MARKUP = `
 <main class="max-w-md mx-auto px-3 py-6 space-y-3">
-    <p class="preview-banner">Draft privacy notice. Pending review by a licensed New York attorney. It describes this preview as built.</p>
-    <h1 class="text-white font-black text-lg">Privacy notice</h1>
-    <p class="empty-note">Effective November 15, 2026. Last updated November 15, 2026.</p>
+    <p class="empty-note"><a href="./index.html">← Back to Scratch Buddy</a></p>
+    <h1 class="text-white font-black text-lg">Privacy</h1>
+    <p class="empty-note">Scratch Buddy is provided by NAV Analytics LLC. Last updated ${LEGAL_UPDATED}.</p>
     <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
-    <p class="empty-note">Scratch Buddy is an 18+ social companion. This preview has an age check, a retailer search, an interactive map of official retailer locations, a prize log that stays on this device, and My Log Map, which shows only those logs. Leaflet and the page styles are self-hosted. Passing the age check is not consent to tracking. Scratch Buddy does not install advertising pixels or other trackers.</p>
-    <h2 class="section-title">Who we are</h2>
-    <p class="empty-note">NAV Analytics LLC operates Scratch Buddy. Postal address: 58 Owaissa Dr, Rochester, NY 14622. Privacy contact: privacy@insertcoinindustries.com. The inbox is not monitored yet.</p>
-    <p class="empty-note">${AFFILIATION}</p>
-    <p class="empty-note">${NOT_AFFILIATED_LINE}</p>
-    <p class="empty-note">Scratch Buddy does not sell lottery tickets or accept wagers.</p>
-    <h2 class="section-title">What this preview stores</h2>
+
+    <h2 class="section-title">No accounts</h2>
+    <p class="empty-note">Scratch Buddy has no sign-up or login and no server copy of your data. We don't ask for your real name, email or phone number. The optional display name is saved only on your device.</p>
+
+    <h2 class="section-title">What stays on your device</h2>
+    <p class="empty-note">Scratch Buddy saves the following in your browser's storage (localStorage, sessionStorage and IndexedDB) on this device only:</p>
     <ul class="empty-note list-disc pl-4 space-y-1">
-        <li>Age check. Under 18, only a session-only block flag is kept until the tab is closed; no date of birth is kept. At 18 or older, only an 18plus pass flag on this device for up to 90 days. The date of birth is not kept.</li>
-        <li>Optional Near me and optional map centering use your device location once, in this session, to sort a list or center a view. The position is not saved.</li>
-        <li>Optional GPS check-in uses your device location once to compare it with a retailer's published coordinates. Only a pass or fail, the date, and a coarse distance band (&lt;50 m or 50-150 m) may be stored with a prize log. Coordinates, accuracy, and exact distance are not kept.</li>
-        <li>A preview sign-in stores only a display name on this device. It is not a shared account.</li>
-        <li>Prize logs you choose to save stay in this browser (localStorage and IndexedDB) until you delete them. There is no server copy in this preview.</li>
-        <li>A ticket photo is optional. A photo is stored only if you first cover the barcode, validation number, and PIN, or you crop those details out. The stored copy is re-encoded so hidden camera data (EXIF, including GPS) is removed. Photos stay on this device. No photo bucket has been created.</li>
-        <li>My Log Map reads only those local prize logs. It does not rank stores.</li>
+        <li>Age check. At 18 or older, only an 18plus pass flag is kept on this device for up to 90 days. Under 18, only a session-only block flag is kept until the tab is closed; no date of birth is kept. The date of birth you enter is used once for the check and is never kept.</li>
+        <li>An optional display name, used to label your prize logs on this device.</li>
+        <li>Prize logs you choose to save: the game name, the prize amount, the optional ticket price, the date and the official retailer you picked.</li>
+        <li>An optional ticket photo. A photo can be saved only after you cover or crop out the barcode, validation number and PIN. The saved copy is re-encoded on your device so hidden camera data (EXIF, including GPS) is removed. Photos are never uploaded.</li>
+        <li>My Log Map reads only those prize logs. It does not rank stores or show store totals.</li>
     </ul>
-    <h2 class="section-title">Network requests this preview makes</h2>
-    <p class="empty-note">Map tiles are fetched from OpenStreetMap (tile.openstreetmap.org) at the area you view. That tile host receives your IP address and the approximate map area and zoom. Leaflet and Tailwind are self-hosted in this preview, so those libraries are not requested from a third-party CDN. The official retailer list is read from a file served with this preview. There are no advertising or analytics pixels.</p>
-    <h2 class="section-title">Retention and deletion</h2>
-    <p class="empty-note">On this device, the age pass, preview sign-in, prize logs, and ticket photos are kept until you delete them. Use "Delete all my data" below, or remove a single prize log from the Prize Log tab. If a shared server is later approved, the proposed rule is: keep logs until you delete them, or delete them after 24 months of inactivity, and never keep raw location.</p>
+
+    <h2 class="section-title">Location</h2>
+    <p class="empty-note">Scratch Buddy never asks for your location when it loads. It asks only when you tap Near me, center My Log Map on your location, or use the optional GPS check-in, and only after you agree in the app first.</p>
+    <ul class="empty-note list-disc pl-4 space-y-1">
+        <li>Near me and map centering use your position once, on your device, to sort the retailer list or center the map. The position is not saved or sent to us.</li>
+        <li>GPS check-in compares your position with the retailer's published coordinates on your device. Only a pass or fail, the date and a coarse distance band (&lt;50 m or 50-150 m) are saved with the prize log. Coordinates, accuracy and exact distance are not kept.</li>
+    </ul>
+
+    <h2 class="section-title">Services the app loads from</h2>
+    <p class="empty-note">When you use Scratch Buddy, your browser makes requests to these services. Like any website, they receive standard request details such as your IP address and browser type.</p>
+    <ul class="empty-note list-disc pl-4 space-y-1">
+        <li>The website host that serves Scratch Buddy keeps standard server logs, including IP addresses.</li>
+        <li>${TILE_PROVIDER.name} (${TILE_PROVIDER.host}): map images. The tile host receives your IP address and the approximate map area and zoom you view.</li>
+    </ul>
+    <p class="empty-note">Leaflet and Tailwind are self-hosted, so those libraries are not requested from a third-party CDN. The official retailer list (NYS Lottery Retailers, data.ny.gov) is a file served with the app, not a request to the state's site.</p>
+    <p class="empty-note">Scratch Buddy has no ads, no tracking pixels and no analytics, and we don't sell or share your information. Passing the age check is not consent to tracking.</p>
+
+    <h2 class="section-title">Keeping and deleting your data</h2>
+    <p class="empty-note">Everything above stays on this device until you delete it. Remove a single prize log from the Prize Log tab, clear this site's data in your browser, or use "Delete all my data" below.</p>
     <button type="button" class="btn-secondary w-full" id="delete-all-data">Delete all my data</button>
     <div id="delete-all-prompt" class="location-prompt" hidden>
         <p class="location-prompt-title">Delete all my data?</p>
-        <p>This removes the age pass, preview sign-in, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
+        <p>This removes the age pass, display name, prize logs, and ticket photos stored in this browser. It cannot be undone. If other Scratch Buddy tabs are open, close them so photos can be fully removed.</p>
         <div class="flex gap-2">
             <button type="button" class="btn-primary flex-1" id="delete-all-confirm">Delete all my data</button>
             <button type="button" class="btn-secondary flex-1" id="delete-all-cancel">Cancel</button>
         </div>
     </div>
     <p id="delete-all-status" class="empty-note" role="status"></p>
-    <h2 class="section-title">Responsible play</h2>
+
+    <h2 class="section-title">Adults only</h2>
+    <p class="empty-note">Scratch Buddy is for adults 18 and older.</p>
+
+    <h2 class="section-title">Questions</h2>
+    <p class="empty-note">Questions: <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
-    <p class="empty-note"><a href="./index.html">Back to Scratch Buddy</a> · <a href="./terms.html">Terms (draft)</a></p>
     <p class="empty-note">${AFFILIATION}</p>
-    <p class="empty-note">© 2026 NAV Analytics LLC</p>
+    <p class="empty-note"><a href="./terms.html">Terms</a> · © 2026 NAV Analytics LLC</p>
 </main>
 `;
 
 export const TERMS_MARKUP = `
 <main class="max-w-md mx-auto px-3 py-6 space-y-3">
-    <p class="preview-banner">DRAFT — pending legal review. This is not a terms of service. Do not rely on it.</p>
-    <h1 class="text-white font-black text-lg">Terms (draft)</h1>
+    <p class="empty-note"><a href="./index.html">← Back to Scratch Buddy</a></p>
+    <h1 class="text-white font-black text-lg">Terms</h1>
+    <p class="empty-note">Scratch Buddy is provided by NAV Analytics LLC. Last updated ${LEGAL_UPDATED}.</p>
+
+    <h2 class="section-title">18+ only</h2>
+    <p class="empty-note">You must be 18 or older to use Scratch Buddy.</p>
+
+    <h2 class="section-title">What Scratch Buddy is</h2>
+    <ul class="empty-note list-disc pl-4 space-y-1">
+        <li>Scratch Buddy is a free companion for scratch-off tickets you already bought. It has a search and map of licensed New York Lottery retailers from public state data, and a personal prize log kept on your device.</li>
+        <li>${PAST_RESULTS_LINE} Nothing in the app makes a prize more likely or tells you where to buy.</li>
+        <li>Scratch Buddy does not sell lottery tickets or take wagers, and it has no accounts.</li>
+        <li>${NOT_AFFILIATED_LINE}</li>
+    </ul>
+
+    <h2 class="section-title">Retailer data</h2>
+    <ul class="empty-note list-disc pl-4 space-y-1">
+        <li>The retailer list comes from the NYS Lottery Retailers dataset published by the New York State Gaming Commission on data.ny.gov. Addresses are the Gaming Commission's address of record and are subject to change. The list may be out of date or incomplete. Check official sources.</li>
+        <li>The list shows licensed locations, not individual ticket machines, and it does not say which locations sell scratch-off tickets.</li>
+    </ul>
+
+    <h2 class="section-title">Prize logs and photos</h2>
+    <ul class="empty-note list-disc pl-4 space-y-1">
+        <li>${LOG_DISCLOSURE}</li>
+        <li>Log only prizes you actually received. Prize logs are for your own records.</li>
+        <li>Not official ticket validation. Confirm prizes with the official lottery at nylottery.ny.gov.</li>
+        <li>Never share a photo showing your ticket's barcode or numbers. Anyone with them may be able to claim your prize.</li>
+    </ul>
+
+    <h2 class="section-title">No warranty</h2>
+    <p class="empty-note">Scratch Buddy is provided as is, without warranties of any kind. To the extent the law allows, NAV Analytics LLC is not liable for any loss from using the app, including any ticket you buy. These terms are governed by New York law.</p>
+
+    <h2 class="section-title">Your data</h2>
+    <p class="empty-note">Prize logs, photos and settings you save stay on your device. See the <a href="./privacy.html">Privacy</a> page.</p>
+
+    <h2 class="section-title">Questions</h2>
+    <p class="empty-note">Questions: <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <div class="required-lines">${REQUIRED_LINES_MARKUP}</div>
-    <p class="empty-note">Scratch Buddy is a preview from NAV Analytics LLC, 58 Owaissa Dr, Rochester, NY 14622.</p>
     <p class="empty-note">${AFFILIATION}</p>
-    <p class="empty-note">${NOT_AFFILIATED_LINE}</p>
-    <p class="empty-note">18+ only. Scratch Buddy does not sell lottery tickets or accept wagers. It is a fun, social companion, not a tool for placing wagers.</p>
-    <p class="empty-note">${HOPENY_LINE}</p>
-    <p class="empty-note">${PAST_RESULTS_LINE}</p>
-    <p class="empty-note"><a href="./index.html">Back to Scratch Buddy</a> · <a href="./privacy.html">Privacy notice (draft)</a></p>
-    <p class="empty-note">${AFFILIATION}</p>
-    <p class="empty-note">© 2026 NAV Analytics LLC</p>
+    <p class="empty-note"><a href="./privacy.html">Privacy</a> · © 2026 NAV Analytics LLC</p>
 </main>
 `;

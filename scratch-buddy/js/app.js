@@ -1,4 +1,5 @@
 import { AGE_BLOCK_KEY, classifyDob, readAgePass, writeAgePass } from "./age.js";
+import { FLAGS } from "./flags.js";
 import { distanceBand, evaluateCheckIn, formatDistance, haversineMeters, requestDevicePosition } from "./geo.js";
 import {
     formatDollars,
@@ -142,7 +143,7 @@ function describeSource(cache) {
     const countLine = Number.isInteger(cache.count)
         ? ` ${formatCount(cache.count)} licensed retailer locations`
         : "";
-    const qdLine = Number.isInteger(cache.quickDrawCount)
+    const qdLine = FLAGS.quickDrawVenue && Number.isInteger(cache.quickDrawCount)
         ? ` (${formatCount(cache.quickDrawCount)} marked Quick Draw).`
         : ".";
     return {
@@ -155,7 +156,8 @@ function describeSource(cache) {
             updatedLine,
             countLine,
             qdLine,
-            " This is a list of licensed locations, not individual ticket machines. The official dataset does not flag which locations sell scratch-off tickets separately from other lottery products."
+            " This is a list of licensed locations, not individual ticket machines. The official dataset does not flag which locations sell scratch-off tickets separately from other lottery products.",
+            " Addresses are the Gaming Commission's address of record and are subject to change."
         ].join("")
     };
 }
@@ -177,7 +179,7 @@ function renderResults(rows) {
 
         const meta = document.createElement("div");
         meta.className = "retailer-meta";
-        if (row.quickDraw) {
+        if (FLAGS.quickDrawVenue && row.quickDraw) {
             const badge = document.createElement("span");
             badge.className = "qd-badge";
             badge.textContent = "Quick Draw venue";
@@ -369,7 +371,7 @@ function runSearch() {
         return;
     }
     const query = $("retailer-query").value;
-    const quickDrawOnly = $("retailer-qd-only").checked;
+    const quickDrawOnly = quickDrawFilterOn();
     const result = searchRetailers(cache.retailers, query, { quickDrawOnly });
     if (result.emptyQuery) {
         findState.listedRows = [];
@@ -411,7 +413,7 @@ async function runNearMe() {
     setStatus("Getting your position…");
     try {
         const position = await requestDevicePosition();
-        const quickDrawOnly = $("retailer-qd-only").checked;
+        const quickDrawOnly = quickDrawFilterOn();
         findState.lastPosition = position;
         const rows = nearbyRetailers(cache.retailers, position.lat, position.lng, {
             quickDrawOnly,
@@ -492,8 +494,13 @@ async function loadFind() {
 }
 
 
+function quickDrawFilterOn() {
+    const box = $("retailer-qd-only");
+    return Boolean(FLAGS.quickDrawVenue && box && box.checked);
+}
+
 function setLogPath(path) {
-    logState.path = path === "bought_at_venue" ? "bought_at_venue" : "standard";
+    logState.path = FLAGS.quickDrawVenue && path === "bought_at_venue" ? "bought_at_venue" : "standard";
     const standard = $("log-path-standard");
     const venue = $("log-path-venue");
     if (standard) standard.setAttribute("aria-pressed", logState.path === "standard" ? "true" : "false");
@@ -513,9 +520,9 @@ function setLogPath(path) {
         if (query && query.value.trim()) searchLogRetailers();
         else renderLogRetailerChoices([]);
     } else {
-        if (note) note.textContent = "Standard path: pick any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.";
+        if (note) note.textContent = `${FLAGS.quickDrawVenue ? "Standard path: pick" : "Pick"} any official retailer, confirm you were there, and optionally add a GPS check-in or a ticket photo.`;
         if (photoLabel) photoLabel.textContent = "Ticket photo (optional)";
-        if (retailerLabel) retailerLabel.textContent = "Retailer or venue";
+        if (retailerLabel) retailerLabel.textContent = FLAGS.quickDrawVenue ? "Retailer or venue" : "Retailer";
         const query = $("log-retailer-query");
         if (query && query.value.trim()) searchLogRetailers();
     }
@@ -530,7 +537,7 @@ function renderSelectedRetailer() {
         return;
     }
     const address = formatRetailerAddress(row) || "Address not in the source data.";
-    const qd = row.quickDraw ? " Quick Draw venue." : "";
+    const qd = FLAGS.quickDrawVenue && row.quickDraw ? " Quick Draw venue." : "";
     el.textContent = `Selected: ${row.name}, ${address}.${qd}`;
 }
 
@@ -586,7 +593,7 @@ function searchLogRetailers() {
 
 function startLogForRetailer(row) {
     if (!row) return;
-    if (row.quickDraw) setLogPath("bought_at_venue");
+    if (FLAGS.quickDrawVenue && row.quickDraw) setLogPath("bought_at_venue");
     else setLogPath("standard");
     logState.selectedRetailer = row;
     logState.checkin = null;
@@ -607,7 +614,7 @@ function renderSession() {
     if (logState.session) {
         if (off) off.hidden = true;
         if (on) on.hidden = false;
-        if (label) label.textContent = `Preview sign-in: ${logState.session.handle} (this device only).`;
+        if (label) label.textContent = `Display name: ${logState.session.handle} (this device only).`;
     } else {
         if (off) off.hidden = false;
         if (on) on.hidden = true;

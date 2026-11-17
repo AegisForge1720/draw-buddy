@@ -80,7 +80,7 @@ export function parsePrizeLog(input) {
     const locationConfirmed = input.locationConfirmed === true;
     const photoAttached = input.photoAttached === true;
 
-    if (!input.handle) return { ok: false, reason: "Sign in on this device before logging a prize." };
+    if (!input.handle) return { ok: false, reason: "Save a display name on this device before logging a prize." };
     if (!game) return { ok: false, reason: "Enter the game name." };
     if (!Number.isFinite(prizeAmount) || prizeAmount <= 0) {
         return { ok: false, reason: "Enter the prize amount paid to you." };
@@ -95,7 +95,7 @@ export function parsePrizeLog(input) {
         return { ok: false, reason: "The date cannot be in the future." };
     }
     if (!retailerId || !retailerName) {
-        return { ok: false, reason: "Pick the retailer or venue from the official list." };
+        return { ok: false, reason: "Pick the retailer from the official list." };
     }
     if (!presentConfirmed) {
         return { ok: false, reason: "Confirm that you were at this location." };
