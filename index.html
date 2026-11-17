@@ -2848,15 +2848,30 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (!fromSheet) document.getElementById('inspector-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
+        // Header Next Draw # and countdown follow the 4-minute Quick Draw schedule
+        // (previewNextPurchasable with no sales-close margin), not when results post.
+        function previewTickHeaderTimer() {
+            if (activeGameKey === 'quickdraw') {
+                const np = previewNextPurchasable(0);
+                const nd = document.getElementById('header-next-draw');
+                if (np) {
+                    if (nd) nd.innerText = `#${np.number}`;
+                    countdownSeconds = Math.max(0, Math.round((np.slot - Date.now()) / 1000));
+                    return;
+                }
+            }
+            countdownSeconds = previewSecondsToNextDraw();
+        }
         function startTimers() {
             if (window.previewRecentTimer) clearInterval(window.previewRecentTimer);
             window.previewRecentTimer = setInterval(() => { if (activeGameKey === 'quickdraw') fetchGameHistoryFromSupabase(); }, 60000);
             if (window.drawBuddyTimer) {
                 clearInterval(window.drawBuddyTimer);
             }
+            previewTickHeaderTimer();
             window.drawBuddyTimer = setInterval(() => {
                 // PREVIEW: countdown from the real ET clock and official schedule (was a fixed 240 s / 12 h loop).
-                countdownSeconds = previewSecondsToNextDraw();
+                previewTickHeaderTimer();
                 if (!Number.isFinite(countdownSeconds)) countdownSeconds = 0;
                 previewRenderSpreadTimer();
                 previewTickPicks();
