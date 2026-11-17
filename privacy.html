@@ -1,163 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="format-detection" content="telephone=no">
-  <title>Privacy</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #050814;
-      --fg: #f4f7fb;
-      --muted: #9aa6c0;
-      --accent: #22d3ee;
-      --line: rgba(255, 255, 255, 0.12);
-    }
-
-    * { box-sizing: border-box; }
-
-    html, body { margin: 0; }
-
-    body {
-      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-      color: var(--fg);
-      background:
-        radial-gradient(900px 420px at 50% -80px, #111c38 0%, transparent 70%),
-        var(--bg);
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding: 1.5rem;
-    }
-
-    main {
-      width: min(48rem, 100%);
-      margin: 0 auto;
-    }
-
-    .effective {
-      margin: 0 0 1rem;
-      color: var(--muted);
-      font-size: 0.82rem;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2rem, 7vw, 2.75rem);
-      font-weight: 700;
-      letter-spacing: -0.035em;
-      line-height: 1.1;
-    }
-
-    .operator {
-      margin: 0.6rem 0 1.5rem;
-      color: var(--accent);
-      font-size: 0.8rem;
-      font-weight: 650;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-    }
-
-    h2 {
-      margin: 1.75rem 0 0.75rem;
-      font-size: 1.15rem;
-      font-weight: 650;
-    }
-
-    p {
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.55;
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: underline;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      margin: 0 0 1.75rem;
-      border: 1px solid var(--line);
-      border-radius: 0.5rem;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      line-height: 1.45;
-    }
-
-    th, td {
-      padding: 0.7rem 0.75rem;
-      text-align: left;
-      vertical-align: top;
-      border-bottom: 1px solid var(--line);
-    }
-
-    th {
-      color: var(--fg);
-      font-weight: 650;
-      background: rgba(255, 255, 255, 0.04);
-    }
-
-    td { color: var(--muted); }
-
-    tr:last-child th, tr:last-child td { border-bottom: 0; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Draw Buddy · Privacy</title>
+    <style>
+        body { margin: 0; background: #050814; color: #cbd5e1; font: 14px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        main { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+        h1 { color: #fde047; font-size: 20px; margin: 0 0 4px; }
+        h2 { color: #67e8f9; font-size: 15px; margin: 22px 0 6px; }
+        a { color: #67e8f9; }
+        .box { background: #0b132b; border: 1px solid #1d4ed8; border-radius: 10px; padding: 10px 12px; }
+        .rg { color: #fde047; font-weight: 700; }
+        .small { font-size: 12px; color: #94a3b8; }
+        ul { padding-left: 20px; margin: 6px 0; }
+    </style>
 </head>
 <body>
-  <main>
-    <p class="effective">Effective November 14, 2026</p>
+<main>
+    <p><a href="./">← Back to Draw Buddy</a></p>
     <h1>Privacy</h1>
-    <p class="operator">NAV Analytics LLC</p>
-    <p>Analytics. We count visits with GoatCounter, a privacy-focused analytics service hosted in the EU (Finland and Germany). It uses no cookies and does not store your IP address or full browser details. We see only aggregate counts, such as pages viewed, referring sites, browser type, screen size, and country. GitHub, which hosts this site, logs visitor IP addresses for security. We do not use advertising pixels or sell or share your data.</p>
-    <p>Browsers sending Global Privacy Control or Do Not Track are not counted.</p>
-    <h2>Cookies and tracking</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Provider</th>
-            <th>First/third party</th>
-            <th>Purpose</th>
-            <th>Cookies</th>
-            <th>Fires only after opt-in</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>GoatCounter count.js</td>
-            <td>GoatCounter (gc.zgo.at)</td>
-            <td>third party</td>
-            <td>analytics (aggregate pageviews)</td>
-            <td>No cookies</td>
-            <td>No (cookieless, aggregate; skipped under GPC/DNT)</td>
-          </tr>
-        </tbody>
-      </table>
+    <p class="small">Draw Buddy is provided by NAV Analytics LLC. Last updated November 16, 2026.</p>
+
+    <h2>No accounts</h2>
+    <p>Draw Buddy has no sign-up or login. We don't ask for your name, email or phone number.</p>
+
+    <h2>What stays on your device</h2>
+    <p>Draw Buddy saves the following in your browser's storage on this device only:</p>
+    <ul>
+        <li>Your 18+ confirmation, remembered for 30 days. Tapping "I'm under 18" clears it.</li>
+        <li>Tickets and slips you log, and any ticket photo you add to a slip (the photo is shrunk and kept with the slip).</li>
+        <li>Your chosen venue, recent and favorite venues, and venue check-ins.</li>
+        <li>Your settings, such as the selected game, state, bankroll, open sections and your Extra wheel direction log.</li>
+    </ul>
+    <p>You can remove all of it by clearing this site's data in your browser.</p>
+
+    <h2>Location ("Near me")</h2>
+    <p>Draw Buddy never asks for your location when it loads. It asks only when you tap 📍 Near me or check in to a venue by location.</p>
+    <ul>
+        <li>By default, your position is compared on your device with a list of NY Quick Draw bars and restaurants included in the app, and it is not saved.</li>
+        <li>Location check-in is also checked on your device.</li>
+        <li>If you turn on "Show all Quick Draw retailers" and tap Near me, your coordinates are sent to data.ny.gov (New York State's open data site) to find retailers within about 5 miles.</li>
+    </ul>
+
+    <h2>Services the app loads from</h2>
+    <p>When you use Draw Buddy, your browser makes requests to these services. Like any website, they receive standard request details such as your IP address and browser type.</p>
+    <ul>
+        <li><strong>GitHub Pages</strong>: hosts this site and keeps standard server logs, including IP addresses.</li>
+        <li><strong>Supabase</strong>: to read official draw history.</li>
+        <li><strong>data.ny.gov</strong>: New York State open data, the source of the draw results and the NY Lottery retailer list.</li>
+        <li><strong>jsDelivr</strong> (cdn.jsdelivr.net): loads the Supabase code library.</li>
+        <li><strong>Tailwind</strong> (cdn.tailwindcss.com): loads the page styles.</li>
+    </ul>
+    <p>Draw Buddy has no ads, no tracking pixels and no analytics, and we don't sell or share your information.</p>
+
+    <h2>Adults only</h2>
+    <p>Draw Buddy is for adults 18 and older.</p>
+
+    <h2>Questions</h2>
+    <p>Questions: <a href="mailto:ralph@insertcoinindustries.com">ralph@insertcoinindustries.com</a></p>
+
+    <div class="box">
+        <p class="rg">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
+        <p class="small">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
     </div>
-    <p><a href="index.html">Home</a></p>
-  </main>
-  <script>
-    window.goatcounter = {
-      path: function (p) {
-        return location.pathname;
-      }
-    };
-    (function () {
-      if (navigator.globalPrivacyControl === true) return;
-      if (navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
-      var script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://gc.zgo.at/count.js';
-      script.setAttribute('data-goatcounter', 'https://drawbuddy.goatcounter.com/count');
-      document.head.appendChild(script);
-    })();
-  </script>
+    <p class="small"><a href="terms.html">Terms</a> · © 2026 NAV Analytics LLC</p>
+</main>
 </body>
 </html>
