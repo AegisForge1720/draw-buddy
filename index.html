@@ -141,7 +141,7 @@
         <div class="bg-[#050814] border-t border-[#1d4ed8] px-4 py-2 text-xs">
             <div class="max-w-md mx-auto grid grid-cols-3 gap-2 text-center">
                 <div id="header-draw-box" class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
-                    <div id="header-draw-label" class="text-blue-400 uppercase tracking-wider text-[10px]">Next Draw</div>
+                    <div id="header-draw-label" class="text-blue-400 uppercase tracking-wider text-[10px]">Est. Next Draw</div>
                     <div id="header-next-draw" class="font-bold text-yellow-400 text-sm">—</div>
                 </div>
                 <div class="bg-[#0b132b]/90 p-1.5 rounded border border-[#1e3a8a]">
@@ -1316,9 +1316,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (rolled) {
                 const end = previewSpread.start + previewSpread.games - 1;
                 const lbl = document.getElementById('card-draw-label');
-                if (lbl) lbl.innerText = previewSpread.games > 1 ? `Draws #${previewSpread.start} – #${end} (${previewSpread.games} Games)` : `Target Draw #${previewSpread.start} (Single Game)`;
+                if (lbl) lbl.innerText = previewSpread.games > 1 ? `Est. draws #${previewSpread.start} – #${end} (${previewSpread.games} Games)` : `Target est. draw #${previewSpread.start} (Single Game)`;
                 const note = document.getElementById('spread-timer-note');
-                if (note) note.innerText = `Rolled forward to draw #${previewSpread.start}: the earlier start closed. Estimate only: this shows 30 s before the scheduled draw time as a margin. Check with your retailer.`;
+                if (note) note.innerText = `Rolled forward to est. draw #${previewSpread.start}: the earlier start closed. Estimate only: this shows 30 s before the scheduled draw time as a margin. Check with your retailer.`;
             }
             return rolled;
         }
@@ -1555,7 +1555,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             previewSetSelect('game-block', pk.games, `${pk.games}`);
             try { updateCostDisplay(); updateOptimizedRoiBadge(); } catch (e) {}
             generateTicket(`${pk.name} · ${pk.xlabel}`, pk.nums, { start: pk.start, slot: pk.slot, openAt: pk.openAt, why: pk.why, kelly: pk.kelly });
-            status.innerText = `${reason || 'Picked'} ${pk.name}: ${pk.spot}-spot, start draw #${pk.start}, from ${previewDayMeta.have} draws in the last 24 h.`;
+            status.innerText = `${reason || 'Picked'} ${pk.name}: ${pk.spot}-spot, start est. draw #${pk.start}, from ${previewDayMeta.have} draws in the last 24 h.`;
         }
         async function previewModeAll(reason) {
             await previewLoadDay();
@@ -1585,7 +1585,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     </div>
                     <div class="flex flex-wrap gap-1">${pk.nums.map(n => `<span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-yellow-400 text-black text-[11px] font-black">${n < 10 ? '0' + n : n}</span>`).join('')}</div>
                     <div class="text-[9px] font-bold ${pk.extra ? 'text-emerald-400' : 'text-rose-300'}">${pk.xlabel || ''}</div>
-                    <div class="pick-range text-[10px] font-bold text-white">${pk.games > 1 ? `Draws #${pk.start} – #${end}` : `Draw #${pk.start}`} (${pk.games} game${pk.games > 1 ? 's' : ''})</div>
+                    <div class="pick-range text-[10px] font-bold text-white">${pk.games > 1 ? `Est. draws #${pk.start} – #${end}` : `Est. draw #${pk.start}`} (${pk.games} game${pk.games > 1 ? 's' : ''})</div>
                     <div class="pick-timer rounded-md border border-yellow-500/60 bg-black/40 px-2 py-1 flex items-center justify-between gap-2">
                         <span class="pick-place text-[10px] font-bold text-yellow-300 leading-snug">⏱ —</span>
                         <span class="pick-count font-mono font-black text-cyan-300 text-sm shrink-0">--:--</span>
@@ -1611,7 +1611,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 previewModePick(due.mode, 'Re-picked').then(() => {
                     previewRolling = false;
                     const st = document.getElementById('four-picks-status');
-                    if (st) st.innerText = `Draw #${old} closed for ${due.name}, so it was re-picked. ` + st.innerText;
+                    if (st) st.innerText = `Est. draw #${old} closed for ${due.name}, so it was re-picked. ` + st.innerText;
                 });
                 return;
             }
@@ -1640,7 +1640,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const cost = (pk.extra ? 2 : 1) * pk.base;
             sessionTickets.unshift({ pickName: pk.name, pickKey: pk.mode, draw: pk.start, endDraw: pk.start + pk.games - 1, spot: pk.spot, games: pk.games, wager: cost * pk.games, costPerGame: cost, baseWager: pk.base, hasExtra: pk.extra, numbers: [...pk.nums], gradedDraws: [], bestHits: 0, winningGamesCount: 0, hits: `Pending (0/${pk.games} gms)`, payout: 0, timestamp: new Date().toISOString() });
             saveHistoryArchive(); updateLedgerUI();
-            const st = document.getElementById('four-picks-status'); if (st) st.innerText = `✅ Logged ${pk.name} for ${pk.games > 1 ? `draws #${pk.start} – #${pk.start + pk.games - 1}` : `draw #${pk.start}`} to the P/L History Archive. Tap ${pk.name} again for a new pick.`;
+            const st = document.getElementById('four-picks-status'); if (st) st.innerText = `✅ Logged ${pk.name} for ${pk.games > 1 ? `est. draws #${pk.start} – #${pk.start + pk.games - 1}` : `est. draw #${pk.start}`} to the P/L History Archive. Tap ${pk.name} again for a new pick.`;
             // Close this pick card after logging (re-opens when its button is tapped again).
             previewPicks.splice(i, 1); previewPickModes = previewPickModes.filter(m => m !== pk.mode); previewRenderPicks();
         }
@@ -2624,7 +2624,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const ownBox = document.getElementById('own-numbers-section'); if (ownBox) ownBox.style.display = gameKey === 'quickdraw' ? 'block' : 'none';
             if (gameKey === 'quickdraw') {
                 if(drawBox) drawBox.style.display = 'block';
-                if(drawLabel) drawLabel.innerText = "Next Draw";
+                if(drawLabel) drawLabel.innerText = "Est. Next Draw";
                 if(proClusterBox) proClusterBox.style.display = 'block';
                 countdownSeconds = 240;
             } else {
@@ -2987,8 +2987,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (drawLabel) {
                 const sd = previewSpread.start, ed = sd + totalBlockSize - 1;
                 drawLabel.innerText = totalBlockSize > 1 
-                    ? `Draws #${sd} – #${ed} (${totalBlockSize} Games)`
-                    : `Target Draw #${sd} (Single Game)`;
+                    ? `Est. draws #${sd} – #${ed} (${totalBlockSize} Games)`
+                    : `Target est. draw #${sd} (Single Game)`;
             }
 
             const reasonEl = document.getElementById('card-algorithm-reason');
@@ -3274,7 +3274,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
             previewBdMode = 'wait'; previewBdWaitDraw = waitNum; previewBdWaitSlips = slips.length; box.hidden = false; previewBdReveal('w' + waitNum);
             ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
-            document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${waitNum}`;
+            document.getElementById('bd-title').innerText = `🎱 Ball Drop · Est. draw #${waitNum}`;
             previewBdWaitText();
             const res = document.getElementById('bd-result'); if (res) res.innerText = '';
             setTimeout(previewBdFit, 0);
@@ -3287,14 +3287,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const n = previewBdWaitDraw, at = previewBdWaitAt, now = Date.now(), lag = previewPostLagS;
             const mini = document.getElementById('bd-mini'), sub = document.getElementById('bd-sub');
             const tk = `${previewBdWaitSlips} number set${previewBdWaitSlips === 1 ? '' : 's'}`;
-            if (!at) { mini.innerText = `Tracking ${tk} · waiting for posted results`; sub.innerText = `Your logged number set is being tracked for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
+            if (!at) { mini.innerText = `Tracking ${tk} · waiting for posted results`; sub.innerText = `Your logged number set is being tracked for est. draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
             const when = previewFmtEtShort(at);
             if (now < at) {
                 mini.innerText = `Tracking ${tk} · draw at ${when.replace(' ET', '')}`;
                 sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
             } else {
                 mini.innerText = `Tracking ${tk} · waiting for posted results`;
-                sub.innerText = `Draw #${n} was at ${when}. Waiting for draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
+                sub.innerText = `Est. draw #${n} was at ${when}. Waiting for est. draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
             }
         }
         setInterval(() => { try { previewBdWaitText(); } catch (e) {} }, 1000);
@@ -3335,7 +3335,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 previewBdWaitAt = previewBdSlotFor(waitNum, newest);
                 const showingResult = previewBdMode === 'qd' && !box.hidden;
                 if (!showingResult && !previewBdHold && previewBdMode !== 'jp') previewBdShowWaiting(waitNum, waiting.filter(t => previewBdCovers(t, waitNum)).length ? waiting.filter(t => previewBdCovers(t, waitNum)) : waiting);
-                else if (showingResult) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw #${waitNum} pending`; }
+                else if (showingResult) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw (est.) #${waitNum} pending`; }
                 return;
             }
             if (!covering.length && !previewBdBusy && !previewBdHold && previewBdMode !== 'jp') { box.hidden = true; if (previewBdMode === 'wait') previewBdMode = null; }
