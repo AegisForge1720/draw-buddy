@@ -31,7 +31,7 @@ export function shellMarkup(flags = FLAGS) {
                 ${ROBOT_MARKUP}
                 <div class="min-w-0">
                     <p class="text-white font-black text-sm tracking-wide leading-none">Scratch Buddy</p>
-                    <p class="text-[9px] text-cyan-300/80 font-semibold tracking-wide mt-1">A social companion</p>
+                    <p class="text-[9px] text-cyan-300/80 font-semibold tracking-wide mt-1">A scratch-off companion</p>
                 </div>
             </div>
         </div>
@@ -222,7 +222,7 @@ export function shellMarkup(flags = FLAGS) {
         </section>
 
         <footer class="text-center text-[10px] text-slate-500 px-1 py-3 space-y-2">
-            <p>Scratch Buddy is a fun, social companion for scratch-off tickets you already bought. It does not sell tickets, and it is not a tool for placing wagers or picking places to play.</p>
+            <p>Scratch Buddy is a fun, personal companion for scratch-off tickets you already bought. It does not sell tickets, and it is not a tool for placing wagers or picking places to play.</p>
             <div class="help-box required-lines">
                 ${REQUIRED_LINES_MARKUP}
                 <p>You can also visit <a href="https://www.gamblersanonymous.org" target="_blank" rel="noopener noreferrer" class="underline font-bold text-yellow-400 hover:text-white">Gamblers Anonymous</a>.</p>
@@ -255,8 +255,8 @@ export const PRIVACY_MARKUP = `
     <ul class="empty-note list-disc pl-4 space-y-1">
         <li>Age check. At 18 or older, only an 18plus pass flag is kept on this device for up to 90 days. Under 18, only a session-only block flag is kept until the tab is closed; no date of birth is kept. The date of birth you enter is used once for the check and is never kept.</li>
         <li>An optional display name, used to label your prize logs on this device.</li>
-        <li>Prize logs you choose to save: the game name, the prize amount, the optional ticket price, the date and the official retailer you picked.</li>
-        <li>An optional ticket photo. A photo can be saved only after you cover or crop out the barcode, validation number and PIN. The saved copy is re-encoded on your device so hidden camera data (EXIF, including GPS) is removed. Photos are never uploaded.</li>
+        <li>Prize logs you choose to save: the game name, the prize amount, the optional ticket price, the date, the official retailer you picked, your display name, your confirmation that you were at that location, any GPS check-in result, and when you saved the log.</li>
+        <li>An optional ticket photo. A photo can be saved only after you draw a cover or crop on it and confirm that the barcode, validation number and PIN are covered. The saved copy is re-encoded on your device so hidden camera data (EXIF, including GPS) is removed. Photos are never uploaded.</li>
         <li>My Log Map reads only those prize logs. It does not rank stores or show store totals.</li>
     </ul>
 
