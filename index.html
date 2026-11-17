@@ -1347,8 +1347,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const waiting = previewSpread.openAt && Date.now() < previewSpread.openAt;
             box.className = box.className.replace(/border-(yellow|emerald)-[0-9/]+/g, '') + (waiting ? ' border-yellow-500/60' : ' border-emerald-400/70');
             label.innerText = waiting
-                ? `⏱ Draw #${previewSpread.start} at ${previewFmtEtShort(previewSpread.slot)} · sales close in ${Math.max(1, Math.round((close - Date.now()) / 60000))} min`
-                : (previewSpread.button ? `⏱ Draw #${previewSpread.start} · on sale · sales close at ${previewFmtEt(close)}` : `⏱ Draw #${previewSpread.start} · sales close at ${previewFmtEt(close)}`);
+                ? `⏱ Draw at ${previewFmtEtShort(previewSpread.slot)} · sales close in ${Math.max(1, Math.round((close - Date.now()) / 60000))} min`
+                : (previewSpread.button ? `⏱ On sale · sales close at ${previewFmtEt(close)}` : `⏱ Sales close at ${previewFmtEt(close)}`);
             const m = Math.floor(left / 60), sec = left % 60;
             count.innerText = `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
             count.className = 'font-mono font-black text-sm ' + (left <= 30 ? 'text-rose-400' : 'text-cyan-300');
@@ -1624,12 +1624,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (pk.openAt && now < pk.openAt) {
                     // Waiting: the start draw goes on sale after the draw before it.
                     const sec = Math.max(0, Math.round((close - now) / 1000)), mins = Math.max(1, Math.round((close - now) / 60000));
-                    place.innerText = `⏱ Draw #${pk.start} at ${at} · sales close in ${mins} min`;
+                    place.innerText = `⏱ Draw at ${at} · sales close in ${mins} min`;
                     c.innerText = fmt(sec); c.className = 'pick-count font-mono font-black text-sm shrink-0 text-cyan-300';
                     box.className = 'pick-timer rounded-md border border-yellow-500/60 bg-black/40 px-2 py-1 flex items-center justify-between gap-2';
                 } else {
                     const sec = Math.max(0, Math.round((close - now) / 1000));
-                    place.innerText = `⏱ Draw #${pk.start} at ${at} · on sale · sales close at ${by}`;
+                    place.innerText = `⏱ Draw at ${at} · on sale · sales close at ${by}`;
                     c.innerText = fmt(sec); c.className = 'pick-count font-mono font-black text-sm shrink-0 ' + (sec <= 30 ? 'text-rose-400' : 'text-emerald-300');
                     box.className = 'pick-timer rounded-md border border-emerald-400/70 bg-emerald-950/40 px-2 py-1 flex items-center justify-between gap-2';
                 }
@@ -2259,7 +2259,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (gradedCount === 0) {
                     t.hits = numGames > 1 ? `Pending (0/${numGames} gms)` : `Pending`;
                 } else if (gradedCount < numGames) {
-                    t.hits = `In play (${gradedCount}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`;
+                    t.hits = `Tracking (${gradedCount}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`;
                 } else {
                     t.hits = numGames > 1
                         ? `Done (${numGames}/${numGames} gms) • Best: ${t.bestHits}/${t.spot}`
@@ -3287,11 +3287,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const n = previewBdWaitDraw, at = previewBdWaitAt, now = Date.now(), lag = previewPostLagS;
             const mini = document.getElementById('bd-mini'), sub = document.getElementById('bd-sub');
             const tk = `${previewBdWaitSlips} number set${previewBdWaitSlips === 1 ? '' : 's'}`;
-            if (!at) { mini.innerText = `Tracking ${tk} · waiting for posted results`; sub.innerText = `Your logged number set is in play for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
+            if (!at) { mini.innerText = `Tracking ${tk} · waiting for posted results`; sub.innerText = `Your logged number set is being tracked for draw #${n}. The balls drop here as soon as this draw's numbers are posted. Results from official posted data. Results may be delayed; check official sources.`; return; }
             const when = previewFmtEtShort(at);
             if (now < at) {
-                mini.innerText = `in play · ${tk} · draw at ${when.replace(' ET', '')}`;
-                sub.innerText = `Your logged number set is in play for draw #${n} at ${when} (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
+                mini.innerText = `Tracking ${tk} · draw at ${when.replace(' ET', '')}`;
+                sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
             } else {
                 mini.innerText = `Tracking ${tk} · waiting for posted results`;
                 sub.innerText = `Draw #${n} was at ${when}. Waiting for draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
@@ -3568,7 +3568,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewAllTiming(r) {
             const sp = r.spread, close = sp.slot - PREVIEW_CLOSE_MARGIN_MS;
             const waiting = sp.openAt && Date.now() < sp.openAt;
-            return `${waiting ? 'On sale in ' + Math.max(1, Math.ceil((sp.openAt - Date.now()) / 60000)) + ' min' : 'On sale now'} · draw #${sp.start} at ${previewFmtEtShort(sp.slot)} · sales close at ${previewFmtEtShort(close)}`;
+            return `${waiting ? 'On sale in ' + Math.max(1, Math.ceil((sp.openAt - Date.now()) / 60000)) + ' min' : 'On sale now'} · draw at ${previewFmtEtShort(sp.slot)} · sales close at ${previewFmtEtShort(close)}`;
         }
         function previewRenderAllPicks() {
             const box = document.getElementById('all-picks-results'); if (!box) return;
