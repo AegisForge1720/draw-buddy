@@ -964,9 +964,23 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         // fallback = measured 2026-11-16 4:32-4:48 PM ET: posts ~10-20 s after the draw).
         const PREVIEW_POST_LAG_DEFAULT_S = 20;
         let previewPostLagS = PREVIEW_POST_LAG_DEFAULT_S;
+        // Public builds (GitHub Pages, static copies) have no /preview-api: it 404s, so the Ball Drop check got no rows
+        // and never showed. There, fall back to the stored quickdraw_history rows (Supabase), fetched at most once a minute.
+        let previewApiMissing = false, previewStoredQd = { at: 0, rows: [] };
+        async function previewFetchStoredQd() {
+            if (Date.now() - previewStoredQd.at < 60000) return previewStoredQd.rows;
+            previewStoredQd.at = Date.now();
+            try {
+                const { data, error } = await supabaseClient.from(GAME_CONFIGS.quickdraw.tableName).select('*').order('draw_number', { ascending: false }).limit(30);
+                if (!error && Array.isArray(data) && data.length) previewStoredQd.rows = data;
+            } catch (e) {}
+            return previewStoredQd.rows;
+        }
         async function previewFetchRecent() {
+            if (previewApiMissing) return previewFetchStoredQd();
             try {
                 const r = await fetch('/preview-api/quickdraw/recent', { cache: 'no-store' });
+                if (r.status === 404) { previewApiMissing = true; return previewFetchStoredQd(); }
                 if (!r.ok) return previewRecentRows;
                 const body = await r.json();
                 if (Number.isFinite(Number(body.postLagSeconds)) && Number(body.postLagSamples) > 0) previewPostLagS = Math.round(Number(body.postLagSeconds));
@@ -3316,7 +3330,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewBdSlotFor(num, fromRow) {
             let slot = Math.round(Date.parse(fromRow.draw_at) / 60000) * 60000, k = Number(fromRow.draw_number), guard = 0;
             if (!Number.isFinite(slot)) return null;
-            while (k < num && guard++ < 400) { const nx = previewNextSlotAfter(slot); if (!nx) return null; slot = nx; k++; }
+            while (k < num && guard++ < 2000) { const nx = previewNextSlotAfter(slot); if (!nx) return null; slot = nx; k++; }
             return k === num ? slot : null;
         }
         async function previewBdCheck(force) {
