@@ -26,6 +26,7 @@ async function open() {
   await p.waitForTimeout(5000);
   const w = await bd(p);
   check("public build: Ball Drop card shows at game start for a logged Quick Draw number set", !w.hidden && w.mode === "wait" && w.title.includes(`#${np}`), JSON.stringify(w));
+  check("public wording: drop happens once the day's official results are posted", w.sub.includes("The balls drop here once the day's official results are posted, usually early the next morning.") && !/as soon as/.test(w.sub), w.sub);
   check("waiting copy has no 'live'/'win'/'jackpot'", !/\b(live|real-time|win|wins|won|jackpot)\b/i.test(w.sub + w.mini + w.title));
   await p.waitForTimeout(12000);
   check("missing /preview-api is asked for once, not on every check", api.length <= 1, `${api.length} requests`);

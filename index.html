@@ -3319,10 +3319,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const when = previewFmtEtShort(at);
             if (now < at) {
                 mini.innerText = `Tracking ${tk} · draw at ${when.replace(' ET', '')}`;
-                sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). The balls drop here as soon as the numbers are posted. Results from official posted data. Results may be delayed; check official sources.`;
+                sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). ${previewApiMissing ? "The balls drop here once the day's official results are posted, usually early the next morning." : 'The balls drop here as soon as the numbers are posted.'} Results from official posted data. Results may be delayed; check official sources.`;
             } else {
                 mini.innerText = `Tracking ${tk} · waiting for posted results`;
-                sub.innerText = `Est. draw #${n} was at ${when}. Waiting for est. draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. Checking for new results; the balls drop as soon as it posts.`;
+                sub.innerText = `Est. draw #${n} was at ${when}. Waiting for est. draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. ${previewApiMissing ? 'Waiting for the next official results.' : 'Checking for new results; the balls drop as soon as it posts.'}`;
             }
         }
         setInterval(() => { try { previewBdWaitText(); } catch (e) {} }, 1000);
