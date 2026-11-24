@@ -966,6 +966,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let previewPostLagS = PREVIEW_POST_LAG_DEFAULT_S;
         // Public builds (GitHub Pages, static copies) have no /preview-api: it 404s, so the Ball Drop check got no rows
         // and never showed. There, fall back to the stored quickdraw_history rows (Supabase), fetched at most once a minute.
+        let previewApiOk = false; // true once the private preview's same-day /preview-api answers; until then the public wording is the default
         let previewApiMissing = false, previewStoredQd = { at: 0, rows: [] };
         async function previewFetchStoredQd() {
             if (Date.now() - previewStoredQd.at < 60000) return previewStoredQd.rows;
@@ -982,7 +983,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const r = await fetch('/preview-api/quickdraw/recent', { cache: 'no-store' });
                 if (r.status === 404) { previewApiMissing = true; return previewFetchStoredQd(); }
                 if (!r.ok) return previewRecentRows;
-                const body = await r.json();
+                const body = await r.json(); previewApiOk = true;
                 if (Number.isFinite(Number(body.postLagSeconds)) && Number(body.postLagSamples) > 0) previewPostLagS = Math.round(Number(body.postLagSeconds));
                 return (body.draws || []).map(d => ({
                     draw_number: d.drawNumber, winning_numbers: d.numbers, listed_order: (Array.isArray(d.listedOrder) && d.listedOrder.length === 20) ? d.listedOrder : null, extra_multiplier: d.extra,
@@ -3319,10 +3320,10 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const when = previewFmtEtShort(at);
             if (now < at) {
                 mini.innerText = `Tracking ${tk} · draw at ${when.replace(' ET', '')}`;
-                sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). ${previewApiMissing ? "The balls drop here once the day's official results are posted, usually early the next morning." : 'The balls drop here as soon as the numbers are posted.'} Results from official posted data. Results may be delayed; check official sources.`;
+                sub.innerText = `Your logged number set is being tracked for the ${when} draw (in ${previewBdMmss((at - now) / 1000)}). ${!previewApiOk ? "The balls drop here once the day's official results are posted, usually early the next morning." : 'The balls drop here as soon as the numbers are posted.'} Results from official posted data. Results may be delayed; check official sources.`;
             } else {
                 mini.innerText = `Tracking ${tk} · waiting for posted results`;
-                sub.innerText = `Est. draw #${n} was at ${when}. Waiting for est. draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. ${previewApiMissing ? 'Waiting for the next official results.' : 'Checking for new results; the balls drop as soon as it posts.'}`;
+                sub.innerText = `Est. draw #${n} was at ${when}. Waiting for est. draw #${n} to post (${previewBdMmss((now - at) / 1000)} so far). Results from official posted data. Results may be delayed; check official sources. ${!previewApiOk ? 'Waiting for the next official results.' : 'Checking for new results; the balls drop as soon as it posts.'}`;
             }
         }
         setInterval(() => { try { previewBdWaitText(); } catch (e) {} }, 1000);

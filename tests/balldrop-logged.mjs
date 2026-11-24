@@ -38,6 +38,7 @@ const bd = p => p.evaluate(() => ({ hidden: document.getElementById('balldrop').
   const w = await bd(p);
   check("waiting panel shows for in-play logged ticket", !w.hidden && w.title.includes(`#${newest}`) && /in play|Tracking/.test(w.mini) && !w.grid, JSON.stringify(w));
   check("waiting copy has no 'live'/'win'", !/\b(live|win|wins|won)\b/i.test(w.sub + w.mini + w.title));
+  check("private preview (same-day feed) keeps the 'as soon as it posts' wording", /as soon as/.test(w.sub) && !/early the next morning|Waiting for the next official results/.test(w.sub), w.sub);
   const flow = await p.evaluate(() => { const box = document.getElementById('balldrop'), r = box.getBoundingClientRect(), h = document.querySelector('header').getBoundingClientRect();
     const order = (a, b) => !!(document.getElementById(a).compareDocumentPosition(document.getElementById(b)) & Node.DOCUMENT_POSITION_FOLLOWING);
     return { inHeader: !!box.closest('header'), inMain: !!box.closest('main'), afterHouse: order('house-lines', 'balldrop'), beforeGen: order('balldrop', 'qd-generator-card'), top: Math.round(r.top), bottom: Math.round(r.bottom), headerBottom: Math.round(h.bottom), inner: innerHeight }; });
