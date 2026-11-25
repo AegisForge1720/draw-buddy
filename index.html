@@ -228,10 +228,16 @@
                         <span id="bd-mini" class="text-[11px] text-cyan-300 ml-1"></span>
                     </button>
                     <button type="button" onclick="previewBdToggle()" class="text-slate-400 text-xs px-1" aria-label="Collapse">▾</button>
-                    <button type="button" onclick="previewBdDismiss()" class="text-slate-400 text-sm px-1" aria-label="Dismiss until the next draw">✕</button>
+                    <button type="button" id="bd-x" onclick="previewBdDismiss()" class="text-slate-400 text-sm px-1" aria-label="Dismiss until the next draw">✕</button>
                 </div>
                 <div id="bd-body" class="space-y-2 pt-1.5" style="overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain">
                     <div id="bd-sub" class="text-[10px] text-slate-400">Results from official posted data. Results may be delayed; check official sources.</div>
+                    <!-- Replay controls: always available on Quick Draw. Stored official results only (quickdraw_history, loaded from data.ny.gov). -->
+                    <div id="bd-replay" class="flex flex-wrap items-center gap-1.5" hidden>
+                        <button type="button" id="bd-replay-go" onclick="previewBdReplayGo()" class="bg-yellow-400 text-black font-black text-xs px-3 py-1.5 rounded-lg">▶ Drop the balls</button>
+                        <select id="bd-replay-pick" onchange="previewBdReplayPicked()" class="bg-[#111c38] text-white text-[11px] border border-slate-700 rounded-lg px-1.5 py-1.5 max-w-[190px]" aria-label="Pick a posted draw to replay"></select>
+                        <button type="button" id="bd-replay-back" onclick="previewBdReplayBack()" class="text-cyan-300 text-[11px] font-bold underline px-1" hidden>← Back to your number set</button>
+                    </div>
                     <div id="bd-balls" class="flex flex-wrap gap-1 min-h-[28px]" hidden></div>
                     <div id="bd-qd" class="space-y-1.5" hidden>
                         <div id="bd-summary">
@@ -261,7 +267,7 @@
                         <div class="flex-1 min-w-0 flex flex-col items-center text-center gap-1">
                         <div id="bd-wheel-label" class="text-xl font-black text-yellow-300 leading-tight">🎡 Extra…</div>
                         <div id="bd-wheel-prize" class="bd-tight-hide text-[11px] text-white leading-snug"></div>
-                        <div class="w-full max-w-[260px] space-y-1">
+                        <div id="bd-dir-block" class="w-full max-w-[260px] space-y-1">
                             <div class="bd-tight-hide text-[9px] uppercase tracking-wider text-cyan-300 font-bold">Which way did the wheel spin?</div>
                             <div class="grid grid-cols-2 gap-1.5">
                                 <button type="button" id="bd-dir-L" onclick="previewBdLogDir('L')" class="bg-indigo-700 text-white font-black py-1.5 rounded-lg text-sm border-2 border-transparent">⟲ Left</button>
@@ -2586,6 +2592,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         async function switchGameProfile(gameKey) {
             activeGameKey = gameKey;
+            setTimeout(() => { try { previewBdCheck(false); } catch (e) {} }, 0);
             { const fpp = document.getElementById('four-picks-panel'); if (fpp) fpp.hidden = gameKey !== 'quickdraw'; }
             ['extra-wheel-panel'].forEach(id => { const el = document.getElementById(id); if (el) el.hidden = gameKey !== 'quickdraw' || !el.dataset.ready; });
             const cfg = GAME_CONFIGS[gameKey];
@@ -3236,7 +3243,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         let previewBdAutoFold = false;
         window.addEventListener('scroll', () => { if (false && previewBdAutoFold && !previewBdBusy && !previewBdCollapsed && window.scrollY > 200) { previewBdAutoFold = false; previewBdToggle(); } }, { passive: true });
         function previewBdToggle() { setTimeout(() => { try { previewBdFit(); } catch (e) {} }, 0); previewBdCollapsed = !previewBdCollapsed; document.getElementById('bd-body').hidden = previewBdCollapsed; document.getElementById('bd-toggle').setAttribute('aria-expanded', String(!previewBdCollapsed)); }
-        function previewBdDismiss() { if (previewBdMode === 'wait') previewBdWaitDismissed = previewBdWaitDraw; else previewBdDismissedAt = previewBdShown || -1; document.getElementById('balldrop').hidden = true; }
+        function previewBdDismiss() {
+            if (previewBdMode === 'idle' || previewBdMode === 'replay') { previewBdSetCollapsed(true); return; }
+            if (previewBdMode === 'wait') previewBdWaitDismissed = previewBdWaitDraw; else previewBdDismissedAt = previewBdShown || -1;
+            if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
+            document.getElementById('balldrop').hidden = true;
+            // The dropper stays available on Quick Draw: come back as the folded one-line card.
+            if (previewBdMode !== 'jp' && activeGameKey === 'quickdraw') { previewBdMode = null; previewBdShowIdle(true); }
+        }
+        function previewBdSetCollapsed(v) { previewBdCollapsed = !!v; document.getElementById('bd-body').hidden = previewBdCollapsed; document.getElementById('bd-toggle').setAttribute('aria-expanded', String(!previewBdCollapsed)); setTimeout(() => { try { previewBdFit(); } catch (e) {} }, 0); }
         function previewBdQdSlips(nextNum) {
             return (sessionTickets || []).filter(t => (t.game || 'quickdraw') === 'quickdraw' && Array.isArray(t.numbers) && t.numbers.length
                 && (t.gradedDraws || []).length < (t.games || 1) && parseInt(t.draw) <= nextNum && parseInt(t.endDraw || t.draw) >= nextNum - 1);
@@ -3299,13 +3314,15 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewBdCovers(t, num) { return parseInt(t.draw) <= num && parseInt(t.endDraw || t.draw) >= num; }
         function previewBdShowWaiting(waitNum, slips) {
             const box = document.getElementById('balldrop');
-            if (previewBdWaitDismissed === waitNum) return;
+            if (previewBdWaitDismissed === waitNum) { if (previewBdMode !== 'idle') previewBdShowIdle(true); else previewBdRenderReplayControls(); return; }
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
-            previewBdMode = 'wait'; previewBdWaitDraw = waitNum; previewBdWaitSlips = slips.length; box.hidden = false; previewBdReveal('w' + waitNum);
+            if (previewBdMode !== 'wait') previewBdSetCollapsed(false);
+            previewBdMode = 'wait'; document.getElementById('bd-x').hidden = false; previewBdWaitDraw = waitNum; previewBdWaitSlips = slips.length; box.hidden = false; previewBdReveal('w' + waitNum);
             ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
             document.getElementById('bd-title').innerText = `🎱 Ball Drop · Est. draw #${waitNum}`;
             previewBdWaitText();
             const res = document.getElementById('bd-result'); if (res) res.innerText = '';
+            previewBdRenderReplayControls();
             setTimeout(previewBdFit, 0);
         }
         // Waiting copy with the draw's scheduled time and the measured posting delay (updated every second).
@@ -3334,10 +3351,76 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             while (k < num && guard++ < 2000) { const nx = previewNextSlotAfter(slot); if (!nx) return null; slot = nx; k++; }
             return k === num ? slot : null;
         }
+        // ===== Always-available dropper (Andrew, Nov 25 2026: "Draw Buddy needs to be able to have the ball dropper at all times.") =====
+        // On Quick Draw the card is always there. When no logged number set has a posted draw to drop, the player can watch the
+        // balls drop for the most recent posted draw, or replay another recent posted draw. Official results only: the stored
+        // quickdraw_history rows (loaded daily from data.ny.gov), never the private preview's same-day rows. A replay never
+        // grades or prices anything; logged number sets are still checked automatically once their own draw is posted.
+        let previewBdReplayRows = [], previewBdReplayPick = null, previewBdReplayWait = null, previewBdLastReplayed = null;
+        function previewBdOfficialRows(rows) { return (rows || []).filter(r => !r.unofficial && Array.isArray(r.winning_numbers) && r.winning_numbers.length === 20); }
+        function previewBdFmtDrawDay(row) {
+            // data.ny.gov draw_date is the official draw date (YYYY-MM-DD); the time is the scheduled draw time in ET.
+            let day = '';
+            try {
+                if (row.draw_date) day = new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(String(row.draw_date).slice(0, 10) + 'T12:00:00Z'));
+                else if (row.draw_at) day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(row.draw_at));
+            } catch (e) {}
+            const t = row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) : '';
+            return [day ? 'draw date ' + day : '', t].filter(Boolean).join(' · ');
+        }
+        function previewBdRenderReplayControls() {
+            const wrap = document.getElementById('bd-replay'), sel = document.getElementById('bd-replay-pick'), go = document.getElementById('bd-replay-go'), back = document.getElementById('bd-replay-back');
+            if (!wrap || !sel || !go) return;
+            const rows = previewBdReplayRows;
+            if (!rows.length || previewBdBusy || previewBdMode === 'jp' || activeGameKey !== 'quickdraw') { wrap.hidden = true; return; }
+            wrap.hidden = false;
+            const key = rows.map(r => r.draw_number).join(',');
+            if (sel.dataset.key !== key) {
+                sel.textContent = '';
+                rows.forEach((r, i) => { const o = document.createElement('option'); o.value = String(r.draw_number); o.textContent = i === 0 ? `Most recent posted · #${r.draw_number}` : `#${r.draw_number} · ${r.draw_at ? previewFmtEtShort(Date.parse(r.draw_at)) : ''}`; sel.appendChild(o); });
+                sel.dataset.key = key;
+            }
+            if (previewBdReplayPick == null || !rows.some(r => Number(r.draw_number) === previewBdReplayPick)) previewBdReplayPick = Number(rows[0].draw_number);
+            sel.value = String(previewBdReplayPick);
+            const newest = previewBdReplayPick === Number(rows[0].draw_number);
+            go.textContent = (newest && (previewBdMode === 'idle' || previewBdMode === 'wait')) ? '▶ Drop the balls' : (previewBdMode === 'replay' && previewBdLastReplayed === previewBdReplayPick ? `↻ Replay draw #${previewBdReplayPick}` : `▶ Replay draw #${previewBdReplayPick}`);
+            if (back) back.hidden = !(previewBdMode === 'replay' && previewBdReplayWait);
+        }
+        function previewBdShowIdle(folded) {
+            const box = document.getElementById('balldrop');
+            if (activeGameKey !== 'quickdraw') { if (previewBdMode === 'idle') { box.hidden = true; previewBdMode = null; } return; }
+            const rows = previewBdReplayRows; if (!rows.length || previewBdBusy) return;
+            if (previewBdMode !== 'idle') previewBdSetCollapsed(!!folded);
+            previewBdMode = 'idle'; box.hidden = false;
+            ['bd-qd', 'bd-balls', 'bd-wheel'].forEach(id => { const e = document.getElementById(id); if (e) e.hidden = true; });
+            document.getElementById('bd-x').hidden = true;
+            const r = rows[0];
+            document.getElementById('bd-title').innerText = '🎱 Ball Drop';
+            document.getElementById('bd-mini').innerText = `Most recent posted draw #${r.draw_number}`;
+            document.getElementById('bd-sub').innerText = `Watch the balls drop for the most recent posted Quick Draw: draw #${r.draw_number}, ${previewBdFmtDrawDay(r)}. Official posted results (data.ny.gov). Log a number set and it's checked automatically once its draw is posted. Results may be delayed; check official sources.`;
+            const res = document.getElementById('bd-result'); if (res) res.innerText = '';
+            previewBdRenderReplayControls();
+            setTimeout(previewBdFit, 0);
+        }
+        async function previewBdReplayGo() {
+            if (previewBdBusy || !previewBdReplayRows.length) return;
+            const row = previewBdReplayRows.find(r => Number(r.draw_number) === previewBdReplayPick) || previewBdReplayRows[0];
+            if (previewBdMode === 'wait') previewBdReplayWait = previewBdWaitDraw; else if (previewBdMode !== 'replay') previewBdReplayWait = null;
+            if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; previewBdDismissedAt = previewBdShown; }
+            previewBdSetCollapsed(false);
+            previewBdLastReplayed = Number(row.draw_number);
+            await previewBdAnimate(row, [], { replay: true, newest: Number(row.draw_number) === Number(previewBdReplayRows[0].draw_number) });
+            previewBdRenderReplayControls();
+        }
+        function previewBdReplayPicked() { const v = Number(document.getElementById('bd-replay-pick').value); if (Number.isFinite(v)) previewBdReplayPick = v; previewBdRenderReplayControls(); }
+        function previewBdReplayBack() { previewBdMode = null; previewBdReplayWait = null; previewBdWaitDismissed = null; try { previewBdCheck(false); } catch (e) {} }
         async function previewBdCheck(force) {
             if (previewBdBusy) return;
-            const rows = await previewFetchRecent(); if (!rows || !rows.length) return;
+            const rows = await previewFetchRecent();
+            // Official rows for the always-available dropper (public build: the same stored rows; private preview: stored rows, not /preview-api).
+            try { previewBdReplayRows = previewBdOfficialRows(previewApiMissing ? rows : await previewFetchStoredQd()); } catch (e) {}
             if (previewBdBusy) return;
+            if (!rows || !rows.length) { if (previewBdMode == null || previewBdMode === 'idle') previewBdShowIdle(false); return; }
             const newest = rows[0], newestNum = Number(newest.draw_number), np = previewNextPurchasable(0), nextNum = np ? np.number : newestNum + 1;
             const all = previewBdQdAll();
             previewBdWaitAt = null;
@@ -3363,30 +3446,39 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 const waitNum = Math.max(newestNum + 1, Math.min(...waiting.map(t => parseInt(t.draw))));
                 previewBdWaitAt = previewBdSlotFor(waitNum, newest);
                 const showingResult = previewBdMode === 'qd' && !box.hidden;
+                if (previewBdMode === 'replay') { previewBdReplayWait = waitNum; previewBdRenderReplayControls(); return; } // keep the replay up; "Back" returns to the number set
                 if (!showingResult && !previewBdHold && previewBdMode !== 'jp') previewBdShowWaiting(waitNum, waiting.filter(t => previewBdCovers(t, waitNum)).length ? waiting.filter(t => previewBdCovers(t, waitNum)) : waiting);
                 else if (showingResult) { const m = document.getElementById('bd-mini'); if (m && !/next: draw/.test(m.innerText)) m.innerText += ` · next: draw (est.) #${waitNum} pending`; }
                 return;
             }
-            if (!covering.length && !previewBdBusy && !previewBdHold && previewBdMode !== 'jp') { box.hidden = true; if (previewBdMode === 'wait') previewBdMode = null; }
+            if (!previewBdBusy && !previewBdHold && previewBdMode !== 'jp') {
+                if (previewBdMode === 'replay') { previewBdReplayWait = null; if (activeGameKey !== 'quickdraw') { box.hidden = true; previewBdMode = null; } else previewBdRenderReplayControls(); return; }
+                if (!(previewBdMode === 'qd' && !box.hidden)) { if (previewBdMode === 'wait') previewBdMode = null; box.hidden = true; previewBdShowIdle(false); }
+            }
         }
         function previewBdTicketLabel(t, i) {
             const name = t.pickName || (t.pickKey && PREVIEW_BTN_NAMES[t.pickKey]) || (t.manual ? 'My Numbers' : `Number set ${i + 1}`);
             return `${String(name).slice(0, 45)} · ${Number(t.spot) || t.numbers.length}-spot`;
         }
         const PREVIEW_BD_BALL_MS = 900; // one ball lands at a time: 20 balls ≈ 18 s, then the 2.7 s Extra wheel
-        async function previewBdAnimate(row, slips) {
-            try { await previewBdAnimateInner(row, slips); } catch (e) { console.warn('ball drop', e); } finally { previewBdBusy = false; }
+        async function previewBdAnimate(row, slips, opts) {
+            try { await previewBdAnimateInner(row, slips, opts || {}); } catch (e) { console.warn('ball drop', e); } finally { previewBdBusy = false; }
         }
-        async function previewBdAnimateInner(row, slips) {
-            previewBdBusy = true; previewBdAutoFold = false; previewBdMode = 'qd';
+        async function previewBdAnimateInner(row, slips, opts) {
+            const replay = !!opts.replay;
+            previewBdBusy = true; previewBdAutoFold = false; previewBdMode = replay ? 'replay' : 'qd';
+            previewBdSetCollapsed(false); document.getElementById('bd-x').hidden = replay;
+            { const rp = document.getElementById('bd-replay'); if (rp) rp.hidden = true; const yb = document.getElementById('bd-your-block'); if (yb) yb.hidden = replay; const db = document.getElementById('bd-dir-block'); if (db) db.hidden = replay; }
             if (previewBdHold) { clearTimeout(previewBdHold); previewBdHold = null; }
             const box = document.getElementById('balldrop'); box.hidden = false;
             setTimeout(previewBdFit, 0); previewBdReveal('d' + row.draw_number);
             const nums = (row.winning_numbers || []).map(Number), mult = Number(row.extra_multiplier) || 1;
             const mine = new Set(slips.flatMap(t => t.numbers.map(Number)));
             const when = row.draw_at ? previewFmtEtShort(Date.parse(row.draw_at)) : '';
-            document.getElementById('bd-title').innerText = `🎱 Ball Drop · Draw #${row.draw_number}`;
-            document.getElementById('bd-sub').innerText = `${when ? when + ' · ' : ''}Results from official posted data. Results may be delayed; check official sources.${row.unofficial ? ' (unofficial until verified)' : ''}`;
+            document.getElementById('bd-title').innerText = replay ? `🎱 Replay · Draw #${row.draw_number}` : `🎱 Ball Drop · Draw #${row.draw_number}`;
+            document.getElementById('bd-sub').innerText = replay
+                ? `${opts.newest ? 'Most recent posted draw' : 'Posted draw'} #${row.draw_number} · ${previewBdFmtDrawDay(row)}. Official posted results (data.ny.gov). A replay doesn't check your number sets. Results may be delayed; check official sources.`
+                : `${when ? when + ' · ' : ''}Results from official posted data. Results may be delayed; check official sources.${row.unofficial ? ' (unofficial until verified)' : ''}`;
             const balls = document.getElementById('bd-balls'), res = document.getElementById('bd-result'); balls.innerHTML = ''; balls.hidden = true; res.innerText = '';
             // 1–80 grid: the slip's numbers are outlined; each ball lights its cell as the counter advances.
             const qd = document.getElementById('bd-qd'), grid = document.getElementById('bd-grid'); qd.hidden = false;
@@ -3412,7 +3504,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     myBox.appendChild(el); o.countEl = count; o.prizeEl = prize; o.el = el;
                 });
             }
-            const ticketSuffix = ` · ${slips.length} number set${slips.length === 1 ? '' : 's'}`;
+            const ticketSuffix = replay ? ` · replay of draw #${row.draw_number}` : ` · ${slips.length} number set${slips.length === 1 ? '' : 's'}`;
             document.getElementById('bd-wheel').hidden = true;
             previewBdFit();
             const order = (Array.isArray(row.listed_order) && row.listed_order.length === nums.length) ? row.listed_order.map(Number) : nums.slice();
@@ -3432,10 +3524,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (hit && myBox) myBox.querySelectorAll(`[data-n="${n}"]`).forEach(chip => chip.classList.add('bd-chip-hit'));
                 const m = `${hitsSoFar} match${hitsSoFar === 1 ? '' : 'es'}`;
                 cnt.innerText = `Ball ${i + 1} of ${order.length}`;
-                document.getElementById('bd-mini').innerText = `Ball ${i + 1} of ${order.length} · ${m}${ticketSuffix}`;
+                document.getElementById('bd-mini').innerText = replay ? `Ball ${i + 1} of ${order.length}${ticketSuffix}` : `Ball ${i + 1} of ${order.length} · ${m}${ticketSuffix}`;
                 await new Promise(r => setTimeout(r, PREVIEW_BD_BALL_MS));
             }
             if (prev) prev.classList.remove('bd-now');
+            if (replay) return previewBdReplayFinish(row, nums, mult, res);
             const info = slips.map(t => {
                 const hits = t.numbers.filter(n => nums.includes(Number(n))).length;
                 const total = t.games || 1, done = new Set([...(t.gradedDraws || []), Number(row.draw_number)]).size;
@@ -3484,10 +3577,40 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 previewBdAutoFold = true;
             }
             previewBdBusy = false;
+            previewBdRenderReplayControls(); previewBdFit(); // the dropper stays available after a result too
             // Slip's last draw: keep the result (and prize) up for 15 min so it can be read at the counter, then hide.
             if (slips.every(t => parseInt(t.endDraw || t.draw) <= Number(row.draw_number))) {
-                previewBdHold = setTimeout(() => { previewBdHold = null; previewBdDismissedAt = Number(row.draw_number); box.hidden = true; }, 15 * 60000);
+                previewBdHold = setTimeout(() => { previewBdHold = null; previewBdDismissedAt = Number(row.draw_number); if (previewBdMode === 'qd') { box.hidden = true; try { previewBdCheck(false); } catch (e) {} } }, 15 * 60000);
             }
+        }
+        // Replay ending: the official numbers and Extra, no grading or prizes; the Extra wheel spins to the posted multiplier.
+        async function previewBdReplayFinish(row, nums, mult, res) {
+            const n = Number(row.draw_number);
+            res.textContent = '';
+            const line = document.createElement('div'); line.className = 'bd-prize-total bd-prize-no';
+            line.textContent = `Replay of posted draw #${n}: ${nums.slice().sort((a, b) => a - b).join(', ')}.`;
+            const note = document.createElement('div'); note.className = 'bd-prize-note';
+            note.textContent = previewBdQdAll().some(t => (t.gradedDraws || []).length < (t.games || 1)) ? 'Your logged number sets are checked automatically once their draw is posted.' : 'Log a number set and it\'s checked automatically once its draw is posted.';
+            res.appendChild(line); res.appendChild(note);
+            const done = `Replay · draw #${n} · Ball 20 of 20`;
+            document.getElementById('bd-mini').innerText = done;
+            previewBdFit();
+            const wrap = document.getElementById('bd-wheel'), svg = document.getElementById('bd-wheel-svg');
+            if (wrap && svg && PREVIEW_EXTRA.some(([m]) => m === mult)) {
+                try { previewDrawWheel(); } catch (e) {}
+                const src = document.getElementById('extra-wheel-svg'); if (src && !svg.childNodes.length) svg.innerHTML = src.innerHTML;
+                previewBdWheelDraw = null; previewBdWheelMult = null; // a replay never adds to the wheel direction log
+                document.getElementById('bd-wheel-label').innerText = '🎡 Extra…';
+                document.getElementById('bd-wheel-prize').innerText = '';
+                wrap.hidden = false; previewBdFit();
+                previewBdSpin(mult, true, 'R', true);
+                await new Promise(r => setTimeout(r, 2700));
+                document.getElementById('bd-wheel-label').innerText = mult === 1 ? 'No Extra' : `Extra ${mult}X`;
+                document.getElementById('bd-wheel-prize').innerText = mult === 1 ? 'No Extra on this posted draw.' : `This posted draw's Extra: ${mult}X.`;
+                document.getElementById('bd-mini').innerText = `${done} · ${mult === 1 ? 'No Extra' : `Extra ${mult}X`}`;
+            }
+            previewBdBusy = false;
+            previewBdRenderReplayControls(); previewBdFit();
         }
         // Powerball / Mega Millions: show results once posted (stored tables), no animation timing claims.
         async function previewBdCheckJackpot() {
