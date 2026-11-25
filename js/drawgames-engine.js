@@ -19,7 +19,7 @@
         { key: 'doubleplay', label: 'Double Play', cost: 1, note: 'Same numbers in a second drawing about 30 minutes later; $10 million top prize. NY since June 2, 2026. Double Play prizes are not multiplied by Power Play. Double Play results are not in the data.ny.gov feed, so Draw Buddy has no Double Play history and does not grade Double Play.' }
       ],
       schedule: [{ session: 'main', label: 'Mon/Wed/Sat 10:59 PM ET', days: [1, 3, 6], h: 22, m: 59, close: '10:00 PM ET' }],
-      maxDraws: 10, official: { n: 39, unit: 'draws', src: 'official game site (ny.gov) Powerball Multi-Draw (up to 39 consecutive draws)' }, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
+      maxDraws: 10, official: { n: 39, unit: 'draws', src: 'Powerball Multi-Draw rules on the official game site, ny.gov: up to 39 consecutive draws' }, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 50000, '4': 100, '3b': 100, '3': 7, '2b': 7, '1b': 4, '0b': 4 },
       ppPrizes: { '5': 2000000 }, // Power Play: match 5 is a flat $2 million; other non-jackpot prizes × multiplier
       dpPrizes: { '5b': 10000000, '5': 500000, '4b': 50000, '4': 500, '3b': 500, '3': 20, '2b': 20, '1b': 10, '0b': 7 },
@@ -33,7 +33,7 @@
       price: 5, priceNote: '$5 per play (every play has a built-in 2X–10X multiplier, assigned at purchase)',
       options: [],
       schedule: [{ session: 'main', label: 'Tue/Fri 11:00 PM ET', days: [2, 5], h: 23, m: 0, close: '10:00 PM ET' }],
-      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'official game site (ny.gov) Mega Millions Multi-Draw (up to 26 consecutive draws)' }, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'Mega Millions Multi-Draw rules on the official game site, ny.gov: up to 26 consecutive draws' }, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 10000, '4': 500, '3b': 200, '3': 10, '2b': 10, '1b': 7, '0b': 5 },
       multOdds: [[2, 1 / 2.13], [3, 1 / 3.2], [4, 1 / 8], [5, 1 / 16], [10, 1 / 32]], builtInMultiplier: true,
       source: 'official game site (ny.gov) Mega Millions page, megamillions.com (Apr 8, 2025 matrix) and 9 NYCRR 5007.7; draws: data.ny.gov 5xaw-6ayf'
@@ -43,7 +43,7 @@
       bonus: { name: 'Millionaire Ball', max: 5, picked: true },
       price: 5, priceNote: '$5 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 11:15 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 23, m: 15, close: '10:15 PM ET' }],
-      maxDraws: 10, official: { n: 28, unit: 'draws', src: 'official game site (ny.gov) Millionaire for Life Multi-Draw (up to 28 consecutive draws)' }, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
+      maxDraws: 10, official: { n: 28, unit: 'draws', src: 'Millionaire for Life Multi-Draw rules on the official game site, ny.gov: up to 28 consecutive draws' }, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
       prizes: { '5b': '$1M a year for life', '5': '$100K a year for life', '4b': 7500, '4': 500, '3b': 250, '3': 50, '2b': 25, '2': 8, '1b': 8 },
       source: 'gaming.ny.gov (Feb 12, 2026) prize chart and official game site (ny.gov) Millionaire for Life page; draws: data.ny.gov a4w9-a3tp'
     },
@@ -52,7 +52,7 @@
       bonus: { name: 'Bonus', max: 59, picked: false }, // drawn from the remaining 53; only counts with 5 matches
       price: 0.5, minPlays: 2, priceNote: '$1 for two plays (minimum two)', options: [],
       schedule: [{ session: 'main', label: 'Wed/Sat 8:15 PM ET', days: [3, 6], h: 20, m: 15, close: '8:00 PM ET' }],
-      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'official game site (ny.gov) Lotto Multi-Draw (up to 26 consecutive draws)' }, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'Lotto Multi-Draw rules on the official game site, ny.gov: up to 26 consecutive draws' }, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
       prizes: { '6': 'Jackpot (pari-mutuel)', '5b': '2nd prize (pari-mutuel)', '5': '3rd prize (pari-mutuel)', '4': '4th prize (pari-mutuel)', '3': 1 },
       source: 'official game site (ny.gov) Lotto page and 9 NYCRR Part 5008; draws: data.ny.gov 6nbc-h7bj'
     },
@@ -62,7 +62,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both). App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
+      maxDraws: 7, official: { n: 7, unit: 'days', src: 'Take 5 play slip on the official game site, ny.gov: Day, Eve or Both, up to 7 consecutive days, 14 draws with Both. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
       prizes: { '5': 'Top prize (pari-mutuel)', '4': 'pari-mutuel', '3': 'pari-mutuel', '2': 'Free Quick Pick' },
       source: 'official game site (ny.gov) Take 5 page; draws: data.ny.gov dg63-4siq'
     },
@@ -70,7 +70,7 @@
       key: 'pick10', name: 'Pick 10', kind: 'keno', pick: 10, max: 80, drawn: 20, bonus: null,
       price: 1, priceNote: '$1 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 8:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 20, m: 30, close: '8:00 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'official game site (ny.gov) Pick 10 Multi-Draw (up to 7 consecutive draws, one a day)' }, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
+      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'Pick 10 Multi-Draw rules on the official game site, ny.gov: up to 7 consecutive draws, one a day' }, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
       prizes: { '10': 500000, '9': 6000, '8': 300, '7': 40, '6': 10, '0': 4 },
       source: 'official game site (ny.gov) Pick 10 page and 9 NYCRR 5011.2; draws: data.ny.gov bycu-cw7c'
     },
@@ -80,7 +80,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'Numbers play slip on the official game site, ny.gov: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2, subdivision d: today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
       source: 'official game site (ny.gov) Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
     },
     win4: {
@@ -89,7 +89,7 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'Win 4 play slip on the official game site, ny.gov: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2, subdivision d: today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
       source: 'official game site (ny.gov) Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
     }
   };
