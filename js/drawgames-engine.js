@@ -19,13 +19,13 @@
         { key: 'doubleplay', label: 'Double Play', cost: 1, note: 'Same numbers in a second drawing about 30 minutes later; $10 million top prize. NY since June 2, 2026. Double Play prizes are not multiplied by Power Play. Double Play results are not in the data.ny.gov feed, so Draw Buddy has no Double Play history and does not grade Double Play.' }
       ],
       schedule: [{ session: 'main', label: 'Mon/Wed/Sat 10:59 PM ET', days: [1, 3, 6], h: 22, m: 59, close: '10:00 PM ET' }],
-      maxDraws: 10, official: { n: 39, unit: 'draws', src: 'nylottery.ny.gov Powerball Multi-Draw (up to 39 consecutive draws)' }, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
+      maxDraws: 10, official: { n: 39, unit: 'draws', src: 'official game site (ny.gov) Powerball Multi-Draw (up to 39 consecutive draws)' }, table: 'powerball_history', era: '2015-10-07', eraNote: '5 of 1–69 + Powerball 1–26 since Oct 7, 2015',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 50000, '4': 100, '3b': 100, '3': 7, '2b': 7, '1b': 4, '0b': 4 },
       ppPrizes: { '5': 2000000 }, // Power Play: match 5 is a flat $2 million; other non-jackpot prizes × multiplier
       dpPrizes: { '5b': 10000000, '5': 500000, '4b': 50000, '4': 500, '3b': 500, '3': 20, '2b': 20, '1b': 10, '0b': 7 },
       // Power Play multiplier odds when 10X is available (official chart). History multipliers come from data.ny.gov.
       ppOdds: [[2, 1 / 1.79], [3, 1 / 3.31], [4, 1 / 14.33], [5, 1 / 21.5], [10, 1 / 43]],
-      source: 'nylottery.ny.gov Powerball page and 9 NYCRR 5007.13; draws: data.ny.gov d6yy-54nr'
+      source: 'official game site (ny.gov) Powerball page and 9 NYCRR 5007.13; draws: data.ny.gov d6yy-54nr'
     },
     megamillions: {
       key: 'megamillions', name: 'Mega Millions', kind: 'lotto', pick: 5, max: 70, drawn: 5,
@@ -33,28 +33,28 @@
       price: 5, priceNote: '$5 per play (every play has a built-in 2X–10X multiplier, assigned at purchase)',
       options: [],
       schedule: [{ session: 'main', label: 'Tue/Fri 11:00 PM ET', days: [2, 5], h: 23, m: 0, close: '10:00 PM ET' }],
-      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'nylottery.ny.gov Mega Millions Multi-Draw (up to 26 consecutive draws)' }, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'official game site (ny.gov) Mega Millions Multi-Draw (up to 26 consecutive draws)' }, table: 'megamillions_history', era: '2025-04-08', eraNote: '5 of 1–70 + Mega Ball 1–24 since Apr 8, 2025',
       prizes: { '5b': 'Jackpot', '5': 1000000, '4b': 10000, '4': 500, '3b': 200, '3': 10, '2b': 10, '1b': 7, '0b': 5 },
       multOdds: [[2, 1 / 2.13], [3, 1 / 3.2], [4, 1 / 8], [5, 1 / 16], [10, 1 / 32]], builtInMultiplier: true,
-      source: 'nylottery.ny.gov Mega Millions page, megamillions.com (Apr 8, 2025 matrix) and 9 NYCRR 5007.7; draws: data.ny.gov 5xaw-6ayf'
+      source: 'official game site (ny.gov) Mega Millions page, megamillions.com (Apr 8, 2025 matrix) and 9 NYCRR 5007.7; draws: data.ny.gov 5xaw-6ayf'
     },
     millionaire: {
       key: 'millionaire', name: 'Millionaire for Life', kind: 'lotto', pick: 5, max: 58, drawn: 5,
       bonus: { name: 'Millionaire Ball', max: 5, picked: true },
       price: 5, priceNote: '$5 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 11:15 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 23, m: 15, close: '10:15 PM ET' }],
-      maxDraws: 10, official: { n: 28, unit: 'draws', src: 'nylottery.ny.gov Millionaire for Life Multi-Draw (up to 28 consecutive draws)' }, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
+      maxDraws: 10, official: { n: 28, unit: 'draws', src: 'official game site (ny.gov) Millionaire for Life Multi-Draw (up to 28 consecutive draws)' }, table: 'ny_draw_history', game: 'millionaire', era: '2026-02-22', eraNote: 'New game: first draw Feb 22, 2026 (replaced Cash4Life)',
       prizes: { '5b': '$1M a year for life', '5': '$100K a year for life', '4b': 7500, '4': 500, '3b': 250, '3': 50, '2b': 25, '2': 8, '1b': 8 },
-      source: 'gaming.ny.gov (Feb 12, 2026) prize chart and nylottery.ny.gov Millionaire for Life page; draws: data.ny.gov a4w9-a3tp'
+      source: 'gaming.ny.gov (Feb 12, 2026) prize chart and official game site (ny.gov) Millionaire for Life page; draws: data.ny.gov a4w9-a3tp'
     },
     nylotto: {
       key: 'nylotto', name: 'NY Lotto', kind: 'lotto', pick: 6, max: 59, drawn: 6,
       bonus: { name: 'Bonus', max: 59, picked: false }, // drawn from the remaining 53; only counts with 5 matches
       price: 0.5, minPlays: 2, priceNote: '$1 for two plays (minimum two)', options: [],
       schedule: [{ session: 'main', label: 'Wed/Sat 8:15 PM ET', days: [3, 6], h: 20, m: 15, close: '8:00 PM ET' }],
-      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'nylottery.ny.gov Lotto Multi-Draw (up to 26 consecutive draws)' }, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
+      maxDraws: 10, official: { n: 26, unit: 'draws', src: 'official game site (ny.gov) Lotto Multi-Draw (up to 26 consecutive draws)' }, table: 'ny_draw_history', game: 'nylotto', era: '2001-09-12', eraNote: '6 of 1–59 + Bonus (all of the data.ny.gov history, since Sep 12, 2001)',
       prizes: { '6': 'Jackpot (pari-mutuel)', '5b': '2nd prize (pari-mutuel)', '5': '3rd prize (pari-mutuel)', '4': '4th prize (pari-mutuel)', '3': 1 },
-      source: 'nylottery.ny.gov Lotto page and 9 NYCRR Part 5008; draws: data.ny.gov 6nbc-h7bj'
+      source: 'official game site (ny.gov) Lotto page and 9 NYCRR Part 5008; draws: data.ny.gov 6nbc-h7bj'
     },
     take5: {
       key: 'take5', name: 'Take 5', kind: 'lotto', pick: 5, max: 39, drawn: 5, bonus: null,
@@ -62,17 +62,17 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both). App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
+      maxDraws: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Take 5 play slip: Day, Eve or Both, up to 7 consecutive days (14 draws with Both). App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'take5', era: '1992-01-17', eraNote: '5 of 1–39 (midday draws since Jul 26, 2021)',
       prizes: { '5': 'Top prize (pari-mutuel)', '4': 'pari-mutuel', '3': 'pari-mutuel', '2': 'Free Quick Pick' },
-      source: 'nylottery.ny.gov Take 5 page; draws: data.ny.gov dg63-4siq'
+      source: 'official game site (ny.gov) Take 5 page; draws: data.ny.gov dg63-4siq'
     },
     pick10: {
       key: 'pick10', name: 'Pick 10', kind: 'keno', pick: 10, max: 80, drawn: 20, bonus: null,
       price: 1, priceNote: '$1 per play', options: [],
       schedule: [{ session: 'main', label: 'Daily 8:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 20, m: 30, close: '8:00 PM ET' }],
-      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'nylottery.ny.gov Pick 10 Multi-Draw (up to 7 consecutive draws, one a day)' }, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
+      maxDraws: 7, official: { n: 7, unit: 'draws', src: 'official game site (ny.gov) Pick 10 Multi-Draw (up to 7 consecutive draws, one a day)' }, table: 'ny_draw_history', game: 'pick10', era: '1987-01-12', eraNote: '10 picked, 20 of 1–80 drawn (all history since 1987)',
       prizes: { '10': 500000, '9': 6000, '8': 300, '7': 40, '6': 10, '0': 4 },
-      source: 'nylottery.ny.gov Pick 10 page and 9 NYCRR 5011.2; draws: data.ny.gov bycu-cw7c'
+      source: 'official game site (ny.gov) Pick 10 page and 9 NYCRR 5011.2; draws: data.ny.gov bycu-cw7c'
     },
     numbers: {
       key: 'numbers', name: 'Numbers', kind: 'digits', digits: 3, bonus: null,
@@ -80,8 +80,8 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
-      source: 'nylottery.ny.gov Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Numbers play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5009.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'numbers', era: '1980-09-02', eraNote: '3 digits 0–9, midday since Dec 2, 2001',
+      source: 'official game site (ny.gov) Numbers odds and prizes and 9 NYCRR 5009.2; draws: data.ny.gov hsys-3def'
     },
     win4: {
       key: 'win4', name: 'Win 4', kind: 'digits', digits: 4, bonus: null,
@@ -89,8 +89,8 @@
       schedule: [
         { session: 'midday', label: 'Midday 2:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 14, m: 30, close: '2:15 PM ET' },
         { session: 'evening', label: 'Evening 10:30 PM ET', days: [0, 1, 2, 3, 4, 5, 6], h: 22, m: 30, close: '10:20 PM ET' }],
-      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'nylottery.ny.gov Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
-      source: 'nylottery.ny.gov Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
+      maxDraws: 10, maxDrawsOneSession: 7, official: { n: 7, unit: 'days', src: 'official game site (ny.gov) Win 4 play slip: Day, Eve or Both, number of days 2 to 7; 9 NYCRR 5010.2(d): today plus up to six days in advance. App limit, not official. Check the official playslip' }, table: 'ny_draw_history', game: 'win4', era: '1981-07-21', eraNote: '4 digits 0–9, midday since Dec 2, 2001',
+      source: 'official game site (ny.gov) Win 4 odds and prizes (Nov 16, 2026) and 9 NYCRR 5010.2; draws: data.ny.gov hsys-3def'
     }
   };
   const ORDER = ['powerball', 'megamillions', 'millionaire', 'nylotto', 'take5', 'pick10', 'numbers', 'win4'];
@@ -228,14 +228,14 @@
     const dpOK = !features || features.doublePlay !== false;
     if (g.kind === 'digits') return {
       hits: 'Straight play: per position, the digit most drawn in the backtested window',
-      best: 'Play type with the best official return per $1, then digits by backtest',
+      best: 'Play type with the highest official payback per $1, then digits by backtest',
       one: 'Smallest real play: Front or Back Pair (2 digits), whichever backtested better',
       jackpot: '$1 Straight: the top prize for this game'
     };
     const b = g.bonus && g.bonus.picked ? g.bonus.name : null;
     return {
       hits: `Most-drawn numbers in the window that backtested the most matches${b ? `; ${b} by its own backtest` : ''}`,
-      best: g.options.length ? 'Options with the best official fixed-prize return per $1, numbers scored by backtested prizes'
+      best: g.options.length ? 'Options with the highest official fixed-prize payback per $1, numbers scored by backtested prizes'
         : (g.prizes && Object.values(g.prizes).some(v => typeof v === 'number') ? 'Numbers scored by backtested fixed prizes (official chart)' : 'Numbers scored by how often the backtest matched any prize tier'),
       one: b ? `Built around one ball: the ${b} that backtested best${g.prizes['0b'] ? ` (a ${b}-only match is a $${g.prizes['0b']} prize tier)` : ''}; main numbers are the longest since last drawn in the last 100 draws. A long gap does not make a number more likely.`
         : 'Built around the one number that backtested best; the rest are the numbers longest since last drawn. A long gap does not make a number more likely.',
@@ -324,7 +324,7 @@
       : mode === 'best' && fixedCash ? `Backtest: $${bt.cashPer$.toFixed(2)} fixed prizes back per $1; a prize in ${(bt.prizeRate * 100).toFixed(0)}% of draws`
         : `Backtest: avg ${bt.avgHits.toFixed(2)} matches vs ${bt.exp.toFixed(2)} by chance; a prize in ${(bt.prizeRate * 100).toFixed(0)}% of draws`);
     if (PB && mode !== 'one') why.push(`${g.bonus.name} ${bonus}: most drawn in the last ${bb ? bb.N : bt.N} draws (backtest ${(bb ? bb.rate * 100 : 0).toFixed(0)}% vs ${(100 / g.bonus.max).toFixed(1)}% by chance)`);
-    why.push(run ? `Draws ${draws}: the pick beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: the pick did not beat chance in the newest backtest draw');
+    why.push(run ? `Draws ${draws}: the pick matched above the chance average in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: the pick did not match above the chance average in the newest backtest draw');
     const fr = fixedReturn(g, opts);
     return { mode, name: MODE_NAMES[mode], nums, bonus, opts: { powerplay: !!opts.powerplay, doubleplay: !!opts.doubleplay }, draws, lookback: bt.N, plays: g.minPlays || 1,
       costPerDraw: opts.cost, why, backtest: { N: bt.N, bt: bt.bt, avgHits: bt.avgHits, exp: bt.exp, prizeRate: bt.prizeRate, big: bt.big, cashPer$: bt.cashPer$ }, odds: fr };
@@ -368,7 +368,7 @@
       for (const t of ['straight', 'box', 'straightbox', 'combo']) { const pl = digitPlay(gk, t, sample, wager); if (!pl) continue; cands.push({ t, ret: digitReturnPer$(gk, t, sample, wager), p: pl.pWin, label: pl.label }); }
       const topRet = Math.max(...cands.map(c => c.ret)); const tied = cands.filter(c => Math.abs(c.ret - topRet) < 1e-9).sort((a, b) => b.p - a.p);
       type = tied[0].t; chosen = bestN(type, r => r.per$ * 1000 + r.winRate);
-      why.push(`${tied[0].label}: best official return per $1 among full-number plays (${(topRet * 100).toFixed(0)}¢ per $1${tied.length > 1 ? `, tied with ${tied.slice(1).map(c => c.label).join(', ')}; the higher chance of winning breaks the tie` : ''})`);
+      why.push(`${tied[0].label}: highest official payback per $1 among full-number plays (${(topRet * 100).toFixed(0)}¢ per $1${tied.length > 1 ? `, tied with ${tied.slice(1).map(c => c.label).join(', ')}; the higher chance of winning breaks the tie` : ''})`);
     }
     if (!chosen) return { error: 'Backtest unavailable.' };
     const ds = build(type, chosen.N, -1), pl = digitPlay(gk, type, ds, wager);
@@ -376,7 +376,7 @@
     const cap = drawCap(g, session), draws = Math.max(1, Math.min(cap, run));
     why.unshift(`Lookback: ${chosen.N} draws (backtested on the newest ${chosen.bt} official draws)`);
     why.push(`Backtest: $${chosen.per$.toFixed(2)} in prize tiers per $1; a prize tier matched on ${(chosen.winRate * 100).toFixed(1)}% of draws`);
-    why.push(run ? `Draws ${draws}: beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: did not beat chance in the newest backtest draw');
+    why.push(run ? `Draws ${draws}: matched above the chance average in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (app limit ${cap})` : 'Draws 1: did not match above the chance average in the newest backtest draw');
     return { mode, name: MODE_NAMES[mode], digits: ds, playType: type, playLabel: pl.label, wager: pl.cost === 1 && type === 'straightbox' ? 1 : wager, costPerDraw: pl.cost, draws, lookback: chosen.N, why,
       odds: { pAny: pl.pWin, top: pl.top, perDollar: digitReturnPer$(gk, type, ds, wager) }, backtest: { N: chosen.N, bt: chosen.bt, per$: chosen.per$, winRate: chosen.winRate } };
   }

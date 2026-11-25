@@ -93,7 +93,7 @@
     <div id="age-gate" role="dialog" aria-modal="true" aria-labelledby="age-gate-title">
         <div class="max-w-sm w-full bg-[#0b132b] border-2 border-yellow-400 rounded-2xl p-5 space-y-3 text-center shadow-2xl">
             <h2 id="age-gate-title" class="text-base font-black text-yellow-300">Are you 18 or older?</h2>
-            <p class="text-[12px] text-slate-200">Draw Buddy covers NY Lottery draw games. It is for adults 18 and older.</p>
+            <p class="text-[12px] text-slate-200">Draw Buddy covers New York draw games, using official posted results (data.ny.gov). It is for adults 18 and older.</p>
             <div class="grid grid-cols-2 gap-2">
                 <button type="button" id="age-yes" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black py-2.5 rounded-lg text-sm">I'm 18 or older</button>
                 <button type="button" id="age-no" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-lg text-sm border border-slate-600">I'm under 18</button>
@@ -302,11 +302,11 @@
                     <button type="button" data-auto="one" data-mode="one" onclick="previewRunButton('one')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-indigo-700">1️⃣ 1 Spot Pick</button>
                     <button type="button" data-auto="jackpot" data-mode="jackpot" onclick="previewRunButton('jackpot')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-amber-600">🏆 Top-Tier Pick</button>
                     <button type="button" data-auto="cluster" onclick="previewRunButton('cluster')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-blue-700">⚡ Balanced Pick</button>
-                    <button type="button" data-auto="markov" onclick="previewRunButton('markov')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-orange-700">🧬 Markov Pick</button>
+                    <button type="button" data-auto="markov" onclick="previewRunButton('markov')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-orange-700">🧬 Repeat Pick</button>
                     <button type="button" data-auto="jackpot10" onclick="previewRunButton('jackpot10')" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-amber-950 border-yellow-500/40">🏆 10 Spot Pick<span class="block text-[9px] font-normal opacity-80">$4/gm +Extra</span></button>
                     <button type="button" id="four-picks-regen" onclick="previewRunAllPicks()" class="auto-btn text-white font-black py-2 px-1 rounded-lg text-[11px] leading-tight min-h-[54px] transition border-2 border-transparent bg-slate-700">🔄 Run All Picks</button>
                 </div>
-                <div id="four-picks-status" class="text-[9px] text-slate-300">Tap a button: it fills Wager &amp; Games and the numbers below.</div>
+                <div id="four-picks-status" class="text-[9px] text-slate-300">Tap a button: it fills Play Amount &amp; Games and the numbers below.</div>
                 <div id="cluster-diagnostic-text" class="text-[9px] text-slate-500 font-mono" hidden></div>
                 <div id="four-picks-coverage" class="text-[9px] text-slate-500">Loading the last 24 hours of draws…</div>
                 <div id="four-picks-grid" hidden></div>
@@ -318,7 +318,7 @@
                 </div>
                 <p id="all-picks-note" class="text-[9px] text-slate-400"></p>
                 <div id="all-picks-results" class="space-y-2"></div>
-                <p class="text-[9px] text-slate-500">Timing is an estimate, not a forecast. Past results don't predict future draws. Every draw is independent. Nothing is logged until you tap 📥 Log Number Set in Your Number Set.</p>
+                <p class="text-[9px] text-slate-500">Timing is an estimate only. Past results don't predict future draws. Every draw is independent. Nothing is logged until you tap 📥 Log Number Set in Your Number Set.</p>
             </div>
             <div id="play-card-closed" class="text-[10px] text-emerald-300 bg-emerald-950/40 border border-emerald-600/50 rounded-lg p-2" hidden></div>
             <!-- 🎟️ Your Ticket (was Optimal Numbers to Play; moved back inside the Ticket Generator) -- Actionable Play Card with Lotto.com Integration & Scanner Upload -->
@@ -408,7 +408,7 @@
                 </div>
             </div>
             <details id="gen-settings" class="bg-[#050814] rounded-lg border border-[#1d4ed8] p-2">
-                <summary class="text-[10px] uppercase tracking-wider text-blue-300 font-bold cursor-pointer">🎯 Wager &amp; Games <span id="gen-settings-sum" class="normal-case font-normal text-slate-400"></span></summary>
+                <summary class="text-[10px] uppercase tracking-wider text-blue-300 font-bold cursor-pointer">🎯 Play Amount &amp; Games <span id="gen-settings-sum" class="normal-case font-normal text-slate-400"></span></summary>
                 <div class="space-y-3 pt-2">
             <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -432,7 +432,7 @@
 
             <div class="grid grid-cols-2 gap-3 pt-1">
                 <div>
-                    <label class="block text-xs text-yellow-300 mb-1">Base Wager ($)</label>
+                    <label class="block text-xs text-yellow-300 mb-1">Play amount (personal log) ($)</label>
                     <select id="base-wager" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
                         <option value="1" selected>$1</option><option value="2">$2</option><option value="3">$3</option>
                         <option value="4">$4</option><option value="5">$5</option><option value="10">$10</option>
@@ -463,15 +463,15 @@
                 </div>
             </div>
             <div>
-                <label for="kelly-bankroll" class="block text-xs text-yellow-300 mb-1">Kelly bankroll (auto pick wagers)</label>
+                <label for="kelly-bankroll" class="block text-xs text-yellow-300 mb-1">Budget planner (for fun): budget for auto pick amounts</label>
                 <select id="kelly-bankroll" class="w-full bg-[#050814] border border-yellow-500/60 rounded-lg p-2 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
                     <option value="50">$50</option><option value="100" selected>$100</option><option value="200">$200</option><option value="500">$500</option><option value="1000">$1,000</option>
                 </select>
-                <div class="text-[9px] text-slate-500 mt-1">Auto picks use ¼ Kelly of this bankroll. Base wager $1–$10; Extra doubles the cost. Negative edge: Kelly says no bet; number set uses $1 base.</div>
+                <div class="text-[9px] text-slate-500 mt-1">For fun only. Auto picks set the play amount from ¼ of the planner share of this budget, $1–$10; Extra doubles the cost. When the paytable pays back less than it costs, the planner stays at the $1 minimum.</div>
             </div>
                 </div>
-                <button type="button" id="custom-pick-btn" onclick="previewSelectedButton = null; previewHighlight(null); generateTicket('Custom Pick (from Wager & Games)'); previewSettingsSummary();" class="w-full mt-2 bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded-lg text-xs">🛠️ Custom Pick (from Wager &amp; Games)</button>
-                <div class="text-[9px] text-slate-500 mt-1">Uses the spot, lookback, wager, Extra and games set above; picks the most frequent numbers in that lookback for the next draw on sale.</div>
+                <button type="button" id="custom-pick-btn" onclick="previewSelectedButton = null; previewHighlight(null); generateTicket('Custom Pick (from Play Amount & Games)'); previewSettingsSummary();" class="w-full mt-2 bg-[#1d4ed8] hover:bg-[#2563eb] text-white font-bold py-2 rounded-lg text-xs">🛠️ Custom Pick (from Play Amount &amp; Games)</button>
+                <div class="text-[9px] text-slate-500 mt-1">Uses the spot, lookback, play amount, Extra and games set above; picks the most frequent numbers in that lookback for the next draw on sale.</div>
             </details>
 
             <!-- PREVIEW: restored "My Numbers" (5a924dd), Quick Draw, real draws only -->
@@ -504,7 +504,7 @@
                     <div class="overflow-x-auto"><table class="w-full text-[10px] font-mono">
                         <thead><tr class="text-blue-300 text-left"><th class="p-1">Draw</th><th class="p-1">Time (ET)</th><th class="p-1">Hits</th><th class="p-1">Prize per $1</th></tr></thead>
                         <tbody id="own-results-body"></tbody></table></div>
-                    <p class="text-[9px] text-slate-500">Official paytable, real NY Lottery draws. Past results don't predict future draws. Every draw is independent.</p>
+                    <p class="text-[9px] text-slate-500">Official paytable, official posted results (data.ny.gov). Past results don't predict future draws. Every draw is independent.</p>
                 </div>
                 </div>
             </section>
@@ -539,7 +539,7 @@
                 <div id="xpred-2plus" class="text-slate-200">—</div>
                 <div id="xpred-extra-call" class="font-black">—</div>
                 <div id="xpred-dir" class="text-slate-300">—</div>
-                <div class="text-[9px] text-slate-500 leading-snug">Based only on how often each multiplier came up in the last draws you chose in Lookback. Each draw is independent, so this is not a guarantee.</div>
+                <div class="text-[9px] text-slate-500 leading-snug">Based only on how often each multiplier came up in the last draws you chose in Lookback. Each draw is independent, so past counts don't change the next one.</div>
             </div>
             <table class="w-full text-[10px]">
                 <thead><tr class="text-blue-300 text-left"><th class="py-0.5">Extra</th><th>Official odds</th><th>Chance</th><th id="extra-hist-head">Recent draws</th></tr></thead>
@@ -559,7 +559,7 @@
                 <div id="dir-stats" class="text-[10px] text-slate-200"></div>
                 <div id="dir-log" class="space-y-1"></div>
             </div>
-            <div class="text-[9px] text-slate-500 leading-snug">The wheel shows each multiplier's official chance and how often it came up in recent draws. Direction stats come only from draws you logged on this device. None of it can forecast the next multiplier, direction, or where the wheel will stop.</div>
+            <div class="text-[9px] text-slate-500 leading-snug">The wheel shows each multiplier's official chance and how often it came up in recent draws. Direction stats come only from draws you logged on this device. None of it can tell you the next multiplier, direction, or where the wheel will stop.</div>
                 </div>
             </section>
 
@@ -568,7 +568,7 @@
                 <div class="flex justify-between items-center">
                     <button type="button" id="ledger-toggle" onclick="previewSecToggle('ledger')" aria-expanded="false" aria-controls="ledger-wrap" class="flex-1 min-w-0 flex items-center gap-1.5 text-left">
                         <span id="ledger-chev" class="text-yellow-400 text-xs">▸</span>
-                        <span class="min-w-0"><h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 P/L History Archive</h2><span id="ledger-sum" class="block text-[9px] text-slate-400 normal-case"></span></span>
+                        <span class="min-w-0"><h2 class="text-xs uppercase tracking-wider text-yellow-400 font-semibold">📊 Play Log (personal record)</h2><span id="ledger-sum" class="block text-[9px] text-slate-400 normal-case"></span></span>
                     </button>
                     <div class="flex items-center space-x-1.5">
                         <button onclick="exportToPowerBICSV()" class="text-[10px] text-emerald-400 bg-emerald-950/60 hover:bg-emerald-900/60 border border-emerald-700 px-2.5 py-0.5 rounded font-bold transition">
@@ -585,7 +585,7 @@
                         <h3 class="text-[10px] uppercase tracking-wider text-cyan-400 font-bold">📸 Multi-Ticket Batch Scanner</h3>
                         <span id="batch-count-badge" class="text-[9px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800 font-mono">0 Scanned in Batch</span>
                     </div>
-                    <p class="text-[9px] text-slate-400">Upload ticket history from your phone: snap or pick ticket photos (you type or confirm the numbers), a PDF, or a CSV. Each slip is graded against real NY Lottery draws and saved on this device only.</p>
+                    <p class="text-[9px] text-slate-400">Upload ticket history from your phone: snap or pick ticket photos (you type or confirm the numbers), a PDF, or a CSV. Each slip is checked against official posted results (data.ny.gov) and saved on this device only.</p>
                     <div class="grid grid-cols-2 gap-2">
                         <label class="bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded text-xs text-center cursor-pointer transition">📷 Take Photo
                             <input id="batch-camera" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleBatchFiles(event)"></label>
@@ -599,7 +599,7 @@
                         <div class="grid grid-cols-3 gap-2">
                             <div><label class="block text-[9px] text-blue-300 mb-0.5">Target Draw #</label><input type="number" inputmode="numeric" id="batch-draw-num" placeholder="e.g. 3031195" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"></div>
                             <div><label class="block text-[9px] text-blue-300 mb-0.5">Games</label><select id="batch-games" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>10</option><option>20</option></select></div>
-                            <div><label class="block text-[9px] text-blue-300 mb-0.5">Wager / gm</label><select id="batch-wager" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"><option value="1">$1</option><option value="2">$2</option><option value="3">$3</option><option value="4">$4</option><option value="5">$5</option><option value="10">$10</option></select></div>
+                            <div><label class="block text-[9px] text-blue-300 mb-0.5">Play amount / gm</label><select id="batch-wager" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"><option value="1">$1</option><option value="2">$2</option><option value="3">$3</option><option value="4">$4</option><option value="5">$5</option><option value="10">$10</option></select></div>
                             <div><label class="block text-[9px] text-blue-300 mb-0.5">Extra</label><select id="batch-extra" class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"><option value="0">No</option><option value="1">Yes</option></select></div>
                             <div class="col-span-2"><label class="block text-[9px] text-blue-300 mb-0.5">Ticket Numbers</label><input type="text" inputmode="numeric" id="batch-numbers" placeholder="4, 12, 23, 45..." class="w-full bg-[#0b132b] border border-[#1d4ed8] rounded p-1.5 text-xs text-white font-bold focus:outline-none"></div>
                         </div>
@@ -610,15 +610,15 @@
 
                 <div class="grid grid-cols-3 gap-2 text-center bg-[#050814] p-2.5 rounded-lg border border-[#1d4ed8]">
                     <div>
-                        <div class="text-[9px] uppercase text-blue-300">Total Wagered</div>
+                        <div class="text-[9px] uppercase text-blue-300">Total spent (your log)</div>
                         <div id="archive-total-wager" class="font-mono font-bold text-white text-xs">$0.00</div>
                     </div>
                     <div>
-                        <div class="text-[9px] uppercase text-blue-300">Total Payout</div>
+                        <div class="text-[9px] uppercase text-blue-300">Total prizes (your log)</div>
                         <div id="archive-total-payout" class="font-mono font-bold text-yellow-400 text-xs">$0.00</div>
                     </div>
                     <div>
-                        <div class="text-[9px] uppercase text-blue-300">Lifetime Net P&L</div>
+                        <div class="text-[9px] uppercase text-blue-300">Net: prizes − spent</div>
                         <div id="archive-net-pnl" class="font-mono font-bold text-cyan-400 text-xs">$0.00</div>
                     </div>
                 </div>
@@ -630,7 +630,7 @@
                                 <th class="pb-2">Draws</th>
                                 <th class="pb-2">Slip Spec</th>
                                 <th class="pb-2">Slip Progress & Hits</th>
-                                <th class="pb-2 text-right">Net P&L</th>
+                                <th class="pb-2 text-right">Prizes − spent</th>
                             </tr>
                         </thead>
                         <tbody id="ledger-body">
@@ -660,8 +660,8 @@
 
             <!-- Free Locked Heatmap Banner Preview -->
             <div id="heatmap-locked-banner" data-flag="pricing" class="bg-gradient-to-r from-amber-950/80 to-yellow-950/80 p-3 rounded-lg border border-yellow-500/50 text-center space-y-1.5 hidden">
-                <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap & Quantum Deep-Dive Locked</div>
-                <p class="text-[10px] text-blue-300">Upgrade to Pro ($9.99) to unlock Markov transition picks, Kelly sizing, and Monte Carlo simulations.</p>
+                <div class="text-xs font-bold text-yellow-400">🔒 Pro Heatmap & Number Details Locked</div>
+                <p class="text-[10px] text-blue-300">Upgrade to Pro ($9.99) to unlock Repeat Pick, the budget planner, and random-draw simulations.</p>
                 <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="inline-block bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-1 px-3 rounded text-[10px] transition">
                     Unlock Pro Features ($9.99)
                 </a>
@@ -678,7 +678,7 @@
                         <div id="inspector-ball-badge" class="w-7 h-7 rounded-full bg-yellow-400 text-slate-950 font-black flex items-center justify-center text-xs">#--</div>
                         <h3 id="inspector-title" class="font-bold text-white text-xs">Tap Any Number Above for Deep-Dive</h3>
                     </div>
-                    <span class="text-[8px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded font-mono">Pro Quantum Suite</span>
+                    <span class="text-[8px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded font-mono">Number details</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
@@ -694,15 +694,15 @@
                         <span id="stat-last-seen" class="font-bold text-cyan-300 text-xs">--</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                        <span class="text-blue-300 block text-[9px]">Markov: repeats next draw</span>
+                        <span class="text-blue-300 block text-[9px]">Repeat rate: came up again next draw</span>
                         <span id="stat-markov" class="font-bold text-yellow-300 text-xs">--%</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                        <span class="text-blue-300 block text-[9px]">Statistical Mean Cycle Interval</span>
+                        <span class="text-blue-300 block text-[9px]">Average draws between appearances</span>
                         <span id="stat-interval" class="font-bold text-white text-xs">--</span>
                     </div>
                     <div class="bg-[#0b132b] p-2 rounded border border-[#1d4ed8]">
-                        <span class="text-blue-300 block text-[9px]">Cluster Density Rating</span>
+                        <span class="text-blue-300 block text-[9px]">Number spread view</span>
                         <span id="stat-density" class="font-bold text-emerald-400 text-xs">Standby</span>
                     </div>
                 </div>
@@ -710,7 +710,7 @@
                 <!-- 🔗 Markov Chain Explanatory Info Card -->
                 <div class="bg-[#0b132b]/80 p-2.5 rounded border border-cyan-500/40 text-[10px] space-y-1">
                     <div class="font-bold text-cyan-300 flex items-center justify-between">
-                        <span>🔗 Markov Chain Sequence Modeling</span>
+                        <span>🔗 Repeat rate (past draw pairs)</span>
                         <span class="text-[8px] text-yellow-400">Real draw pairs</span>
                     </div>
                     <p class="text-slate-300 leading-tight">How often this number came up again in the very next draw, after it was drawn, over consecutive real draws in the last 24 h. 25% is the base rate.</p>
@@ -720,18 +720,18 @@
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div onclick="runKellyOptimizerModal()" class="bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-yellow-500/45 cursor-pointer transition space-y-1">
                         <div class="flex justify-between text-[9px] font-bold text-yellow-400">
-                            <span>🧮 Kelly Sizing</span>
-                            <span>¼ Kelly</span>
+                            <span>🧮 Budget planner (for fun)</span>
+                            <span>¼ share</span>
                         </div>
                         <div id="visual-kelly-bar" class="w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-yellow-500/30">
                             <div id="kelly-fill-bar" class="bg-yellow-400 h-full w-[0%] transition-all"></div>
                         </div>
-                        <div id="kelly-text-sub" class="text-[8px] text-blue-300 truncate">Select Number for Stake</div>
+                        <div id="kelly-text-sub" class="text-[8px] text-blue-300 truncate">Tap a number for the budget view</div>
                     </div>
 
                     <div onclick="runMonteCarloModal()" class="bg-[#0b132b] hover:bg-[#111c38] p-2 rounded border border-cyan-500/45 cursor-pointer transition space-y-1">
                         <div class="flex justify-between text-[9px] font-bold text-cyan-300">
-                            <span>🌀 Monte Carlo</span>
+                            <span>🌀 Random-draw simulation</span>
                             <span>10k Sims</span>
                         </div>
                         <div id="visual-mc-bar" class="w-full bg-[#050814] h-2 rounded-full overflow-hidden border border-cyan-500/30">
@@ -814,7 +814,7 @@
                     <span class="text-[9px] bg-purple-950 text-purple-300 border border-purple-600 px-2 py-0.5 rounded font-bold">This device</span>
                 </div>
                 <div class="space-y-1.5" id="leaderboard-list"></div>
-                <div class="text-[9px] text-blue-400/70 text-center italic">Ranks your own logged slips at this venue by net result, graded on real draws. Nothing is shared.</div>
+                <div class="text-[9px] text-blue-400/70 text-center italic">Lists your own logged slips at this venue by prizes minus spent, checked on official posted results. Nothing is shared.</div>
             </div>
 
             <!-- HOLD (Ralph 2026-11-16, Gate 0): Lotto.com button in the venue hub, behind the partnerLinks flag -->
@@ -871,7 +871,7 @@
                         <span class="font-bold text-white text-xs">👤 Individual Lifetime Pass</span>
                         <span class="text-yellow-400 font-mono text-xs font-bold">$9.99 One-Time</span>
                     </div>
-                    <p class="text-[11px] text-blue-300">Permanent unlock for Balanced Pick, Interactive Heatmap, Markov Pick, Kelly Sizing, Monte Carlo, and zero ads.</p>
+                    <p class="text-[11px] text-blue-300">Permanent unlock for Balanced Pick, Interactive Heatmap, Repeat Pick, Budget planner, random-draw simulation, and zero ads.</p>
                     <a href="https://buy.stripe.com/test_5kQ5kDcE62t37Pd9JD0co06" target="_blank" class="block text-center bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 font-black py-2 rounded-lg text-xs transition">
                         Get Lifetime Access ($9.99)
                     </a>
@@ -929,7 +929,7 @@
                     <span class="partner-tag block text-[7px] uppercase tracking-wide font-normal text-slate-400 mt-0.5">Partner link</span>
                 </a>
                 <a href="https://nylottery.ny.gov" target="_blank" rel="noopener" class="bg-[#050814] hover:bg-[#111c38] text-cyan-300 border border-blue-500/30 p-2 rounded-lg font-bold text-[10px] text-center transition flex flex-col items-center justify-center">
-                    <span>🗽 NY Lottery</span>
+                    <span>🗽 Official game site</span>
                     <span class="text-[8px] text-blue-300 font-normal mt-0.5">Official site · not a partner</span>
                 </a>
             </div>
@@ -938,14 +938,14 @@
 
         <!-- ⚖️ Fine Print Disclaimer Footer & Responsible Gaming Support -->
         <footer class="text-center text-[10px] text-slate-500 px-2 py-4 space-y-2">
-            <p><strong>Disclaimer:</strong> Draw Buddy is an analytical statistical modeling and entertainment tool designed for exploring probability distributions and mathematical probability sets. This app does not promote or endorse problem gambling. All odds, lookback weights, and simulation calculations are for mathematical entertainment and educational analysis only. Play responsibly.</p>
+            <p><strong>Disclaimer:</strong> Draw Buddy is for entertainment. It shows past official results, official odds and the official paytable; no pick, statistic or simulation makes a prize more likely. This app does not promote or endorse problem gambling. Play responsibly.</p>
             <div id="footer-house-lines" class="bg-[#050814] p-2.5 rounded-lg border border-yellow-500/30 text-[10px] space-y-1">
                 <p class="font-bold text-yellow-300">18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).</p>
                 <p class="text-slate-300">Not affiliated with any lottery. Past results don't predict future draws. Every draw is independent.</p>
-                <p class="text-slate-400">Official results and prizes: <a href="https://nylottery.ny.gov" target="_blank" rel="noopener" class="underline text-cyan-300">nylottery.ny.gov</a> (official site, not a partner). Draw data: data.ny.gov.</p>
+                <p class="text-slate-400">Official results and prizes: <a href="https://nylottery.ny.gov" target="_blank" rel="noopener" class="underline text-cyan-300">the official game site</a> (not a partner). Draw data: data.ny.gov.</p>
             </div>
             <p><a href="privacy.html" class="underline text-cyan-300">Privacy</a> · <a href="terms.html" class="underline text-cyan-300">Terms</a></p>
-            <p>© 2026 <span class="entity-name">NAV Analytics LLC</span>. All rights reserved.</p>
+            <p>© 2026 <span class="entity-name">Insert Coin Industries LLC</span>. All rights reserved.</p>
             <script>try { document.querySelectorAll('.entity-name').forEach(function (el) { if (window.DB_COPY && DB_COPY.ENTITY) el.textContent = DB_COPY.ENTITY; }); } catch (e) {}</script>
         </footer>
 
@@ -1036,7 +1036,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const st = previewSpotStats();
             const text = st ? `${st.ret >= 1 ? '+' : ''}${st.retPct}%` : 'n/a';
             const badge = document.getElementById('roi-badge');
-            if (badge) badge.innerText = `⚡ Est. ROI (paytable): ${text}`;
+            if (badge) badge.innerText = `⚡ Paytable payback: ${text}`;
             const box = document.getElementById('slip-roi-box');
             if (box) box.innerText = text;
         }
@@ -1204,8 +1204,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewKellyLine(k) {
             const src = k.n ? `backtest avg ${k.obsMean.toFixed(2)} of ${k.spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance, shrunk to ${k.mean.toFixed(2)}` : 'official odds';
             return k.f > 0
-                ? `Kelly: edge ${((k.ret - 1) * 100).toFixed(1)}% per $1 (${src}) → f* ${(k.f * 100).toFixed(2)}%, ¼ Kelly of $${k.bankroll} = $${k.stake.toFixed(2)} → $${k.base} base`
-                : `Kelly: edge ${((k.ret - 1) * 100).toFixed(1)}% per $1 (prize ${(k.p * 100).toFixed(1)}% at ${k.b.toFixed(2)}:1; ${src}) → f* ${(k.f * 100).toFixed(1)}%, negative, so Kelly says don't bet; number set uses the $1 base minimum${k.extra ? " ($2 with Extra)" : ""}`;
+                ? `Budget planner (for fun): paytable result ${((k.ret - 1) * 100).toFixed(1)}% per $1 (${src}) → planner share ${(k.f * 100).toFixed(2)}%, ¼ of the $${k.bankroll} budget = $${k.stake.toFixed(2)} → $${k.base} play amount`
+                : `Budget planner (for fun): paytable result ${((k.ret - 1) * 100).toFixed(1)}% per $1 (prize ${(k.p * 100).toFixed(1)}% at ${k.b.toFixed(2)}:1; ${src}) → planner share ${(k.f * 100).toFixed(1)}%, below zero, so the planner stays at the minimum; number set uses the $1 minimum${k.extra ? " ($2 with Extra)" : ""}`;
         }
         // Monte Carlo: each simulated game draws 20 of 80 at random and an Extra multiplier from the official weights.
         function previewMonteCarlo(nums, base, extra, games) {
@@ -1232,7 +1232,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         function previewMoney(v) { return `${v < 0 ? '-' : '+'}$${Math.abs(v).toFixed(0)}`; }
         function previewMcLine(m) {
-            return `🌀 Monte Carlo, ${m.sims.toLocaleString('en-US')} random sessions of this number set ($${m.spend} spent): returns ${(m.ret * 100).toFixed(0)}¢ per $1 on average, ends ahead ${(m.ahead * 100).toFixed(1)}% of the time. Net: middle ${previewMoney(m.p50)}, 90% between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}, best ${previewMoney(m.max)}.`;
+            return `🌀 Monte Carlo, ${m.sims.toLocaleString('en-US')} random sessions of this number set ($${m.spend} spent): pays back ${(m.ret * 100).toFixed(0)}¢ per $1 on average; ends above what was spent ${(m.ahead * 100).toFixed(1)}% of the time. Net: middle ${previewMoney(m.p50)}, 90% between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}, highest ${previewMoney(m.max)}. For fun only.`;
         }
         function previewTicketNow() {
             if (activeGameKey !== 'quickdraw' || !lastGeneratedNumbers.length) return null;
@@ -1248,16 +1248,16 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         function previewKellyText() {
             const tk = previewTicketNow(); const spot = tk ? tk.nums.length : parseInt(document.getElementById('spot-tier').value) || 4;
-            if (activeGameKey !== 'quickdraw') return 'Kelly sizing uses the Quick Draw paytable. Switch to Quick Draw.';
+            if (activeGameKey !== 'quickdraw') return 'The budget planner uses the Quick Draw paytable. Switch to Quick Draw.';
             const extra = (parseInt(document.getElementById('extra-multiplier').value) || 1) === 2;
             const k = previewLastKelly && previewLastKelly.spot === spot && previewLastKelly.extra === extra ? previewLastKelly : previewKelly(spot, extra, []);
-            return `🧮 Kelly Criterion, f* = (b·p − q) / b:\n\n• ${spot}-Spot${extra ? ' + Extra' : ''}\n• p (chance of any prize): ${(k.p * 100).toFixed(2)}%\n• b (net odds of an average prize): ${k.b.toFixed(2)} to 1\n• Expected return per $1: $${k.ret.toFixed(3)}\n• f* = ${(k.f * 100).toFixed(2)}% of bankroll\n• ${k.f > 0 ? `¼ Kelly of $${k.bankroll} = $${k.stake.toFixed(2)} → $${k.base} base` : 'Negative, so Kelly says not to bet. Number sets use the $1 minimum.'}\n\nHit odds: ${k.n ? `official 20-of-80 odds tilted to this pick's backtest average (${k.obsMean.toFixed(2)} of ${spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance), shrunk to ${k.mean.toFixed(2)}` : 'official odds'}.`;
+            return `🧮 Budget planner (for fun), share = (b·p − q) / b:\n\n• ${spot}-Spot${extra ? ' + Extra' : ''}\n• p (chance of any prize): ${(k.p * 100).toFixed(2)}%\n• b (net odds of an average prize): ${k.b.toFixed(2)} to 1\n• Paytable pays back per $1: $${k.ret.toFixed(3)}\n• Planner share = ${(k.f * 100).toFixed(2)}% of budget\n• ${k.f > 0 ? `¼ of the $${k.bankroll} budget = $${k.stake.toFixed(2)} → $${k.base} play amount` : 'Below zero: the paytable pays back less than it costs, so number sets use the $1 minimum.'}\n\nHit odds: ${k.n ? `official 20-of-80 odds tilted to this pick's backtest average (${k.obsMean.toFixed(2)} of ${spot} matched in ${k.n} draws vs ${k.chance.toFixed(2)} by chance), shrunk to ${k.mean.toFixed(2)}` : 'official odds'}.`;
         }
         function previewMonteCarloText() {
             const tk = previewTicketNow();
             if (!tk) return 'Monte Carlo runs on your number set. Tap a pick first (Quick Draw).';
             const m = previewMonteCarlo(tk.nums, tk.base, tk.extra, tk.games);
-            return `🌀 Monte Carlo (${m.sims.toLocaleString('en-US')} sessions; each game draws 20 of 80 at random${tk.extra ? ', Extra from official odds' : ''}):\n\n• Number set: ${tk.nums.length}-spot, $${tk.base} base${tk.extra ? ' + Extra' : ''}, ${tk.games} game${tk.games === 1 ? '' : 's'} ($${m.spend})\n• Average return: ${(m.ret * 100).toFixed(1)}¢ per $1 (net ${previewMoney(m.meanNet)})\n• Sessions that ended ahead: ${(m.ahead * 100).toFixed(1)}%\n• Net, middle session: ${previewMoney(m.p50)}\n• 90% of sessions between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}\n• Best session: ${previewMoney(m.max)}\n\nEvery draw is independent; this is not a prediction.`;
+            return `🌀 Monte Carlo (${m.sims.toLocaleString('en-US')} sessions; each game draws 20 of 80 at random${tk.extra ? ', Extra from official odds' : ''}):\n\n• Number set: ${tk.nums.length}-spot, $${tk.base} base${tk.extra ? ' + Extra' : ''}, ${tk.games} game${tk.games === 1 ? '' : 's'} ($${m.spend})\n• Average paid back: ${(m.ret * 100).toFixed(1)}¢ per $1 (net ${previewMoney(m.meanNet)})\n• Sessions that ended above what was spent: ${(m.ahead * 100).toFixed(1)}%\n• Net, middle session: ${previewMoney(m.p50)}\n• 90% of sessions between ${previewMoney(m.p5)} and ${previewMoney(m.p95)}\n• Highest session: ${previewMoney(m.max)}\n\nEvery draw is independent. For fun only.`;
         }
         // Countdown from the real ET clock. Quick Draw: every 4 minutes, 4:00 AM to 3:24 AM ET.
         // Powerball: Mon/Wed/Sat 10:59 PM ET. Mega Millions: Tue/Fri 11:00 PM ET.
@@ -1402,9 +1402,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             rows.slice(0, 50).forEach(d => d.winning_numbers.forEach(n => f50[n]++));
             const s20 = Object.values(f20).sort((a, b) => b - a), s50 = Object.values(f50).sort((a, b) => b - a);
             const t3 = (s20[0] + s20[1] + s20[2]) / 3, t4 = (s50[0] + s50[1] + s50[2] + s50[3]) / 4, t5 = (s50[0] + s50[1] + s50[2] + s50[3] + s50[4]) / 5, spread = s50[0] - s50[9];
-            if (t3 >= 9) return { spot: 3, lookback: 20, why: `Tight 3-number cluster: top 3 averaged ${t3.toFixed(1)} of the last 20 draws` };
-            if (t4 >= 18) return { spot: 4, lookback: 50, why: `4-number cluster: top 4 averaged ${t4.toFixed(1)} of the last 50 draws` };
-            if (t5 >= 17 && spread <= 3) return { spot: 5, lookback: 50, why: `Balanced 5-number cluster: top 5 averaged ${t5.toFixed(1)} of the last 50 draws` };
+            if (t3 >= 9) return { spot: 3, lookback: 20, why: `Top-3 spread: top 3 averaged ${t3.toFixed(1)} of the last 20 draws` };
+            if (t4 >= 18) return { spot: 4, lookback: 50, why: `Top-4 spread: top 4 averaged ${t4.toFixed(1)} of the last 50 draws` };
+            if (t5 >= 17 && spread <= 3) return { spot: 5, lookback: 50, why: `Top-5 spread: top 5 averaged ${t5.toFixed(1)} of the last 50 draws` };
             return { spot: 10, lookback: 100, why: `Wide spread (${spread} between the 1st and 10th most drawn in 50 draws) → 10-spot` };
         }
         function previewOverdue(rows, lookback, k) {
@@ -1518,7 +1518,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                     const xp0 = previewExtraPredict(b0.N), on = xp0 ? xp0.extraOn : false;
                     const r = previewReturnPer$(k, on); if (r > bestR + 1e-12) { bestR = r; bestK = k; }
                 }
-                spot = bestK; why1 = `${spot}-spot: best paytable return per $1 (${((bestR - 1) * 100).toFixed(1)}%)`;
+                spot = bestK; why1 = `${spot}-spot: highest paytable payback per $1 (${((bestR - 1) * 100).toFixed(1)}%)`;
             }
             bt = previewBacktest(rows, P, spot, scoreFor[mode], false);
             if (!bt) return null;
@@ -1549,11 +1549,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 why1,
                 `Lookback: ${bt.N} draws (chosen by backtest on the newest ${bt.bt})`,
                 mode === 'jackpot' ? `Backtest: ${bt.big} of ${bt.bt} draws had 7+ matches; avg ${bt.avgHits.toFixed(2)} matches vs ${exp.toFixed(2)} by chance`
-                    : mode === 'best' ? `Backtest return: $${retBt.toFixed(2)} per $1 (any prize ${(bt.prizeRate * 100).toFixed(0)}% of draws)`
+                    : mode === 'best' ? `Backtest payback: $${retBt.toFixed(2)} per $1 (any prize ${(bt.prizeRate * 100).toFixed(0)}% of draws)`
                     : `Backtest: avg ${bt.avgHits.toFixed(2)} matches vs ${exp.toFixed(2)} by chance; a prize in ${(bt.prizeRate * 100).toFixed(0)}% of draws`,
                 previewKellyLine(kel),
                 timingWhy,
-                run ? `Games ${games}: the pick beat chance in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (1–20)` : `Games 1: the pick did not beat chance in the newest backtest draw, so 1 game`
+                run ? `Games ${games}: the pick matched above the chance average in the newest ${run} backtest draw${run === 1 ? '' : 's'} in a row (1–20); past draws don't change the odds` : `Games 1: the pick did not match above the chance average in the newest backtest draw, so 1 game`
             ];
             let slot = plan.slot, openAt = null;
             for (let d = 0; d < dBest; d++) { openAt = slot; slot = previewNextSlotAfter(slot); }
@@ -1660,7 +1660,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const cost = (pk.extra ? 2 : 1) * pk.base;
             sessionTickets.unshift({ pickName: pk.name, pickKey: pk.mode, draw: pk.start, endDraw: pk.start + pk.games - 1, spot: pk.spot, games: pk.games, wager: cost * pk.games, costPerGame: cost, baseWager: pk.base, hasExtra: pk.extra, numbers: [...pk.nums], gradedDraws: [], bestHits: 0, winningGamesCount: 0, hits: `Pending (0/${pk.games} gms)`, payout: 0, timestamp: new Date().toISOString() });
             saveHistoryArchive(); updateLedgerUI();
-            const st = document.getElementById('four-picks-status'); if (st) st.innerText = `✅ Logged ${pk.name} for ${pk.games > 1 ? `est. draws #${pk.start} – #${pk.start + pk.games - 1}` : `est. draw #${pk.start}`} to the P/L History Archive. Tap ${pk.name} again for a new pick.`;
+            const st = document.getElementById('four-picks-status'); if (st) st.innerText = `✅ Logged ${pk.name} for ${pk.games > 1 ? `est. draws #${pk.start} – #${pk.start + pk.games - 1}` : `est. draw #${pk.start}`} to the Play Log. Tap ${pk.name} again for a new pick.`;
             // Close this pick card after logging (re-opens when its button is tapped again).
             previewPicks.splice(i, 1); previewPickModes = previewPickModes.filter(m => m !== pk.mode); previewRenderPicks();
         }
@@ -1772,8 +1772,8 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             call.innerText = xp.extraOn ? `Auto picks: Extra ON (2X-or-more rate at or above the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)` : `Auto picks: Extra OFF (2X-or-more rate below the official ${(PREVIEW_OFFICIAL_2PLUS * 100).toFixed(0)}%)`;
             call.className = 'font-black ' + (xp.extraOn ? 'text-emerald-400' : 'text-rose-300');
             document.getElementById('xpred-dir').innerText = xp.dir.n
-                ? `Direction pick: ${xp.dir.pick ? (xp.dir.pick === 'L' ? '⟲ Left' : 'Right ⟳') : 'even'} · Left ${xp.dir.L} / Right ${xp.dir.R} from your logged spins in this window (n=${xp.dir.n}) · For fun, not a prediction.`
-                : 'Direction pick: log spins with Left / Right below to see one for this window (n=0) · For fun, not a prediction.';
+                ? `Direction pick: ${xp.dir.pick ? (xp.dir.pick === 'L' ? '⟲ Left' : 'Right ⟳') : 'even'} · Left ${xp.dir.L} / Right ${xp.dir.R} from your logged spins in this window (n=${xp.dir.n}) · For fun only; past spins don't set the next one.`
+                : 'Direction pick: log spins with Left / Right below to see one for this window (n=0) · For fun only; past spins don\'t set the next one.';
             // The pointer shows the pick. It spins when a new draw arrives or the pick changes.
             const num = Number(latest.draw_number);
             if (previewWheelDraw === null) previewSpinTo(xp.pick, false);
@@ -2051,7 +2051,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function autoOptimizeByLiveCluster() {
             if (activeTier === 'free') {
-                alert("🔒 Balanced Pick is a Pro feature! Upgrade to Pro ($9.99) to pick a spot size from recent draw clusters.");
+                alert("🔒 Balanced Pick is a Pro feature! Upgrade to Pro ($9.99) to pick a spot size from the recent number spread.");
                 return;
             }
             if (activeGameKey !== 'quickdraw') return;
@@ -2091,28 +2091,28 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 bestWager = "2";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `Tight 3-Number Surge (${(top3Avg20 / 20 * 100).toFixed(0)}% hit rate in 20 draws) → Locked 3-Spot`;
+                diagSummary = `Number spread view: top 3 (${(top3Avg20 / 20 * 100).toFixed(0)}% of the last 20 draws) → 3-Spot`;
             } else if (top4Avg50 >= 18.0) {
                 bestSpot = "4";
                 bestLookback = "50";
                 bestWager = "1";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `⚡ High-Density 4-Number Cluster (${top4Avg50.toFixed(1)} avg hits/50) → Locked 4-Spot`;
+                diagSummary = `⚡ Number spread view: top 4 (${top4Avg50.toFixed(1)} avg hits/50) → 4-Spot`;
             } else if (top5Avg50 >= 17.0 && top10Spread <= 3) {
                 bestSpot = "5";
                 bestLookback = "50";
                 bestWager = "1";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🎯 Balanced 5-Number Cluster (${top5Avg50.toFixed(1)} avg hits/50) → Locked 5-Spot`;
+                diagSummary = `🎯 Number spread view: top 5 (${top5Avg50.toFixed(1)} avg hits/50) → 5-Spot`;
             } else {
                 bestSpot = "10";
                 bestLookback = "100";
                 bestWager = "2";
                 bestExtra = "2";
                 bestBlock = "5";
-                diagSummary = `🛡️ Wide Cluster Dispersion (Spread ${top10Spread}) → Locked 10-Spot (0-Hit Insurance)`;
+                diagSummary = `🛡️ Number spread view: wide (spread ${top10Spread}) → 10-Spot (the 10-spot paytable also pays on 0 matches)`;
             }
 
             // PREVIEW: Extra from the Extra pick (last N draws, N = lookback chosen above)
@@ -2142,27 +2142,27 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         async function autoOptimizeByMarkovKelly(fresh) {
             if (activeTier === 'free') {
-                alert("🔒 Markov Pick is a Pro feature! Upgrade to Pro ($9.99) to unlock Markov transition picks.");
+                alert("🔒 Repeat Pick is a Pro feature! Upgrade to Pro ($9.99) to unlock it.");
                 return;
             }
             if (fresh || !previewDayMeta) await previewLoadDay();
             const rows = previewDayRows.length >= 30 ? previewDayRows : previewQdRows();
             const mk = previewMarkovPick(rows, 4);
             const diagEl = document.getElementById('cluster-diagnostic-text');
-            if (!mk) { if (diagEl) diagEl.innerText = 'Markov Pick needs at least 20 consecutive real draw pairs.'; return; }
+            if (!mk) { if (diagEl) diagEl.innerText = 'Repeat Pick needs at least 20 consecutive posted draw pairs.'; return; }
             const extra = true, kel = previewKelly(4, extra, mk.hits);
-            previewSetSelect('spot-tier', 4); previewSetSelect('lookback-draws', mk.used, `${mk.used} (Markov)`);
+            previewSetSelect('spot-tier', 4); previewSetSelect('lookback-draws', mk.used, `${mk.used} (Repeat)`);
             previewSetSelect('base-wager', kel.base, `$${kel.base}`); previewSetSelect('extra-multiplier', 2); previewSetSelect('game-block', 10);
             const avg = mk.hits.length ? mk.hits.reduce((a, b) => a + b, 0) / mk.hits.length : 0;
             const why = [
-                `Markov: after draw #${mk.lastDraw}, ${mk.top} followed those 20 numbers ${(mk.topP * 100).toFixed(1)}% of the time vs 25.0% base (${mk.used} consecutive draw pairs, smoothed)`,
+                `Repeat rate: after draw #${mk.lastDraw}, ${mk.top} followed those 20 numbers ${(mk.topP * 100).toFixed(1)}% of the time vs 25.0% base (${mk.used} consecutive draw pairs, smoothed)`,
                 `Backtest: avg ${avg.toFixed(2)} of 4 matched over ${mk.hits.length} draws vs 1.00 by chance (each based on the draw before it)`,
                 previewKellyLine(kel),
-                'One step ahead: these numbers are based on draw #' + mk.lastDraw + '; later games reuse the same numbers. Not a prediction.'
+                'These numbers come from draw #' + mk.lastDraw + '; later games reuse the same numbers. Past draws don\'t change the odds.'
             ];
             if (diagEl) { diagEl.innerText = `🧬 ${mk.top}: ${(mk.topP * 100).toFixed(1)}% after the last draw vs 25% base`; diagEl.className = "text-[9px] text-cyan-400 font-mono font-bold text-center"; }
             updateCostDisplay(); updateOptimizedRoiBadge();
-            generateTicket(`🧬 Markov transition model (${mk.used} draw pairs) · ¼ Kelly wager`, mk.nums, { why: why.join('<br>'), kelly: kel });
+            generateTicket(`🧬 Repeat Pick (${mk.used} past draw pairs) · budget planner amount`, mk.nums, { why: why.join('<br>'), kelly: kel });
         }
 
         function launchNativeApp(appType) {
@@ -2361,9 +2361,9 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function previewVenueSourceNote() {
             const n = document.getElementById('venue-source-note'), l = document.getElementById('venue-search-label'); if (!n) return;
             if (l) l.innerText = previewShowAll() ? '📍 All Quick Draw retailers' : '📍 Bars & restaurants with Quick Draw';
-            if (previewShowAll()) { n.innerText = 'Source: NY Lottery retailers that sell Quick Draw (data.ny.gov). Includes stores and gas stations.'; return; }
+            if (previewShowAll()) { n.innerText = 'Source: Quick Draw retailers (data.ny.gov). Includes stores and gas stations.'; return; }
             const b = previewBars;
-            n.innerText = b ? `Source: NY Lottery Quick Draw retailers matched to an active NY Liquor Authority on-premises licence (restaurant, tavern, hotel, club; these require food). ${b.counts.kept.toLocaleString()} of ${b.counts.quickDrawRetailers.toLocaleString()} Quick Draw retailers · data of ${b.sources.sla.updated}.` : 'Source: NY Lottery Quick Draw retailers + NY Liquor Authority on-premises licences.';
+            n.innerText = b ? `Source: Quick Draw retailers (data.ny.gov) matched to an active NY Liquor Authority on-premises licence (restaurant, tavern, hotel, club; these require food). ${b.counts.kept.toLocaleString()} of ${b.counts.quickDrawRetailers.toLocaleString()} Quick Draw retailers · data of ${b.sources.sla.updated}.` : 'Source: Quick Draw retailers (data.ny.gov) + NY Liquor Authority on-premises licences.';
         }
         function previewVenueScopeChange() { document.getElementById('venue-search-results').innerHTML = ''; document.getElementById('venue-search-status').innerText = ''; previewVenueSourceNote(); if (!previewShowAll()) previewBarsLoad().catch(() => {}); }
         function previewBarsSearch(q) {
@@ -2384,7 +2384,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             const q = (document.getElementById('venue-search-input').value || '').trim().toUpperCase().replace(/[^A-Z0-9 &'.-]/g, '').slice(0, 40);
             const st = document.getElementById('venue-search-status');
             if (q.length < 2) { st.innerText = 'Type at least 2 letters of a bar name, a city, or a 5-digit ZIP.'; return; }
-            st.innerText = previewShowAll() ? 'Searching NY Lottery retailers…' : 'Searching bars & restaurants with Quick Draw…';
+            st.innerText = previewShowAll() ? 'Searching Quick Draw retailers…' : 'Searching bars & restaurants with Quick Draw…';
             if (!previewShowAll()) {
                 try { await previewBarsLoad(); const rows = previewBarsSearch(q); previewRenderVenueResults(rows, rows.length ? `${rows.length === 8 ? 'First 8' : rows.length} bar${rows.length === 1 ? '' : 's'} & restaurant${rows.length === 1 ? '' : 's'} with Quick Draw for “${q}”. Tap one to set your venue.` : `No bar or restaurant with Quick Draw matches “${q}”. Tick “Show all Quick Draw retailers” to include stores.`); }
                 catch (e) { st.innerText = 'Venue list unavailable right now. Try again shortly.'; }
@@ -2505,7 +2505,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         function updateVenueUI() {
             const v = previewVenue;
             document.getElementById('venue-name-display').innerText = v ? v.name : 'No venue selected';
-            document.getElementById('venue-address-display').innerText = v ? `${v.street}, ${v.city}, NY ${v.zip} • NY Lottery retailer #${v.id} (Quick Draw)${v.licenceType ? ` • NY SLA ${v.licenceType} licence` : ''}` : 'Tap 📍 Find venue in Choose Your Game at the top.';
+            document.getElementById('venue-address-display').innerText = v ? `${v.street}, ${v.city}, NY ${v.zip} • Quick Draw retailer #${v.id}${v.licenceType ? ` • NY SLA ${v.licenceType} licence` : ''}` : 'Tap 📍 Find venue in Choose Your Game at the top.';
             const set = (id, t) => { const e = document.getElementById(id); if (e) e.innerText = t; };
             try { previewQuickLaunchRender(); } catch (e) {} set('venue-bottom-music-name', '📻 AMI Play');
             renderVenueLeaderboard(); try { previewVenueLabel(); previewApplyVenuePlacement(); } catch (e) {}
@@ -2565,7 +2565,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                             <span class="text-[9px] text-blue-300">${t.spot}-Spot${t.hasExtra ? ' +Extra' : ''} • ${previewEsc(t.hits || 'Pending')}</span></div>
                     </div>
                     ${(t.gradedDraws || []).length ? `<div class="text-right font-mono font-bold ${o.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${o.net >= 0 ? '+' : '-'}$${Math.abs(o.net).toFixed(2)}</div>` : `<div class="text-right font-mono font-bold text-slate-400 text-[10px]">Not drawn yet</div>`}
-                </div>`; }).join('') + `<div class="text-[9px] text-slate-400 text-right">${rows.length} slip${rows.length === 1 ? '' : 's'} here · wagered $${tw.toFixed(2)} · paid $${tp.toFixed(2)}</div>`;
+                </div>`; }).join('') + `<div class="text-[9px] text-slate-400 text-right">${rows.length} slip${rows.length === 1 ? '' : 's'} here · spent $${tw.toFixed(2)} · prizes $${tp.toFixed(2)}</div>`;
         }
 
         function toggleFavoriteVenue() {
@@ -2779,7 +2779,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function runKellyOptimizerModal() {
             if (activeTier === 'free') {
-                alert("🔒 Kelly Criterion Sizing is a Pro feature! Upgrade to Pro ($9.99) to unlock advanced bankroll optimization.");
+                alert("🔒 The budget planner is a Pro feature! Upgrade to Pro ($9.99) to unlock it.");
                 return;
             }
             alert(previewKellyText());
@@ -2787,7 +2787,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
 
         function runMonteCarloModal() {
             if (activeTier === 'free') {
-                alert("🔒 Monte Carlo Simulation is a Pro feature! Upgrade to Pro ($9.99) to run 10,000-session simulations of your number set.");
+                alert("🔒 Random-draw simulation is a Pro feature! Upgrade to Pro ($9.99) to run 10,000-session simulations of your number set.");
                 return;
             }
             alert(previewMonteCarloText());
@@ -2846,11 +2846,11 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             if (tk) {
                 const k = previewLastKelly && previewLastKelly.spot === tk.nums.length && previewLastKelly.extra === tk.extra ? previewLastKelly : previewKelly(tk.nums.length, tk.extra, []);
                 document.getElementById('kelly-fill-bar').style.width = k.f > 0 ? `${Math.min(100, k.f * 100 * 4).toFixed(0)}%` : '0%';
-                document.getElementById('kelly-text-sub').innerText = k.f > 0 ? `¼ Kelly: $${k.base} base` : `f* ${(k.f * 100).toFixed(0)}%: $1 minimum`;
+                document.getElementById('kelly-text-sub').innerText = k.f > 0 ? `¼ share: $${k.base} play amount` : `Share ${(k.f * 100).toFixed(0)}%: $1 minimum`;
                 let m = previewLastMc && previewLastMc.key === JSON.stringify(tk) ? previewLastMc : null;
                 if (!m) { m = previewMonteCarlo(tk.nums, tk.base, tk.extra, tk.games); previewLastMc = { ...m, key: JSON.stringify(tk) }; }
                 document.getElementById('mc-fill-bar').style.width = `${Math.min(100, m.ahead * 100).toFixed(0)}%`;
-                document.getElementById('mc-text-sub').innerText = `Ahead ${(m.ahead * 100).toFixed(1)}% · ${(m.ret * 100).toFixed(0)}¢/$1`;
+                document.getElementById('mc-text-sub').innerText = `Above spent ${(m.ahead * 100).toFixed(1)}% · ${(m.ret * 100).toFixed(0)}¢/$1`;
             } else {
                 document.getElementById('kelly-text-sub').innerText = 'Tap a pick first'; document.getElementById('mc-text-sub').innerText = 'Tap a pick first';
             }
@@ -3508,7 +3508,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             document.getElementById('bd-wheel').hidden = true;
             previewBdFit();
             const order = (Array.isArray(row.listed_order) && row.listed_order.length === nums.length) ? row.listed_order.map(Number) : nums.slice();
-            document.getElementById('bd-order-note').innerText = row.listed_order ? 'Balls drop in the order NY Lottery lists them for this draw.' : 'NY Lottery order not stored for this draw, so balls drop low to high.';
+            document.getElementById('bd-order-note').innerText = row.listed_order ? 'Balls drop in the official posted order for this draw.' : 'Official order not stored for this draw, so balls drop low to high.';
             const cnt = document.getElementById('bd-count');
             cnt.innerText = `Ball 0 of ${order.length}`;
             let hitsSoFar = 0, prev = null;
@@ -3662,7 +3662,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         setInterval(() => { previewBdCheckJackpot(); }, 300000);
 
         // ===== PREVIEW: unified Auto Picks buttons =====
-        const PREVIEW_BTN_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Top-Tier Pick', 'cluster': '⚡ Balanced Pick', 'markov': '🧬 Markov Pick', 'jackpot10': '🏆 10 Spot Pick'};
+        const PREVIEW_BTN_NAMES = {'hits': '🎯 Hits Pick', 'best': '⚖️ Best Spot Pick', 'one': '1️⃣ 1 Spot Pick', 'jackpot': '🏆 Top-Tier Pick', 'cluster': '⚡ Balanced Pick', 'markov': '🧬 Repeat Pick', 'jackpot10': '🏆 10 Spot Pick'};
         let previewSelectedButton = null, previewRerunning = false;
         function previewSetSelect(id, value, label) {
             const el = document.getElementById(id); if (!el) return;
@@ -3750,14 +3750,14 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
         }
         async function previewRunAllPicks() {
             if (previewAllBusy || activeGameKey !== 'quickdraw') return;
-            if (activeTier === 'free') { document.getElementById('four-picks-status').innerText = 'All seven picks require Pro, including Balanced Pick and Markov Pick.'; return; }
+            if (activeTier === 'free') { document.getElementById('four-picks-status').innerText = 'All seven picks require Pro, including Balanced Pick and Repeat Pick.'; return; }
             previewAllBusy = true;
             const btn = document.getElementById('four-picks-regen'), status = document.getElementById('four-picks-status');
             const wasShown = !document.getElementById('play-card').classList.contains('hidden'), old = previewCapturePick(previewSelectedButton);
             btn.disabled = true; btn.style.opacity = '.6';
             const panel = document.getElementById('all-picks-panel'); panel.hidden = false;
             document.getElementById('all-picks-results').innerHTML = '';
-            document.getElementById('all-picks-note').innerText = 'Building all seven picks from real NY Lottery draws…';
+            document.getElementById('all-picks-note').innerText = 'Building all seven picks from official posted results (data.ny.gov)…';
             previewAllRows = [];
             try {
                 await previewLoadDay();
@@ -3854,12 +3854,12 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
                 if (p.err) return bad.push(`row ${rowNo}: ${p.err}`);
                 const spot = ci.spot >= 0 && v[ci.spot] ? parseInt(v[ci.spot], 10) : p.nums.length;
                 if (spot !== p.nums.length) return bad.push(`row ${rowNo}: ${spot}-spot needs ${spot} numbers`);
-                let w = ci.wager >= 0 ? parseFloat(String(v[ci.wager]).replace(/[^0-9.]/g, '')) : 1; if (![1, 2, 3, 4, 5, 10].includes(w)) return bad.push(`row ${rowNo}: wager must be $1–$5 or $10`);
+                let w = ci.wager >= 0 ? parseFloat(String(v[ci.wager]).replace(/[^0-9.]/g, '')) : 1; if (![1, 2, 3, 4, 5, 10].includes(w)) return bad.push(`row ${rowNo}: play amount (wager column) must be $1–$5 or $10`);
                 const x = ci.extra >= 0 ? /^(1|y|yes|true|on|x)$/i.test(String(v[ci.extra]).trim()) : false;
                 const g = ci.games >= 0 && v[ci.games] ? parseInt(v[ci.games], 10) : 1; if (!(g >= 1 && g <= 20)) return bad.push(`row ${rowNo}: games 1–20`);
                 previewAddUploaded({ draw, spot, nums: p.nums, w, x, g, fileName: name }); ok++;
             });
-            if (ok) previewClosePlayCard(`✅ ${ok} uploaded slip${ok === 1 ? '' : 's'} added to the P/L History Archive. Tap a pick above for a new number set.`);
+            if (ok) previewClosePlayCard(`✅ ${ok} uploaded slip${ok === 1 ? '' : 's'} added to the Play Log. Tap a pick above for a new number set.`);
             previewBatchMsg(`${name}: imported ${ok} slip${ok === 1 ? '' : 's'}${bad.length ? `; skipped ${bad.length} (${bad.slice(0, 4).join('; ')}${bad.length > 4 ? '…' : ''})` : ''}. Grading against real draws…`);
             previewGradeUploads();
         }
@@ -3904,7 +3904,7 @@ var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],
             document.getElementById('batch-numbers').value = ''; document.getElementById('batch-draw-num').value = draw + g;
             previewBatchFile = null; document.getElementById('batch-review-img').hidden = true; document.getElementById('batch-review-file').innerText = 'Next slip: take or upload another photo, or type it here.';
             previewGradeUploads();
-            previewClosePlayCard(`✅ Upload added to the P/L History Archive. Tap a pick above for a new number set.`);
+            previewClosePlayCard(`✅ Upload added to the Play Log. Tap a pick above for a new number set.`);
         }
         function previewSyncLogBtn() {
             const pc = document.getElementById('play-card'), b = document.getElementById('log-ticket-main'), h = document.getElementById('log-ticket-hint'); if (!pc || !b) return;

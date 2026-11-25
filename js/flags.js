@@ -27,8 +27,8 @@
     RG: '18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369).',
     NA: 'Not affiliated with any lottery.',
     NOT_OFFICIAL: 'Not official ticket validation. Confirm prizes with the official lottery.',
-    // Pending-name placeholder: swap to 'Insert Coin Industries LLC' once the rename is accepted.
-    ENTITY: 'NAV Analytics LLC'
+    // Legal name (rename effective Nov 13, 2026).
+    ENTITY: 'Insert Coin Industries LLC'
   });
   function buildMode(doc) {
     try { const m = doc && doc.querySelector && doc.querySelector('meta[name="db-build"]'); return m && m.getAttribute('content') === 'private-preview' ? 'private-preview' : 'public'; } catch (e) { return 'public'; }

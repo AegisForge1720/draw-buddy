@@ -15,7 +15,7 @@
   const NA = CP.NA || 'Not affiliated with any lottery.';
   const NOT_OFFICIAL = CP.NOT_OFFICIAL || 'Not official ticket validation. Confirm prizes with the official lottery.';
   const DP_NOT_GRADED = 'Double Play results are not in the feed, so they are not graded.';
-  const SAME_NOTE = 'These buttons can produce the same numbers. They are a lookback on posted results, not a forecast.';
+  const SAME_NOTE = 'These buttons can produce the same numbers. They only look back at posted results.';
   const LS_TICKETS = 'draw_buddy_dg_tickets', LS_GAME = 'draw_buddy_dg_last_game';
   const state = { game: null, rows: {}, loading: {}, pick: null, settings: {}, lookback: 'auto', busy: false, heatSel: null, modeCache: {} };
   const $ = id => document.getElementById(id);
@@ -80,7 +80,7 @@
 
       <div class="bg-[#050814] border-2 border-yellow-400/80 rounded-xl p-3 shadow-2xl space-y-2" id="dg-balldrop">
         <div class="flex items-center justify-between gap-2"><h3 class="text-[13px] font-black text-yellow-300">🎱 Ball Drop</h3><span id="dg-bd-mini" class="text-[10px] text-cyan-300 truncate"></span></div>
-        <div id="dg-bd-sub" class="text-[10px] text-slate-400">Result replay of official NY Lottery results, once posted.</div>
+        <div id="dg-bd-sub" class="text-[10px] text-slate-400">Replay of official results from data.ny.gov, once posted.</div>
         <div id="dg-bd-stage" class="relative rounded-lg bg-gradient-to-b from-[#0b132b] to-[#050814] border border-slate-700 min-h-[92px] p-2 overflow-hidden"></div>
         <div id="dg-bd-result" class="text-[11px] text-white leading-snug"></div>
         <div class="grid grid-cols-2 gap-2">
@@ -177,7 +177,7 @@
     if (g.schedule.length > 1) h += sel('dg-s-session', 'Draw', [['any', 'Next draw (either)'], ...g.schedule.map(x => [x.session, x.label])], s.session);
     if (g.kind === 'digits') {
       h += sel('dg-s-type', 'Play type', [['straight', 'Straight'], ['box', 'Box'], ['straightbox', 'Straight/Box ($1)'], ['combo', 'Combination'], ['frontpair', 'Front Pair'], ['backpair', 'Back Pair']], s.playType);
-      h += sel('dg-s-wager', 'Wager', [[0.5, '50¢'], [1, '$1']], s.wager);
+      h += sel('dg-s-wager', 'Play amount', [[0.5, '50¢'], [1, '$1']], s.wager);
     }
     if (g.minPlays) h += sel('dg-s-plays', 'Plays per draw', [2, 4, 6, 8, 10].map(n => [n, `${n} plays ($${(n * g.price).toFixed(0)})`]), s.plays);
     const cap = E.drawCap(g, s.session); if (s.draws > cap) s.draws = cap;
@@ -200,7 +200,7 @@
     g.options.forEach(o => { if (o.key !== 'doubleplay' || FLAGS.doublePlay) notes.push(`<div><b>${esc(o.label)}</b>: ${esc(o.note)}</div>`); });
     if (g.key === 'powerball' && s.doubleplay) notes.push(`<div class="text-amber-200 font-bold">${esc(DP_NOT_GRADED)}</div>`);
     if (g.builtInMultiplier) notes.push('<div>Every Mega Millions play includes a 2X, 3X, 4X, 5X or 10X multiplier on non-jackpot prizes, assigned at purchase and printed on the ticket. The feed has no per-ticket multiplier, so hindsight checks and the log use base prizes only. The fixed-prize return uses the official multiplier odds.</div>');
-    if (g.kind === 'digits') notes.push('<div>Booster Ball is an occasional free NY promotion; history shows the boost percentage on draws where it ran. Hindsight check and log amounts do not include Booster. Instant Win (+$1) is decided at purchase and has no draw history, so Draw Buddy does not include it. Lucky Sum and Close Enough are not covered either. Wagers shown: 50¢ and $1.</div>');
+    if (g.kind === 'digits') notes.push('<div>Booster Ball is an occasional free NY promotion; history shows the boost percentage on draws where it ran. Hindsight check and log amounts do not include Booster. Instant Win (+$1) is decided at purchase and has no draw history, so Draw Buddy does not include it. Lucky Sum and Close Enough are not covered either. Play amounts shown: 50¢ and $1.</div>');
     if (g.key === 'take5') notes.push('<div>Instant Win (+$1) is decided at purchase and has no draw history, so Draw Buddy does not include it. Take 5 prizes are pari-mutuel; match 2 wins a free Quick Pick.</div>');
     if (g.key === 'nylotto') notes.push('<div>Lotto prizes are pari-mutuel except match 3 ($1).</div>');
     if (g.key === 'pick10') notes.push('<div>Match 10 is $500,000 unless more than 10 tickets match all 10; then those winners share a $5,000,000 prize pool (9 NYCRR 5011.2).</div>');
@@ -302,7 +302,7 @@
     const box = $('dg-ticket'), pk = state.pick, g = G(); if (!pk) { box.hidden = true; return; }
     const s = S(), cost = costPerDraw(), next = upcoming(s.draws);
     let oddsTxt = '';
-    if (g.kind === 'digits') { const pl = E.digitPlay(g.key, s.playType, pk.digits, s.wager); if (pl) oddsTxt = `${pl.label}: odds 1 in ${Math.round(1 / pl.pWin).toLocaleString()}, top prize ${money(pl.top)}; official return ${(E.digitReturnPer$(g.key, s.playType, pk.digits, s.wager) * 100).toFixed(0)}¢ per $1.`; else oddsTxt = 'That play type is not offered for these digits.'; }
+    if (g.kind === 'digits') { const pl = E.digitPlay(g.key, s.playType, pk.digits, s.wager); if (pl) oddsTxt = `${pl.label}: odds 1 in ${Math.round(1 / pl.pWin).toLocaleString()}, top prize ${money(pl.top)}; official payback ${(E.digitReturnPer$(g.key, s.playType, pk.digits, s.wager) * 100).toFixed(0)}¢ per $1.`; else oddsTxt = 'That play type is not offered for these digits.'; }
     else { const fr = E.fixedReturn(g, { powerplay: s.powerplay, doubleplay: s.doubleplay }); oddsTxt = `Odds of any prize: 1 in ${(1 / fr.pAny / (g.minPlays ? 1 : 1)).toFixed(2)} per play · fixed-prize return ${(fr.perDollar * 100).toFixed(1)}¢ per $1 (jackpots${g.key === 'millionaire' ? ', lifetime prizes' : ''}${['nylotto', 'take5'].includes(g.key) ? ' and pari-mutuel prizes' : ''} not counted)${s.powerplay ? '. Power Play return assumes the multiplier table where 10X is available (advertised jackpot $150 million or less)' : ''}${g.builtInMultiplier ? '. Includes the average built-in multiplier' : ''}${g.key === 'pick10' ? '. Uses $500,000 for match 10 (it can be a share of $5,000,000 when more than 10 tickets match)' : ''}.`; }
     const same = state.pick.source === 'auto' ? sameText(sameAs(pk, pk.mode)) : sameText(sameAs(pk, null));
     box.hidden = false;

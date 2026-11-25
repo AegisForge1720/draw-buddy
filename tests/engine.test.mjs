@@ -52,14 +52,14 @@ ok("Take 5 / Numbers / Win 4 official multi-draw: 7 consecutive days, verified (
 ok("Two-session games: one session <= 7 draws (7 days), either session <= 14 draws (7 days x 2)", ["take5", "numbers", "win4"].every(k => { const G = E.GAMES[k]; return E.drawCap(G, "midday") <= 7 && E.drawCap(G, "evening") <= 7 && E.drawCap(G, "any") <= 14; }));
 ok("Wagers offered match the official page/play slip (50c or $1)", ["numbers", "win4"].every(k => JSON.stringify(E.GAMES[k].wagers) === "[0.5,1]"));
 ok("Pick 10 and Take 5 capped at 7 draws", E.drawCap(E.GAMES.pick10, "main") === 7 && E.drawCap(E.GAMES.take5, "any") === 7);
-ok("Sources cite official sites, not nylottery.org", E.ORDER.every(k => !/nylottery\.org/i.test(E.GAMES[k].source) && /nylottery\.ny\.gov|gaming\.ny\.gov/.test(E.GAMES[k].source)));
+ok("Sources cite official sites, not nylottery.org", E.ORDER.every(k => !/nylottery\.org/i.test(E.GAMES[k].source) && /official game site \(ny\.gov\)|gaming\.ny\.gov/.test(E.GAMES[k].source)));
 ok("Power Play note: 10X only at $150 million or less + table disclosure", /\$150 million or less/.test(E.GAMES.powerball.options[0].note) && /10X is available/.test(E.GAMES.powerball.options[0].note));
 ok("1 Spot subtitle matches the code (longest-since-drawn main numbers)", ["powerball", "megamillions", "millionaire"].every(k => /longest since last drawn/.test(E.modeMeaning(E.GAMES[k]).one) && !/Hits ranking|can win/.test(E.modeMeaning(E.GAMES[k]).one)));
 ok("Double Play off: Jackpot Pick meaning has no Double Play", !/Double Play/.test(E.modeMeaning(E.GAMES.powerball, { doublePlay: false }).jackpot));
 const FL = require("../js/flags.js");
 ok("Flags: public build defaults are all off", Object.values(FL.PUBLIC_DEFAULTS).every(v => v === false) && FL.buildMode(null) === "public" && Object.values(FL.resolve(null)).every(v => v === false));
 ok("Flags: private preview turns every feature on; public defaults stay off", Object.values(FL.PRIVATE_PREVIEW).every(Boolean) && !Object.values(FL.PUBLIC_DEFAULTS).some(Boolean));
-ok("House copy is exact", FL.COPY.RG === "18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369)." && FL.COPY.NA === "Not affiliated with any lottery." && FL.COPY.D1.startsWith("Past results don't predict future draws.") && FL.COPY.ENTITY === "NAV Analytics LLC");
+ok("House copy is exact", FL.COPY.RG === "18+. Gambling problem? Call 1-877-8-HOPENY or text HOPENY (467369)." && FL.COPY.NA === "Not affiliated with any lottery." && FL.COPY.D1.startsWith("Past results don't predict future draws.") && FL.COPY.ENTITY === "Insert Coin Industries LLC");
 // Schedule: Sun Nov 15, 2026 9:10 PM ET
 const now = Date.UTC(2026, 10, 16, 2, 10);
 const nd = g => { const d = E.nextDraws(E.GAMES[g], now, 1)[0]; const p = E.etParts(d.at); return `${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][p.wd]} ${p.h}:${String(p.mi).padStart(2, "0")} ${d.session}`; };
